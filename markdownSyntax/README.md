@@ -63,16 +63,21 @@ HTML의 `<h1> ~ <h6>`를 `#`의 개수로 표현한다.
 
 <br/>
 <br/>
+
 [코드]
+
 <br/>
 <br/>
 
 ```
 ![Markdown logo](images/Markdown_logo.png) 
 ```
+
 <br/>
 <br/>
+
 [실행결과]
+
 <br/>
 <br/>
 
