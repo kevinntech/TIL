@@ -26,7 +26,7 @@ cd /Users/FINTFACE/study/jpashop
  
 #### 1) 컨트롤러 작성하기
 
- ```
+ ```java
 @Controller
 public class HelloController {
 
@@ -42,7 +42,7 @@ public class HelloController {
 
 * 서버 사이드 렌더링이 되면 th:text의 결과를 태그의 내용물로 대체한다. 
     
- ```
+ ```html
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org"> <head>
     <title>Hello</title>
@@ -75,7 +75,7 @@ public class HelloController {
 
 ##### (2) 회원 엔티티 작성
 
- ```
+ ```java
 @Entity
 @Getter @Setter
 public class Member {
@@ -90,7 +90,7 @@ public class Member {
 
 ##### (3) 회원 리포지토리 작성
 
- ```
+ ```java
 @Repository
 public class MemberRepository {
 
@@ -110,7 +110,7 @@ public class MemberRepository {
 
 ##### (4) 테스트 코드 작성
 
- ```
+ ```java
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class MemberRepositoryTest {
@@ -212,7 +212,7 @@ public class MemberRepositoryTest {
 
 * 그래서 아래와 같이 생성자 인젝션으로 작성 할 수 있다.
 
- ```
+ ```java
 @Repository
 @RequiredArgsConstructor
 public class MemberRepository {
