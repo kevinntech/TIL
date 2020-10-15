@@ -192,14 +192,14 @@ public class MemberRepositoryTest {
 
 * `@PersistenceContext` : 스프링이 EntityManager를 만들어서 주입 시켜준다.
 
- ```
+ ```java
     @PersistenceContext
     private EntityManager em;
  ```
 
 * `@PersistenceUnit` : 스프링이 EntityManagerFactory를 만들어서 주입 시켜준다. (거의 사용 하지 않음)
 
- ```
+ ```java
     @PersistenceUnit
     private EntityManagerFactory emf;
  ```
