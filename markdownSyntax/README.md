@@ -3,12 +3,14 @@
 ## 마크다운(Markdown)
 
 - 마크다운(Markdown)은 일반 텍스트 기반의 마크업 언어다.
+
 - 깃(Git)의 README.md 파일이나 온라인 문서, 혹은 일반 텍스트 편집기로 문서 양식을 편집할 때,
   쉽게 쓰고 읽을 수 있으며 HTML로 변환이 가능하다.
 
 ## 1. 줄 바꾸기
 
-- 줄 바꿈 1번 : `Enter` 키를 2번 누르기  
+- 줄 바꿈 1번 : `Enter` 키를 2번 누르기
+
 - 줄 바꿈 여러 번 : `<br/>` 를 사용하자 
 
 ## 2. 제목(Header) 
@@ -157,9 +159,41 @@ __볼드체__
 
 ```
 --- 
-*** 
 ___
+
+*** 
 ```
 
-:+1: :sparkles: :camel: :tada:
-:rocket: :metal: :octocat:
+## 13. 이스케이프 문자
+
+* \를 사용하여 마크다운 문법을 적용하지 않는 것이 가능하다.
+
+```
+\*
+\\
+\`
+\#
+```
+
+## 14. 배지(Badge)
+
+* [배지(Badge)](https://shields.io/ "이모지")에 대한 더 자세한 내용은 링크를 참조하자.
+
+```
+https://img.shields.io/apm/l/test
+```
+
+## 15. 이모지(Emoji)
+
+* [이모지(Emoji)](https://www.webfx.com/tools/emoji-cheat-sheet/ "이모지")에 대한 더 자세한 내용은 링크를 참조하자.
+
+```
+:octocat:
+:rocket:
+:blue_car:
+```
+
+:octocat:
+:rocket:
+:blue_car:
+
