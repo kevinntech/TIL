@@ -180,10 +180,10 @@ ___
 * [배지(Badge)](https://shields.io/ "이모지")에 대한 더 자세한 내용은 링크를 참조하자.
 
 ```
-<img src="https://img.shields.io/aur/last-modified/test"> 
+<img src="https://img.shields.io/aur/last-modified/TIL"> 
 ```
 
-<img src="https://img.shields.io/aur/last-modified/test"> 
+<img src="https://img.shields.io/aur/last-modified/TIL"> 
 
 ## 15. 이모지(Emoji)
 
