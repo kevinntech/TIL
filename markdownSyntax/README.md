@@ -186,6 +186,8 @@ ___
 <img src="https://img.shields.io/github/commit-activity/m/kevinntech/TIL"> 
 
 [![배지](https://img.shields.io/github/commit-activity/m/kevinntech/TIL")]
+(https://github.com/kevinntech/TIL)
+
 
 ## 15. 이모지(Emoji)
 
