@@ -185,6 +185,8 @@ ___
 
 <img src="https://img.shields.io/github/commit-activity/m/kevinntech/TIL"> 
 
+[배지(Badge)](https://img.shields.io/github/commit-activity/m/kevinntech/TIL")
+
 ## 15. 이모지(Emoji)
 
 * [이모지(Emoji)](https://www.webfx.com/tools/emoji-cheat-sheet/ "이모지")에 대한 더 자세한 내용은 링크를 참조하자.
