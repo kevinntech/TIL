@@ -1,7 +1,111 @@
 # 백기선님의 스프링 프레임워크 핵심 기술
+> 아래 내용은 [스프링 프레임워크 핵심 기술](https://www.inflearn.com/course/spring-framework_core "스프링 프레임워크 핵심 기술") 강좌를 정리한 내용 입니다.
 
 ## 1. 스프링 소개
+
+#### 1) 스프링이란?
+
+* 스프링은 “소규모 애플리케이션 또는 기업용 애플리케이션을 자바로 개발하는데 있어 유용하고 편리한 기능을 제공하는 프레임워크"이다.
+
+#### 2) 스프링의 역사
+
+* 2003년 등장
+
+* 최근까지 주로 서블릿 기반 애플리케이션을 만들 때 사용해 옴.
+
+* 스프링 5 부터는 WebFlux 지원으로 서블릿 기반이 아닌 서버 애플리케이션도 개발할 수 있게 됨.
+
+#### 3) 스프링의 디자인 철학 
+
+* 모든 선택은 개발자의 몫.
+
+* 다양한 관점을 지향한다. 
+
+* 하위 호환성을 지킨다. 
+
+* API를 신중하게 설계한다.
+
+* 높은 수준의 코드를 지향한다.
+
 ## 2. IoC 컨테이너와 빈
+
+### 2-1. IoC 컨테이너 1부: 스프링 IoC 컨테이너와 빈
+
+#### 1) 제어의 역전 (IoC : Inversion of Control)
+
+* `제어의 역전(IoC)`은 `의존성 주입(Dependency Injection)`이라고도 하며, 어떤 객체가 사용하는 의존 객체를 직접 만들어 사용하는게 아니라,주입 받아 사용하는 방법을 말한다.
+
+* 의존 객체를 직접 만들어 사용하는 예시는 다음과 같다.
+
+```java
+BookRepository bookRepository = new BookRepository();
+ 
+BookService service = new BookService(bookRepository);
+```
+
+* IoC의 예시는 다음과 같다.
+
+```java
+// BookService 타입의 객체가 사용할 bookRepository라는 의존 객체를 
+// 직접 만들어 사용하는게 아니라, 주입 받아 사용하는 방법을 말함
+
+@Autowired
+BookRepository bookRepository;
+ 
+BookService service = new BookService(bookRepository);
+```
+
+#### 2) 빈(Bean)
+
+* `빈(Bean)`은 스프링 IoC 컨테이너가 관리 하는 객체이다
+
+* 스프링에서 빈으로 등록될 때의 장점은 다음과 같다.
+  
+    * 의존성 관리 
+    
+        * 의존성 주입을 받으려면 빈이 되어야 한다. 
+  
+    * 객체의 스코프 관리가 용이 
+  
+        * 스프링 IoC 컨테이너에 등록되는 빈은 기본적으로 싱글톤 scope 으로 등록된다.  
+        * (메모리 측면에서 효율적이며 런타임 시 성능 최적화에 유리함.) 
+  
+    * 라이프 사이클 인터페이스를 제공한다.  `@PostConstruct`
+
+#### 3) 스프링 IoC 컨테이너
+
+* `스프링 IoC 컨테이너`는 빈 설정 파일로 부터 빈 정의를 읽어 들이고 빈을 생성한 다음, 제공하는 역할을 한다.
+
+* Annotation을 사용하여 POJO 객체를 Bean으로 등록하고 Bean으로 등록된 객체를 주입 받아서 사용한다.
+
+#### 4) 스프링 IoC 컨테이너 관련 인터페이스
+
+##### (1) BeanFactory
+
+* `BeanFactory`는 스프링 IoC 컨테이너의 최상위에 있는 인터페이스이다.
+
+* IoC 컨테이너 기능을 수행한다. (빈을 생성하고 의존성을 관리)
+
+##### (2) ApplicationContext
+
+* `ApplicationContext`는 BeanFactory를 상속 받은 인터페이스이다.
+
+* `ApplicationContext`는 BeanFactory의 IoC 컨테이너 기능을 가지고 있으면서도 다음과 같은 추가적인 기능을 가진다. 
+
+    * 국제화 기능 (i18n) `MessageSource`
+
+    * 이벤트 발행 기능 `ApplicationEventPublisher`
+
+    * 리소스 로딩 기능 `ResourceLoader`
+
+    * 프로파일과 프로퍼티 `EnvironmentCapable`
+    
+* `ApplicationContext` 인터페이스를 구현한 대표적인 클래스
+
+    * `ClassPathXmlApplicationContext` [XML]  
+
+    * `AnnotationConfigApplicationContext` [Java]  
+
 ## 3. Resource / Validation
 
 ## 4. 데이터 바인딩
