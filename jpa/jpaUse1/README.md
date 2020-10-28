@@ -61,7 +61,7 @@ public class HelloController {
 ##### (2) H2 데이터베이스 실행 및 파일 생성 방법 
 
 * H2 데이터베이스를 설치한 경로 ( `~/study/h2/bin` ) 에서 `./h2.sh`로 실행한다.
-    * `chmod -R 777 bin`로 bin 디렉토리의 하위 파일까지 권한을 부여하자. 
+    * `chmod 755 h2.sh`로 h2.sh에 권한을 부여하자. 
 
 * JDBC URL : `jdbc:h2:~/jpashop` 로 DB 파일을 생성 할 경로를 지정한 다음 (파일 모드), 연결 버튼을 클릭한다.
 
