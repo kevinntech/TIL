@@ -74,9 +74,9 @@ BookService service = new BookService(bookRepository);
 
 #### 3) 스프링 IoC 컨테이너
 
-* `스프링 IoC 컨테이너`는 빈 설정 파일로 부터 빈 정의를 읽어 들이고 빈을 생성한 다음, 제공하는 역할을 한다.
+* `스프링 IoC 컨테이너`는 빈 설정 파일로 부터 빈 정의를 읽어 들이고 빈을 생성한 다음, 제공하는 역할을 한다.
 
-* Annotation을 사용하여 POJO 객체를 Bean으로 등록하고 Bean으로 등록된 객체를 주입 받아서 사용한다.
+* Annotation을 사용하여 POJO 객체를 Bean으로 등록하고 Bean으로 등록된 객체를 주입 받아서 사용한다.
 
 #### 4) 스프링 IoC 컨테이너 관련 인터페이스
 
