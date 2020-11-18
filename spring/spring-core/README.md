@@ -1,5 +1,5 @@
 # 백기선님의 스프링 프레임워크 핵심 기술
-> 아래 내용은 [스프링 프레임워크 핵심 기술](https://www.inflearn.com/course/spring-framework_core "스프링 프레임워크 핵심 기술") 강좌를 정리한 내용 입니다.
+> 아래 내용은 [스프링 프레임워크 핵심 기술](https://www.inflearn.com/course/spring-framework_core "스프링 프레임워크 핵심 기술") 강좌를 정리한 내용 입니다.
 
 ## 1. 스프링 소개
 
@@ -625,7 +625,7 @@ public class KeesunBookRepository implements BookRepository{ }
          
 #### 1) Environment
 
-* `Environment`는 프로파일과 프로퍼티를 다루는 인터페이스이다. 
+* `EnvironmentCapable`는 프로파일과 프로퍼티를 다루는 인터페이스이다. 
 
 * `ApplicationContext`는 `EnvironmentCapable` 인터페이스를 상속 받는다. 
 
@@ -730,13 +730,13 @@ public class KeesunBookRepository implements BookRepository{ }
 
 #### 6) 프로파일 설정하기
 
-* ① Active profiles 설정
+* Active profiles 설정
 
     * 인텔리제이에서 [Edit Configurations]를 클릭한다.
 
     * `Active profiles`를 test로 지정한 다음, [Apply] – [OK]를 클릭 한다.
 
-* ② VM Options 설정
+* VM Options 설정
 
     * [Edit Configurations]를 클릭한 다음, VM options를 `-Dspring.profiles.active="test"`로 지정하는 것도 가능하다.
 
@@ -756,7 +756,7 @@ public class KeesunBookRepository implements BookRepository{ }
 
 #### 8) 프로파일 정의하기 [추가 내용]
 
-* 빈 설정 파일을 사용하지 않고 빈(Bean)에 바로 프로파일을 정의 할 수도 있다.
+* 빈 설정 파일을 사용하지 않고 빈(Bean)에 프로파일을 바로 정의 할 수도 있다.
 
 * `@Component @Profile("test")`
 
@@ -802,14 +802,14 @@ public class KeesunBookRepository implements BookRepository{ }
     ```
 
 * (2) @PropertySource
-
+ 
     * resources에 `app.properties`를 생성한다.
     
         * app.properties 파일에 `app.about=spring`와 같이 환경변수를 설정 할 수 있다.
 
     * `@Configuration`이 붙어있는 클래스에 `@PropertySource` 애노테이션을 추가한다.
     
-        * @PropertySource 애노테이션에 properties의 경로를 전달하면 Environment 객체에 프로퍼티 값이 자동으로 주입된다.
+        * @PropertySource 애노테이션에 properties의 경로를 전달하면 Environment에 프로퍼티를 추가한다.
         
         ```java
         @SpringBootApplication
@@ -824,7 +824,7 @@ public class KeesunBookRepository implements BookRepository{ }
         }
         ```
         
-    * Runner에서 다음과 같이 확인 할 수 있다.
+    * 그리고 Environment에서 프로퍼티를 꺼내 쓸 수 있다.
     
         ```java
         @Component
@@ -1304,7 +1304,7 @@ public class MyEventHandler{
 
 * ResourceLoader 빈을 주입 받은 다음, Resource 객체를 얻고 해당 객체의 주요 메서드 결과를 출력한다. 
 
-* (ApplicationContext를 주입 받은 다음, 동일하게 사용 할 수도 있지만 가장 구체적인 인터페이스를 주입 받아 사용하는 것이 직관적이므로 더 좋은 코딩 방식이다.)
+* (ApplicationContext를 주입 받아서 사용 할 수도 있지만 사용 하고자하는 가장 구체적인 인터페이스를 주입 받는 것이 직관적이므로 더 좋은 코딩 방식이다.)
 
     ```java
     @Component
@@ -1816,6 +1816,561 @@ public class MyEventHandler{
     }
     ```
 
-## 6. 스프링 AOP
+> AOP 관련 내용을 작성할 때, [jojoldu님의 블로그](https://jojoldu.tistory.com/71?category=635883 "jojoldu")를 일부 참조 하였습니다.
 
-## 7. Null-Safety
+## 6. 스프링 AOP : 개념 소개
+
+#### 1) AOP (Aspect-Oriented Programming : 관점 지향 프로그래밍)
+
+* AOP (Aspect-Oriented Programming : 관점 지향 프로그래밍)
+
+    * AOP는 OOP를 보완하는 수단으로, 핵심 기능에서 부가 기능을 분리하여 이 분리한 부가 기능을 Aspect라는 모듈 형태로 만드는 프로그래밍 기법을 말합니다.
+
+    * 핵심 기능(Core Concerns)
+    
+        * 비즈니스 로직을 말합니다.
+        
+        * Ex) 게시글 관리, 회원 관리 등
+
+    * 부가 기능(Cross-cutting Concerns, 흩어진 관심사)
+    
+        * 핵심 기능을 도와주는 부가적인 기능을 말합니다.
+
+        * Ex) 로깅, 보안, 트랜잭션 처리 등
+        
+#### 2) AOP 관련 용어 
+
+* Aspect 
+ 
+    * 부가 기능을 모듈화한 것을 말한다.
+
+    * Aspect는 부가 기능을 정의한 Advice와 Advice를 어디에 적용할지를 결정하는 PointCut을 함께 갖고 있다.
+
+* Target  
+
+    * 핵심 기능을 담고 있는 모듈로 Target은 부가 기능을 적용할 대상이 된다.
+
+    * Aspect가 적용되는 곳 
+
+* Advice 
+
+    * 실질적인 부가 기능을 담은 구현체를 말한다. (해야 할 일) 
+
+    * Advice는 Aspect가 '무엇'을 '언제' 할지를 정의하고 있다.
+
+* Join Point 
+
+    * Advice가 적용될 수 있는 위치를 말한다.
+   
+    * 메서드 실행 시점, 생성자 호출 시점 등이 JoinPoint에 해당한다.  (여러 가지 끼어들 수 있는 지점을 의미)
+
+* PointCut 
+
+    * 부가 기능이 적용될 대상(메소드)를 선정하는 방법을 말한다.
+
+    * 즉, Advice를 적용할 JoinPoint를 선별하는 기능을 정의한 모듈이다.
+
+#### 3) Java의 AOP 구현체
+
+* AspectJ : 다양한 Join Point와 기능을 제공함
+
+* 스프링 AOP : AspectJ에 비해 다소 적은 기능을 제공함
+
+#### 4) AOP 적용 방법
+
+* (1) 컴파일 시점 (AspectJ)
+
+    * 자바 파일을 클래스 파일로 만들 때 부가 기능을 추가
+
+* (2) 클래스 로딩 시점 (AspectJ)
+
+    * JVM이 클래스를 로딩하는 시점에 바이트 코드에 부가 기능을 추가 
+
+* (3) 런타임 시점 (Spring AOP)
+
+    * JVM이 클래스를 로딩 한 후 Bean을 생성할 때 해당 클래스 타입의 프록시 빈을 생성하여 적용
+
+## 7. 스프링 AOP : 프록시 기반 AOP
+
+#### 1) 스프링 AOP 
+
+* 스프링 AOP는 프록시 기반의 AOP 구현체이다.
+
+* 스프링 빈(Bean)에만 AOP를 적용 할 수 있다. 
+
+* 모든 AOP 기능을 제공하는 것이 목적이 아니라, 스프링 IoC와 연동하여 엔터프라이즈 애플리케이션에서 가장 흔한 문제에 대한 해결책을 제공하는 것이 목적. 
+
+#### 2) 프록시 패턴
+
+* 프록시 패턴을 사용하는 이유는 접근 제어 또는 부가 기능을 추가하기 위해 사용된다.
+
+* 프록시 패턴에서 클라이언트는 해당 인터페이스 타입으로 프록시 객체를 사용하게 된다.
+
+  그리고 프록시 객체는 타겟 객체(Real Subject)를 참조하고 있다.
+
+  프록시 객체가 원래 해야 할 일을 가지고 있는 타겟 객체를 감싸서 실제 클라이언트의 요청을 처리하게 된다.
+
+![image 1](images/img1.png)
+ 
+#### 3) 프록시 패턴 - 예시
+
+* 앞서 살펴본 그림의 Subject에 해당하는 EventService 인터페이스를 작성한다.
+
+    ```java
+    public interface EventService {
+    
+        void createEvent();
+    
+        void publishEvent();
+    
+    }
+    ```
+
+* 앞서 살펴본 "그림"의 Real Subject에 해당하는 SimpleEventSerivce 클래스를 작성한다. 
+
+  그리고 해당 클래스를 빈으로 등록한다. (@Service)
+      
+    ```java
+    @Service
+    Public class SimpleEventSerivce implements EventService {
+    
+        @Override
+        public void createEvent() {
+            try {
+                Thread.sleep(1000);            // 1초 쉬고
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Created an event"); // 메시지 출력
+        }
+    
+        @Override
+        public void publishEvent() {
+            try {
+                Thread.sleep(2000);            // 2초 쉬고
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Published an event"); // 메시지 출력
+        }
+    }
+    ```
+
+* 앞서 살펴본 "그림"의 Client에 해당하는 AppRunner 클래스를 작성한다.
+      
+  해당 코드는 createEvent()를 호출하고 1초 후에 "Created an event” 메시지를 출력하고
+      
+  publishEvent()를 호출하고 나서 2초 후에 "Published an event“ 메시지를 출력하게 된다.
+
+    ```java
+    @Component
+    public class AppRunner implements ApplicationRunner {
+    
+        @Autowired
+        EventService eventService; // 인터페이스가 있다면 인터페이스 타입으로 주입 받는 것이 좋다.
+    
+        @Override
+        public void run(ApplicationArguments args) throws Exception {
+            eventService.createEvent();
+            eventService.publishEvent();
+        }
+    }
+    ```
+  
+* EventService 인터페이스에 deleteEvent()를 새롭게 추가하고 그림의 "Real Subject"에 해당하는 SimpleEventService에 createEvent()와 publishEvent()의 실행 시간을 측정하는 기능을 추가한다.
+       
+  그리고 AppRunner에는 deleteEvent()를 호출하는 코드를 추가한다.
+      
+    ```java
+    public interface EventService {
+    
+        void createEvent();
+    
+        void publishEvent();
+    
+        void deleteEvent();
+    }
+    ```
+  
+    ```java
+    public class SimpleEventSerivce implements EventService {
+    
+        @Override
+        public void createEvent() {
+            long begin = System.currentTimeMillis(); // 흩어진 관심사
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Created an event");
+            System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
+        }
+    
+        @Override
+        public void publishEvent() {
+            long begin = System.currentTimeMillis();
+            try {
+                Thread.sleep(2000);           
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Published an event"); 
+            System.out.println(System.currentTimeMillis() - begin);
+        }
+    
+        public void deleteEvent(){
+            System.out.println("Delete an event");
+        }
+    }
+    ```
+
+    ```java
+    @Component
+    public class AppRunner implements ApplicationRunner {
+    
+        @Autowired
+        EventService eventService;
+    
+        @Override
+        public void run(ApplicationArguments args) throws Exception {
+            eventService.createEvent();
+            eventService.publishEvent();
+            eventService.deleteEvent();
+        }
+    }
+    ```
+
+* 매번 측정 할 때 마다 기존의 코드에 성능을 측정하는 코드를 추가해주어야 한다.
+  
+  기존의 코드를 건들지 않고 성능을 측정할 수는 없을까?
+  
+  이러한 문제를 해결 하기 위해 Proxy 패턴을 적용한다.
+  
+  다음과 같이 SimpleEventSerivce 클래스에서 성능을 측정하는 코드를 제거한다.
+
+    ```java
+    @Service
+    public class SimpleEventSerivce implements EventService {
+    
+        @Override
+        public void createEvent() {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Created an event");
+        }
+    
+        @Override
+        public void publishEvent() {
+            try {
+                Thread.sleep(2000);            // 2초 취고
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Published an event"); // 메시지 출력
+        }
+    
+        public void deleteEvent(){
+            System.out.println("Delete an event");
+        }
+    }
+    ```
+
+* 그 다음, Proxy 클래스를 작성하는데 SimpleEventService와 동일한 인터페이스를 구현 해야한다.
+  
+  그리고 빈으로 등록한 다음, @Primary로 우선 순위를 가지는 빈으로 지정하여 해당 빈이 주입 되도록 한다.
+  
+  프록시는 "그림"의 Real Subject에게 위임을 하여 일을 대신 처리 하도록 한 다음, 부가 기능(성능을 측정하는 코드)를 추가한다.
+
+    ```java
+    @Primary
+    @Service
+    public class ProxySimpleEventService implements EventService {
+    
+        @Autowired
+        SimpleEventSerivce simpleEventSerivce; // Proxy는 Real Subject의 빈을 주입 받아 사용해야 한다.
+    
+        @Override
+        public void createEvent() {
+            long begin = System.currentTimeMillis(); // 흩어진 관심사
+            simpleEventSerivce.createEvent(); // Proxy는 SimpleEventSerivce로 위임을 한다.
+            System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
+        }
+    
+        @Override
+        public void publishEvent() {
+            long begin = System.currentTimeMillis(); // 흩어진 관심사
+            simpleEventSerivce.publishEvent();
+            System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
+        }
+    
+        @Override
+        public void deleteEvent() {
+            simpleEventSerivce.deleteEvent();
+    
+        }
+    }
+    ```
+
+  그러면 "그림"의 Client에 해당하는 AppRunner는 @Autowired로 EventService를 주입 받는데 @Primary로 지정한
+
+  ProxySimpleEventService 빈을 주입 받게 된다.
+  
+* 앞서 Proxy 클래스를 만들어서 모든 문제가 해결된 것처럼 보이지만 아직도 문제점이 존재한다.
+ 
+  매번 프록시 클래스를 작성해야 되며 이를 여러 클래스, 여러 메서드에 적용해야 된다면 상당히 번거롭다고 느끼게 될 것이다.
+  
+  이러한 이유로 등장한 것이 스프링 AOP 이다.
+  
+  스프링 IoC 컨테이너가 제공하는 기반 시설과 동적 프록시를 사용하여 여러 복잡한 문제 해결 하였다.
+  
+  * 동적 프록시 (Dynamic Proxy)
+  
+    * 동적으로 프록시 객체를 생성하는 방법을 말한다.
+  
+    * 여기서 말하는 동적이란 런타임에 생성된다는 것을 의미한다.
+  
+  * AbstractAutoProxyCreator
+  
+    * 특정 클래스가 빈으로 등록될 때, 해당 Bean을 대체하는 동적 프록시 빈을 만들어 등록 시켜준다.
+  
+    * AbstractAutoProxyCreator 클래스는 BeanPostProcessor의 구현체 이다.
+
+## 8. 스프링 AOP : @AOP
+
+#### 1) 애노테이션 기반 스프링 AOP 구현하기
+
+* (1) 스프링 AOP를 구현하기 위해서는 다음과 같은 의존성을 추가해야 한다.  
+
+    ```html
+     <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-aop</artifactId>
+     </dependency>
+    ```
+  
+* (2) @Aspect를 적용하여 Aspect 클래스를 작성한다. 그리고 @Component를 적용하여 빈(Bean)으로 등록한다.
+  
+    ```java
+    @Component
+    @Aspect
+    public class PerfAspect {
+        
+    }
+    ```
+
+* (3) ProceedingJoinPoint의 proceed() 메서드로 타겟 메서드를 호출하고 그 결과 값을 전달 받는다.
+
+    ```java
+    @Component
+    @Aspect
+    public class PerfAspect {
+    
+        // me.whiteship 패키지와 하위 패키지에 있는 EventService의 모든 메서드에 advice를 적용 합니다.
+        @Around("execution(* me.whiteship..*.EventService.*(..))")
+        public Object logPerf(ProceedingJoinPoint pjp) throws Throwable{
+            long begin = System.currentTimeMillis();
+            
+            Object retVal = pjp.proceed();
+            System.out.println(System.currentTimeMillis() - begin);
+            
+            return retVal;
+        }  
+  
+    }
+    ```
+  
+    * 어드바이스(Advice)
+
+        * @Around는 어드바이스를 정의할 때 사용하는 애노테이션이다.
+
+        * 앞서 살펴본 것처럼 어드바이스는 Aspect가 ‘무엇을’, ‘언제’ 할지를 정의하고 있다.
+
+          여기서 ‘무엇’이란 logPerf() 메소드를 말한다. 그리고 ‘언제’는 @Around가 된다. 
+
+        * 이 '언제' 라는 시점의 경우, @Around를 포함하여 총 5가지가 존재한다.
+
+            * @Before (이전)
+
+                * 타겟 메소드가 호출 되기 전에 어드바이스 기능을 수행
+
+            * @After (이후)
+
+                * 타겟 메소드의 결과에 관계없이 (즉 성공, 예외 관계없이) 타겟 메소드가 완료 되면 어드바이스 기능을 수행
+
+            * @AfterReturning (정상적 반환 이후)
+
+                * 타겟 메소드가 성공적으로 결과 값을 반환 후에 어드바이스 기능을 수행
+
+            * @AfterThrowing (예외 발생 이후)
+
+                * 타겟 메소드가 수행 중 예외를 발생 시키면 어드바이스 기능을 수행
+                
+            * @Around (메소드 실행 전후)
+
+                * 어드바이스가 타겟 메소드를 감싸서 타겟 메소드 호출 전과 후에 어드바이스 기능을 수행
+
+                * 예를 들어 타겟 메소드의 호출 전, 후에 어드바이스 메소드를 수행하고 싶다면, 다음과 같이 작성하면 된다. 
+
+                    ```java
+                    @Around("포인트컷 표현식") 
+                    public void 어드바이스메소드() { 
+                         ...
+                    
+                    }
+                    ```
+                  
+                * 위의 예제에서 작성한 logPerf()가 바로 어드바이스 메소드이다.
+
+                * 그리고 파라미터로 지정된 ProceedingJoinPoint는 해당 advice가 적용되는 대상을 의미한다.
+
+                * 여기서 주의할 점은 "@Around의 경우, 반드시 proceed() 메서드가 호출되어야 한다"는 것이다.
+
+                *  proceed() 메서드는 타겟 메서드를 의미하며 proceed() 메서드를 호출 해야 타겟 메서드가 실행된다.
+
+    * 포인트컷 표현식
+
+        * 어드바이스의 value로 들어간 문자열을 "포인트컷 표현식"이라 한다.
+
+          포인트 컷에는 다양한 지정자가 존재하는데, 그 중 execution을 살펴본다.
+
+        * execution 지정자는 Advice를 적용할 타겟 메소드를 지정한다.
+
+          `execution([접근제어자] 리턴타입 [클래스이름].메소드이름(파라미터))`
+
+#### 2) 특정 메서드에만 AOP를 적용하기
+
+* 앞서 살펴본 예제에서 deleteEvent()는 적용 대상에서 제외를 해야 된다면 어떻게 해야 될까? 애노테이션을 직접 정의하는 방법으로 해결 가능하다. 
+
+    ```java
+    /*
+    * 이 애노테이션을 사용하면 성능을 로깅해 줍니다.
+    */
+    @Documented
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.CLASS) // 기본 값인 CLASS 이상을 유지해야 됨
+    public @interface PerLogging {
+    
+    }
+    ```
+  
+    * RetentionPolicy : 애노테이션 정보를 얼마나 유지할 것인지를 지정한다.
+
+        * @Retention(RetentionPolicy.RUNTIME) : 컴파일 이후에도 JVM에 의해서 참조가 가능하다.
+
+        * @Retention(RetentionPolicy.CLASS) : 컴파일러가 클래스를 참조할 때까지 유효하다. (기본 값)
+
+        * @Retention(RetentionPolicy.SOURCE) : 어노테이션 정보는 컴파일 이후 없어진다. 
+
+*  AOP를 적용할 메서드에 앞서 정의한 애노테이션을 붙여준다. 
+
+    ```java
+    @Service
+    public class SimpleEventSerivce implements EventService {
+    
+        @PerLogging
+        @Override
+        public void createEvent() {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Created an event");
+        }
+    
+        @PerLogging
+        @Override
+        public void publishEvent() {
+            try {
+                Thread.sleep(2000); 
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Published an event");
+        }
+    
+        public void deleteEvent(){
+            System.out.println("Delete an event");
+        }
+    }
+    ```
+
+*  애노테이션 표현식으로 @PerLogging 애노테이션이 붙여진 곳에 Advice를 적용한다.
+
+    ```java
+    @Component
+    @Aspect
+    public class PerfAspect {
+    
+        @Around("@annotation(PerLogging)")
+        public Object logPerf(ProceedingJoinPoint pjp) throws Throwable{
+    
+            long begin = System.currentTimeMillis();
+            Object retVal = pjp.proceed();
+            System.out.println(System.currentTimeMillis() - begin);
+            return retVal;
+    
+        }
+    
+    }
+    ```
+
+## 9. Null-Safety
+
+#### 1) Null 관련 애노테이션
+
+* 스프링 5에서 (IDE의 지원을 받아) 컴파일 시점에 최대한 NullPointerException을 방지하기 위해 아래와 같은 애노테이션이 추가 되었다. 
+ 
+    * `@NonNull` : Null을 허용 하지 않음
+      
+    * `@Nullable` : Null을 허용
+      
+    * `@NonNullApi` : 해당 패키지의 모든 파라미터와 리턴 값은 Null을 허용 하지 않음
+      
+    * `@NonNullFields` : 해당 패키지의 모든 필드는 Null을 허용하지 않음
+    
+#### 2) Null-Safety - 예시
+
+* EventService 클래스를 작성할 때 createEvent() 메서드의 파라미터도 Null을 허용하지 않고 리턴 값도 Null을 허용하지 않도록 한다.
+
+    ```java
+    @Service
+    public class EventService {
+    
+        @NonNull
+        public String createEvent(@NonNull String name){
+            return "hello " + name;
+        }
+    }
+    ```
+
+* 그리고 AppRunner 클래스를 작성한 다음, createEvent() 메서드로 null을 전달한다
+
+    ```java
+    @Component
+    public class AppRunner implements ApplicationRunner {
+    
+        @Autowired
+        EventService eventService;
+    
+        @Override
+        public void run(ApplicationArguments args) throws Exception {
+            eventService.createEvent(null);
+        }
+    }
+    ```
+
+* 우리는 1번 과정에서 IDE의 경고 메시지의 도움을 받아 Null을 방지하기 위해 @NonNull 애노테이션을 붙였다. 
+
+  아래 메서드 호출 시 매개변수로 Null을 전달하고 있기 때문에 IDE에서 경고 메시지를 표시해주어야 하는데 어떠한 경고 메시지도 나타나지 않는다.
+  
+    ```java
+    eventService.createEvent(null);
+    ```
+  
+  그래서 IDE의 경고 메시지를 통해 Null을 방지하기 위해 인텔리제이의 설정을 변경 해야 하는데 해당 강좌를 참고하도록 하자.
+     
