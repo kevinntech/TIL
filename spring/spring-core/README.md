@@ -1113,9 +1113,9 @@ public class KeesunBookRepository implements BookRepository{ }
     
 * (3) 이벤트 핸들러 작성
 
-    * Spring 4.2 이후 버전에서 이벤트 핸들러는 ApplicationListener를 구현할 필요가 없으며 빈으로 등록 되어야 한다.
+    * Spring 4.2 이후 버전에서 이벤트 핸들러는 ApplicationListener를 구현할 필요가 없다.
 
-    * 그리고 @EventListener 애노테이션만 붙여주면 됩니다.
+    * 이벤트 핸들러를 빈으로 등록하고 `@EventListener` 애노테이션만 붙여주면된다.다
     
     * (이벤트 핸들러를 빈으로 등록 해야 하는 이유는 스프링이 누구에게 이벤트를 전달해야 하는지 알아야 하기 때문이다.)
 
@@ -1140,12 +1140,14 @@ public class KeesunBookRepository implements BookRepository{ }
 
     ```java
     @Component
-    public class MyEventHandler {
+    public class AnotherHandler {
     
         @EventListener
-        public void handle(MyEvent event) { // 메서드명은 사용자 마음대로 결정 가능
-            System.out.println("이벤트 받았다. 데이터는 " + event.getData());
+        public void handle(MyEvent event){
+            System.out.println(Thread.currentThread().toString());
+            System.out.println("Another " + event.getData());
         }
+    
     }
     ```
 
@@ -1201,7 +1203,7 @@ public class KeesunBookRepository implements BookRepository{ }
 
 #### 6) 이벤트 핸들러의 비동기적 실행 - @Async
 
-* (1) 이벤트 핸들러는 기본적으로 동기적으로(synchronized) 실행된다. 비동기적으로 실행 하려면 @EventListener 애노테이션이 붙어 있는 메서드에 @Async를 사용한다.
+* (1) 이벤트 핸들러는 기본적으로 동기적으로(synchronized) 실행된다. 비동기적으로 실행 하려면 @EventListener 애노테이션이 붙어 있는 메서드에 `@Async`를 사용한다.
 
     ```java
     @Component
@@ -1229,7 +1231,7 @@ public class KeesunBookRepository implements BookRepository{ }
     }
     ```
 
-* (2) 그리고 @SpringBootApplication이 붙어 있는 클래스에 @EnableAsync을 붙여 준다. 
+* (2) 그리고 `@SpringBootApplication`이 붙어 있는 클래스에 `@EnableAsync`을 붙여 준다. 
 
     ```java
     @SpringBootApplication
@@ -1298,8 +1300,11 @@ public class MyEventHandler{
 * (2) `ResourceLoarder`를 주입 받은 다음, 주요 메서드 호출
 
     * ResourceLoader의 `getResource()` : 지정한 리소스의 Resource 객체를 얻는다. 
+    
     * Resource의 메소드
-        * `exists() `          : 리소스가 존재하는지 확인한다.        
+    
+        * `exists() `          : 리소스가 존재하는지 확인한다. 
+               
         * `getDescription()`   : 상세 설명을 반환한다.
 
 * ResourceLoader 빈을 주입 받은 다음, Resource 객체를 얻고 해당 객체의 주요 메서드 결과를 출력한다. 
@@ -1349,42 +1354,42 @@ public class MyEventHandler{
 
 #### 3) Resource 인터페이스의 주요 메서드
 
-* ① exists(): 리소스가 존재하는지 확인
+* `exists()`: 리소스가 존재하는지 확인
 
-* ② isReadable() : 리소스를 읽을 수 있는지 확인
+* `isReadable()` : 리소스를 읽을 수 있는지 확인
   
-* ③ isFile() : 리소스가 파일인지 확인
+* `isFile()` : 리소스가 파일인지 확인
   
-* ④ isOpen() : 리소스가 열려있는지 확인
+* `isOpen()` : 리소스가 열려있는지 확인
   
-* ⑤ getDescription() : 전체 경로 포함한 파일 이름 또는 실제 URL
+* `getDescription()` : 전체 경로 포함한 파일 이름 또는 실제 URL
 
 #### 4) Resource 인터페이스 구현체
 
 * Resource 인터페이스를 구현한 주요 구현체들은 아래와 같다.
 
-    * ① UrlResource
+    * `UrlResource`
         * URL을 기준으로 리소스를 찾는다. 
         * 지원하는 프로토콜은 http, https, ftp, file, jar
         
-    * ② ClassPathResource
+    * `ClassPathResource`
         * 접두어가 classpath: 일 때, 클래스패스를 기준으로 리소스를 찾는다.
  
-    * ③ FileSystemResource
+    * `FileSystemResource`
         * 파일 시스템을 기준으로 리소스를 찾는다.
  
-    * ④ ServletContextResource
+    * `ServletContextResource`
         * 웹 애플리케이션 루트에서 상대 경로로 리소스를 찾는다.
         * 스프링 부트의 기본적인 내장형 톰캣은 context path가 지정 되어 있지 않으므로 리소스를 찾을 수가 없다. 
         * 그래서 클래스 패스를 기준으로 찾도록 classpath 접두어를 사용해야 된다.
 
 #### 5) Resource 인터페이스 구현체
 
-* Resource의 타입은 리소스 위치를 지정하는 location 문자열과 ApplicationContext의 타입에 따라 결정 됩니다.
+* **Resource의 타입은 리소스 위치를 지정하는 location 문자열과 ApplicationContext의 타입에 따라 결정된다.**
 
-    * ① ClassPathXmlApplicationContext 이면 ClassPathResource
-    * ② FileSystemXmlApplicationContext 이면 FileSystemResource 
-    * ③  WebApplicationContext 이면 ServletContextResource
+    * ClassPathXmlApplicationContext 이면 ClassPathResource
+    * FileSystemXmlApplicationContext 이면 FileSystemResource 
+    * WebApplicationContext 이면 ServletContextResource
 
 * 예를 들어, ApplicationContext가 ClassPathXmlApplicationContext이면 리소스를 읽어 올 때, classpath를 기준으로 읽어온다.   
 
@@ -1396,7 +1401,7 @@ public class MyEventHandler{
 
 * 대부분 ApplicationContext는 WebApplicationContext 타입을 사용하기 때문에 Resource는 ServletContextResource를 사용하게 된다.  
 
-* 스프링 부트에서 @Autowired 으로 ApplicationContext를 주입 받는 경우 , WebServerApplicationContext 중 하나를 주입 받게 된다.
+* 스프링 부트에서 @Autowired으로 ApplicationContext를 주입 받는 경우, WebServerApplicationContext 중 하나를 주입 받게 된다.
 
   그리고 ApplicationContext가 WebApplicationContext 타입이면 getResource()로 얻는 Resource 구현체의 타입은 ServletContextResource 이다.
 
@@ -1424,13 +1429,13 @@ public class MyEventHandler{
     }
     ```
 
-* ApplicationContext의 타입에 상관없이 리소스 타입을 강제하려면 java.net.URL 접두어와 classpath: 중 하나를 사용할 수 있다.
+* **ApplicationContext의 타입에 상관없이 리소스 타입을 강제하려면 java.net.URL 접두어와 classpath: 중 하나를 사용할 수 있다.**
   
   (접두어를 사용하는 방법을 권장하며 그 이유는 명시적이기 때문이다.)
   
-    * ① `classpath: me/whiteship/config.xml`     → ClassPathResource
+    * `classpath: me/whiteship/config.xml `    → ClassPathResource
 
-    * ② `file:/// some/resource/path/config.xml ` → FileSystemResource
+    * `file:/// some/resource/path/config.xml ` → FileSystemResource
 
 ### 3-2. Validation 추상화
 
@@ -1446,9 +1451,9 @@ public class MyEventHandler{
 
 * Validator 인터페이스를 구현하는 클래스는 아래의 메서드를 구현해야 한다.
 
-    * ① `boolean supports(Class clazz)` : 파라미터로 전달되는 클래스 타입이 해당 Validator가 검증할 수 있는 클래스인지를 확인 합니다.
+    * `boolean supports(Class clazz)` : 파라미터로 전달되는 클래스 타입이 해당 Validator가 검증할 수 있는 클래스인지를 확인한다.
     
-    * ② `void validate(Object target, Errors error)` : 실제 검증 작업을 합니다. 구현할 때 ValidationUtils를 사용하여 편리하게 작성 가능
+    * `void validate(Object target, Errors error)` : 실제 검증 작업을 한다. 구현할 때 ValidationUtils를 사용하여 편리하게 작성 가능
 
 #### 3) Validator 생성 및 사용 
 
@@ -1499,7 +1504,7 @@ public class MyEventHandler{
         
             @Override
             public void validate(Object target, Errors errors) {
-                ValidationUtils.rejectIfEmptyOrWhitespace(errors, "title", "notempty", "Empty title is now allowed.");
+                ValidationUtils.rejectIfEmptyOrWhitespace(errors, "title", "notempty", "Empty title is not allowed.");
             }
         }
         ```
@@ -1531,7 +1536,7 @@ public class MyEventHandler{
                 Errors errors = new BeanPropertyBindingResult(event, "event");
         
                 // EventValidator의 validate() 메서드로 검증을 합니다.
-                // 파라미터로 검증할 객체 event와  검증 시 발생한 에러 정보를 담을 객체 errors를 전달한다.
+                // 파라미터로 검증할 객체 event와 검증 시 발생한 에러 정보를 담을 객체 errors를 전달한다.
                 eventValidator.validate(event, errors);
         
                 // 에러가 있는지 확인
@@ -1539,7 +1544,7 @@ public class MyEventHandler{
         
                 // 발생한 모든 에러를 가져와서 순차적으로 순회하며 에러코드와 디폴트 메시지를 출력
                 errors.getAllErrors().forEach( e -> {
-                    System.out.println("===== error Code =====");
+                    System.out.println("===== error code =====");
                     Arrays.stream(e.getCodes()).forEach(System.out::println);
                     System.out.println(e.getDefaultMessage());
                 });
@@ -1628,33 +1633,32 @@ public class MyEventHandler{
          * 아래 코드에서는 검증 대상의 필드에 오류가 발생 하도록 값을 설정하고 검증을 한다.
          
              ```java
-             public class Event {
-              
-                 Integer id;
-              
-                 @NotEmpty
-                 String title;  // @NotEmpty : 비어 있으면 안됨
-              
-                 @Min(0)
-                 Integer limit; // @Min(0) : 최소 0 이상이어야 함
-              
-                 @Email
-                 String email; //  @Email : 이메일이 필요함
-              
-                 public Integer getId() {
-                     return id;
-                 }
-              
-                 public void setId(Integer id) {
-                     this.id = id;
-                 }
-              
-                 public String getTitle() {
-                     return title;
-                 }
-              
-                 public void setTitle(String title) {
-                     this.title = title;
+             @Component
+             public class AppRunner implements ApplicationRunner {
+             
+                 @Autowired
+                 Validator validator;
+             
+                 @Override
+                 public void run(ApplicationArguments args) throws Exception {
+                     System.out.println(validator.getClass());
+             
+                     // 검증 대상인 Event 객체 생성
+                     Event event = new Event();
+                     event.setLimit(-1);   // limit에 에러 발생을 위해 -1로 설정
+                     event.setEmail("aaa2"); // email에 email이 아닌 값으로 설정
+             
+                     Errors errors = new BeanPropertyBindingResult(event, "event");
+             
+                     validator.validate(event, errors); // 빈으로 주입 받은 Validator를 사용한다.
+             
+                     System.out.println(errors.hasErrors());
+             
+                     errors.getAllErrors().forEach( e -> {
+                         System.out.println("===== error Code =====");
+                         Arrays.stream(e.getCodes()).forEach(System.out::println);
+                         System.out.println(e.getDefaultMessage());
+                     });
                  }
              }
              ``` 
@@ -1677,11 +1681,19 @@ public class MyEventHandler{
 
 * `PropertyEditor`는 스프링 3.0 이전까지 DataBinder가 변환 작업에 사용한 인터페이스이다.
 
-* 상태 정보을 저장 하고 있어서 쓰레드-세이프 하지 않음
+* 상태 정보을 저장 하고 있어서 쓰레드-세이프 하지 않다.
 
-* 일반적인 싱글톤 scope 빈으로 등록해서 사용 할 수 없음 
+* 즉, `PropertyEditor`는 일반적인 싱글톤 scope 빈으로 등록해서 사용하면 안 된다.
+
+    * @InitBinder로 등록해서 사용한다. 
 
 * Object와 String 간의 변환만 할 수 있어 사용 범위가 제한적임
+
+* PropertyEditorSupport 클래스를 상속 받아서 필요한 메서드만 선택해서 구현할 수 있다.
+
+    * `getAsText()`: 객체(Object)를 문자열(String)으로 변환한다.
+
+    * `setAsText()`: 문자열(String)을 객체(Object)로 변환한다.
 
 ### 4-2. 데이터 바인딩 추상화: Converter와 Formatter
 
@@ -1689,20 +1701,24 @@ public class MyEventHandler{
 
 * `Converter`는 S 타입을 T 타입으로 변환 할 수 있는 변환기이다.
 
-* 상태 정보 없으므로(Stateless) 쓰레드 세이프하다.
+* 상태 정보가 없으므로(Stateless) 쓰레드 세이프하다.
 
-* ConverterRegistry에 등록해서 사용한다.
+* ConverterRegistry에 등록해서 사용한다. (빈으로 등록해서 사용 할 수 있다.)
 
     ```java
     public class EventConverter {
         
+        // Converter<Source, Target> : 즉, 아래 코드는 String을 Event로 변환
+        //@Component
         public static class StringToEventConverter implements Converter<String, Event>{
             @Override
             public Event convert(String source) {
                 return new Event(Integer.parseInt(source));
             }
         }
-    
+ 
+        // Converter<Source, Target> : 즉, 아래 코드는 Event를 String으로 변환
+        //@Component   
         public static class EventToStringConverter implements Converter<Event, String>{
             @Override
             public String convert(Event source) {
@@ -1723,6 +1739,7 @@ public class MyEventHandler{
 * thread-safe 하므로 빈으로 등록해서 사용 할 수도 있다.
 
     ```java
+    //@Component
     public class EventFormatter implements Formatter<Event> {
     
         @Override
@@ -1736,10 +1753,16 @@ public class MyEventHandler{
         }
     }
     ```
+  
+    * `parse()` : 문자열(String)을 객체(Object)로 변환한다. 
+
+    * `print()` : 객체(Object)를 문자열(String)으로 변환한다.
 
 #### 3) ConversionService
 
 * `Converter`와 `Formatter`는 `ConversionService`에 등록 되어 실제 변환 작업을 하게 된다.
+
+* 스프링 MVC, 빈 (value) 설정, SpEL에서 사용한다.
 
 * Spring이 제공하는 여러 가지 ConversionService 구현체 중 DefaultFormattingConversionService가 자주 사용된다.
 
@@ -1816,11 +1839,11 @@ public class MyEventHandler{
     }
     ```
 
-> AOP 관련 내용을 작성할 때, [jojoldu님의 블로그](https://jojoldu.tistory.com/71?category=635883 "jojoldu")를 일부 참조 하였습니다.
+>AOP 관련 내용을 작성할 때, [jojoldu님의 블로그](https://jojoldu.tistory.com/71?category=635883 "jojoldu")를 일부 참조 하였습니다.
 
 ## 6. 스프링 AOP : 개념 소개
 
-#### 1) AOP (Aspect-Oriented Programming : 관점 지향 프로그래밍)
+#### 1) AOP
 
 * AOP (Aspect-Oriented Programming : 관점 지향 프로그래밍)
 
