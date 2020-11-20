@@ -428,7 +428,7 @@ public class KeesunBookRepository implements BookRepository{ }
     * `@Primary` : 같은 타입의 빈이 여러 개 일 때, 우선 순위를 가지는 빈으로 지정하여 해당 빈이 주입 되도록 한다.
 
         ```java
-         @Repository
+        @Repository
          @Primary
          public class KeesunBookRepository implements BookRepository{}
         ```
@@ -460,6 +460,16 @@ public class KeesunBookRepository implements BookRepository{ }
 
 * BeanPostProcessor의 구현체인 AutowiredAnnotationBeanPostProcessor가 Bean의 초기화 라이프 사이클 이전에 @Autowired 애노테이션이 붙어 있는 빈(Bean)을 찾아 주입 한다.
 
+* [참고] 스프링 빈의 이벤트 라이프 사이클 ([김영한님의 스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EA%B8%B0%EB%B3%B8%ED%8E%B8 "스프링 핵심 원리 - 기본편") 내용 중 일부를 참고 하였습니다.)
+    
+    * 스프링 컨테이너 생성 -> 스프링 빈 생성 -> 의존 관계 주입 -> 초기화 콜백 -> 사용 -> 소멸전 콜백 -> 스프링 종료    
+
+    * 빈 생명주기 콜백
+    
+        * `@PostConstruct` : 빈이 생성되고, 빈의 의존관계 주입이 완료된 후 호출될 초기화 메소드에 적용한다.
+    
+        * `@PreDestroy` : 빈이 소멸되기 직전에 호출될 소멸 메소드에 적용한다.
+    
 ### 2-4. IoC 컨테이너 4부: @Component와 컴포넌트 스캔
 
 #### 1) @ComponentScan
@@ -1703,7 +1713,7 @@ public class MyEventHandler{
 
 * 상태 정보가 없으므로(Stateless) 쓰레드 세이프하다.
 
-* ConverterRegistry에 등록해서 사용한다. (빈으로 등록해서 사용 할 수 있다.)
+* ConverterRegistry에 등록해서 사용한다. (빈으로 등록해서 사용 할 수도 있다.)
 
     ```java
     public class EventConverter {
