@@ -9,6 +9,7 @@
 ## SPRING
 
 * [백기선님의 스프링 프레임워크 핵심 기술](https://github.com/kevinntech/TIL/tree/main/spring/spring-core "스프링 프레임워크 핵심 기술")
+* [백기선님의 스프링 부트 개념과 활용](https://github.com/kevinntech/TIL/tree/main/spring/spring-boot "스프링 부트 개념과 활용")
 
 ## JPA
 
