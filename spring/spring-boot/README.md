@@ -164,7 +164,7 @@
 
     * `Xxx-Spring-Boot-Autoconfigure` 모듈 : 자동 설정
     
-    * `Xxx-Spring-Boot-Start` 모듈 : 필요한 의존성 정의
+    * `Xxx-Spring-Boot-Starter` 모듈 : 필요한 의존성 정의
     
         * 그냥 하나로 만들고 싶다면? `Xxx-Spring-Boot-Starter`
   
@@ -172,7 +172,7 @@
 
     * ① 먼저, maven 프로젝트를 xxx-spring-boot-starter 형식으로 생성한다.
 
-    * ② pom.xml에 의존성을 추가한다. me.kevinntech
+    * ② pom.xml에 의존성을 추가한다.
 
         ```html
         <dependencies>
@@ -235,7 +235,7 @@
         }
         ```
       
-    * ④ 앞서 만든 클래스의 자동 설정 파일(@Configuration)을 만든다.
+    * ④ 자동 설정 파일(@Configuration)을 만든다.
    
         ```java
         @Configuration
@@ -264,15 +264,15 @@
     
     * ⑦ 기존 프로젝트(spring-boot-second)의 pom.xml에 아래 코드를 추가한다.
     
-    * ⑧ 의존성이 들어온 것을 확인 할 수 있다.
-
-        ```java
+        ```html
         <dependency>
         	<groupId>org.example</groupId>
         	<artifactId>kevin-spring-boot-starter</artifactId>
         	<version>1.0-SNAPSHOT</version>
         </dependency>
-        ```
+        ```    
+      
+    * ⑧ 의존성이 들어온 것을 확인 할 수 있다.
 
     * ⑨ 스프링 부트 메인 애플리케이션을 다음과 같이 변경 한다.
 
@@ -305,11 +305,11 @@
         }
         ```
       
-    * 앞서 살펴본 구현 방식은 발생할 수 있는 문제가 있다.
+    * 앞서 살펴본 구현 방식은 문제점이 존재한다.
 
-        * 스프링 부트의 메인 애플리케이션에 명시적으로 빈을 등록하면 @ComponentScan에 의해서 빈으로 등록 된 다음, 
+        * 스프링 부트의 메인 애플리케이션에 명시적으로 빈을 등록하면 `@ComponentScan`에 의해서 빈으로 등록 된 다음, 
         
-        * @EnableAutoConfiguration는 자동 설정 파일을 읽어 빈으로 등록하며 이때, 명시적으로 등록한 빈을 덮어쓰게 된다는 문제점이 있다.
+        * `@EnableAutoConfiguration`이 자동 설정 파일을 읽어 빈으로 등록하며 이때, 명시적으로 등록한 빈을 덮어쓰게 된다는 문제점이 있다.
 
             ```java
             @SpringBootApplication
@@ -330,7 +330,7 @@
           
 #### 5) 자동 설정 만들기 2부: @ConfigurationProperties
 
-앞서 살펴본 자동 설정을 만드는 방식에는 문제점이 있었다. 문제점을 해결하기 위한 방법을 아래에서 하나씩 살펴본다.
+이전에 발생한 문제점을 해결하기 위한 방법을 아래에서 하나씩 살펴본다.
 
 * (1) @ConditionalOnMissingBean으로 덮어쓰기 방지하기 
 
@@ -354,15 +354,15 @@
 
         * `@ConditionalOnMissingBean`
         
-            * 해당 bean이 생성되어 있지 않은 경우에만 조건이 만족된다.
+            * 해당 bean이 생성되어 있지 않은 경우에만 조건을 만족한다.
             
             * @Bean과 함께 사용되어 조건을 만족하는 경우에만 빈을 생성한다.
             
         * `@ConditionalOnClass`
         
-            * 클래스패스에 해당 class가 존재할 때만 조건이 만족된다. 
+            * 해당 class가 클래스패스에 존재할 때만 조건을 만족한다. 
             
-    * ② 그리고 Maven install을 한다.
+    * ② 그리고 `Maven install`을 한다.
     
     * ③ 기존 프로젝트(spring-boot-second)에서 Maven을 refresh 한다.
     
@@ -439,7 +439,7 @@
         }
         ```
       
-    * ⑥ kevin-spring-boot-starter 프로젝트에서 install 한 다음, spring-boot-second 프로젝트에서 refresh를 한 다음, 실행한다.
+    * ⑥ kevin-spring-boot-starter 프로젝트에서 mvn install를 하고 spring-boot-second 프로젝트에서 refresh를 한 다음, 실행한다.
 
 #### 6) 내장 서블릿 컨테이너
 
@@ -503,7 +503,7 @@
         
     * `DispatcherServlet`는 `HttpServlet`를 상속해서 만든 Spring MVC의 핵심 클래스이다
         
-* 즉, 스프링 부트의 자동 설정이 내장 서블릿 컨테이너(Tomcat, Jetty, Undertow)를 설정하고 실행 시켜준다.
+* 즉, 스프링 부트의 자동 설정이 내장 서블릿 컨테이너(Tomcat, Jetty, Undertow)를 설정하고 실행 시킨다.
 
 #### 7) 내장 서블릿 컨테이너 응용 1부 : 컨테이너와 서버 포트
 
@@ -624,7 +624,7 @@
       
     * 이렇게 지정하면 스프링 부트에서 톰캣이 사용하는 커넥터는 하나만 등록되는데 해당 커넥터에 SSL이 적용된다.
     
-    * 즉, 앞으로는 모든 요청에 https를 붙여야 한다. (http로 접근하면 Bad Request가 나타남)
+    * 즉, 앞으로는 모든 요청에 https를 붙여야 한다. (http로 접근하면 Bad Request가 결과로 나타난다.)
     
 * (2) HTTP 커넥터를 코딩으로 설정하기
 
@@ -709,7 +709,7 @@
     </dependency>
     ```
   
-    * http2로 요청을 보내면 http2를 사용하고 있는 것을 알 수 있다.
+    * http2로 요청을 보내면 http2를 사용하고 있는 것을 확인 할 수 있다.
         
         ```html
         curl -I -k --http2 https://localhost:8443/hello
