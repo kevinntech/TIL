@@ -805,3 +805,675 @@
 
 * 스프링 부트의 주요 목표 중 하나가 `독립적으로 실행 가능한 애플리케이션(stand-alone)`을 만들 수 있도록 하는 것이다.
     
+## 3. 스프링 부트 활용
+
+#### 1) SpringApplication : 1부 - `핵심 기능`
+
+* (1) SpringApplication 실행 방법
+
+    * 이전까지 실행 했던 방법은 다음과 같다.
+    
+        ```java
+        @SpringBootApplication
+        public class SpringinitApplication {
+        
+        	public static void main(String[] args) {
+        		SpringApplication.run(SpringinitApplication.class, args);
+        	}
+        
+        }
+        ```
+      
+    * 하지만 이렇게 사용하게 되면 스프링 애플리케이션이 제공하는 다양한 커스터마이징 기능을 사용하기가 어렵다.
+    
+    * 그래서 SpringApplication 인스턴스를 만든 다음, run()를 호출하는 방법을 사용한다.
+          
+        ```java
+        @SpringBootApplication
+        public class SpringinitApplication {
+        
+        	public static void main(String[] args) {
+        		SpringApplication app = new SpringApplication(SpringinitApplication.class);
+        		app.run(args);
+        	}
+        
+        }
+        ```
+      
+    * 그리고 SpringApplicationBuilder로 애플리케이션을 실행하고 커스터마이징 기능을 사용하는 것도 가능하다.
+          
+        ```java
+        @SpringBootApplication
+        public class SpringinitApplication {
+        
+        	public static void main(String[] args) {
+        		SpringApplication app = new SpringApplication(SpringinitApplication.class);
+        		app.run(args);
+        	}
+        
+        }
+        ```
+
+* (2) 기본 로그 레벨 INFO
+
+    * 어떠한 옵션도 변경하지 않고 실행하면 기본 로그 레벨은 INFO다.
+    
+    * 로그 관련 설정 - 실습
+
+        * ① Edit Configurations... 를 클릭한다.
+        
+            ![image 3](images/img3.png)
+            
+        * ② `VM option`에 -Ddebug를 작성하거나 `Program arguments`에 —debug를 작성한 다음, 실행하면 디버그 모드로 애플리케이션이 동작되며 애플리케이션 로그도 디버그 레벨까지 출력한다.
+
+        * ③ 다음 그림처럼 디버그 레벨로 출력된 로그를 확인 할 수 있다.
+
+            ![image 4](images/img4.png)
+
+        * 디버그 레벨로 출력된 로그를 보면 어떠한 자동 설정이 적용 되었는지, 적용되지 않았다면 그 이유를 확인 할 수 있다.
+
+* (3) FailureAnalyzer
+
+    * FailureAnalyzer는 애플리케이션 에러가 발생 했을 때 에러 메시지를 좀 더 예쁘게 출력 해주는 기능이다.
+
+    * 스프링 부트 애플리케이션은 기본적으로 여러 가지 FailureAnalyzer들이 등록 되어 있다.
+
+* (4) 배너
+
+    * 스프링 애플리케이션 실행 시 처음에 나타나는 로고를 "배너"라고 한다.
+    
+        ![image 5](images/img5.png)
+        
+    * 배너를 변경하는 방법
+    
+        * `src/main/resources`에 배너 파일(banner.txt)를 만든 다음, 배너로 사용 할 텍스트를 입력한다.
+        
+        * banner는 gif, jpg, png로 만들 수도 있다.
+
+    * 여러가지 변수를 사용 할 수 있다.
+    
+        * ${spring-boot.version}를 사용하면 스프링 부트 버전이 출력된다.
+
+        * MANIFEST 파일이 존재해야 스프링 부트 버전이 출력 된다.
+
+            * JAR 파일로 패키징할 때, MANIFEST 파일도 만들어 주기 때문에 패키징을 한 다음, 해당 JAR 파일을 실행하면 된다.
+
+    * 배너 파일의 위치를 변경하는 방법
+
+        * `application.properties`에서 `spring.banner.location`를 지정하면 된다.
+        
+    * 배너가 나타나지 않도록 하는 방법
+    
+        ```java
+        @SpringBootApplication
+        public class SpringinitApplication {
+        
+        	public static void main(String[] args) {
+        		SpringApplication app = new SpringApplication(SpringinitApplication.class);
+        		app.setBannerMode(Banner.Mode.OFF);
+        		app.run(args);
+        	}
+        
+        }
+        ```
+
+    * 배너를 코딩으로 구현하는 방법
+    
+        * Banner 클래스를 구현하고 `SpringApplication.setBanner()`로 설정하면 된다.
+    
+        ```java
+        @SpringBootApplication
+        public class SpringinitApplication {
+        
+        	public static void main(String[] args) {
+        		SpringApplication app = new SpringApplication(SpringinitApplication.class);
+        		app.setBanner(new Banner() {
+        			@Override
+        			public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out) {
+        				out.println("=================");
+        				out.println("KEVINNTECH");
+        				out.println("=================");
+        			}
+        		});
+        		app.run(args);
+        	}
+        
+        }
+        ```
+  
+#### 2) SpringApplication : 2부 - `핵심 기능`
+
+* (1) ApplicationEvent와 Listener
+
+    * ① 이벤트 리스너 만들기
+    
+        * ApplicationListener 인터페이스를 구현하는 클래스를 정의한다.
+        
+            ```java
+            @Component
+            public class SampleListener implements ApplicationListener<ApplicationStartingEvent> {
+            
+                @Override
+                public void onApplicationEvent(ApplicationStartingEvent applicationStartingEvent) {
+                    System.out.println("=======================");
+                    System.out.println("Application is Starting");
+                    System.out.println("=======================");
+                }
+            }
+            ```
+          
+    * ② 이벤트 리스너를 빈(Bean)으로 등록하기
+    
+        * 이벤트 리스너를 빈(Bean)으로 등록하기 위해 @Component 애노테이션을 붙여준다.
+        
+        * 해당 이벤트가 발생하면 리스너가 실행 되는데, 리스너를 빈으로 등록하면 등록되어 있는 빈 중에 해당하는 이벤트의 리스너를 알아서 실행시켜준다.
+
+    * ③ 여기서 발생 할 수 있는 문제점
+    
+        * `ApplicationContext`가 만들어진 다음, 발생하는 이벤트들은 해당 이벤트의 리스너가 빈(Bean)일 경우, 알아서 호출 할 수 있는데, 문제는 `ApplicationContext`가 만들어 지기 전에 발생하는 이벤트다.
+
+        * `ApplicationStartingEvent`는 `ApplicationContext`가 만들어 지기 전에 발생하는 이벤트이며 해당 이벤트에 대한 리스너를 빈으로 등록해도 실행 되지 않는다.
+
+        * 문제점을 해결하려면 `addListeners()`를 사용하면 된다. (리스너에 붙인 @Component 애노테이션은 의미가 없기 때문에 제거한다.)
+    
+            ```java
+            @SpringBootApplication
+            public class SpringinitApplication {
+            
+                public static void main(String[] args) {
+                    SpringApplication app = new SpringApplication(SpringinitApplication.class);
+                    app.addListeners(new SampleListener());
+                    app.run(args);
+                }
+            
+            }
+            ```
+
+* (2) WebApplicationType 설정
+
+    * 웹 애플리케이션 타입은 다음 세 종류가 있다.
+    
+        * `WebApplicationType.SERVLET`는 Spring MVC가 있을 때 사용되는 타입이다.
+    
+        * `WebApplicationType.REACTIVE`는 Spring Webflux가 있을 때 사용되는 타입이다.
+    
+        * `WebApplicationType.NONE`는 둘 다 없을 때 사용되는 타입이다. (내장 웹 서버가 실행 되지 않음)
+    
+    * Spring MVC, Spring Webflux 둘 다 있다면 WebApplicationType.SERVLET으로 설정된다.
+   
+        * 이러한 상황에서 Spring Webflux를 선택하고 싶다면 다음과 같이 메인 애플리케이션에 명시적으로 지정하면 된다.
+    
+        * `app.setWebApplicationType(WebApplicationType.REACTIVE);`
+        
+* (3) 애플리케이션 아규먼트(Argument) 사용하기
+
+    * 아규먼트(Argument)
+    
+        * JVM option는 `-D`로 시작하며 JVM 설정과 관련된 Argument이다.
+    
+        * 애플리케이션 아규먼트는 `--`로 시작하며 애플리케이션 설정과 관련된 Argument이다. `Program arguments`
+
+    * ① Edit Configurations...에서 다음과 같이 설정한다.
+
+        ![image 6](images/img6.png)
+
+    * ② 다음과 같이 `SampleListener`를 변경한 다음, 애플리케이션을 실행한다.
+
+        ```java
+        @Component
+        public class SampleListener{
+        
+            /* 어떤 빈(Bean)에 생성자가 1개이고 그 생성자의 파라미터가
+                빈(Bean)인 경우, 스프링이 해당 빈을 자동으로 주입한다. */
+            public SampleListener(ApplicationArguments arguments){
+                System.out.println("foo: " + arguments.containsOption("foo"));
+                System.out.println("bar: " + arguments.containsOption("bar"));
+            }
+        
+        }
+        ```
+      
+    * ③ 실행 결과를 보면 foo는 출력되지 않고 bar는 출력된다.
+        
+    * 즉, ApplicationArguments 객체에는 JVM option 값이 전달 되지 않는다는 것을 알 수 있다.
+    
+* (4) 애플리케이션이 실행된 이후, 뭔가 추가적으로 실행하고 싶을 때, 사용 할 수 있는 방법
+
+    * ① ApplicationRunner `추천`
+
+        ```java
+        @Component
+        public class SampleListener implements ApplicationRunner {
+        
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                System.out.println("foo: " + args.containsOption("foo"));
+                System.out.println("bar: " + args.containsOption("bar"));
+            }
+        
+        }
+        ```
+      
+    * ② CommandLineRunner
+    
+    * `@Order`로 순서를 지정 할 수도 있다. (값이 낮을수록 우선 순위가 높다)
+
+#### 3) 외부 설정 : 1부 - `핵심 기능`
+
+* (1) 사용 할 수 있는 외부 설정
+
+    * `외부 설정`은 애플리케이션에서 사용하는 여러 가지 설정 값들을 정의한다.
+    
+    * application.properties
+   
+        * `application.properties`는 스프링 부트가 애플리케이션을 구동할 때, 자동으로 로딩하는 외부 설정 파일이다. (해당 이름은 컨벤션으로 정해진 것이다.)
+
+        * ① 설정 값 정의하기
+        
+            * `키 = 값` 형태로 설정 값을 저장한다.
+
+                ```java
+                #application.properties
+                kevin.name = kevin
+                ```
+              
+        * ② 애플리케이션에서 설정 값 참조하기
+        
+            * 애플리케이션에서 설정 값을 참조하려면 @Value를 사용하면 된다.
+
+                ```java
+                @Component
+                public class SampleRunner implements ApplicationRunner {
+                
+                    @Value("${kevin.name}")
+                    private String name;
+                
+                    @Override
+                    public void run(ApplicationArguments args) throws Exception {
+                        System.out.println("================");
+                        System.out.println(name);
+                        System.out.println("================");
+                    }
+                }
+                ```
+
+    * YAML, 환경변수, 커맨드 라인 아규먼트를 사용하는 방법도 있다.
+    
+* (2) 프로퍼티 우선 순위
+
+    * ① 유저 홈 디렉토리에 있는 spring-boot-dev-tools.properties
+
+    * ② 테스트에 있는 @TestPropertySource
+
+    * ③ @SpringBootTest 애노테이션의 properties 애트리뷰트
+
+    * ④ 커맨드 라인 아규먼트
+
+    * ⑤ SPRING_APPLICATION_JSON (환경 변수 또는 시스템 프로퍼티)에 들어있는 프로퍼티
+
+    * ⑥ ServletConfig 파라미터
+
+    * ⑦ ServletContext 파라미터
+
+    * ⑧ java:comp/env JNDI 애트리뷰트
+
+    * ⑨ System.getProperties() 자바 시스템 프로퍼티
+
+    * ⑩ OS 환경 변수
+
+    * ⑪ RandomValuePropertySource
+
+    * ⑫ JAR 밖에 있는 특정 프로파일용 application properties
+
+    * ⑬ JAR 안에 있는 특정 프로파일용 application properties
+
+    * ⑭ JAR 밖에 있는 application properties
+
+    * ⑮ JAR 안에 있는 application properties
+
+    * ⑯ @PropertySource
+
+    * ⑰ 기본 프로퍼티 (SpringApplication.setDefaultProperties)
+    
+* (3) 테스트 코드에서 외부 설정 - 문제가 발생 할 수 있는 방법
+
+    * ① 다음과 같은 테스트 코드를 작성한다.
+    
+        ```java
+        @RunWith(SpringRunner.class)
+        @SpringBootTest
+        public class SpringinitApplicationTests {
+        
+            @Autowired
+            Environment environment; // Environment 빈을 주입 받은 다음, 설정 값을 가져 올 수 있다.
+        
+            @Test
+            public void contextLoads() {
+                assertThat(environment.getProperty("kevin.name"))
+                        .isEqualTo("kevin");
+            }
+        
+        }
+        ```
+      
+    * ② 테스트에서만 사용되는 application.properties 파일이 필요하다 `test/resources`에 application.properties 파일을 생성한다.
+    
+        * 해당 경로에 resources 디렉토리가 없다면 생성한다.
+        
+            ![image 7](images/img7.png)
+            
+        * 인텔리제이에서 [File] - [Project Structure]를 클릭한 다음, 아래 그림처럼 [src]-[test]에 있는 `resources`를 선택하고 `Test Resources` 아이콘을 클릭한다. 그리고 [Apply] , [OK] 버튼을 클릭한다.
+          
+            ![image 8](images/img8.png)
+            
+        * `test/resources`에 생성한 application.properties 파일의 내용은 다음과 같이 작성한다.
+        
+            ```
+            kevin.name=kevinntech
+            ```
+                
+    * ③ 그리고 테스트 코드를 다음과 같이 변경한 다음, 실행한다.
+    
+        ```java
+        @RunWith(SpringRunner.class)
+                @SpringBootTest
+                public class SpringinitApplicationTests {
+                
+                    @Autowired
+                    Environment environment; // Environment 빈을 주입 받은 다음, 설정 값을 가져 올 수 있다.
+                
+                    @Test
+                    public void contextLoads() {
+                        assertThat(environment.getProperty("kevin.name"))
+                                .isEqualTo("kevinntech");
+                    }
+                
+                }
+        ```
+
+* (4) 테스트 코드에서 외부 설정 - 문제가 발생하는 이유
+
+    * 문제가 발생하는 이유에 대해서 하나씩 살펴보자.
+    
+    * ① `src/main/resources`에 있는 `application.properties`를 다음과 같이 수정한다.
+
+        ```
+        kevin.name=kevin
+        kevin.age=${random.int}
+        ```
+      
+    * ② SampleRunner 코드를 수정한다. 
+
+        ```java
+        @Component
+        public class SampleRunner implements ApplicationRunner {
+        
+            @Value("${kevin.name}")
+            private String name;
+        
+            @Value("${kevin.age}")
+            private int age;
+        
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                System.out.println("================");
+                System.out.println(name);
+                System.out.println(age);
+                System.out.println("================");
+            }
+        }
+        ```
+      
+    * ③ `src/main`에 있는 SampleRunner를 실행하면 문제가 없지만 테스트 코드를 실행하면 에러가 발생한다.
+    
+        * 에러가 발생한 이유는 다음과 같다.
+        
+        * 테스트 코드를 실행하면 main 디렉토리를 빌드한 다음, test 디렉토리를 빌드한다.
+          
+        * 이 과정에서 test 디렉토리에 있는 application.properties가 main 디렉토리에 있는 것을 덮어쓰게 된다.
+          
+        * 그리고 test 디렉토리에 있는 application.properties 파일은 kevin.age가 정의되어 있지 않으므로 에러가 발생하게 되는 것이다.
+        
+        * 그래서 에러가 발생하지 않도록 하려면 test 디렉토리에도 `kevin.age = ${random.int}`를 추가해야 한다. 이러한 방식으로 관리 하기에는 힘들다.
+    
+* (5) 테스트 코드에서 외부 설정 - 해결방법
+
+    * ① @SpringBootTest의 properties 속성을 이용하는 방법
+    
+        ```java
+        @RunWith(SpringRunner.class)
+        @SpringBootTest(properties = "kevin.name = kevin2")
+        public class SpringinitApplicationTests {
+        
+        	@Autowired
+        	Environment environment;
+        
+        	@Test
+        	public void contextLoads() {
+        		assertThat(environment.getProperty("kevin.name"))
+        				.isEqualTo("kevin2");
+        	}
+        
+        }
+        ```
+    
+    * ② @TestPropertySource를 사용하여 직접 설정 값을 지정하는 방법
+    
+        ```java
+        @RunWith(SpringRunner.class)
+        @TestPropertySource(properties = "kevin.name=kevin3")
+        // @TestPropertySource(properties = {"kevin.name=kevin2", "kevin.age=20"})
+        @SpringBootTest(properties = "kevin.name = kevin2")
+        public class SpringinitApplicationTests {
+        
+        	@Autowired
+        	Environment environment;
+        
+        	@Test
+        	public void contextLoads() {
+        		assertThat(environment.getProperty("kevin.name"))
+        				.isEqualTo("kevin3");
+        	}
+        
+        }
+        ```
+
+    * ③ 테스트 용도의 외부 설정 파일을 다른 이름(test.properties)으로 만든 다음, @TestPropertySource로 지정하는 방법
+
+        * 외부 설정 파일 이름이 다르기 때문에 `application.properties` 파일을 덮어 쓰지 않는다.
+    
+        ```java
+        @RunWith(SpringRunner.class)
+        @TestPropertySource(locations = "classpath:/test.properties") // 테스트에서는 클래스 패스를 기준으로 test.properties를 사용한다.
+        @SpringBootTest
+        public class SpringinitApplicationTests {
+        
+        	@Autowired
+        	Environment environment; // Environment 빈을 주입 받은 다음, 설정 값을 가져 올 수 있다.
+        
+        	@Test
+        	public void contextLoads() {
+        		assertThat(environment.getProperty("kevin.name"))
+        				.isEqualTo("kevinTest");
+        	}
+        
+        }
+        ```
+      
+        ```
+        #test.properties
+        kevin.name=kevin2
+        ```
+      
+* (6) 랜덤 값 설정 및 플레이스 홀더
+
+    ```
+    kevin.name = kevin
+    kevin.fullName = ${kevin.name} Kim  // 플레이스 홀더
+    
+    kevin.age = ${random.int} // 랜덤 값
+    ```
+
+* (7) application.properties 우선 순위
+
+    * 우선 순위가 높은 설정 파일이 낮은 설정 파일을 덮어쓴다.
+    
+        ```
+        ① file:./config/
+        ② file:./
+        ③ classpath:/config/      
+        ④ classpath:/
+        ```
+      
+#### 4) 외부 설정 : 2부 - `핵심 기능`
+
+* (1) 외부 설정을 Bean으로 등록하기
+
+    * 같은 key로 시작하는 외부 설정이 많은 경우, 하나의 클래스로 정의한 다음, 빈으로 등록 할 수 있다. (자동 완성, 타입 컨버전 등 가능해짐)
+    
+        ```
+        kevin.name = kevin
+        kevin.age = ${random.int(0,100)}
+        kevin.fullName = ${kevin.name} Kim
+        ```
+
+    * ① 클래스를 다음과 같이 작성한다.
+    
+        * `@Component`는 빈으로 등록되도록 하며 `@ConfigurationProperties`는 application.properties와 바인딩 되도록 한다.
+
+            ```java
+            @Component
+            @ConfigurationProperties("kevin")
+            public class KevinProperties {
+            
+                String name;
+            
+                int age;
+            
+                String fullName;
+            
+                // Getter, Setter
+                public String getName() {
+                    return name;
+                }
+            
+                public void setName(String name) {
+                    this.name = name;
+                }
+            
+                public int getAge() {
+                    return age;
+                }
+            
+                public void setAge(int age) {
+                    this.age = age;
+                }
+            
+                public String getFullName() {
+                    return fullName;
+                }
+            
+                public void setFullName(String fullName) {
+                    this.fullName = fullName;
+                }
+            }
+            ```
+     
+    * ② pom.xml에 의존성을 추가한다.
+    
+        ```html
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+        </dependency>
+        ```
+      
+    * ③ SampleRunner 코드를 다음과 같이 변경한다. 외부 설정 클래스의 Bean을 주입 받아서 사용한다.
+    
+        ```java
+        @Component
+        public class SampleRunner implements ApplicationRunner {
+            
+            /*  // 기존 코드
+                @Value("${kevin.fullName}")
+                private String name;
+            
+                @Value("${kevin.age}")
+                private int age;    */
+            
+            @Autowired
+            KevinProperties kevinProperties;
+            
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                System.out.println("================");
+                System.out.println(kevinProperties.getName());
+                System.out.println(kevinProperties.getAge());
+                System.out.println("================");
+            }
+        }
+        ```
+      
+* (2) 융통성 있는 바인딩 (Relaxed Binding)
+
+    * `application.properties`에서 사용되는 키(key)에  `_ (under score)` 또는 `- (kebab)`이 포함되어 있더라도 적절하게 camelcase로 변환하여 바인딩 된다.
+  
+        ```
+        kevin.name = kevin
+        kevin.age = ${random.int(0,100)} // ${random.int(0, 100)}와 같이 공백이 있으면 에러가 발생함
+        kevin.full_name = ${kevin.name} Kim
+        ```
+      
+* (3) 프로퍼티 타입 컨버전
+
+    * `application.properties`에 있는 설정 값이 외부 설정 Bean 클래스와 바인딩 될 때, 해당 클래스의 필드에 적절한 타입(int, String, Duration 등)으로 타입 컨버전이 된다.
+
+        ```java
+        @Component
+        @ConfigurationProperties("kevin")
+        public class KevinProperties {
+        
+            String name;
+        
+            int age;
+        
+            String fullName;
+        
+            @DurationUnit(ChronoUnit.SECONDS)
+            private Duration sessionTimeout = Duration.ofSeconds(30);
+        
+            // getter, setter가 있다고 가정
+        }
+        ```
+      
+    * application.properties에서 외부 설정을 지정할 때 s, m, h, d 와 같은 suffix를 사용하면 @DurationUnit을 사용하지 않더라도 Duration으로 타입 컨버전이 된다.
+
+        ```
+        kevin.name = kevin
+        kevin.age = ${random.int(0,100)} // ${random.int(0, 100)}와 같이 공백이 있으면 에러가 발생함
+        kevin.full_name = ${kevin.name} Kim
+        kevin.sessionTimeout=25s
+        ```
+
+* (4) 프로퍼티 값 검증
+
+    * @Validated 와 JSR-303 Validation API의 구현체 (@NotNull ...)를 사용하여 프로퍼티 값을 검증한다.
+    
+        ```java
+        @Component
+        @ConfigurationProperties("kevin")
+        @Validated
+        public class KevinProperties {
+        
+            @NotEmpty
+            String name;
+        
+            ...
+        }
+        ```
+
+* (5) @Value과 @ConfigurationProperties 비교
+
+    * @Value 보다는 @ConfigurationProperties를 사용하는 것이 좋다.
+      
+    * 그 이유는 @Value는 SpEL을 사용 할 수 있지만 위에서 언급된 기능들은 전부 사용 할 수 없기 때문이다.   
