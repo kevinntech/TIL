@@ -1707,7 +1707,7 @@
 
 * (1) 실습 전에 환경설정
 
-    * ① 다음과 같이 info에서 debug 레벨로 로그를 출력 하도록 변경 하였다.
+    * ① info에서 debug 레벨로 로그를 출력 하도록 변경한다.
 
         ```java
         @Component
@@ -1732,33 +1732,35 @@
         }
         ```
       
-    * ② [Edit Configurations...]에서 VM Options 과 Program arguments에 설정한 내용을 제거한다.
+    * ② [Edit Configurations...]에서 `VM Options`와 `Program arguments`에 설정한 내용을 제거한다.
     
-    * ③ 애플리케이션을 실행하여 결과를 확인한 다음, 다음 실습을 위해 `application.properties`에서 `logging.level.me.kevinntech = DEBUG`를 제거한다.
+    * ③ `application.properties`에서 `logging.level.me.kevinntech = DEBUG`를 추가하고 실행한 다음, 결과를 확인하고 제거한다.
         
 * (2) 커스텀 로그 설정 파일 사용하기
 
-    * ① 로거에 맞는 커스텀 로그 설정 파일을 다음과 같이 생성한다.
+    * 로거에 맞는 커스텀 로그 설정 파일을 다음과 같이 생성한다.
       
-        * Logback: logback-spring.xml
+        * Logback: `logback-spring.xml`
+        
+            ```html
+            <?xml version="1.0" encoding="UTF-8"?>
+            <configuration>
+                <include resource="org/springframework/boot/logging/logback/base.xml"/>
+                <logger name="me.kevinntech" level="DEBUG"/>
+            </configuration>
+            ```
+    
+        * Log4J2: `log4j2-spring.xml`
       
-        * Log4J2: log4j2-spring.xml
-      
-        * JUL (추천X): logging.properties
+        * JUL (추천X): `logging.properties`
+        
+        * Logback extension
+        
+            * 프로파일 <springProfile name=”프로파일”>
+            
+            * Environment 프로퍼티 <springProperty>
 
-        ```html
-        <?xml version="1.0" encoding="UTF-8"?>
-        <configuration>
-        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-        <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
-        <root level="INFO">
-            <appender-ref ref="CONSOLE" />
-        </root>
-        <logger name="me.kevinntech" level="DEBUG"/>
-        </configuration>
-        ```
-      
-    * ② 애플리케이션을 실행하면 다음과 같이 DEBUG 레벨로 출력되는 것을 확인 할 수 있다.
+    * 애플리케이션을 실행하면 다음과 같이 DEBUG 레벨로 출력되는 것을 확인 할 수 있다.
     
         ![image 11](images/img11.png)
         
@@ -1768,40 +1770,26 @@
    
     * 일단, 이전 실습에서 만들었던 `logback-spring.xml`를 삭제한다.
     
-    * ① pom.xml에서 기본적으로 들어오는 로깅을 exclustion으로 제외한다.
+    * ① pom.xml에서 기본적으로 들어오는 로깅을 <exclusion>으로 제외한다.
     
     * ② 그리고 log4j2 의존성을 추가한다.
     
         ```html
-        <?xml version="1.0" encoding="UTF-8"?>
-        <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+        <dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-starter-web</artifactId>
+        	<exclusions>
+        		<exclusion>
+        			<groupId>org.springframework.boot</groupId>
+        			<artifactId>spring-boot-starter-logging</artifactId>
+        		</exclusion>
+        	</exclusions>
+        </dependency>
         
-            ...
-        
-            <dependencies>
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-web</artifactId>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>org.springframework.boot</groupId>
-                            <artifactId>spring-boot-starter-logging</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-        
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-log4j2</artifactId>
-                </dependency>
-        
-            </dependencies>
-        
-            ...
-            
-        </project>
-        
+        <dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
         ```
 
     * ③ `application.properties`에 `logging.level.me.kevinntech = debug`를 추가한 다음, 애플리케이션을 실행한다.
@@ -1810,11 +1798,11 @@
     
 #### 8) 테스트 - `핵심 기능`
 
-* (1) 실습 전에 환경설정
+* (1) 실습 준비
 
     * ① 새로운 프로젝트를 생성한다.
     
-    * ② 다음과 같이 Controller와 Service 클래스를 작성한다. 그리고 컨트롤러가 서비스를 호출하고 hello kevin를 리턴한다.
+    * ② 그리고 `Controller`와 `Service` 클래스를 작성한다. 그리고 `Controller`가 `Service`를 호출하고 "hello kevin"를 리턴한다.
     
         ```java
         @RestController
@@ -1841,42 +1829,47 @@
         }
         ```
       
-    * ③ 테스트 코드를 작성 하기 전에 pom.xml에 다음 의존성이 있는지 확인한다.
+    * ③ 테스트 코드를 작성 하기 전에 pom.xml에 다음 의존성이 존재하는지 확인한다.
     
-        ```html
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        ```
+        * `spring-boot-starter-test` 의존성을 추가하면 테스트에 필요한 라이브러리는 대부분 있다고 보면 된다. 
+    
+            ```html
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <scope>test</scope>
+            </dependency>
+            ```
       
 * (2) 테스트 코드 작성
 
-    * @SpringBootTest
+    * `@SpringBootTest`
     
         * 통합 테스트를 제공하는 스프링 부트 테스트 애노테이션이며 테스트에 필요한 모든 의존성을 제공한다.
 
         * JUnit 4에서는 @RunWith(SpringRunner.class)와 같이 사용해야 한다.
         
-        * JUnit 5에서는 @ExtendWith(SpringExtension.class)가 이미 안에 존재하기 때문에 생략 가능하다.
+        * JUnit 5에서는 @SpringBootTest 안에 @ExtendWith(SpringExtension.class)가 포함되어 때문에 생략 가능하다.
         
-        * webEnvironment의 타입
+        * `webEnvironment`의 타입
         
-            * MOCK : 내장 톰캣 구동 안함
-            * RANDOM_PORT, DEFINED_PORT : 내장 톰캣 사용 함
-            * NONE : 서블릿 환경 제공 안함
-
-            * webEnvironment가 RANDOM_PORT 또는 DEFINED_PORT 타입이면 해당 포트로 서블릿 컨테이너(내장 톰캣)를 구동한다.
-            * 이때 부터는 MockMvc가 아닌 TestRestTemplate 이나 WebTestClient를 사용해야 한다.
+            * MOCK : 내장 톰캣을 구동 하지 않는다. (기본 값)
             
-    * MockMvc 사용
+                * `webEnvironment`가 Mock 타입이면 서블릿 컨테이너를 구동 하지 않고 서블릿을 Mocking 한 것을 띄워준다.
+ 
+                * 이 때, Mockup 된 서블릿과 상호 작용을 하려면 `MockMVC`라는 클라이언트를 사용해야 한다.
+            
+            * RANDOM_PORT, DEFINED_PORT : 내장 톰캣을 구동한다.
+            
+                * `webEnvironment`가 RANDOM_PORT 또는 DEFINED_PORT 타입이면 해당 포트로 서블릿 컨테이너(내장 톰캣)를 구동한다.
+                
+                * 이 때는 MockMvc가 아닌 `TestRestTemplate` 이나 `WebTestClient`를 사용해야 한다.
+                        
+            * NONE : 서블릿 환경을 제공 하지 않는다.
+
+    * `MockMvc` 사용
     
-        * webEnvironment가 Mock 타입이면 서블릿 컨테이너를 구동 하지 않고 서블릿을 Mocking 한 것을 띄워준다.
-          
-        * 이 때, Mockup 된 서블릿과 상호 작용을 하려면 `MockMVC`라는 클라이언트를 사용해야 한다.
-          
-        * MockMVC 라는 클라이언트를 사용하려면 @AutoConfigureMockMvc 애노테이션을 붙여주고, MockMVC를 주입 받으면 된다.          
+        * `MockMVC` 라는 클라이언트를 사용하려면 `@AutoConfigureMockMvc`를 붙여주고, `MockMVC`를 주입 받으면 된다.          
     
             ```java
             @RunWith(SpringRunner.class)
@@ -1890,9 +1883,9 @@
                 @Test
                 public void hello() throws Exception {
                     mockMvc.perform(get("/hello"))      // MockMvc를 통해 "/hello"로 HTTP GET 요청을 한다.
-                            .andExpect(status().isOk())         // status 코드가 200 OK
+                            .andExpect(status().isOk()) // status 코드가 200 OK
                             .andExpect(content().string("hello kevin")) // 컨텐츠가 hello kevin 이길 바란다.
-                            .andDo(print());                    // 요청온 것을 출력한다.
+                            .andDo(print()); // 요청온 것을 출력한다.
                 }
             
             }
@@ -1918,9 +1911,9 @@
                 
                 * 응답 본문의 내용을 검증한다.
         
-    * TestRestTemplate 사용
+    * `TestRestTemplate` 사용
      
-        * 다음과 같이 webEnvironment를 RANDOM_PORT 타입으로 지정한 다음, TestRestTemplate를 사용해야 한다.
+        * 다음과 같이 webEnvironment를 RANDOM_PORT 타입으로 지정하고 `TestRestTemplate`를 사용한다.
         
             ```java
             @RunWith(SpringRunner.class)
@@ -1933,20 +1926,17 @@
             
                 @Test
                 public void hello() throws Exception {
-                    String result = testRestTemplate.getForObject("/hello", String.class);
+                    String result = testRestTemplate.getForObject("/hello", String.class); // 
                     assertThat(result).isEqualTo("hello kevin");
-            
                 }
             
             }
             ```
-          
-        * 만약 테스트를 Service 단 까지 가지말고 Controller 만 테스트 하고 싶다면 @MockBean 애노테이션을 사용하여 SampleService 타입의 Mock 객체를 정의한다. (Mocking)
-          
-        * 그러면 SampleController가 사용하는 ApplicationContext에 있는 SampleService 빈을 Mock 객체(mockSampleService)로 교체한다.
-          
-        * 그래서 원본이 아닌 Mock bean을 사용해서 테스트할 수 있다.
         
+            * `getForObject(url, responsetype)`는 해당 URL에 HTTP GET 방식으로 요청하여 결과를 responsetype 타입으로 받는다.
+         
+        * 만약 `Service` 단까지 가지않고 `Controller`만 테스트 하고 싶다면 어떻게 해야할까?
+       
             ```java
             @RunWith(SpringRunner.class)
             @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -1970,11 +1960,17 @@
             }
             ```
           
-    * WebTestClient 사용
-     
-        * WebTestClient를 사용하면 비동기적으로 클라이언트 요청을 할 수 있다.
+          * `@MockBean`으로 컨트롤러가 사용하는 서비스(SampleService) 타입의 Mock 객체를 정의한다. (Mocking)
         
-        * ① 먼저, pom.xml에 WebFlux 의존성을 추가한다.
+          * 그러면 SampleController가 사용하는 ApplicationContext에 있는 SampleService 빈을 Mock 객체(mockSampleService)로 교체한다.
+        
+          * 그래서 원본이 아닌 Mock 객체를 사용해서 테스트 할 수 있다.
+          
+    * `WebTestClient` 사용
+     
+        * `WebTestClient`를 사용하면 비동기적으로 클라이언트 요청을 할 수 있다.
+        
+        * ① 먼저, pom.xml에 `WebFlux` 의존성을 추가한다.
         
             ```html
             <dependency>
@@ -2001,7 +1997,7 @@
                 public void hello() throws Exception {
                     when(mockSampleService.getName()).thenReturn("kevin");
             
-                    webTestClient.get().uri("/hello").exchange()
+                    webTestClient.get().uri("/hello").exchange() // 요청
                             .expectStatus().isOk()
                             .expectBody(String.class).isEqualTo("hello kevin");
                 }
@@ -2009,23 +2005,27 @@
             }
             ```
           
-            * @SpringBootTest 애노테이션은 스프링 메인 애플리케이션(@SpringBootApplication)을 찾아가서 해당 패키지를 기준으로
-              
-            * 하위의 모든 Bean을 Scan 한 다음, Test용 ApplicationContext를 만들면서 빈으로 등록해주고, @MockBean을 찾아서 그 빈만 Mock 객체로 교체한다.
-              
-            * 그리고 MockBean는 @Test 마다 자동으로 리셋된다.
+        * @SpringBootTest 애노테이션은 스프링 메인 애플리케이션(@SpringBootApplication)을 찾아가서 
+        
+        * 해당 패키지를 기준으로 하위의 모든 Bean을 Scan 한 다음, 테스트용 ApplicationContext를 만들면서 빈으로 등록해주고, @MockBean을 찾아서 해당 빈(Bean)만 Mock 객체로 교체한다.
+          
+        * 그리고 @MockBean는 @Test 마다 자동으로 리셋된다.
             
-    * 슬라이싱 테스트 (단위 테스트)
-     
+    * 슬라이스 테스트 (단위 테스트)
+ 
+        * 레이어 별로 잘라서 테스트를 하고 싶을 때 사용된다. (레이어 별로 빈이 등록된다.)
+             
         * 단위 테스트를 위한 @JsonTest, @WebMvcTest, @WebFluxTest, @DataJpaTest 애노테이션을 제공한다.
         
-        * 레이어 별로 잘라서 테스트 하고 싶을 때 사용된다. (레이어 별로 빈이 등록 됨)
+        * 슬라이스 테스트 - 예시
         
-        * 다음과 같이, 하나의 컨트롤러만 테스트 할 수 있다.
+            * 다음과 같이, 하나의 컨트롤러만 테스트 할 수 있다.
+              
+            * `@WebMvcTest`를 사용하면 Web과 관련된 것(Controller ...)만 빈(Bean)으로 등록되고 
+            
+            * 일반적인 컴포넌트(Service, Repository)는 빈으로 등록되지 않기 때문에 `@MockBean`으로 Mock 객체를 정의해야 한다.
           
-        * Controller만 빈(Bean)으로 등록되고 Service는 빈으로 등록되지 않기 때문에 @MockBean 으로 주입 받아야 한다.
-          
-        * 그리고 @WebMvcTest는 MockMvc로 테스트 해야 한다.
+            * 그리고 `@WebMvcTest`는 `MockMvc`로 테스트 해야 한다.
         
             ```java
             @RunWith(SpringRunner.class)
@@ -2049,13 +2049,13 @@
             }
             ```
           
-        * SampleController 하나만 Bean으로 등록 되기 때문에, 훨씬 더 가벼운 테스트가 된다.
+            * SampleController 하나만 Bean으로 등록 되기 때문에, 훨씬 더 가벼운 테스트가 된다.
         
 * (3) 테스트 유틸
 
     * 스프링 테스트가 제공하는 유틸은 다음과 같다.
     
-        * ① OutputCapture
+        * ① **OutputCapture**
           
         * ② TestPropertyValues
           
@@ -2063,7 +2063,7 @@
           
         * ④ ConfigFileApplicationContextInitializer
         
-    * 이 중 제일 유용할 것 같은 OutputCapture에 대해서 알아 보겠다.
+    * 이 중 제일 유용할 것 같은 OutputCapture에 대해서 알아본다.
     
     * OutputCapture는 JUnit의 Rule을 확장해서 만든 것이며 로그를 비롯한 console에 출력되는 모든 것을 캡처한다.
     
@@ -2083,7 +2083,7 @@
                 @GetMapping("/hello")
                 public String hello() {
                     logger.info("kevin");
-                    System.out.println("skip"); // 이렇게 하면 안되지만 이것 또한 캡처된다는 것을 보여주기 위함
+                    System.out.println("skip"); // 이렇게 작성하면 안되지만 이것 또한 캡처된다는 것을 보여주기 위해서 작성한다.
                     return "hello " + sampleService.getName();
                 }
             
@@ -2125,7 +2125,11 @@
 
 * (1) Spring-Boot-Devtools
 
-    * `Spring-Boot-Devtools`는 스프링 부트가 제공하는 optional한 tool이다.
+    * `Spring-Boot-Devtools`는 개발할 때, 유용한 기능을 포함하고 있는 스프링 부트 모듈이다.
+    
+        * 캐시 설정을 개발 환경에 맞게 변경한다.
+        
+        * 클래스패스에 있는 파일이 변경 될 때마다 자동으로 재시작.
     
     * 사용 하려면 pom.xml에 의존성을 추가 해야 한다.
     
