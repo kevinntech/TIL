@@ -2123,40 +2123,98 @@
           
 #### 9) Spring-Boot-Devtools - `핵심 기능`
 
-* (1) Spring-Boot-Devtools
+* `Spring-Boot-Devtools`는 개발할 때, 유용한 기능을 포함하고 있는 스프링 부트 모듈이다.
 
-    * `Spring-Boot-Devtools`는 개발할 때, 유용한 기능을 포함하고 있는 스프링 부트 모듈이다.
+    * 캐시 설정을 개발 환경에 맞게 변경한다.
     
-        * 캐시 설정을 개발 환경에 맞게 변경한다.
+    * 클래스패스에 있는 파일을 변경하고 Build를 하면 자동으로 애플리케이션을 재시작한다.
+    
+        * 재시작하는 속도가 직접 톰캣을 종료 했다가 구동하는 것 보다 훨씬 빠르다. 왜냐하면 스프링 부트는 2개의 클래스 로더를 사용하기 때문이다.
         
-        * 클래스패스에 있는 파일이 변경 될 때마다 자동으로 재시작.
+            * ① `base classloader`: 의존성을 읽어 들이는 클래스 로더다.
+            
+            * ② `restart classloader`: 애플리케이션을 읽어 들이는 클래스 로더다.
     
-    * 사용 하려면 pom.xml에 의존성을 추가 해야 한다.
+    * 애플리케이션을 재시작 했을 때, 브라우저를 자동 새로고침(refresh)하는 기능(live reload)를 제공한다.
     
-        ```html
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-        </dependency>
-        ```
-      
-    * Devtools의 의존성을 추가하는 순간, properties의 설정들이 자동으로 변경된다. 캐시 관련 설정을 개발 환경에 맞게 꺼준다.
-
-    * 클래스패스에 있는 파일이 변경 될 때마다 애플리케이션을 자동으로 재 시작한다. 우리가 직접 톰캣을 종료 했다가 구동하는 것 보다는 빠르다. 왜냐하면 스프링 부트는 2개의 클래스 로더를 사용하기 때문이다.
-    
-        * ① base classloader: 라이브러리들, 우리가 바꾸지 않는 의존성을 읽어들이는 클래스 로더이다.
+        * 해당 기능을 적용 하려면 웹 브라우저에 플러그인을 설치해야 한다.
         
-        * ② restart classloader: 애플리케이션을 읽어 들이는 클래스 로더이다.
+        * live reload 서버를 사용하지 않으려면 `spring.devtools.liveload.enabled = false`로 설정한다.
         
-    * 이를 테스트 하기 위해서는 소스코드를 변경한 다음, [Build Project]를 클릭하고 웹 브라우저를 새로고침하면 확인 할 수 있다. (해당 기능이 되지 않을 때도 있음...)
-    
-    * 리스타트 했을 때, 브라우저를 자동 새로고침(refresh)하는 기능을 라이브 리로드라고 한다. 해당 기능을 적용 하려면 웹 브라우저의 플러그인을 설치해야 한다.
-       
     * 글로벌 설정
     
-        * spring-boot-devtools가 의존성에 있으면 ~/.spring-boot-devtools.properties가 프로퍼티 우선 순위 중에 우선 순위가 가장 높다.
-      
+        * `spring-boot-devtools` 의존성이 추가되면 `~/.spring-boot-devtools.properties`가 프로퍼티 우선 순위가 가장 높아진다.
+        
+* `Spring-Boot-Devtools`를 사용 하려면 pom.xml에 다음과 같은 의존성을 추가해야 한다.
 
+    ```html
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-devtools</artifactId>
+    </dependency>
+    ```
+
+#### 10) 스프링 웹 MVC 1부 : 소개
+
+* (1) 실습 준비
+
+    * ① 새로운 프로젝트를 생성한다.
+    
+    * ② test 디렉토리에서 user 패키지를 생성한 다음, `UserControllerTest` 클래스를 작성한다.
+    
+    * ③ 테스트 코드를 작성한다.
+
+        ```java
+        @RunWith(SpringRunner.class)
+        @WebMvcTest(UserController.class)
+        public class UserControllerTest {
         
+            @Autowired
+            MockMvc mockMvc; // @WebMvcTest를 만들때 주로 사용하는 MockMvc 객체를 주입 받는다.
         
+            @Test
+            public void hello() throws Exception {
+                mockMvc.perform(get("/hello"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string("hello"));
+            }
+        
+        }
+        ```
+      
+    * ④ 그리고 다음과 같이 컨트롤러(UserController)를 작성한 다음, 테스트를 실행하면 성공하게 된다.
+        
+         ```java
+         @RestController
+         public class UserController {
+         
+             @GetMapping("/hello")
+             public String hello() {
+                 return "hello";
+             }
+         }
+         ```
+      
+    * 스프링 부트는 자동 설정을 통해 스프링 웹 MVC 기능들을 기본적으로 제공하기 때문에 어떠한 설정 파일을 작성하지 않아도 바로 스프링 웹 MVC 개발을 시작 할 수 있다.
+    
+* (2) 스프링 웹 MVC 란?
+
+    * MVC 패턴 기반의 웹 프레임워크를 말한다.
+    
+* (3) 스프링 MVC 확장 ★★★
+
+    * 스프링 부트가 기본적으로 제공하는 스프링 웹 MVC 기능들을 모두 사용하면서 추가적인 설정을 하고 싶다면
+    
+    * `@Configuration` + `WebMvcConfigurer`를 사용한다.
+
+         ```java
+        @Configuration
+        public class WebConfig implements WebMvcConfigurer {
+        
+        }
+         ```
+    
+* (4) 스프링 MVC 재정의
+
+    * 스프링 웹 MVC 기능들을 원하는 대로 재정의 하고 싶다면 `@Configuration` + `@EnableWebMvc`를 사용한다.
     
