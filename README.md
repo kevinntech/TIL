@@ -6,6 +6,10 @@
 
 * [마크다운 문법](https://github.com/kevinntech/TIL/tree/main/markdownSyntax "마크다운 문법")
 
+## Java
+
+* [자바 기본 문법 정리](https://github.com/kevinntech/TIL/tree/main/java/java-basic "자바 기본 문법 정리")
+
 ## SPRING
 
 * [백기선님의 스프링 프레임워크 핵심 기술](https://github.com/kevinntech/TIL/tree/main/spring/spring-core "스프링 프레임워크 핵심 기술")
