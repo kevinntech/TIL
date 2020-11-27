@@ -2054,6 +2054,8 @@
             }
             ```
           
+            * @WebMvcTest()에 테스트 하고자 하는 클래스(SampleController.class)를 지정한다.
+            
             * SampleController 하나만 Bean으로 등록 되기 때문에, 훨씬 더 가벼운 테스트가 된다.
         
 * (3) 테스트 유틸
@@ -2549,3 +2551,477 @@
     * 파비콘 파일을 기본 리소스 위치로 옮긴 다음, 애플리케이션을 재 실행한다.
     
     * [파비콘이 변경되지 않을 때, 해결방법](https://stackoverflow.com/questions/2208933/how-do-i-force-a-favicon-refresh "파비콘이 변경되지 않을 때, 해결방법")
+    
+#### 16) 스프링 웹 MVC 7부 : Thymeleaf 
+
+* (1) 템플릿 엔진이란?
+          
+    * `템플릿 엔진`은 지정된 템플릿 양식과 데이터가 합쳐져 HTML 문서를 출력하는 소프트웨어를 말한다.
+    
+    * 기본적인 템플릿은 같은데 그 안에 들어가는 값만 달라지는 경우가 있다.
+
+    * 이러한 경우에는 정적인 컨텐츠를 사용 할 수 없고 동적으로 컨텐츠를 생성해서 응답을 해야한다. 이때, 템플릿 엔진을 사용 할 수 있다.
+    
+* (2) 스프링 부트가 자동 설정을 지원하는 템플릿 엔진
+          
+    * FreeMarker
+    
+    * Groovy
+    
+    * Thymeleaf
+    
+    * Mustache
+    
+* (3) JSP를 권장하지 않는 이유
+          
+    * JSP는 자동 설정을 지원하지 않으며 스프링 부트에서 권장하지 않는 템플릿 엔진이다.
+    
+    * JAR로 패키징 할 때는 동작 하지 않고, WAR로 패키징 해야 함.
+    
+    * Undertow는 JSP를 지원하지 않음.
+
+* (4) 템플릿 파일 위치
+
+    * `/src/main/resources/template/`이다.
+    
+* (5) Thymeleaf 사용하기
+          
+    * ① 타임리프 의존성을 추가한다.
+    
+        ```html
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        ```
+      
+    * ② 컨트롤러를 작성한다.
+    
+        ```java
+        @Controller
+        public class SampleController {
+        
+            @GetMapping("/hello")
+            public String hello(Model model){
+                // model은 Java의 Map과 같다고 생각하면 된다.
+                model.addAttribute("name", "kevin");
+                return "hello";
+            }
+        
+        }
+        ```
+      
+    * ③ 테스트 코드를 작성한다.
+     
+        ```java
+        @RunWith(SpringRunner.class)
+        @WebMvcTest(SampleController.class)
+        public class SampleControllerTest {
+        
+            @Autowired
+            MockMvc mockMvc;
+        
+            @Test
+            public void hello() throws Exception {
+        
+                // 요청 "/hello"
+                // 응답
+                // - 모델 name : kevin
+                // - 뷰 이름 : hello
+        
+                mockMvc.perform(get("/hello"))
+                        .andExpect(status().isOk())
+                        .andDo(print())
+                        .andExpect(view().name("hello"))
+                        .andExpect(model().attribute("name", is("kevin")))
+                        .andExpect(content().string(containsString("kevin")));
+            }
+        }
+        ```
+      
+    * ④ `resources/templates`에 `hello.html`를 생성한 다음, 아래와 같이 작성한다.
+     
+        ```html
+        <!DOCTYPE html>
+        <html xmlns:th="http://www.thymeleaf.org">
+        <head>
+            <meta charset="UTF-8">
+            <title>Title</title>
+        </head>
+        <body>
+        <h1 th:text="${name}">Name</h1>
+        </body>
+        </html>
+        ```
+
+#### 17) 스프링 웹 MVC 8부 :  HtmlUnit
+
+* (1) HtmlUnit
+          
+    * `HtmlUnit`는 HTML을 단위 테스트 하기 위한 도구(tool)이다.
+    
+    * 스프링 부트는 HtmlUnit에 대한 기능을 지원한다.
+    
+    * HtmlUnit은 webClient를 만든 다음, webClient로 어떤 요청을 보내고 결과를 받아서 HtmlPage라는 인터페이스를 통해 여러 방식(xml, text …)으로 가져올 수 있다.
+      
+    * 그리고 form submit에 대한 테스트가 가능하며 특정 브라우저를 시뮬레이션 할 수도 있다. (이외에도 여러 가지 기능을 지원한다.)
+    
+* (2) HtmlUnit 사용하기
+          
+    * ① 의존성을 추가한다.
+
+        ```html
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>htmlunit-driver</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        ```
+    
+    * ② 테스트 코드를 작성한다.
+    
+        ```java
+        @RunWith(SpringRunner.class)
+        @WebMvcTest(SampleController.class)
+        public class SampleControllerTest {
+        
+            @Autowired
+            WebClient webClient; // HtmlUnit를 사용하면 WebClient를 주입 받는다. MockMvc를 사용 할 수도 있다.
+        
+            @Test
+            public void hello() throws Exception {
+                HtmlPage page = webClient.getPage("/hello");
+                HtmlHeading1 h1 = page.getFirstByXPath("//h1");
+                assertThat(h1.getTextContent()).isEqualToIgnoringCase("Kevin");
+            }
+        }
+        ```
+      
+#### 18) 스프링 웹 MVC 9부 : ExceptionHandler
+
+* (1) 스프링 부트가 제공하는 기본 예외 처리기
+          
+    * 스프링 부트 애플리케이션을 실행하면 기본적으로 ErrorHandler가 이미 등록 되어 있다.
+
+    * 그리고 기본 ErrorHandler에 의해 어떤 메시지들이 표시된다.
+    
+    * 웹 브라우저에서 localhost:8080으로 요청 시, Index 페이지가 없을 때 보이는 화면
+    
+    * 또는 터미널에서 `curl http://localhost:8080/`으로 요청 시 받게되는 응답이 기본 ErrorHandler가 처리해준 결과이다.
+    
+    * 기본적인 Error Handling 로직은 BasicErrorController에 들어 있다. (HTML과 JSON 응답 지원)
+    
+    * 커스터마이징을 하는 방법은 ErrorController를 구현한 클래스를 작성하고 빈으로 등록하면 된다.
+    
+        * BasicErrorController를 상속 받아서 작성 할 수도 있다.
+
+* (2) 스프링 MVC 예외 처리 방법
+          
+    * ① 컨트롤러를 작성한다.
+
+        ```java
+        @Controller
+        public class SampleController {
+        
+            @GetMapping("/hello")
+            public String hello(){
+                throw new SampleException(); // 에러를 발생시킨다.
+            }
+              
+            /*
+              @ExceptionHandler를 사용하여 SampleController에서 
+              SampleException라는 예외가 발생하면 해당 핸들러를 사용하겠다라고 지정한다.
+              @ResponseBody를 사용하여 Json으로 리턴한다.
+              */
+            @ExceptionHandler(SampleException.class)
+            public @ResponseBody AppError sampleError(SampleException e){
+                AppError appError = new AppError();
+                appError.setMessage("error.app.key");
+                appError.setReason("IDK IDK IDK");
+                return appError;
+            }
+        
+        }
+        ```
+    
+    * ② RuntimeException을 상속 받은 SampleException 클래스를 작성한다.
+
+        ```java
+        public class SampleException extends RuntimeException {
+        
+        }
+        ```
+
+    * ③ 애플리케이션의 Error 정보를 담고있는 커스텀 클래스를 작성한다.
+
+        ```java
+        public class AppError {
+        
+            private String message;
+        
+            private String reason;
+        
+            public String getMessage() {
+                return message;
+            }
+        
+            public void setMessage(String message) {
+                this.message = message;
+            }
+        
+            public String getReason() {
+                return reason;
+            }
+        
+            public void setReason(String reason) {
+                this.reason = reason;
+            }
+            
+        }
+        ```
+      
+    * ④ 애플리케이션을 실행한 다음, `localhost:8080/hello`로 요청하면 AppError 응답이 발생한다.
+    
+    * Exception Handler를 전역적으로 사용하고 싶다면 클래스를 따로 만들고 해당 클래스에 `@ControllerAdvice`를 붙인다.
+      
+    * 그리고 클래스 안에 `@ExceptionHandler`들을 정의하면, 여러 컨트롤러에서 발생하는 SampleException을 처리하는 핸들러가 된다.
+    
+* (3) 커스텀 에러 페이지
+          
+    * 커스텀 에러 페이지를 사용하면 에러가 발생 했을 때, 응답의 상태 코드 값에 따라 다른 에러 페이지를 보여 줄 수 있다.    
+   
+    * ① `src/resources/static` 또는 `src/resources/templates` 중 아무 곳이나 error 디렉토리를 생성한다.
+      
+    * ② html 파일을 생성할 때, 파일명을 상태 코드 값에 맞게 작성하면 된다.
+      
+    * 예를 들어, `404.html` 또는 `5xx.html`과 같이 작성하면 된다.
+      
+#### 19) 스프링 웹 MVC 10부 :  Spring HATEOAS
+
+* (1) HATEOAS란?
+
+    * `HATEOAS`는 `Hypermedia As The Engine Of Application State`의 약자로
+
+    * Rest API에서 서버가 클라이언트에게 리소스를 제공할 때, 리소스와 연관된 정보를 같이 제공하며
+
+    * 클라이언트는 연관된 링크 정보를 바탕으로 리소스에 접근하도록 하는 것을 말한다.
+
+* (2) 연관된 링크 정보?
+
+    * ① Relation
+
+    * ② Hypertext Reference
+
+* (3) Spring HATEOAS란?
+
+    * HATEOAS를 구현하기 위해 편리한 기능들을 제공 해주는 tool(라이브러리)이다.
+    
+* (4) Spring HATEOAS - 실습
+
+    * ① spring-boot-starter-hateoas 의존성 추가
+
+        ```html
+        <dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-starter-hateoas</artifactId>
+        </dependency>
+        ```
+      
+        * ObjectMapper 제공
+            * `spring.jackson.* `  
+            * Jackson2ObjectMapperBuilder
+        
+        * LinkDiscovers 제공
+            * 클라이언트 쪽에서 링크 정보를 Rel 이름으로 찾을때 사용할 수 있는 XPath 확장 클래스
+
+    * ② SampleController를 작성한다.
+ 
+        ```java
+        @RestController
+        public class SampleController {
+        
+            @GetMapping("/hello")
+            public Resource<Hello> hello() {
+                Hello hello = new Hello();
+                hello.setPrefix("Hey,");
+                hello.setName("Kevin");
+        
+                Resource<Hello> helloResource = new Resource<>(hello);
+                helloResource.add(linkTo(methodOn(SampleController.class).hello()).withSelfRel());
+        
+                return helloResource;
+            }
+        
+        }
+        ```
+       
+            * Hateoas에 있는 Resource를 선언한다. 
+    
+            * (해당 Resource는 서버가 제공할 리소스 + 링크 정보를 뜻한다.)
+    
+            * 그리고 SampleController 클래스에서 제공하는 hello()라는 메서드에 대한 링크를 Self라는 릴레이션으로 만들어서 추가한다.
+ 
+     * ③ 위의 코드에서 사용된 Hello 클래스를 작성한다.
+     
+        ```java
+        public class Hello {
+        
+            private String prefix;
+        
+            private String name;
+        
+            public String getPrefix() {
+                return prefix;
+            }
+        
+            public void setPrefix(String prefix) {
+                this.prefix = prefix;
+            }
+        
+            public String getName() {
+                return name;
+            }
+        
+            public void setName(String name) {
+                this.name = name;
+            }
+        
+            @Override
+            public String toString() {
+                return prefix + " " + name;
+            }
+        }
+        ```
+       
+     * ④ 그리고 테스트 코드를 작성한다.
+     
+        ```java
+        @RunWith(SpringRunner.class)
+        @WebMvcTest(SampleController.class)
+        public class SampleControllerTest {
+        
+            @Autowired
+            MockMvc mockMvc;
+        
+            @Test
+            public void hello() throws Exception {
+                mockMvc.perform(get("/hello"))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$._links.self").exists());
+            }
+        }
+        ```
+
+#### 20) 스프링 웹 MVC 11부 : CORS
+
+* (1) Orgin
+
+    * 아래의 세가지를 조합한 것이 하나의 Origin 이다.
+         
+        * ① URI 스키마 (http, https)
+        
+        * ② 호스트 이름 (whiteship.me, localhost)
+          
+        * ③ 포트 (8080, 18080)
+        
+* (2) SOP (Single-Origin Policy)
+
+    * SOP (Single-Origin Policy)는 같은 Origin에만 리소스를 요청 할 수 있는 정책이다.
+      
+    * 기본적으로는 SOP가 적용되어 있으므로 Origin이 다른 경우에는 리소스를 요청 할 수 없다.
+    
+    * localhost:18080의 애플리케이션이 localhost:8080에서 실행 중인 애플리케이션의 자원을 가져 올 수 없다. 
+    
+    * 그 이유는 SOP에 위반되기 때문이다.
+    
+* (3) CORS (Cross-Origin Resource Sharing)
+
+    * CORS는 서로 다른 origin끼리 리소스를 요청 할 수 있는 정책이다.
+
+    * 즉, SOP를 우회하기 위한 표준 기술이다.
+    
+* (4) CORS - 실습
+
+    * ① Rest API를 제공하는 서버를 만들기 위해, 새로운 프로젝트를 생성한다.
+
+    * ② 다음과 같은 코드를 작성한다.
+    
+        ```java
+        @SpringBootApplication
+        @RestController
+        public class SpringcorsserverApplication {
+        
+        	@GetMapping("/hello")
+        	public String hello(){
+        		return "Hello";
+        	}
+        
+        	public static void main(String[] args) {
+        		SpringApplication.run(SpringcorsserverApplication.class, args);
+        	}
+        
+        }
+        ```
+      
+    * ③ Rest API를 요청하는 클라이언트를 만들기 위해, 새로운 프로젝트를 생성한다.
+
+    * ④ 그리고 클라이언트 프로젝트에 Index 페이지를 생성한다.  
+
+        ```html
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Title</title>
+        </head>
+        <body>
+        <h1>CORS Client</h1>
+        
+        <script src="/webjars/jquery/3.3.1/dist/jquery.min.js"></script>
+        <script>
+            $(function() {
+                $.ajax("http://localhost:8080/hello")
+                .done(function(msg){
+                    alert(msg);
+                })
+                .fail(function(){
+                    aloert("fail");
+                });
+            });
+        </script>
+        </body>
+        </html>
+        ```
+
+    * ⑤ `application.properties`에서 `server.port = 18080`를 지정하여 포트를 변경한 다음, 애플리케이션을 실행한다.
+
+    * ⑥ 결과는 fail인데 그 이유는 서버 애플리케이션에 CORS 설정을 하지 않았기 때문이다.
+    
+    * ⑦ 서버 프로젝트의 코드에서 @CrossOrigin 애노테이션을 사용하도록 변경한다.
+    
+    * ⑧ 서버 애플리케이션을 재 실행하고 클라이언트 애플리케이션에서 요청하면 정상적으로 처리되는 것을 확인 할 수 있다.
+    
+* (5) 여러 컨트롤러에 대한 CORS 설정
+
+    * 여러 컨트롤러에 대해 CORS 설정을 해야 된다면 WebMvcConfigurer를 구현한 WebConfig 클래스를 작성한다.
+      
+    * 그리고 `addCorsMappings()`를 오버라이딩 하면 된다.
+    
+        ```java
+        @Configuration
+        public class WebConfig implements WebMvcConfigurer {
+        
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:18080");
+            }
+        }
+        ```
