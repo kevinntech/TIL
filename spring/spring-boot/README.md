@@ -2806,11 +2806,9 @@
 
 * (1) HATEOAS란?
 
-    * `HATEOAS`는 `Hypermedia As The Engine Of Application State`의 약자로
+    * `HATEOAS`는 **H**ypermedia **A**s **T**he **E**ngine Of **A**pplication **S**tate의 약자로
 
-    * Rest API에서 서버가 클라이언트에게 리소스를 제공할 때, 리소스와 연관된 정보를 같이 제공하며
-
-    * 클라이언트는 연관된 링크 정보를 바탕으로 리소스에 접근하도록 하는 것을 말한다.
+    * Rest API에서 서버가 클라이언트에게 리소스를 제공할 때, 리소스와 연관된 정보를 같이 제공하며 클라이언트는 연관된 링크 정보를 바탕으로 리소스에 접근하는 것을 말한다.
 
 * (2) 연관된 링크 정보?
 
@@ -2824,7 +2822,7 @@
     
 * (4) Spring HATEOAS - 실습
 
-    * ① spring-boot-starter-hateoas 의존성 추가
+    * ① `spring-boot-starter-hateoas` 의존성 추가
 
         ```html
         <dependency>
@@ -2832,10 +2830,12 @@
         	<artifactId>spring-boot-starter-hateoas</artifactId>
         </dependency>
         ```
-      
+        
+        * `spring-boot-starter-hateoas` 의존성 추가하면 스프링 부트는 다음과 같은 것들을 제공한다.
+        
         * ObjectMapper 제공
             * `spring.jackson.* `  
-            * Jackson2ObjectMapperBuilder
+            * `Jackson2ObjectMapperBuilder`
         
         * LinkDiscovers 제공
             * 클라이언트 쪽에서 링크 정보를 Rel 이름으로 찾을때 사용할 수 있는 XPath 확장 클래스
@@ -2852,6 +2852,7 @@
                 hello.setPrefix("Hey,");
                 hello.setName("Kevin");
         
+                // Hateoas에 있는 Resource 클래스를 사용하여 링크 정보를 추가한다.
                 Resource<Hello> helloResource = new Resource<>(hello);
                 helloResource.add(linkTo(methodOn(SampleController.class).hello()).withSelfRel());
         
@@ -2866,6 +2867,26 @@
             * (해당 Resource는 서버가 제공할 리소스 + 링크 정보를 뜻한다.)
     
             * 그리고 SampleController 클래스에서 제공하는 hello()라는 메서드에 대한 링크를 Self라는 릴레이션으로 만들어서 추가한다.
+ 
+        * Spring HATEOAS 1.0 부터 `Resource`는 `EntityModel`로 대체 되었다.
+        
+             ```java
+             @RestController
+             public class SampleController {
+             
+                 @GetMapping("/hello")
+                 public EntityModel<Hello> hello(){
+                     Hello hello = new Hello();
+                     hello.setPrefix("Hey, ");
+                     hello.setName("Kevin");
+             
+                     EntityModel<Hello> helloEntityModel = new EntityModel<>(hello);
+                     helloEntityModel.add(linkTo(methodOn(SampleController.class).hello()).withSelfRel());
+             
+                     return helloEntityModel;
+                 }
+             }
+             ```
  
      * ③ 위의 코드에서 사용된 Hello 클래스를 작성한다.
      
@@ -2921,29 +2942,35 @@
 
 #### 20) 스프링 웹 MVC 11부 : CORS
 
-* (1) Orgin
+* (1) Origin
 
-    * 아래의 세가지를 조합한 것이 하나의 Origin 이다.
+    * Origin은 특정 페이지에 접근할 때 사용되는 URI의 스키마, 호스트 이름, 포트를 말한다. 
+    
+    * 즉, 아래의 세가지를 조합한 것이 하나의 Origin 이다.
          
         * ① URI 스키마 (http, https)
+            
+           * URI 스키마를 URI 프로토콜 이라고도 함
         
         * ② 호스트 이름 (whiteship.me, localhost)
           
         * ③ 포트 (8080, 18080)
         
+    * URI의 스키마, 호스트 이름, 포트 이 3가지 중 하나라도 다르면 `Cross-Origin`이다.
+        
 * (2) SOP (Single-Origin Policy)
 
-    * SOP (Single-Origin Policy)는 같은 Origin에만 리소스를 요청 할 수 있는 정책이다.
+    * `SOP`는 같은 Origin에만 리소스를 요청 할 수 있는 정책이다.
       
     * 기본적으로는 SOP가 적용되어 있으므로 Origin이 다른 경우에는 리소스를 요청 할 수 없다.
     
-    * localhost:18080의 애플리케이션이 localhost:8080에서 실행 중인 애플리케이션의 자원을 가져 올 수 없다. 
+    * localhost:18080의 애플리케이션이 localhost:8080에서 실행 중인 애플리케이션의 리소스를 가져 올 수 없다. 
     
     * 그 이유는 SOP에 위반되기 때문이다.
     
 * (3) CORS (Cross-Origin Resource Sharing)
 
-    * CORS는 서로 다른 origin끼리 리소스를 요청 할 수 있는 정책이다.
+    * `CORS`는 서로 다른 Origin끼리 리소스를 요청 할 수 있는 정책이다.
 
     * 즉, SOP를 우회하기 위한 표준 기술이다.
     
@@ -2957,7 +2984,9 @@
         @SpringBootApplication
         @RestController
         public class SpringcorsserverApplication {
-        
+          
+            // @CrossOrigin(origins = "http://localhost:18080")
+            // /hello로 GET 요청을 하면 Hello라는 메시지를 표시한다. (REST API)
         	@GetMapping("/hello")
         	public String hello(){
         		return "Hello";
@@ -2972,7 +3001,17 @@
       
     * ③ Rest API를 요청하는 클라이언트를 만들기 위해, 새로운 프로젝트를 생성한다.
 
-    * ④ 그리고 클라이언트 프로젝트에 Index 페이지를 생성한다.  
+    * ④ Mvn Repository에서 JQuery 의존성을 복사한 다음, pom.xml에 추가한다.
+
+        ```html
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>jquery</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+        ```
+
+    * ⑤ 그리고 클라이언트 프로젝트에 Index 페이지를 생성한다.  
 
         ```html
         <!DOCTYPE html>
@@ -2992,7 +3031,7 @@
                     alert(msg);
                 })
                 .fail(function(){
-                    aloert("fail");
+                    alert("fail");
                 });
             });
         </script>
@@ -3000,17 +3039,17 @@
         </html>
         ```
 
-    * ⑤ `application.properties`에서 `server.port = 18080`를 지정하여 포트를 변경한 다음, 애플리케이션을 실행한다.
+    * ⑥ `application.properties`에서 `server.port = 18080`를 지정하여 포트를 변경한 다음, 클라이언트 역할을 하는 애플리케이션을 실행한다.
 
-    * ⑥ 결과는 fail인데 그 이유는 서버 애플리케이션에 CORS 설정을 하지 않았기 때문이다.
+    * ⑦ 결과는 fail인데 그 이유는 서버 애플리케이션에 CORS 설정을 하지 않았기 때문이다.
     
-    * ⑦ 서버 프로젝트의 코드에서 @CrossOrigin 애노테이션을 사용하도록 변경한다.
+    * ⑧ 서버 프로젝트의 코드에서 @CrossOrigin 애노테이션을 사용하도록 변경한다.
     
-    * ⑧ 서버 애플리케이션을 재 실행하고 클라이언트 애플리케이션에서 요청하면 정상적으로 처리되는 것을 확인 할 수 있다.
+    * ⑨ 서버 애플리케이션을 재실행하고 클라이언트 애플리케이션에서 요청하면 정상적으로 처리되는 것을 확인 할 수 있다.
     
 * (5) 여러 컨트롤러에 대한 CORS 설정
 
-    * 여러 컨트롤러에 대해 CORS 설정을 해야 된다면 WebMvcConfigurer를 구현한 WebConfig 클래스를 작성한다.
+    * 여러 컨트롤러에 대해 CORS 설정을 해야 된다면 `WebMvcConfigurer`를 구현한 WebConfig 클래스를 작성한다. (웹 관련 설정 파일 작성)
       
     * 그리고 `addCorsMappings()`를 오버라이딩 하면 된다.
     
@@ -3025,3 +3064,486 @@
             }
         }
         ```
+      
+#### 21) 스프링 데이터 1부 : 소개
+
+* 자세한 내용은 해당 강좌를 참고하자.
+
+#### 22) 스프링 데이터 2부 : 인메모리 데이터베이스
+
+* 인-메모리 데이터베이스
+
+    * 주기억장치(main memory)에 데이터를 저장하는 DBMS를 말한다.
+
+    * Mysql과 같은 DBMS는 디스크에 데이터를 저장한다.
+
+    * 디스크에 최적화된 데이터베이스보다 더 빠르다.
+
+    * 메모리에 저장 되기 때문에 휘발성이라는 단점이 있다.
+
+* 스프링 부트가 지원하는 인메모리 데이터베이스
+
+    * ① H2 (추천, 콘솔 때문에...)
+
+    * ② HSQL
+    
+    * ③ Derby
+
+* `Spring-JDBC`가 클래스패스에 있으면 자동 설정이 필요한 빈을 설정 해준다.
+
+    * ① DataSource
+
+    * ② JdbcTemplate
+
+* 프로젝트 생성하기
+
+    * 프로젝트를 생성할 때, 다음과 같이 설정한다.
+    
+        ![image 12](images/img12.png)
+        
+    * 그리고 h2, JDBC 라이브러리를 추가한다.
+
+        ![image 13](images/img13.png)
+
+        * H2 의존성을 추가하고 아무런 DataSource 설정을 하지 않으면 스프링 부트는 자동으로 인메모리 데이터베이스를 사용한다.
+        
+* DataSource를 이용한 DB 연동 실습
+
+    * `ApplicationRunner` 인터페이스를 구현한 H2Runner 클래스를 작성한 다음, 빈으로 등록한다.
+
+    * 그리고 기본적으로 `DataSource`가 빈으로 등록 되어 있기 때문에 주입 받아서 사용하면 된다.
+
+    * 인-메모리 데이터베이스 기본 연결 정보는 `DataSourceProperties`에서 확인 할 수 있다.
+
+        ```java
+        @Component
+        public class H2Runner implements ApplicationRunner {
+        
+            @Autowired
+            DataSource dataSource;
+        
+            @Autowired
+            JdbcTemplate jdbcTemplate;
+        
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                // 커넥션을 가져온다.
+                try(Connection connection = dataSource.getConnection()){ // try-resource문으로 자원을 자동 해제한다.
+                    // DB 연결 정보를 출력한다.
+                    System.out.println(connection.getMetaData().getURL());
+                    System.out.println(connection.getMetaData().getUserName());
+        
+                    // statement 만들기
+                    Statement statement = connection.createStatement();
+                    String sql = "CREATE TABLE USER(ID INTEGER NOT NULL, name VARCHAR(255), PRIMARY KEY (id))";
+                    statement.executeUpdate(sql);
+                }
+        
+                jdbcTemplate.execute("INSERT INTO USER VALUES (1, 'kevin')");
+            }
+        
+        }
+        ```
+      
+        * JdbcTemplate
+      
+            * JdbcTemplate를 주입 받아 사용 할 수도 있다.
+      
+            * 기본적인 JDBC API를 사용하는 것 보다 더 편리하다.
+
+* H2 콘솔 사용하는 방법
+
+    * 아래 2가지 방법 중 하나를 선택해서 진행한다.
+
+        * `spring-boot-devtools` 의존성을 추가한다.
+
+        * 또는 `application.properties`에 `spring.h2.console.enabled=true`를 추가한다.
+        
+        ![image 14](images/img14.png)
+        
+    * 그리고 웹 브라우저에서 `localhost:8080/h2-console/`로 접속한다.
+
+#### 23) 스프링 데이터 3부 : MySQL
+
+* DBCP(DataBase Connection Pool)란? 
+
+    * `DBCP`는 DB와 연결하는 커넥션을 미리 여러 개 생성하여 풀(Pool)에 저장 해놓고 필요할 때 꺼내 쓰는 방식을 말한다.
+    
+    * 몇 개를 만들어 놓을지, 얼마나 사용되지 않으면 없앨 것 인지 등의 여러가지 설정들을 할 수 있다. 
+    
+    * DBCP는 애플리케이션 성능에 아주 핵심적인 역할을 한다.
+    
+    * 따라서 자신이 사용하는 DBCP에 대한 학습과 버그 리포팅에 대해 지속적으로 관심을 가져야한다.
+    
+    * 스프링 부트는 기본적으로 `HikariCP`라는 DBCP를 사용한다.
+    
+* 지원하는 DBCP
+
+    * ① HikariCP (기본)
+    
+    * ② Tomcat CP
+    
+    * ③ Commons DBCP2
+    
+* 스프링 부트에서 DBCP 설정
+
+    * `application.properties`에 `spring.datasource.DBCP명.속성=속성값`으로 설정한다.
+      
+    * 예를 들어, 다음과 같이 풀(pool)에 유지시킬 수 있는 최대 커넥션 수를 지정 할 수 있다. 
+     
+    * `spring.datasource.hikari.maximum-pool-size=4`
+    
+* MySQL 사용하기
+
+    * ① MySQL에 접속 할 수 있는 `Connector`에 대한 의존성을 추가한다.
+    
+        ```html
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        ```
+         
+    * ② MySQL를 직접 설치 또는 도커를 이용하여 MySQL를 설치한다.
+    
+        ```
+        docker run -p 3306:3306 --name mysql_boot -e MYSQL_ROOT_PASSWORD=1 -e MYSQL_DATABASE=springboot -e MYSQL_USER=kevin -e MYSQL_PASSWORD=pass -d mysql
+        ```
+      
+        * `docker exec -i -t mysql_boot bash`로 도커 컨테이너에 들어가서 bash를 실행한다.
+        
+        * `mysql -u kevin -p`로 도커 컨테이너에 설치된 MySQL에 접속한다.
+        
+    * ③ `application.properties`에서 데이터베이스 연결 설정을 한다.
+    
+        ```
+        spring.datasource.url=jdbc:mysql://localhost:3308/springboot
+        spring.datasource.username=kevin
+        spring.datasource.password=pass
+        ```
+      
+    * ④ MySQLRunner를 작성한 다음, MySQL로 쿼리를 전달한다.
+    
+        ```java
+        @Component
+        public class MySQLRunner implements ApplicationRunner {
+        
+            @Autowired
+            DataSource dataSource;
+        
+            @Autowired
+            JdbcTemplate jdbcTemplate;
+        
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+        
+                try(Connection connection = dataSource.getConnection()){
+                    // DB 연결 정보를 출력한다.
+                    System.out.println(connection.getMetaData().getURL());
+                    System.out.println(connection.getMetaData().getUserName());
+        
+                    Statement statement = connection.createStatement();
+                    String sql = "CREATE TABLE USER(ID INTEGER NOT NULL, name VARCHAR(255), PRIMARY KEY (id))";
+                    statement.executeUpdate(sql);
+        
+                }
+        
+                jdbcTemplate.execute("INSERT INTO USER VALUES (1, 'kevin')");
+        
+            } 
+        }
+        ```
+      
+    * ⑤ USER 테이블이 만들어지고 kevin이라는 데이터가 들어간 것을 확인 할 수 있다.
+    
+        ![image 15](images/img15.png)
+        
+        * `docker stop mysql_boot`로 도커 컨테이너를 멈추게 한다.
+        
+        * `docker rm mysql_boot`로 도커 컨테이너를 삭제한다.
+        
+* MySQL 라이센스 (GPL) 주의
+
+    * MySQL 대신 MariaDB를 사용하는 것을 검토한다.
+      
+    * 소스코드 공개 의무 여부를 확인해야 한다.
+    
+#### 24) 스프링 데이터 4부 : PostgreSQL 설정하기
+
+* PostgreSQL
+
+    * PostgreSQL는 무료이다. (상용에서도 문제 없다.)
+    
+    * 소스코드 공개 의무가 없다.
+    
+* PostgreSQL 사용하기
+
+    * ① `pom.xml`에 PostgreSQL 드라이버 의존성을 추가한다.
+
+        ```html
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        ```
+      
+      * 여러 개의 데이터베이스 의존성이 있더라도 `application.properties`에서 `datasource`의 url에 설정한 것이 적용된다.
+    
+    * ② 도커를 이용한 PostgreSQL 설치
+
+        ```
+        docker run -p 5432:5432 -e POSTGRES_PASSWORD=pass -e POSTGRES_USER=kevin -e POSTGRES_DB=springboot --name postgres_boot -d postgres
+        ```
+    
+    * ③ 아래 명령어로 도커 컨테이너 안으로 들어가기
+
+        ```
+        docker exec -i -t postgres_boot bash
+        ```
+    
+    * ④ 명령어 `su - postgres`를 입력하여 유저를 postgres로 변경한다.
+    
+    * ⑤ `psql 사용할 데이터베이스명 --username 유저명`으로 PostgreSQL에 접속한다.
+
+        * `psql springboot --username kevin`
+        
+        * PostgreSQL 명령어
+          
+            * `\l` : 전체 데이터베이스 목록 조회
+          
+            * `\dt` : 데이터베이스의 테이블 조회
+          
+    * ⑥ `application.properties`를 다음과 같이 작성한다.
+
+        ```
+        spring.datasource.url=jdbc:postgresql://localhost:5432/springboot
+        spring.datasource.username=kevin
+        spring.datasource.password=pass
+        ```
+    
+    * ⑦ 아래와 같은 PgSQLRunner를 작성한 다음, 애플리케이션을 실행한다.
+
+        ```java
+        @Component
+        public class PgSQLRunner implements ApplicationRunner {
+        
+            @Autowired
+            DataSource dataSource;
+        
+            @Autowired
+            JdbcTemplate jdbcTemplate;
+        
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+        
+                try(Connection connection = dataSource.getConnection()){
+                    // DB 연결 정보를 출력한다.
+                    System.out.println(dataSource.getClass());
+                    System.out.println(connection.getMetaData().getDriverName());
+                    System.out.println(connection.getMetaData().getURL());
+                    System.out.println(connection.getMetaData().getUserName());
+        
+                    Statement statement = connection.createStatement();
+                    String sql = "CREATE TABLE ACCOUNT(ID INTEGER NOT NULL, name VARCHAR(255), PRIMARY KEY (id))";
+                    statement.executeUpdate(sql);
+                }
+        
+                jdbcTemplate.execute("INSERT INTO ACCOUNT VALUES (1, 'kevin')");
+        
+            }
+        
+        }
+        ```
+      
+            * PostgreSQL에서는 USER가 키워드이므로 USERS 또는 ACCOUNT라는 테이블명을 사용해야 한다.
+    
+    * ⑧ 그리고 PostgreSQL에서 테이블과 데이터가 생성되었음을 확인 할 수 있다.
+      
+        ![image 16](images/img16.png)
+        
+#### 25) 스프링 데이터 5부 :  ORM, JPA,  스프링 데이터 JPA 개요
+
+* ORM(Object Relational Mapping)?
+
+    * `ORM`는 객체와 릴레이션을 맵핑 할 때 발생하는 개념적 불일치를 해결하는 프레임워크를 말한다.
+
+    * 개념적 불일치?
+    
+        * 객체는 상속이라는 개념이 있지만 테이블은 상속이라는 개념이 없음
+
+* JPA?
+
+    * `JPA`는 ORM을 위한 자바 (EE) 표준을 말한다.
+
+    * 대부분의 자바 표준은 하이버네이트 기반으로 만들어져 있다.
+
+* 스프링 데이터 JPA(Spring Data JPA)?
+
+    * `Spring Data JPA`는 JPA 표준 스펙을 아주 쉽게 사용할 수 있게 스프링 데이터로 추상화 시켜 놓은 것을 말한다.
+
+* 추상화 → 구체화
+
+    * `Spring Data JPA` → `JPA` → `Hibernate` → `Datasource` 
+
+#### 26) 스프링 데이터 6부 :  스프링 데이터 JPA 연동
+
+* 스프링 데이터 JPA 사용하기
+
+    * ① 프로젝트 생성하기    
+    
+    * ② pom.xml에 스프링 데이터 JPA 의존성을 추가한다.
+
+        ```html
+        <dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        ``` 
+
+    * ③ account 패키지를 생성한 다음, Entity 클래스를 작성한다.
+    
+        ```java
+        @Entity
+        public class Account {
+        
+            @Id @GeneratedValue
+            private Long id;
+        
+            private String username;
+        
+            private String password;
+        
+            public Long getId() {
+                return id;
+            }
+        
+            public void setId(Long id) {
+                this.id = id;
+            }
+        
+            public String getUsername() {
+                return username;
+            }
+        
+            public void setUsername(String username) {
+                this.username = username;
+            }
+        
+            public String getPassword() {
+                return password;
+            }
+        
+            public void setPassword(String password) {
+                this.password = password;
+            }
+        
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Account account = (Account) o;
+                return Objects.equals(id, account.id) &&
+                        Objects.equals(username, account.username) &&
+                        Objects.equals(password, account.password);
+            }
+        
+            @Override
+            public int hashCode() {
+                return Objects.hash(id, username, password);
+            }
+        
+        }
+        ``` 
+    
+    * ④ account 패키지에 Repository 인터페이스를 작성한다.
+
+        ```java
+        public interface AccountRepository extends JpaRepository<Account, Long> {
+            
+        }
+        ```
+    
+    * ⑤ pom.xml에 PostgreSQL 의존성을 추가한다.
+ 
+         ```html
+         <dependency>
+         	<groupId>org.postgresql</groupId>
+         	<artifactId>postgresql</artifactId>
+         </dependency>
+         ```  
+    
+    * ⑥ (PostgreSQL를 설치하지 않았다면) 도커를 이용한 PostgreSQL를 설치한다.
+
+         ```
+         docker run -p 5432:5432 -e POSTGRES_PASSWORD=pass -e POSTGRES_USER=kevin -e POSTGRES_DB=springboot --name postgres_boot -d postgres
+         ```
+    
+    * ⑦ `application.properties`에 데이터베이스 접속 정보를 입력한 다음, 애플리케이션을 실행한다.
+    
+        * application.properties에 데이터베이스 관련 설정을 하지 않으면 인-메모리 DB를 사용하려고 한다. 
+        
+         ```
+         spring.datasource.url=jdbc:postgresql://localhost:5432/springboot
+         spring.datasource.username=kevin
+         spring.datasource.password=pass
+         
+         spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
+         ```
+
+* 테스트 코드 작성하기
+
+    * ① 테스트에서 사용할 인-메모리 데이터베이스인 H2의 의존성을 추가한다.  
+
+        ```html
+        <dependency>
+        	<groupId>com.h2database</groupId>
+        	<artifactId>h2</artifactId>
+        	<scope>test</scope>
+        </dependency>
+        ``` 
+    
+    * ② 테스트 코드를 작성한 다음, 실행한다.
+    
+        * @DataJpaTest는 슬라이스 테스트를 할 때, 사용되는 애노테이션인데 해당 애노테이션을 사용하면 인-메모리 DB를 사용하도록 자동 설정된다.
+
+            ```java
+            @RunWith(SpringRunner.class)
+            @DataJpaTest
+            public class AccountRepositoryTest {
+            
+                @Autowired
+                DataSource dataSource;
+            
+                @Autowired
+                JdbcTemplate jdbcTemplate;
+            
+                @Autowired
+                AccountRepository accountRepository;
+            
+                @Test
+                public void di() throws SQLException {
+                    Account account = new Account();
+                    account.setUsername("kevin");
+                    account.setPassword("pass");
+            
+                    Account newAccount = accountRepository.save(account);
+            
+                    assertThat(newAccount).isNotNull();
+            
+                    Account existingAccount = accountRepository.findByUsername(newAccount.getUsername());
+                    assertThat(existingAccount).isNotNull();
+            
+                    Account nonexistingAccount = accountRepository.findByUsername("whiteship");
+                    assertThat(nonexistingAccount).isNull();
+                }
+            
+            }
+            ```
+          
+        * @SpringBootTest를 사용하여 테스트를 진행 할 수도 있다.
+          
+        * 하지만 application.properties에 설정된 DB에 데이터가 반영되기 때문에 테스트 DB를 설정 해둔 다음, 테스트를 진행해야 한다.
+          
+        * 또는 @SpringBootTest(properties = "spring.datasource.url={테스트DB URL}”)와 같이 할 수도 있다.
+              
+        * 슬라이싱 테스트를 만드는 것이 더 간단하고 안전하기 때문에 이 방법을 권장한다.
