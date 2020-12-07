@@ -1360,8 +1360,370 @@ int[][] arr = {
         char ch = str.charAt(3); // 문자열 str의 4번째 문자 'D'를 ch에 저장
         ```
 
+## 5. 객체지향 프로그래밍 1
 
+## 6. 객체지향 프로그래밍 2
 
+## 7. 예외처리(Exception Handling)
+
+## 8. java.lang 패키지와 유용한 클래스
+
+## 9. 날짜와 시간 & 형식화
+
+#### 1) java.time 패키지란?
+
+* java.time 패키지
+
+    * `Date`, `Calendar`의 단점을 보완하기 위해 JDK 1.8 부터 추가된 패키지
+    
+    * 해당 패키지에 속한 클래스들은 모두 `불변(immutable)`이다.
+
+#### 2) java.time 패키지의 핵심 클래스
+
+* `LocalDate`는 날짜를 표현할 때 사용한다.
+
+* `LocalTime`는 시간을 표현할 때 사용한다.
+
+* `LocalDateTime`는 날짜와 시간을 같이 표현할 때 사용한다.
+
+    * `LocalDate`와 `LocalTime`을 합쳐놓은 것이다.
+
+* `ZonedDateTime`는 날짜와 시간, 그리고 시간대까지 표현할 때 사용한다.
+
+    * `LocalDateTime`에 시간대(time zone)를 추가한 것이다.
+
+* `Period`는 날짜간의 차이를 표현할 때 사용하며 `Duration`은 시간의 차이를 표현할 때 사용한다.
+
+* `Temporal`과 `TemporalAmount`
+
+    * 날짜와 시간을 표현하기 위한 클래스들은 (LocalDate, LocalTime, LocalDateTime, ZonedDateTime, Instant 등) 모두 Temporal, TemporalAccessor, TemporalAdjuster 인터페이스를 구현했다.
+    
+    * Period과 Duration는 `TemporalAmount`를 구현했다.
+    
+    * `Temporal`로 시작하는 인터페이스들은 매개변수 타입으로 많이 사용되며 `TemporalAmount`인지 아닌지만 구별하면 된다.
+    
+* `TemporalUnit`과 `TemporalField`
+
+    * `TemporalUnit`는 날짜와 시간의 단위를 정의해 놓은 인터페이스이다.
+    
+    * `TemporalField`는 날짜와 시간의 필드(년, 월, 일 등)를 정의해 놓은 인터페이스이다.
+    
+    * `ChronoUnit`은 `TemporalUnit`을, `ChronoField`는 `TemporalField`를 구현한 열거형이다.
+
+        ```java
+        LocalDate today = LocalDate.now(); // 오늘 날짜
+        LocalDate tomorrow = today.plus(1, ChronoUnit.DAYS); // 오늘 날짜에 1일을 더함
+        //LocalDate tomorrow = today.plusDays(1); // 위의 문장과 동일
+
+        LocalTime now = LocalTime.now(); // 현재 시간
+        int minute = now.getMinute();  // 현재 시간에서 분(minute)만 뽑아낸다.
+        //int minute2 = now.get(ChronoField.MINUTE_OF_HOUR); // 위의 문장과 동일
+        ```
+
+#### 3) LocalDate와 LocalTime
+
+* LocalDate와 LocalTime 객체 생성하기
+
+    * `now()`는 현재 날짜와 시간을 저장하는 객체를 생성한다.
+
+        ```java
+        LocalDate today = LocalDate.now(); // 오늘 날짜
+        LocalTime now = LocalTime.now(); // 현재 시간
+        ```
+    
+    * `of()`는 지정된 날짜와 시간을 저장하는 객체를 생성한다.
+    
+        ```java
+        LocalDate today = LocalDate.now(); // 오늘 날짜
+        LocalTime now = LocalTime.now(); // 현재 시간
+        ```
+
+    * 일 단위나 초 단위로도 지정 할 수 있다. (1일은 24 * 60 * 60 = 86400 초)
+    
+        ```java
+        LocalDate birthDate = LocalDate.ofYearDay(2020, 365); // 2020년의 365번째 날 == 2020년 12월 30일
+        LocalTime birthTime = LocalTime.ofSecondOfDay(86399); // 그 날의 0시 0분 0초 부터 86399초가 지난 시간 == 23시 59분 59초
+        ```
+
+* 특정 필드의 값 가져오기 
+
+    * LocalDate와 LocalTime 객체에서 특정 필드의 값을 가져올 때는 get() 또는 getXXX()를 사용한다.
+    
+        * 대부분의 필드는 int 타입의 범위에 속하지만, 몇몇 필드는 int 타입의 범위를 넘을 수 있으므로 그럴 때는 getLong()를 사용해야 한다.
+    
+            ```java
+            LocalDate today = LocalDate.now();
+    
+            int year = today.getYear();
+            int month = today.getMonthValue();
+            int day = today.getDayOfMonth();
+            System.out.println(year + "년 " + month + "월 " + day + "일");
+    
+            int chronoYear = today.get(ChronoField.YEAR); // get()로 원하는 필드를 직접 지정 할 수도 있다.
+            System.out.println(chronoYear);
+            ```
+        
+        * 더 자세한 내용은 자바의 정석 3판 p556를 참고하자. 
+
+* 특정 필드의 값 변경하기
+
+    * `with()`, `plus()`, `minus()`로 특정 필드의 값을 변경 할 수 있다.
+    
+        * 필드를 변경하는 메서드들은 항상 새로운 객체를 생성해서 반환하므로 대입 연산자를 같이 사용해야한다.
+        
+            ```java
+            LocalDate date = LocalDate.of(2000, 1, 1); // 2000년 1월 1일
+            LocalTime time = LocalTime.of(12, 0, 0); // 12시 0분 0초
+    
+            date = date.withYear(2020); // 2020년 1월 1일
+            time = time.withHour(13); // 13시 0분 0초
+            date = date.plusDays(1); // 2020년 1월 2일
+    
+            System.out.println(date);
+            System.out.println(time);
+            ```
+
+* 날짜와 시간 비교
+
+    * `isAfter()`, `isBefore()`, `isEqual()`로 날짜와 시간을 비교 할 수 있다.
+    
+    * `compareTo()`로도 비교 할 수 있다.
+
+        ```java
+        int result = date1.compareTo(date2); // 같으면 0, date1이 이전이면 -1, 이후면 1
+        ```
+
+    * 대부분의 경우, `isEqual()` 대신 `equals()`를 사용해도 된다.
+    
+        * equals()는 모든 필드가 일치해야 하지만 isEqual()은 날짜만 비교한다. 
+
+        ```java
+        LocalDate kDate = LocalDate.of(1999, 12, 31);
+        JapaneseDate jDate = JapaneseDate.of(1999, 12, 31);
+
+        System.out.println(kDate.equals(jDate)); // 결과 : false (연대가 다름)
+        System.out.println(kDate.isEqual(jDate)); // 결과 : true
+        ```
+
+#### 4) Instant
+
+* `Instant`는 에포크 타임(EPOCH TIME, 1970년 1월 1일 0시 0분 0초) 부터 경과된 시간을 나노초 단위로 표현한다.
+
+    * `Instant`는 기계용 시간이다.
+
+        ```java
+        Instant now = Instant.now();
+        long epochSecond = now.getEpochSecond();
+        int nano = now.getNano();
+        
+        System.out.println(epochSecond);
+        System.out.println(nano);
+        ```
+
+    * `Instant`는 항상 UTC(Universal Time Coordinated)를 기준으로 하기 때문에 `LocalTime`과 차이가 있을 수 있다. 
+    
+    * 나노초 단위가 아닌 밀리초 단위의 에포크 타임이 필요할 때는 `toEpochMilli()`를 사용한다.
+
+#### 5) LocalDateTime과 ZonedDateTime
+
+* `LocalDateTime`과 `ZonedDateTime` 객체 생성하기
+
+    * `now()` 또는 `of()`를 사용하여 생성한다.
+
+        ```java
+        LocalDateTime localDateTime = LocalDateTime.of(2015, 12, 31, 12, 34, 56);
+        ZonedDateTime zonedDateTime = ZonedDateTime.now();
+
+        System.out.println(localDateTime);
+        System.out.println(zonedDateTime);
+        ```
+
+    * `LocalDateTime`을 `LocalDate` 또는 `LocalTime`으로 변환하기
+
+        ```java
+        LocalDateTime dt = LocalDateTime.of(2015, 12, 31, 12, 34, 56);
+        LocalDate date = dt.toLocalDate();
+        LocalTime time = dt.toLocalTime();
+        ```  
+
+    * `LocalDateTime`으로 `ZonedDateTime` 만들기
+    
+        * `LocalDateTime`에 `atZone()`으로 시간대 정보를 추가하면 `ZonedDateTime`을 얻을 수 있다.
+
+        ```java
+        LocalDateTime dateTime = LocalDateTime.now();
+        ZoneId zid = ZoneId.of("Asia/Seoul");
+        ZonedDateTime zonedDateTime = dateTime.atZone(zid);
+        System.out.println(zonedDateTime);
+        ```  
+
+    * 현재 특정 시간대(예를 들어, 뉴욕)의 시간을 알고 싶다면 다음과 같이 한다.
+    
+        ```java
+        ZoneId newYorkZoneId = ZoneId.of("America/New_York");
+        ZonedDateTime newYorkTime = ZonedDateTime.now().withZoneSameInstant(newYorkZoneId);
+
+        System.out.println(newYorkTime);
+        ```
+  
+    * ZonedDateTime의 변환
+    
+        * ZonedDateTime을 변환하는데 사용되는 메서드는 다음과 같다.
+        
+            * LocalDate **toLocalDate**()
+            * LocalTime **toLocalTime**()
+            * LocalDateTime **toLocalDateTime**()
+            * OffsetDateTime **toOffsetDateTime**()
+            * long **toEpochSecond**()
+            * Instant **toInstant**()
+            
+        * ZonedDateTime을 GregorianCalendar(Calendar)로 변환하는 방법
+        
+            * 자바의 정석 3판 p563를 참고하자.
+            
+#### 6) ZoneOffset과 OffsetDateTime
+
+* `ZoneOffset`은 UTC(표준 시)로 부터 얼마만큼 떨어져 있는지를 표현할 때 사용한다.
+
+    * 예를 들어, 한국은 UTC+9 이다. 즉, UTC 보다 9시간이 빠르다.
+    
+        ```java
+        // 현재 위치(서울)의 ZoneOffset을 얻은 다음, offset을 초 단위로 구한다.
+        ZoneOffset krOffset = ZonedDateTime.now().getOffset();
+        int krOffsetInSec = krOffset.get(ChronoField.OFFSET_SECONDS); // 32400초 (9 시간)
+
+        System.out.println(krOffsetInSec);
+        ```
+      
+* `OffsetDateTime`은 `ZoneOffset`으로 시간대를 표현한다.
+
+    * `ZonedDateTime`은 ZoneId로 시간대를 표현한다.
+    
+* `OffsetDateTime`은 서로 다른 시간대에 존재하는 컴퓨터 간의 통신에 유용하다.
+
+    ```java
+    ZonedDateTime zonedDateTime = ZonedDateTime.now();
+    OffsetDateTime offsetDateTime = zonedDateTime.toOffsetDateTime(); // ZonedDateTime를 OffsetDateTime로 변경
+
+    System.out.println(offsetDateTime);
+    ```
+
+#### 7) TemporalAdjusters
+
+* `TemporalAdjusters`는 자주 쓰일만한 날짜 계산들을 대신 해주는 메서드를 정의해놓은 클래스이다.
+
+* 자세한 내용은 자바의 정석 3판 p565를 참고하자.
+
+#### 8) Period와 Duration
+
+* 두 날짜 또는 시간의 차이를 구할 때는 `between()`를 사용한다.
+
+    ```java
+    // 두 날짜의 차이를 구하기
+    LocalDate date1 = LocalDate.of(2014, 1, 1);
+    LocalDate date2 = LocalDate.of(2015, 12, 31);
+
+    Period period = Period.between(date1, date2);
+    
+    // 두 시각의 차이를 구하기
+    LocalTime time1 = LocalTime.of(00, 00, 00);
+    LocalTime time2 = LocalTime.of(12, 34, 56);
+    
+    Duration duration = Duration.between(time1, time2);
+    ```
+  
+* `Period`와 `Duration`에서 특정 필드의 값을 얻을 때는 `get()`를 사용한다.
+
+    ```java
+    // Period에서 특정 필드 값 얻기
+    long year = period.get(ChronoUnit.YEARS);
+    long month = period.get(ChronoUnit.MONTHS);
+    long day = period.get(ChronoUnit.DAYS);
+
+    // Duration에서 특정 필드 값 얻기
+    long sec = duration.get(ChronoUnit.SECONDS);
+    long nano = duration.get(ChronoUnit.NANOS);
+    ```
+
+* getUnits()라는 메서드로 get()에 사용 할 수 있는 ChronoUnit의 종류를 알 수 있다.
+
+    ```java
+    System.out.println(period.getUnits());
+    System.out.println(duration.getUnits());
+    ```
+
+* 시분초를 구할 때는 `Duration`을 `LocalTime`으로 변환하는 것이 편리하다.
+
+* of(), ofXXX()를 사용 할 수 있으며 with(), withXXX()로 특정 필드의 값을 변경 할 수 있다.
+
+* 다른 단위로 변환하고 싶다면 to로 시작하는 메서드를 사용한다.
+
+* 자세한 내용은 자바의 정석 3판 p567~571를 참고하자.
+
+#### 9) 파싱과 포맷
+
+* `java.time.format` 패키지는 형식화와 관련된 클래스를 제공한다.
+
+* `DateTimeFormatter`의 `format()`를 사용해서 날짜와 시간을 형식화한다.
+    
+    ```java
+    LocalDate date = LocalDate.of(2016, 1, 2);
+    String yyyymmdd = DateTimeFormatter.ISO_LOCAL_DATE.format(date);
+    String yyyymmdd2 = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+
+    System.out.println(yyyymmdd);
+    System.out.println(yyyymmdd2);
+    ```
+
+* `ofLocalizedDate()`, `ofLocalizedTime()`, `ofLocalizedDateTime()`은 로케일(Locale)에 종속적인 포매터를 생성한다. 
+
+    ```java
+    DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
+    String shortFormat = formatter.format(LocalDate.now());
+    ```
+
+* `DateTimeFormatter`의 `ofPattern()`으로 원하는 출력 형식을 직접 작성 할 수 있다.
+
+    ```java
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+    ```
+  
+  //
+  
+* 문자열을 날짜와 시간으로 파싱하기
+
+    * 파싱(Parsing) : 해석
+    
+    * 문자열을 날짜 또는 시간으로 변환하려면 `parse()`를 사용한다.
+    
+        ```java
+        LocalDate date = LocalDate.parse("2016-01-02", DateTimeFormatter.ISO_LOCAL_DATE);
+        ```   
+
+    * 자주 사용되는 형식의 문자열은 `ISO_LOCAL_DATE`와 같은 형식화 상수를 사용하지 않고 파싱이 가능하다.
+    
+        ```java
+		LocalDate     newDate     = LocalDate.parse("2001-01-01");
+		LocalTime     newTime     = LocalTime.parse("23:59:59");
+		LocalDateTime newDateTime = LocalDateTime.parse("2001-01-01T23:59:59");
+        ```
+
+    * `ofPattern()`로 파싱 할 수도 있다.
+    
+        ```java
+		DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		LocalDateTime endOfYear   = LocalDateTime.parse("2015-12-31 23:59:59", pattern);
+        ```  
+
+## 10. 컬렉션 프레임워크
+
+## 11. 제네릭스, 열거형, 애노테이션
+
+## 12. 스레드(Thread)
+
+## 13. 람다와 스트림
+
+## 14. 입출력(I/O)
 
     
 

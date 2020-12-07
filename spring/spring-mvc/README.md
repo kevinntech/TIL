@@ -31,8 +31,8 @@
          * ③ `Enable annotation processing`을 체크한다.       
     
             ![image 2](images/img2.png)
-     
-          * ④ 지금부터 해당 프로젝트에서 롬복을 사용 할 수 있다.
+  
+         * ④ 지금부터 해당 프로젝트에서 롬복을 사용 할 수 있다.
           
     * 자주 사용하는 롬복 애노테이션
     
@@ -962,7 +962,7 @@
     
         * ② `RequestMappingHandlerMapping`
         
-            * 애노테이션 정보를 기반으로 핸들러를 찾아주는 HandlerMapping이다.
+            * 애노테이션 정보를 기반으로 작성된 핸들러를 찾아주는 HandlerMapping이다.
             
             * 즉, @Controller, @RequestMapping , @GetMapping , @PostMapping를 지정한 핸들러를 찾는다.
 
@@ -1002,11 +1002,11 @@
     
         * ① RequestMappingHandlerMapping
         
-            * 애노테이션 정보를 기반으로 한 핸들러를 찾는다.
+            * 애노테이션 정보를 기반으로 작성된 핸들러를 찾는다.
         
         * ② RequestMappingHandlerAdapter
         
-            * 애노테이션 정보를 기반으로 한 핸들러를 실행한다.
+            * 애노테이션 정보를 기반으로 작성된 핸들러를 실행한다.
         
 * (2) View가 있는 경우
 
@@ -1239,11 +1239,11 @@
 
 * (3) 스프링 부트를 사용하지 않는 스프링 MVC
 
-    * (1) 서블릿 컨테이너(Ex : 톰캣)에 등록한 웹 애플리케이션(WAR)에 DispatcherServlet을 등록한다.
+    * ① 서블릿 컨테이너(Ex : 톰캣)에 등록한 웹 애플리케이션(War)에 DispatcherServlet을 등록한다.
 
-        * ① `web.xml`에 서블릿을 등록한다.
+        * `web.xml`에 서블릿을 등록한다.
     
-        * ② 또는 `WebApplicationInitializer`를 구현한 클래스에 자바 코드로 서블릿을 등록한다. (스프링 3.1+, 서블릿 3.0+)
+        * 또는 `WebApplicationInitializer`를 구현한 클래스에 자바 코드로 서블릿을 등록한다. (스프링 3.1+, 서블릿 3.0+)
         
             ```java
             // 이전에 만든 web.xml 파일을 삭제하자.
@@ -1265,7 +1265,7 @@
             }
             ```
           
-    * (2) 세부 구성 요소는 빈 설정하기 나름.
+    * ② 세부 구성 요소는 빈 설정하기 나름.
     
 * (4) 스프링 부트를 사용하는 스프링 MVC
 
