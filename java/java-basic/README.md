@@ -1687,9 +1687,7 @@ int[][] arr = {
     ```java
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
     ```
-  
-  //
-  
+   
 * 문자열을 날짜와 시간으로 파싱하기
 
     * 파싱(Parsing) : 해석

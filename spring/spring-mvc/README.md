@@ -2786,47 +2786,47 @@
     
 * (3) 학습 할 애노테이션
 
-    * ① `@RequestMapping`, `@GetMapping`, `@PostMapping`, `@PutMapping`, ...
+    * `@RequestMapping`
+    
+        * `@GetMapping`, `@PostMapping`, `@PutMapping`, ...
 
-    * ② `@ModelAttribute`
+    * `@ModelAttribute`
 
-    * ③ `@RequestParam`, `@RequestHeader`
+    * `@RequestParam`, `@RequestHeader`
 
-    * ④ `@PathVariable`, `@MatrixVariable`
+    * `@PathVariable`, `@MatrixVariable`
 
-    * ⑤ `@SessionAttribute`, `@RequestAttribute`, `@CookieValue`
+    * `@SessionAttribute`, `@RequestAttribute`, `@CookieValue`
 
-    * ⑥ `@Valid`
+    * `@Valid`
 
-    * ⑦ `@RequestBody`, `@ResponseBody`
+    * `@RequestBody`, `@ResponseBody`
 
-    * ⑧ `@ExceptionHandler`
+    * `@ExceptionHandler`
 
-    * ⑨ `@ControllerAdvice`
+    * `@ControllerAdvice`
     
 * (4) 프로젝트 생성
 
-    * ① `@RequestMapping`, `@GetMapping`, `@PostMapping`, `@PutMapping`, ...
-    
-        ![image 46](images/img46.png)
+    ![image 46](images/img46.png)
             
 #### 2) HTTP 요청 맵핑하기 1부 : 요청 메소드
 
 * HTTP 요청을 핸들러에 맵핑하는 방법에 대해서 알아본다.
 
-* 핸들러는 컨트롤러 안에 요청을 처리 할 수 있는 메서드를 말한다.
+* `핸들러(Handler)`는 컨트롤러 안에 요청을 처리 할 수 있는 메서드를 말한다.
 
 * (1) 애노테이션 기반의 스프링 MVC
 
-    * HTTP 메소드는 GET, POST, PUT, PATCH, DELETE 등이 있다.
+    * HTTP 메소드(Method)는 `GET`, `POST`, `PUT`, `PATCH`, `DELETE` 등이 있다.
         
-    * @RequestMapping은 HTTP 요청을 처리하는 핸들러를 지정하는 애노테이션이다.
+    * `@RequestMapping`은 HTTP 요청을 처리하는 핸들러를 지정하는 애노테이션이다.
       
     * HTTP 메소드를 따로 지정하지 않으면 모든 HTTP 메소드를 처리하게 된다.
      
 * (2) HTTP method 맵핑하기 1 - 모든 HTTP 메소드 처리
 
-    * ① 컨트롤러 작성
+    * ① 컨트롤러를 작성한다.
     
         ```java
         @Controller
@@ -2861,17 +2861,15 @@
         }
         ```
       
-        * @RunWith : JUnit 애노테이션
+        * `@RunWith(SpringRunner.class)`
         
-            * SpringRunner.class
+            * `SpringRunner.class`
             
-            * 스프링에서 제공하는 JUnit용 Runner이다.
-            
-            * 스프링 테스트를 조금 더 효율적으로 할 수 있도록 도와주는 클래스
-        
-        * 내부적으로 테스트에서 사용 할 ApplicationContext도 만들어 준다.
-        
-        * JUnit4에서는 테스트 메소드를 만들 때 public void 로 선언 해야 됨
+                * 스프링에서 제공하는 JUnit용 Runner이다.
+                
+                * 스프링 테스트를 조금 더 효율적으로 실행 할 수 있도록 도와주는 클래스이며 테스트에서 사용 할 `ApplicationContext`도 만들어준다.
+                
+        * JUnit4에서는 테스트 메소드를 만들 때 `public void`로 선언 해야 됨
         
 * (3) HTTP method 맵핑하기 2 - 하나의 HTTP 메소드만 처리
 
@@ -2892,9 +2890,9 @@
       
     * ② 테스트 코드를 변경
 
-        * 핸들러는 GET 요청에 대해서 처리 하도록 되어 있으므로 put 요청을 하게 되면 이전 테스트 코드는 당연히 실패 할 것이다.
+        * 핸들러는 `GET` 요청에 대해서 처리 하도록 되어 있으므로 테스트 코드에서 `PUT` 요청을 하게 되면 테스트에 실패 할 것이다.
           
-        * 그래서 테스트 코드를 다음과 같이 변경한다.
+        * 그래서 다음과 같이 테스트 코드를 변경한다.
     
         ```java
         @RunWith(SpringRunner.class)
@@ -2915,9 +2913,9 @@
       
 * (4) HTTP method 맵핑하기 3 - 여러 HTTP 메소드 처리
 
-    * ① 컨트롤러 작성
+    * ① 컨트롤러를 작성한다.
     
-        * 여러 HTTP 메소드에 대해 처리 하고 싶은 경우, @RequestMapping의 method에 배열을 {}로 지정 할 수 있다.
+        * 여러 HTTP 메소드에 대해 처리 하고 싶은 경우에는 `@RequestMapping`의 `method `속성에 {}로 배열을 지정 할 수 있다.
           
         * 아래의 핸들러는 HTTP GET과 PUT 요청에 대해서 허용한다.
     
@@ -2934,7 +2932,7 @@
         }
         ```
       
-    * ② 테스트 코드 변경
+    * ② 테스트 코드를 변경한다.
        
         * GET, PUT, POST 요청에 대한 테스트를 진행한다.
         
@@ -2964,21 +2962,21 @@
             }
             ```
 
-* (5) @RequestMapping의 축약형
+* (5) `@RequestMapping`의 축약형
 
-    * ① @GetMapping
+    * ① `@GetMapping`
 
-    * ② @PostMapping
+    * ② `@PostMapping`
 
-    * ③ @PutMapping
+    * ③ `@PutMapping`
 
-    * ④ @PatchMapping
+    * ④ `@PatchMapping`
 
-    * ⑤ @DeleteMapping
+    * ⑤ `@DeleteMapping`
     
-* (6) @RequestMapping를 클래스에 지정
+* (6) `@RequestMapping`를 클래스에 지정
 
-    * 클래스에 @RequestMapping를 아래와 같이 지정하면 해당 컨트롤러의 모든 핸들러는 GET 요청만 처리한다. 
+    * 다음과 같이 클래스에 `@RequestMapping`를 지정하면 해당 컨트롤러의 모든 핸들러는 GET 요청만 처리한다. 
     
         ```java
         @Controller
@@ -2994,13 +2992,19 @@
         }
         ```
       
-* (7) HTTP 메소드 종류
+* (7) HTTP 메소드의 종류
 
     * GET 요청
 
         * GET 요청은 클라이언트가 서버의 리소스를 요청 할 때 사용한다.
     
         * 캐싱 할 수 있다. (조건적인 GET으로 바뀔 수 있다.)
+        
+            * 조건부 헤더(If-Modified-Since ...)를 사용하여 HTTP 조건부 요청을 할 수 있다.
+               
+            * 조건에 따라 서버가 `304 Not Modified`라고 응답을 하면서 본문(body)를 보내지 않더라도 
+               
+            * 클라이언트가 캐싱하고 있던 그 정보를 바로 보여줌으로써 요청 처리가 굉장히 빨라지며 서버 쪽 리소스도 아낄 수 있다.
     
         * 브라우저 기록에 남는다.
     
@@ -3008,9 +3012,9 @@
     
         * 민감한 데이터를 보낼 때는 사용하지 않아야 한다. (URL에 다 보이니까)
         
-        * Idemponent (멱등성)을 보장한다.
+        * 멱등성(Idempotent)을 보장한다.
     
-            * → 멱등성(Idempotent)는 여러 번 수행을 해도 결과가 같은 경우를 말한다.
+            * 멱등성(Idempotent)는 여러 번 수행을 해도 결과가 같은 경우를 말한다.
 
     * POST 요청
 
@@ -3030,35 +3034,72 @@
 
         * PUT 요청은 URI에 해당하는 데이터를 새로 만들거나 수정할 때 사용한다.
 
-        * POST와 다른 점은 “URI”에 대한 의미가 다르다.
+        * POST와 다른 점은 "URI"에 대한 의미가 다르다.
 
-        * → POST의 URI는 보내는 데이터를 처리 할 수 있는 리소스를 지칭하며
+            * POST의 URI는 보내는 데이터를 처리 할 수 있는 리소스를 지칭하며
 
-        * PUT의 URI는 보내는 데이터에 해당하는 리소스 자체를 지칭한다.
+            * PUT의 URI는 보내는 데이터에 해당하는 리소스 자체를 지칭한다.
 
-        * Idempotent
+        * 멱등성(Idempotent)을 보장한다.
 
     * PATCH 요청
 
         * PUT과 비슷하지만, 기존 엔티티와 새 데이터의 차이점만 보낸다는 차이가 있다.
 
-        * 리소스가 가지고 있는 일부 데이터만 수정 하고 싶은 경우에 PATCH를 사용하고
-    
-        * 수정하고 싶은 데이터를 전부 보내는 경우에는 PUT 또는 POST를 사용한다. 
+        * 리소스가 가지고 있는 일부 데이터만 수정 하고 싶은 경우에 PATCH를 사용하고 수정하고 싶은 데이터를 전부 보내는 경우에는 PUT 또는 POST를 사용한다. 
 
-        * Idempotent
+        * 멱등성(Idempotent)을 보장한다.
 
     * DELETE 요청
 
         * URI에 해당하는 리소스를 삭제할 때 사용한다.
 
-        * Idempotent
+        * 멱등성(Idempotent)을 보장한다.
 
 #### 3) HTTP 요청 맵핑하기 2부 : URI 패턴 맵핑
 
 * (1) URI, URL, URN 차이점
 
-    * 정리 필요
+    * URI (Uniform Resource Identifier, 통합 자원 식별자)
+   
+        * 인터넷 상의 자원을 식별하기 위한 문자열
+
+        * URI의 하위 개념으로 URL과 URN이 있다.
+
+        * 예시
+        
+            * http://www.test.com/books.php?id=1234
+            
+                * http://www.test.com/라는 서버에 위치한 books.php 파일은 쿼리 스트링 파라미터인 id의 값에 따라 여러가지 결과가 나타난다.
+
+                * 여기서 URL은 books.php라는 자원의 위치를 표기한 http://www.test.com/books.php다.
+
+                * 내가 원하는 정보에 도달 하기 위해서는 `?id=1234`라는 식별자(Identifier)가 필요하다.
+
+                * 그래서 http://www.test.com/books.php?id=1234 라는 주소는 URI는 맞지만 URL은 아니다.
+
+    * URL (Uniform Resource Locator)
+   
+        * 인터넷 상의 자원의 위치를 나타내는 것
+
+        * URI는 URL을 포함하는 개념이다. (URI > URL)
+
+    * URN (Uniform Resource Name)
+   
+        * 인터넷 상의 자원의 이름을 나타내는 것 (자원의 위치에 영향을 받지 않는 유일 무이한 이름을 말한다.)
+
+        * URN은 서로 중복되지 않는 유일한 값이어야 한다.
+        
+        * 예시
+
+            * `urn:isbn:0451450523`
+            
+                * URN으로 1926년에 출간된 the Last Unicorn의 도서 식별 번호를 가리킨다.
+
+            * `urn:oid:2.16.840`
+            
+                * URN으로 미국을 의미하는 OID 입니다.
+         
     
 * (2) HTTP 요청을 여러 개의 문자열과 맵핑
 
@@ -3107,24 +3148,27 @@
       
 * (3) 요청 식별자로 맵핑하기
 
-    * @RequestMapping은 다음의 패턴을 지원합니다.
+    * @RequestMapping은 다음 패턴을 지원한다.
 
     * `?`
     
         * 임의의 한 글자
-        * “/author/???”  →  “/author/123”
+        
+        * `"/author/???"` → `"/author/123"`
 
     * `*` 
     
         * 임의의 여러 글자
-        * “/author/*”      → “/author/keesun”
+        
+        * `"/author/*"` → `"/author/kevin"`
 
     * `**` 
     
         * 임의의 여러 경로(path)
-        * “/author/**      →  “/author/keesun/book”
         
-* (4) 클래스에 선언한 @RequestMapping과 조합
+        * `"/author/**"` → `"/author/kevin/book"`
+        
+* (4) 클래스에 선언한 `@RequestMapping`과 조합
 
     * 클래스에 선언한 URI 패턴 뒤에 이어 붙여서 맵핑 합니다.
     
@@ -3142,24 +3186,10 @@
         }
         ```
       
-* (5) 정규 표현식으로 맵핑할 수도 있습니다.
+* (5) 정규 표현식으로 맵핑할 수도 있다.
 
-    * ① @RequestMapping를 정규 표현식을 이용하여 /{varName:정규 표현식}로 작성한다.
+    * ① `@RequestMapping`를 정규 표현식을 이용하여 `/{varName:정규 표현식}`로 작성한다.
 
-    * URI 템플릿 형식은 URI에서 변동되는 부분을 {변수명}의 형태로 지정하는 것을 말한다.
-
-    * @PathVariable는 @RequestMapping의 URI에서 {}로 명시된 변수의 값을 받아온다.
-
-    * @PathVariable를 지정한 변수명과 {변수명}이 다르다면 @PathVariable("변수명")으로 명시 할 수도 있다.
-
-        ```java
-        @GetMapping("/events/{id}")
-        @ResponseBody
-        public String getAnEvents(@PathVariable("id") int idValue){
-          return "events " + idValue;    
-        }
-        ```
-      
         ```java
         @Controller
         @RequestMapping("/hello")
@@ -3174,6 +3204,10 @@
         }
         ```
       
+        * `@PathVariable`는 `@RequestMapping`의 URI에서 `{변수명}`로 명시된 변수의 값을 받아온다.
+        
+        * `@PathVariable`를 지정한 변수명과 URI의 `{변수명}`이 다르다면 `@PathVariable("변수명")`으로 명시 할 수도 있다.
+
     * ② 테스트 코드를 작성한다.
     
         ```java
@@ -3197,32 +3231,180 @@
 
 * (6) 패턴이 중복되는 경우에는?
 
-    * URI 패턴이 중복되는 경우에는 가장 구체적으로 맵핑되는 핸들러를 선택합니다.
+    * URI 패턴이 중복되는 경우에는 가장 구체적으로 맵핑되는 핸들러를 선택한다.
 
-    * ① 컨트롤러 클래스를 작성한다.
+    * 실습
     
+        * ① 컨트롤러 클래스를 작성한다.
+        
+            ```java
+            @Controller
+            @RequestMapping("/hello")
+            public class SampleController {
+            
+                @RequestMapping("/kevin") // 가장 구체적으로 맵핑되는 핸들러를 선택한다.
+                @ResponseBody
+                public String helloKevin(){
+                    return "hello kevin";
+                }
+            
+                @RequestMapping("/**")
+                @ResponseBody
+                public String hello(){
+                    return "hello";
+                }
+            
+            }
+            ```  
+          
+        * ② 테스트 코드를 작성한다.
+        
+            ```java
+            @RunWith(SpringRunner.class)
+            @WebMvcTest
+            public class SampleControllerTest {
+            
+                @Autowired
+                MockMvc mockMvc;
+            
+                @Test
+                public void helloTest() throws Exception {
+                    mockMvc.perform(get("/hello/kevin")) // GET 요청 테스트
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andExpect(content().string("hello kevin"))
+                            .andExpect(handler().handlerType(SampleController.class))
+                            .andExpect(handler().methodName("helloKevin"));
+                }
+            
+            }
+            ```
+
+* (7) URI 확장자 맵핑 지원
+
+    * 스프링 MVC는 `URI 확장자 맵핑`을 지원한다.
+    
+        * 스프링 MVC는 `/hello/kevin.html`이나 `/hello/kevin.json`과 같은 확장자로 요청을 하더라도 처리 해준다.
+        
+        * 최근 추세는 URI에 `.html`, `.json`과 같이 사용하는 것이 아닌 HTTP 요청 헤더에 원하는 확장자를 지정하여 전달한다.
+
+    * 하지만 이 `URI 확장자 맵핑`은 권장하지 않는 기능이다. (스프링 부트에서는 기본으로 `URI 확장자 맵핑` 기능을 사용하지 않도록 설정되어 있다.)
+
+        * `RFD Attack`이라는 보안 이슈가 있다.
+    
+        * URI 변수, Path 매개변수, URI 인코딩을 사용할 때 불명확해진다.
+      
+#### 4) HTTP 요청 맵핑하기 3부: 미디어 타입 맵핑
+
+* (1) 특정한 타입의 데이터를 보내는 요청만 처리하는 핸들러
+
+    * 특정한 타입의 데이터를 보내는 요청만 처리하는 핸들러를 만들고 싶다면 `consumes` 옵션을 지정한다.
+    
+        * ① `@RequestMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)`
+
+            * `MediaType`에는 MediaType 타입을 리턴하는 것과 String을 리턴하는 것이 있다.
+            
+                * MediaType을 리턴하는 것은 `APPLICATION_JSON_UTF8`과 같은 형식이다.
+                
+                * String을 리턴하는 것은 `APPLICATION_JSON_UTF8_VALUE`와 같이, 이름이 VALUE로 끝난다. 
+            
+        * ② HTTP의 `Content-Type` 헤더로 필터링 한다.
+
+            * 매치 되는 않는 경우에 `415 Unsupported Media Type` 응답
+    
+    * 실습
+    
+        * ① 컨트롤러를 작성한다.
+        
+            ```java
+            @Controller
+            public class SampleController {
+                
+                @RequestMapping(value = "/hello", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+                @ResponseBody
+                public String hello(){
+                    return "hello";
+                }
+            
+            }
+            ```
+          
+            * 해당 핸들러는 JSON 요청만 처리 하도록 하였다.
+            
+        * ② 아래 테스트 코드에서는 어떠한 헤더도 지정하지 않았기 때문에 테스트가 실패하게 된다. 
+        
+            ```java
+            @RunWith(SpringRunner.class)
+            @WebMvcTest
+            public class SampleControllerTest {
+            
+                @Autowired
+                MockMvc mockMvc;
+            
+                @Test
+                public void helloTest() throws Exception {
+                    mockMvc.perform(get("/hello")) // GET 요청 테스트
+                            .andDo(print())
+                            .andExpect(status().isOk());
+                }
+            
+            }
+            ```
+          
+        * ③ 테스트 코드를 올바르게 변경한다.
+        
+            ```java
+            @RunWith(SpringRunner.class)
+            @WebMvcTest
+            public class SampleControllerTest {
+            
+                @Autowired
+                MockMvc mockMvc;
+            
+                @Test
+                public void helloTest() throws Exception {
+                    mockMvc.perform(get("/hello")
+                                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                            .andDo(print())
+                            .andExpect(status().isOk());
+                }
+            
+            }
+            ```
+          
+* (2) 특정한 타입의 응답을 만드는 핸들러
+
+    * 특정한 타입의 응답을 만드는 핸들러를 지정하려면 `produces` 옵션을 지정한다.
+       
+        * ① `@RequestMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)`
+          
+        * ② Accept 헤더로 필터링을 하는데 Accept 헤더가 없는 경우에도 처리를 해준다.
+
+            * Accept 헤더가 없는 경우(설정하지 않는 경우)에는 아무거나 받겠다는 것으로 인식한다.
+                  
+        * 매치 되지 않는 경우에는 `406 Not Acceptable`로 응답한다.
+
+    * 실습
+       
         ```java
         @Controller
-        @RequestMapping("/hello")\
         public class SampleController {
         
-            @RequestMapping("/kevin")
-            @ResponseBody
-            public String helloKevin(){
-                return "hello kevin";
-            }
-        
-            @RequestMapping("/**")
+            /* produces = MediaType.APPLICATION_JSON_UTF8_VALUE 이면
+               클라이언트가 JSON을 요청하는 경우에만 핸들러가 처리한다. */
+            @RequestMapping(
+                    value = "/hello",
+                    consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+                    produces = MediaType.APPLICATION_JSON_UTF8_VALUE
+            )
             @ResponseBody
             public String hello(){
                 return "hello";
             }
         
         }
-        ```  
+        ```
       
-    * ② 테스트 코드를 작성한다.
-    
         ```java
         @RunWith(SpringRunner.class)
         @WebMvcTest
@@ -3233,39 +3415,765 @@
         
             @Test
             public void helloTest() throws Exception {
-                mockMvc.perform(get("/hello/kevin")) // GET 요청 테스트
+                mockMvc.perform(get("/hello")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
                         .andDo(print())
-                        .andExpect(status().isOk())
-                        .andExpect(content().string("hello kevin"))
-                        .andExpect(handler().handlerType(SampleController.class))
-                        .andExpect(handler().methodName("helloKevin"));
+                        .andExpect(status().isOk());
             }
         
         }
         ```
+      
+* (3) 클래스에 선언한 `@RequestMapping`의 `consumes`나 `produces` 옵션은 메소드에서 사용한 `@RequestMapping`의 설정으로 덮어쓴다. 
 
-* (7) URI 확장자 맵핑 지원
+    * URI의 경우에는 조합 할 수 있었지만 `consumes`나 `produces` 옵션은 메소드의 설정으로 오버라이딩 하도록 되어 있다.
 
-    * 스프링 MVC는 URI 확장자 맵핑을 지원한다.
-    
-        * → 스프링 MVC는 /hello/kevin.html이나 /hello/kevin.json 과 같은 확장자로 요청을 하더라도 처리 해준다.
+        ```java
+        @Controller
+        @RequestMapping(consumes = MediaType.APPLICATION_XML_VALUE)
+        public class SampleController {
         
-        * 최근 추세는 URI에 .html , .json과 같이 사용하는 것이 아닌 HTTP 요청 헤더에 원하는 확장자를 지정하여 전달한다.
-
-    * 하지만 이 기능은 권장하지 않는다. (스프링 부트에서는 기본으로 이 기능을 사용하지 않도록 설정 해 줌)
-
-        * → 보안 이슈 (RFD Attack)
-    
-        * URI 변수, Path 매개변수, URI 인코딩을 사용할 때 불명확 함.
+            @RequestMapping(
+                    value = "/hello",
+                    consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+                    produces = MediaType.TEXT_PLAIN_VALUE
+            )
+            @ResponseBody
+            public String hello(){
+                return "hello";
+            }
         
-* (8) RFD Attack
-      
-    * https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/reflected-file-download-a-new-web-attack-vector/
-      
-    * https://www.owasp.org/index.php/Reflected_File_Download
-      
-    * https://pivotal.io/security/cve-2015-5211
-      
+        }
+        ```
+     
+#### 5) HTTP 요청 맵핑하기 4부: 헤더와 파라미터 맵핑
 
+* (1) 특정한 헤더가 있을 때, 요청을 처리하고 싶은 경우
 
+    * `@RequestMapping(headers = "key")`
+    
+    * 실습
+    
+        * ① 컨트롤러 작성
+        
+            ```java
+            @Controller
+            public class SampleController {
+                // FROM이라는 HTTP 요청 헤더가 있는 경우에만 요청을 처리하는 핸들러
+                @RequestMapping(value = "/hello" , headers = HttpHeaders.FROM)
+                @ResponseBody
+                public String hello(){
+                    return "hello";
+                }
+            
+            }
+            ```
+          
+        * ② 테스트 코드 작성
+        
+            ```java
+            @RunWith(SpringRunner.class)
+            @WebMvcTest
+            public class SampleControllerTest {
+            
+                @Autowired
+                MockMvc mockMvc;
+            
+                @Test
+                public void helloTest() throws Exception {
+                    mockMvc.perform(get("/hello")
+                                .header(HttpHeaders.FROM, "localhost"))
+                            .andDo(print())
+                            .andExpect(status().isOk());
+                }
+            
+            }
+            ```
 
+* (2) 특정한 헤더가 없을 때, 요청을 처리하고 싶은 경우
+
+    * `@RequestMapping(headers = "!key")`
+    
+    * 실습
+    
+        * ① 컨트롤러 작성
+        
+            ```java
+            @Controller
+            public class SampleController {
+            
+                @RequestMapping(value = "/hello", headers = "!" + HttpHeaders.FROM)
+                @ResponseBody
+                public String hello(){
+                    return "hello";
+                }
+            
+            }
+            ```
+          
+        * ② 테스트 코드 작성
+        
+            ```java
+            @RunWith(SpringRunner.class)
+            @WebMvcTest
+            public class SampleControllerTest {
+            
+                @Autowired
+                MockMvc mockMvc;
+            
+                @Test
+                public void helloTest() throws Exception {
+                    mockMvc.perform(get("/hello")
+                                .header(HttpHeaders.AUTHORIZATION, "111"))
+                            .andDo(print())
+                            .andExpect(status().isOk());
+                }
+            
+            }
+            ```
+
+* (3) 특정한 헤더 키/값이 있을 때, 요청을 처리하고 싶은 경우
+
+    * `@RequestMapping(headers = "key=value")`
+    
+    * 실습
+           
+        ```java
+        @Controller
+        public class SampleController {
+        
+            @RequestMapping(value = "/hello", headers = HttpHeaders.AUTHORIZATION + "=" + "111")
+            @ResponseBody
+            public String hello(){
+                return "hello";
+            }
+        
+        }
+        ```
+      
+* (4) 특정한 요청 매개변수 키를 가지고 있을 때, 요청을 처리하고 싶은 경우
+
+    * `@RequestMapping(params = "a")`
+    
+    * 실습
+           
+        * ① 컨트롤러 작성
+        
+            ```java
+            @Controller
+            public class SampleController {
+            
+                @RequestMapping(value = "/hello", params = "name")
+                @ResponseBody
+                public String hello(){
+                    return "hello";
+                }
+            
+            }
+            ```
+          
+        * ② 테스트 코드 작성
+        
+            ```java
+            @RunWith(SpringRunner.class)
+            @WebMvcTest
+            public class SampleControllerTest {
+            
+                @Autowired
+                MockMvc mockMvc;
+            
+                @Test
+                public void helloTest() throws Exception {
+                    mockMvc.perform(get("/hello")
+                                .param("name", "kevin"))
+                            .andDo(print())
+                            .andExpect(status().isOk());
+                }
+            
+            }
+            ```
+          
+* (5) 특정한 요청 매개변수가 없을 때, 요청을 처리하고 싶은 경우
+
+    * `@RequestMapping(params = "!a")`
+
+* (6) 특정한 요청 매개변수 키/값을 가지고 있을 때, 요청을 처리하고 싶은 경우
+
+    * `@RequestMapping(params = "a=b")`
+      
+    * 실습
+          
+        ```java
+        @Controller
+        public class SampleController {
+        
+            @GetMapping(value = "/hello" , params = "name=kevin")
+            @ResponseBody
+            public String hello(){
+                return "hello";
+            }
+        
+        }
+        ```
+      
+#### 6) HTTP 요청 맵핑하기 5부 : HEAD와 OPTIONS 요청 처리
+
+* (1) 우리가 구현하지 않아도 스프링 웹 MVC에서 자동으로 처리하는 `HTTP Method`가 있다.
+
+    * ① HEAD
+        
+    * ② OPTIONS
+    
+* (2) HEAD
+
+    * `HEAD` 요청은 GET 요청과 동일 하지만 **응답 본문(Body)을 받아오지 않고 응답 헤더만 받아온다.**
+    
+    * 실습
+    
+        * ① 테스트 코드를 변경한다.
+        
+            ```java
+            @RunWith(SpringRunner.class)
+            @WebMvcTest
+            public class SampleControllerTest {
+            
+                @Autowired
+                MockMvc mockMvc;
+            
+                @Test
+                public void helloTest() throws Exception {
+                    mockMvc.perform(head("/hello")
+                                .param("name", "kevin"))
+                            .andDo(print())
+                            .andExpect(status().isOk());
+                }
+            
+            }
+            ```
+          
+        * ② 테스트 결과를 보면 응답 본문(Body)은 받아오지 않고 응답 헤더(Headers)만 받아오는 것을 확인 할 수 있다.
+         
+            ![image 47](images/img47.png)
+            
+* (3) OPTIONS
+
+    * `OPTIONS` 요청은 **사용 할 수 있는 HTTP Method를 제공한다.**
+       
+    * 서버 또는 특정 리소스가 제공하는 기능을 확인할 때 사용 할 수 있다.
+      
+    * 서버는 Allow 응답 헤더에 사용할 수 있는 `HTTP Method` 목록을 제공해야 한다.
+    
+    * 실습
+    
+        * ① 컨트롤러를 작성한다.
+        
+            ```java
+            @Controller
+            public class SampleController {
+            
+                @GetMapping("/hello")
+                @ResponseBody
+                public String hello(){
+                    return "hello";
+                }
+            
+                @PostMapping("/hello")
+                @ResponseBody
+                public String helloPost(){
+                    return "hello";
+                }
+            
+            }
+            ```
+          
+        * ② 테스트 코드를 작성한다.
+        
+            ```java
+            @RunWith(SpringRunner.class)
+            @WebMvcTest
+            public class SampleControllerTest {
+            
+                @Autowired
+                MockMvc mockMvc;
+            
+                @Test
+                public void helloTest() throws Exception {
+                    mockMvc.perform(options("/hello"))
+                            .andDo(print())
+                            .andExpect(status().isOk());
+                }
+            
+            }
+            ```
+          
+        * ③ 테스트 결과를 보면 Allow 응답 헤더에서 `/hello`라는 리소스가 지원하는 `HTTP Method` 목록을 확인 할 수 있다.
+         
+            ![image 48](images/img48.png)
+            
+ * (4) 응답 헤더를 확인하는 방법
+ 
+     * ① ALLOW 헤더가 있는지 확인하는 테스트 코드를 작성한다.
+           
+         ```java
+         @RunWith(SpringRunner.class)
+         @WebMvcTest
+         public class SampleControllerTest {
+         
+             @Autowired
+             MockMvc mockMvc;
+         
+             @Test
+             public void helloTest() throws Exception {
+                 mockMvc.perform(options("/hello"))
+                         .andDo(print())
+                         .andExpect(status().isOk())
+                         .andExpect(header().exists(HttpHeaders.ALLOW)); // ALLOW 헤더가 있는지 확인
+             }
+         }
+         ```
+
+     * ② 순서에 상관 없이 ALLOW 헤더에 해당 HTTP 메서드가 있는지 확인하는 테스트 코드를 작성한다.
+           
+         ```java
+         @RunWith(SpringRunner.class)
+         @WebMvcTest
+         public class SampleControllerTest {
+         
+             @Autowired
+             MockMvc mockMvc;
+         
+             @Test
+             public void helloTest() throws Exception {
+                 mockMvc.perform(options("/hello"))
+                         .andDo(print())
+                         .andExpect(status().isOk())
+                         .andExpect(header().stringValues(HttpHeaders.ALLOW,
+                                 hasItems(
+                                         containsString("GET"),
+                                         containsString("POST"),
+                                         containsString("HEAD"),
+                                         containsString("OPTIONS")
+                                         )))
+                 ;
+             }
+         }
+         ```
+       
+#### 7) HTTP 요청 맵핑하기 6부 : 커스텀 애노테이션
+
+* (1) `@RequestMapping` 애노테이션을 메타 애노테이션으로 사용하기
+
+    * `@GetMapping`과 같은 커스텀한 애노테이션을 만들 수 있다.
+
+    * 실습
+    
+        * ① `@RequestMapping` 애노테이션을 메타 애노테이션으로 사용하여 커스텀 애노테이션을 만든다.
+        
+            * `@Retention`이 `RUNTIME`이 아니면 테스트에 실패하게 된다.
+            
+            * 클래스가 메모리에 로딩 될 때 해당 애노테이션 정보는 사라진다.
+            
+            * 하지만 스프링은 런타임 시, 디스패처 서블릿이 동작할 때 애노테이션 정보를 참고해야 한다. 그래서 RUNTIME 이어야 한다.
+        
+             ```java
+             @Documented
+             @Target(ElementType.METHOD)
+             @Retention(RetentionPolicy.RUNTIME)
+             @RequestMapping(method = RequestMethod.GET, value = "/hello")
+             public @interface GetHelloMapping {
+             }
+             ```
+
+        * ② 컨트롤러의 핸들러에 `@GetHelloMapping`를 사용한다.
+               
+             ```java
+             @Controller
+             public class SampleController {
+             
+                 @GetHelloMapping
+                 @ResponseBody
+                 public String hello(){
+                     return "hello";
+                 }
+             
+             }
+             ```
+          
+        * ③ 테스트 코드를 실행한다.
+               
+             ```java
+             @RunWith(SpringRunner.class)
+             @WebMvcTest
+             public class SampleControllerTest {
+             
+                 @Autowired
+                 MockMvc mockMvc;
+             
+                 @Test
+                 public void helloTest() throws Exception {
+                     mockMvc.perform(get("/hello"))
+                             .andDo(print())
+                             .andExpect(status().isOk());
+                 }
+             }
+             ```
+
+* (2) 메타(Meta) 애노테이션
+
+    * `메타 애노테이션`은 애노테이션을 만들 때 사용하는 애노테이션이다.
+
+    * 스프링이 제공하는 대부분의 애노테이션은 메타 애노테이션으로 사용 할 수 있다.
+    
+* (3) 조합(Composed) 애노테이션
+
+    * 조합 애노테이션은 한 개 혹은 여러 메타 애노테이션을 조합해서 만든 애노테이션이다.
+      
+        * Ex) `@GetMapping`
+
+    * 코드를 간결하게 줄일 수 있다.
+    
+    * 보다 구체적인 의미를 부여할 수 있다.
+    
+* (4) `@Retention`
+      
+    * `@Retention`는 애노테이션이 유지되는 기간을 지정하는데 사용된다.
+
+        * Source
+        
+            * 소스 코드까지만 유지된다.
+        
+            * 즉, 컴파일 하면 해당 애노테이션 정보는 사라진다.
+    
+        * Class
+        
+            * 컴파일까지 유지된다. (컴파일 한 `.class` 파일에도 유지)
+    
+            * 런타임 시, 클래스를 메모리로 읽어오면 해당 애노테이션 정보는 사라진다.
+    
+        * Runtime
+        
+            * 런타임까지 유지된다. 
+            
+                * 애플리케이션 구동 중에도 애노테이션 정보가 유지되도록 할 때 사용한다.
+    
+            * 실행 시에 리플렉션을 통해 클래스 파일에 저장된 애노테이션의 정보를 읽어서 처리 할 수 있다.
+            
+* (5) `@Target`
+      
+    * 해당 애노테이션이 적용 가능한 대상을 지정할 때 사용한다. 
+    
+* (6) `@Documented`
+      
+    * 애노테이션에 대한 정보가 `javadoc`으로 작성한 문서에 포함 되도록 한다.
+    
+#### 8) HTTP 요청 맵핑하기 7부 : 맵핑 연습문제
+
+* 다음 요청을 처리할 수 있는 핸들러 메소드를 맵핑하는 `@RequestMapping` (또는 `@GetMapping`, `@PostMapping` 등)을 정의하세요.
+
+    * ① `GET /events`
+    
+         ```java
+         @Controller
+         public class SampleController {
+         
+             @GetMapping("/events")
+             @ResponseBody
+             public String events(){
+                 return "events";
+             }
+         
+         }
+         ```
+      
+    * ② `GET /events/1, GET /events/2, GET /events/3,` ...
+    
+         ```java
+         @Controller
+         public class SampleController {
+         
+             @GetMapping("/events/{id}") // {id} : 플레이스 홀더
+             @ResponseBody
+             public String getAnEvents(@PathVariable int id){
+                 return "events";
+             }
+         
+         }
+         ```
+      
+    * ③ `POST /events` `CONTENT-TYPE: application/json` `ACCEPT: application/json`
+    
+         ```java
+         @Controller
+         public class SampleController {
+         
+             @PostMapping(
+                         value = "/events",
+                         consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+                         produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+             @ResponseBody
+             public String createEvent(){
+                 return "events";
+             }
+         
+         }
+         ```
+      
+    * ④ `DELETE /events/1, DELETE /events/2, DELETE /events/3,` ...
+       
+         ```java
+         @Controller
+         public class SampleController {
+         
+             @DeleteMapping("/events/{id}")
+             @ResponseBody
+             public String removeAnEvents(@PathVariable int id){
+                 return "events";
+             }
+         
+         }
+         ```
+      
+    * ⑤ 다음 내용을 참고하여 작성하세요.
+    
+        * `PUT /events/1` `CONTENT-TYPE: application/json` `ACCEPT: application/json`,
+        
+        * `PUT /events/2` `CONTENT-TYPE: application/json` `ACCEPT: application/json`, ...
+        
+         ```java
+         @Controller
+         public class SampleController {
+         
+             @PutMapping(
+                     value = "/events/{id}",
+                     consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+                     produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+             @ResponseBody
+             public String updateEvent(@PathVariable int id){
+                 return "events";
+             }
+         
+         }
+         ```
+      
+* 연습문제에 대한 테스트 코드는 다음과 같다.
+
+     ```java
+     @RunWith(SpringRunner.class)
+     @WebMvcTest
+     public class SampleControllerTest {
+     
+         @Autowired
+         MockMvc mockMvc;
+     
+         @Test
+         public void getEvents() throws Exception {
+             mockMvc.perform(get("/events"))
+                     .andExpect(status().isOk());
+         }
+     
+         @Test
+         public void getEventsWithId() throws Exception {
+             mockMvc.perform(get("/events/1"))
+                     .andExpect(status().isOk());
+             mockMvc.perform(get("/events/2"))
+                     .andExpect(status().isOk());
+             mockMvc.perform(get("/events/3"))
+                     .andExpect(status().isOk());
+         }
+     
+         @Test
+         public void createEvent() throws Exception{
+             mockMvc.perform(post("/events")
+                         .contentType(MediaType.APPLICATION_JSON_UTF8)
+                         .accept(MediaType.APPLICATION_JSON_UTF8))
+                     .andExpect(status().isOk());
+         }
+     
+         @Test
+         public void deleteEvent() throws Exception{
+             mockMvc.perform(delete("/events/1"))
+                     .andExpect(status().isOk());
+             mockMvc.perform(delete("/events/2"))
+                     .andExpect(status().isOk());
+             mockMvc.perform(delete("/events/3"))
+                     .andExpect(status().isOk());
+         }
+     
+         @Test
+         public void updateEvent() throws Exception{
+             mockMvc.perform(put("/events/1")
+                     .contentType(MediaType.APPLICATION_JSON_UTF8)
+                     .accept(MediaType.APPLICATION_JSON_UTF8))
+                     .andExpect(status().isOk());
+         }
+     }
+     ```
+  
+* `consumes`와 `produces` 옵션을 사용하는 핸들러 일부만 빼내어 클래스를 작성 할 수도 있다.
+
+     ```java
+     @Controller
+     @RequestMapping(
+             consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+     public class EventUpdateController {
+     
+         @PutMapping("/events/{id}")
+         @ResponseBody
+         public String updateEvent(@PathVariable int id){
+             return "events";
+         }
+     
+         @PostMapping("/events")
+         @ResponseBody
+         public String createEvent(){
+             return "events";
+         }
+     
+     }
+     ```
+  
+#### 9) 핸들러 메소드 1부 : 지원하는 메소드 아규먼트와 리턴 타입
+
+* 핸들러 메소드 아규먼트는 주로 요청 그 자체 또는 요청에 들어있는 정보를 받아오는데 사용한다.
+
+    * https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-methods
+    
+* 핸들러 메소드 리턴은 주로 응답 또는 모델을 랜더링할 뷰에 대한 정보를 제공하는데 사용한다.
+
+    * @`ResponseBody` : 핸들러의 리턴 값이 `HttpMessageConverter`를 사용해서 응답 본문에 작성된다.
+
+    * https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-return-types
+
+#### 10) 핸들러 메소드 2부 : URI 패턴
+
+* (1) @PathVariable
+
+    * `@PathVariable` : URI 템플릿 변수를 읽어올 때 사용한다.
+        
+        * URI 템플릿 변수명과 메소드 파라미터명이 같다면 따로 이름을 명시하지 않아도 된다.
+        
+        * 타입 변환 지원.
+        
+        * (기본)값이 반드시 있어야 한다.
+        
+        * Optional 지원.
+    
+    * 실습
+    
+        * ① 테스트 코드 작성
+
+             ```java
+             @RunWith(SpringRunner.class)
+             @WebMvcTest
+             public class SampleControllerTest {
+             
+                 @Autowired
+                 MockMvc mockMvc;
+             
+                 @Test
+                 public void getEvent() throws Exception {
+                     mockMvc.perform(get("/events/1"))
+                             .andDo(print())
+                             .andExpect(status().isOk())
+                             .andExpect(jsonPath("id").value(1));
+                 }
+             
+             }
+             ```
+
+        * ② 컨트롤러 작성
+        
+             ```java
+             @Controller
+             public class SampleController {
+             
+                 @GetMapping("/events/{id}")
+                 @ResponseBody
+                 public Event getEvent(@PathVariable Integer id){
+                     Event event = new Event();
+                     event.setId(id);
+                     return event;
+                 }
+             }
+             ```
+          
+* (2) @MatrixVariable
+
+    * `@MatrixVariable` : 요청 URI 경로에서 키/값 쌍의 데이터를 읽어올 때 사용한다.
+            
+        * 타입 변환 지원.
+                 
+        * (기본)값이 반드시 있어야 한다.
+                
+        * Optional 지원.
+               
+        * MatrixVariable은 기본적으로 비활성화 되어 있다. 그래서 활성화 하려면 다음과 같이 설정해야 한다.
+
+             ```java
+             @Configuration
+             public class WebConfig implements WebMvcConfigurer {
+                 @Override
+                 public void configurePathMatch(PathMatchConfigurer configurer) {
+                     UrlPathHelper urlPathHelper = new UrlPathHelper(); // UrlPathHelper 생성
+                     urlPathHelper.setRemoveSemicolonContent(false); // UrlPathHelper가 세미콜론을 제거 하지 않도록 설정
+                     configurer.setUrlPathHelper(urlPathHelper); // configurer에 urlPathHelper를 설정
+                 }
+             }
+             ```
+    
+    * 실습
+    
+        * ① 테스트 코드 작성
+
+             ```java
+             @RunWith(SpringRunner.class)
+             @WebMvcTest
+             public class SampleControllerTest {
+             
+                 @Autowired
+                 MockMvc mockMvc;
+             
+                 @Test
+                 public void getEvent() throws Exception {
+                     mockMvc.perform(get("/events/1;name=kevin"))
+                             .andDo(print())
+                             .andExpect(status().isOk())
+                             .andExpect(jsonPath("id").value(1));
+                 }
+             
+             }
+             ```
+          
+        * ② 컨트롤러 작성
+          
+             ```java
+             @Controller
+             public class SampleController {
+             
+                 @GetMapping("/events/{id}")
+                 @ResponseBody
+                 public Event getEvent(@PathVariable Integer id, @MatrixVariable String name){
+                     Event event = new Event();
+                     event.setId(id);
+                     event.setName(name);
+                     return event;
+                 }
+             }
+             ```
+
+        * ③ `WebConfig`에서 `configurePathMatch()`를 오버라이딩 한다.
+                    
+             ```java
+             @Configuration
+             public class WebConfig implements WebMvcConfigurer {
+                 @Override
+                 public void configurePathMatch(PathMatchConfigurer configurer) {
+                     UrlPathHelper urlPathHelper = new UrlPathHelper(); // UrlPathHelper 생성
+                     urlPathHelper.setRemoveSemicolonContent(false); // UrlPathHelper를 세미콜론을 제거 하지 않도록 설정
+                     configurer.setUrlPathHelper(urlPathHelper); // configurer에 urlPathHelper를 설정
+                 }
+             }
+             ```
+          
