@@ -5974,17 +5974,40 @@
 
 #### 26) 모델: @ModelAttribute 또 다른 사용법
 
-* (1) @ModelAttribute의 다른 용법
+* (1) `Model`과 `ModelMap`
 
-    * @RequestMapping을 사용한 핸들러 메소드의 아규먼트에 사용하기
+    * `Model`이나 `ModelMap`이라는 메소드 아규먼트를 사용해서 모델 정보를 담을 수 있다.
     
-    * @Controller 또는 @ControllerAdvice를 사용한 클래스에서 공통적으로 사용하는 모델 정보를 초기화 할 때 사용한다.
+    * 그리고 그 모델 정보를 뷰에서 참조해서 렌더링 하게 되는 것이다.
+
+* (2) @ModelAttribute의 사용방법
+
+    * `@RequestMapping`을 사용한 핸들러 메소드의 아규먼트에 사용하기 `[이전에 공부했던 내용]`
+    
+    * `@Controller` 또는 `@ControllerAdvice`를 사용한 클래스에서 공통적으로 사용하는 모델 정보를 정의 할 때 사용한다.
+
+    * `@RequestMapping`과 같이 사용하면 해당 메소드에서 리턴하는 객체를 모델에 넣어준다. `자주 사용되는 기능 X`  
+      
+        * `RequestToViewNameTranslator`가 요청의 이름과 일치하는 뷰 이름을 리턴한다.
+        
+            ```java
+            @GetMapping("/events/form/name")
+            @ModelAttribute // 해당 애노테이션은 생략 가능
+            public Event eventsFormName(){
+                return new Event();
+            }
+            ```
+
+* (3) @ModelAttribute의 또 다른 사용법 - 공통적으로 사용하는 모델 정보를 초기화
+
+    * 컨트롤러를 변경한다.
     
         ```java
         @Controller
         @SessionAttributes("event")
         public class EventController {
-        
+          
+            /* 모든 요청에 카테고리 정보를 전달하고 싶다면 해당 메소드에 @ModelAttribute를 붙이고 Model 또는 ModelMap에 addAttribute()로 넣는다.  */
             @ModelAttribute
             public void categories(Model model) {
                 model.addAttribute("categories", List.of("study", "seminar", "hobby", "social"));
@@ -5995,6 +6018,8 @@
         }
         ```
       
+    * 테스트 코드를 변경한다. 
+      
         ```java
         @RunWith(SpringRunner.class)
         @WebMvcTest
@@ -6021,57 +6046,20 @@
             }
         }
         ```
-      
-    * 또는
-    
-        ```java
-        @RunWith(SpringRunner.class)
-        @WebMvcTest
-        public class EventControllerTest {
-        
-            @Autowired
-            MockMvc mockMvc;
-        
-            ...
-        
-            @Test
-            public void getEvents() throws Exception {
-                Event newEvent = new Event();
-                newEvent.setName("Winter is coming");
-                newEvent.setLimit(10000);
-        
-                mockMvc.perform(get("/events/list")
-                            .sessionAttr("visitTime", LocalDateTime.now())
-                            .flashAttr("newEvent", newEvent))
-                        .andDo(print())
-                        .andExpect(status().isOk())
-                        .andExpect(model().attributeExists("categories"))
-                        .andExpect(xpath("//p").nodeCount(2));
-            }
-        }
-        ```
-
-    * @RequestMapping과 같이 사용하면 해당 메소드에서 리턴하는 객체를 모델에 넣어 준다. `자주 사용되는 기능 X`  
-      
-    * (뷰 이름은 RequestToViewNameTranslator가 리턴 한다.)
-    
-        ```java
-        @GetMapping("/events/form/name")
-        @ModelAttribute // 생략 가능
-        public Event eventsFormName(){
-            return new Event();
-        }
-        ```
-      
+            
 #### 27) DataBinder: @InitBinder
 
 * (1) @InitBinder
 
-    * @InitBinder는 특정 컨트롤러에서 바인딩 또는 Validator 설정을 변경하고 싶을 때 사용한다.
+    * `@InitBinder`는 특정 컨트롤러에서 바인딩 또는 검증 설정을 변경하고 싶을 때 사용한다.
 
-* (2) 실습
+* (2) 실습 - @InitBinder 사용하기 
 
-    * @InitBinder 사용
+    * `@InitBinder`를 사용한다.
+    
+        * 메서드 리턴 타입은 `void`여야 하며 메서드명은 임의로 정해도 된다.
+        
+        * 그리고 WebDataBinder라는 파라미터를 사용해야 한다.
     
         ```java
         @InitBinder
@@ -6080,7 +6068,7 @@
         }
         ```
       
-    * 뷰(`form-name.html`) 수정 하기
+    * `form-name.html`를 수정한다.
        
         ```html
         <!DOCTYPE html>
@@ -6099,64 +6087,75 @@
         </body>
         </html>
         ```
+
+    * 폼에서 id 값을 입력하더라도 id가 바인딩 되지 않는 것을 확인 할 수 있다. 
       
 * (3) 바인딩 설정
     
-    * webDataBinder.setDisallowedFields() : 바인딩을 하고 싶지 않은 필드를 지정한다.
+    * `webDataBinder.setDisallowedFields()` : 바인딩을 하고 싶지 않은 필드를 지정한다.
 
-    * webDataBinder.setAllowedFields() : 바인딩을 하고 싶은 필드를 지정한다.
+    * `webDataBinder.setAllowedFields() `: 바인딩을 하고 싶은 필드를 지정한다.
         
 * (4) 포매터 설정
     
-    * webDataBinder.addCustomFormatter();
+    * `webDataBinder.addCustomFormatter();`
         
 * (5) Validator 설정
     
-    * webDataBinder.addValidators();
+    * `webDataBinder.addValidators();`
+
+    * 실습
     
-        ```java
-        public class EventValidator implements Validator {
-        
-            @Override
-            public boolean supports(Class<?> clazz) {
-                return Event.class.isAssignableFrom(clazz);
-            }
-        
-            @Override
-            public void validate(Object target, Errors errors) {
-                Event event = (Event) target;
-        
-                if(event.getName().equalsIgnoreCase("aaa")){
-                    errors.rejectValue("name", "wrongValue", "the value is not allowed");
+        * EventValidator를 만든다.
+           
+            ```java
+            public class EventValidator implements Validator {
+            
+                @Override
+                public boolean supports(Class<?> clazz) {
+                    return Event.class.isAssignableFrom(clazz);
                 }
+            
+                @Override
+                public void validate(Object target, Errors errors) {
+                    Event event = (Event) target;
+                      
+                    // 이름이 aaa이면 값을 거부한다. (허용하지 않는다.)
+                    if(event.getName().equalsIgnoreCase("aaa")){
+                        errors.rejectValue("name", "wrongValue", "the value is not allowed");
+                    }
+                }
+            
             }
-        
-        }
-        ```
+            ```
+          
+        * webDataBinder에 Validator를 등록한다.
+          
+            ```java
+            @InitBinder
+            public void initEventBinder(WebDataBinder webDataBinder){
+                webDataBinder.setDisallowedFields("id"); // 바인딩을 하고 싶지 않은 필드를 지정한다.
+                webDataBinder.addValidators(new EventValidator());
+            }
+            ```
       
-        ```java
-        @InitBinder
-        public void initEventBinder(WebDataBinder webDataBinder){
-            webDataBinder.setDisallowedFields("id"); // 바인딩을 하고 싶지 않은 필드를 지정한다.
-            webDataBinder.addValidators(new EventValidator());
-        }
-        ```
-      
-* (6) 특정 모델 객체에만 바인딩 또는 Validator 설정을 변경하고 싶을 때 사용
+* (6) 특정 모델 객체에만 바인딩 또는 Validator 설정을 적용하고 싶을 때 사용 할 수 있다. 
     
-    * @InitBinder(“event”)
+    * `@InitBinder("event")` : 지정된 이름에 해당하는 모델 애트리뷰트를 바인딩 할 때, 어떠한 설정을 적용 할 수 있다.
+    
+        * 특정 필드는 바인딩 되지 않도록 하거나 Validator를 설정 할 수 있다. 
           
 #### 28) 예외 처리 핸들러: @ExceptionHandler
 
-* (1) @ExceptionHandler는 특정 예외가 발생한 요청을 처리하는 핸들러를 정의할 때 사용한다.
+* (1) `@ExceptionHandler`는 특정 예외를 처리하는 핸들러를 정의한다.
 
     * 지원하는 메소드 아규먼트 (해당 예외 객체, 핸들러 객체, ...)
     
     * 지원하는 리턴 값
     
-    * REST API의 경우 응답 본문에 에러에 대한 정보를 담아주고, 상태 코드를 설정하려면 ResponseEntity를 주로 사용한다.
+    * `REST API`의 경우 응답 본문에 에러에 대한 정보를 담아주고, 상태 코드를 설정하려면 `ResponseEntity`를 주로 사용한다.
     
-* (2) 실습하기
+* (2) 실습
 
     * 커스텀한 예외 클래스를 정의한다.
     
@@ -6167,34 +6166,33 @@
       
     * 예외 처리 핸들러를 정의한 다음, 예외를 발생 시키는 코드를 작성한다.
     
-        ```java
-        @Controller
-        @SessionAttributes("event")
-        public class EventController {
-        
-            @ExceptionHandler
-            public String eventErrorHandler(EventException exception,
-                                            Model model){
-                model.addAttribute("message", "event error");
-                return "error";
+        * 예외가 발생하면 @ExceptionHandler에서 예외를 처리하는데 이때, error 뷰를 보여준다. 
+    
+            ```java
+            @Controller
+            @SessionAttributes("event")
+            public class EventController {
+            
+                @ExceptionHandler
+                public String eventErrorHandler(EventException exception, // 처리하고 싶은 예외를 메소드 아규먼트로 선언한다. 
+                                                Model model){
+                    model.addAttribute("message", "event error");
+                    return "error"; // 에러 페이지를 보여준다. 
+                }
+            
+                ...
+            
+                @GetMapping("/events/form/name")
+                public String eventsFormName(Model model){ 
+                    throw new EventException(); // 예외를 발생시킨다. 
+                }
+            
+                ...
+            
             }
-        
-            ...
-        
-            @GetMapping("/events/form/name")
-            public String eventsFormName(Model model){ 
-                throw new EventException();
-                
-             //   model.addAttribute("event", new Event());
-             //   return "/events/form-name";
-            }
-        
-            ...
-        
-        }
-        ```
+            ```
       
-    * 에러 페이지를 작성한다.
+    * 에러 페이지(`error.html`)를 작성한다.
     
         ```html
         <!DOCTYPE html>
@@ -6215,40 +6213,15 @@
 
 #### 29) 전역 컨트롤러: @(Rest)ControllerAdvice
 
-* (1) @(Rest)ControllerAdvice는 예외 처리, 바인딩 설정, 모델 객체 정보 설정을 모든 컨트롤러 전반에 걸쳐 적용하고 싶은 경우에 사용한다.
+* (1) `@(Rest)ControllerAdvice`는 예외 처리, 바인딩 설정, 모델 객체 정보 설정을 모든 컨트롤러에 적용하고 싶은 경우에 사용한다.
     
     * @ExceptionHandler
 
     * @InitBinder
 
     * @ModelAttribute
-    
-        ```java
-        @ControllerAdvice
-        public class BaseController {
-        
-            @ExceptionHandler
-            public String eventErrorHandler(EventException exception,
-                                            Model model){
-                model.addAttribute("message", "event error");
-                return "error";
-            }
-        
-            @InitBinder
-            public void initEventBinder(WebDataBinder webDataBinder){
-                webDataBinder.setDisallowedFields("id"); // 바인딩을 하고 싶지 않은 필드를 지정한다.
-                webDataBinder.addValidators(new EventValidator());
-            }
-        
-            @ModelAttribute
-            public void categories(Model model) {
-                model.addAttribute("categories", List.of("study", "seminar", "hobby", "social"));
-            }
-            
-        }
-        ```
       
-* (2) 적용할 범위를 지정 할 수도 있다.
+* (2) 적용 범위를 지정 할 수도 있다.
     
     * 특정 애노테이션을 가지고 있는 컨트롤러에만 적용하기
     
@@ -6268,7 +6241,31 @@
         @ControllerAdvice(assignableTypes = {EventController.class, EventApi.class})
         ```
 
+* (3) 실습
+
+    ```java
+    @ControllerAdvice
+    public class BaseController {
     
+        @ExceptionHandler
+        public String eventErrorHandler(EventException exception,
+                                        Model model){
+            model.addAttribute("message", "event error");
+            return "error";
+        }
     
+        @InitBinder
+        public void initEventBinder(WebDataBinder webDataBinder){
+            webDataBinder.setDisallowedFields("id"); // 바인딩을 하고 싶지 않은 필드를 지정한다.
+            webDataBinder.addValidators(new EventValidator());
+        }
+    
+        @ModelAttribute
+        public void categories(Model model) {
+            model.addAttribute("categories", List.of("study", "seminar", "hobby", "social"));
+        }
+        
+    }
+    ```
 
     
