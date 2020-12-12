@@ -4052,7 +4052,7 @@
         
 * 핸들러 메소드 리턴은 주로 응답 또는 모델을 랜더링할 뷰에 대한 정보를 제공하는데 사용한다.
 
-    * @`ResponseBody` : 핸들러의 리턴 값이 `HttpMessageConverter`를 사용해서 응답 본문에 작성된다.
+    * `@ResponseBody `: 핸들러의 리턴 값을 `HttpMessageConverter`를 사용해서 응답 본문에 작성한다.
 
     * https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-return-types
 
@@ -4172,21 +4172,7 @@
                  }
              }
              ```
-
-        * ③ `WebConfig`에서 `configurePathMatch()`를 오버라이딩 한다.
-                    
-             ```java
-             @Configuration
-             public class WebConfig implements WebMvcConfigurer {
-                 @Override
-                 public void configurePathMatch(PathMatchConfigurer configurer) {
-                     UrlPathHelper urlPathHelper = new UrlPathHelper(); // UrlPathHelper 생성
-                     urlPathHelper.setRemoveSemicolonContent(false); // UrlPathHelper를 세미콜론을 제거 하지 않도록 설정
-                     configurer.setUrlPathHelper(urlPathHelper); // configurer에 urlPathHelper를 설정
-                 }
-             }
-             ```
-          
+                  
 #### 11) 핸들러 메소드 3부 : 요청 매개변수
 
 * (1) 요청 매개변수란?
@@ -4197,7 +4183,7 @@
         
         * `쿼리 파라미터`라고도 한다.
     
-            * @GetMapping("/events/{id}?name=kevin")
+            * `"http://localhost:8080/events?name=kevin"`
 
     * ② `폼 데이터(form-data)`
 
@@ -4205,7 +4191,7 @@
 
 * (2) @RequestParam
 
-    * `@RequestParam`는 요청 매개변수에 들어있는 단순 타입 데이터를 메소드 아규먼트로 받아올 수 있다.
+    * `@RequestParam`는 요청 매개변수에 들어있는 단순 타입 데이터를 메소드 아규먼트로 받아올 때 사용한다.
     
         * `단순 타입` : 하나의 값을 말한다. Ex) String, Integer ...
         * `복합 타입` : 다른 타입들을 포함하고 있는 타입을 말한다. Ex) Event ...
@@ -4316,20 +4302,15 @@
         * ① 컨트롤러 작성
         
              ```java
-             @RunWith(SpringRunner.class)
-             @WebMvcTest
-             public class SampleControllerTest {
+             @Controller
+             public class SampleController {
              
-                 @Autowired
-                 MockMvc mockMvc;
-             
-                 @Test
-                 public void postEvent() throws Exception {
-                     mockMvc.perform(post("/events")
-                                 .param("name", "kevin"))
-                             .andDo(print())
-                             .andExpect(status().isOk())
-                             .andExpect(jsonPath("name").value("kevin"));
+                 @GetMapping("/events/form")
+                 public String eventsForm(Model model){
+                     Event newEvent = new Event();
+                     newEvent.setLimit(50);
+                     model.addAttribute("event", newEvent); // 모델에 "event"라는 이름으로 Event 객체를 저장
+                     return "events/form"; // 뷰 이름 리턴
                  }
              
              }
@@ -4368,7 +4349,7 @@
                 
                     * `*{}`: selection 표현식
 
-        * ③ 애플리케이션을 실행하고 웹 브라우저에서 값을 입력한 다음, submit을 하면 입력한 값이 Json이 나오는 것을 확인 할 수 있다.   
+        * ③ 애플리케이션을 실행하고 웹 브라우저에서 값을 입력한 다음, submit을 하면 입력한 값이 Json으로 나타나는 것을 확인 할 수 있다.   
         
             ![image 49](images/img49.png)
             
@@ -4395,7 +4376,7 @@
              }
              ```
 
-* (3) 포스트맨으로 테스트하기
+* (3) 포스트맨(Postman)으로 테스트하기
     
     * ① 쿼리 스트링(Query String)
     
@@ -4496,17 +4477,17 @@
          }
          ```
       
-    * 그리고 바인딩 에러가 발생했을 때, 폼 데이터를 그대로 저장하지 않고 해당 폼(Form)을 다시 보여주면서 입력 값 중에서 잘못된 값을 알려줄 수 있다.  
+    * 그리고 바인딩 에러가 발생했을 때, 폼 데이터를 그대로 저장하지 않고 해당 폼(Form)을 다시 보여주면서 입력 값 중에서 잘못된 값을 알려 줄 수도 있다.  
 
-* (4) 바인딩 이후에 검증 작업을 추가로 하고 싶은 경우
+* (4) 바인딩 이후에 검증(Validation) 작업을 추가로 하고 싶은 경우
 
     * `@Valid` 또는 `@Validated` 애노테이션을 사용한다.
     
     * 실습
            
-        * ① 컨트롤러에서 `@Valid` 또는 `@Validated` 애노테이션을 사용한다.
+        * ① 핸들러에 `@Valid` 또는 `@Validated` 애노테이션을 사용한다.
         
-            * 사용자가 요청 시 전달하는 값(-10)이 바인딩 한 다음, `@Valid`을 사용 하였으므로 유효성 검증(Validation)을 수행한다.
+            * 사용자가 요청 시 전달하는 값(-10)이 바인딩 된 다음, `@Valid`을 사용 하였으므로 유효성 검증(Validation)을 수행한다.
             
             * 유효성 검증(Validation)에 대한 에러도 BindingResult에 저장된다. 
           
@@ -4531,7 +4512,7 @@
           
             * 즉, `BindingResult`에는 바인딩 에러와 유효성 검증(Validation) 에러가 저장된다. 
           
-        * ② Event 클래스에 JSR-303 애노테이션 중 하나인 `@Min(0)`으로 limit이 최소 0 보다는 커야된다고 지정한다.
+        * ② Event 클래스에 JSR-303 애노테이션 중 하나인 `@Min(0)`으로 limit이 최소 0 이상 이어야 한다고 지정한다.
         
              ```java
              public class Event {
@@ -4540,7 +4521,7 @@
              
                  private String name;
              
-                 @Min(0) // limit의 값은 최소 0 보다는 커야 함
+                 @Min(0) // limit의 값은 최소 0 이상
                  private Integer limit;
              
                  ...
@@ -4580,49 +4561,49 @@
     
         * `@Validated`만 사용하더라도 `@Valid`와 동일하게 검증이 된다.
     
-         ```java
-         public class Event {
-         
-             interface ValidateLimit {}
-             interface ValidateName {}
-         
-             private Integer id;
-         
-             // 해당 애노테이션이 사용 되어야 하는 Validation 그룹으로 ValidateName를 지정한다. 
-             @NotBlank(groups = ValidateName.class)
-             private String name;
-         
-             // 해당 애노테이션이 사용 되어야 하는 Validation 그룹으로 ValidateLimit를 지정한다. 
-             @Min(value = 0 , groups = ValidateLimit.class) // limit의 값은 최소 0 보다는 커야 함
-             private Integer limit;
-         
-             ...
-         }
-         ```
-          
-         ```java
-         @Controller
-         public class SampleController {
-         
-             // ValidateLimit이라는 그룹으로 검증 하도록 한다. 그러면 @NotBlank는 적용되지 않고 @Min만 적용된다.
-             @PostMapping("/events/name/{name}")
-             @ResponseBody
-             public Event getEvent(@Validated(Event.ValidateLimit.class) @ModelAttribute Event event , BindingResult bindingResult){
-                 if(bindingResult.hasErrors()){
-                     System.out.println("==========================");
-                     bindingResult.getAllErrors().forEach(c -> {
-                         System.out.println(c.toString());
-                     });
-                 }
-                 return event;
+             ```java
+             public class Event {
+             
+                 interface ValidateLimit {}
+                 interface ValidateName {}
+             
+                 private Integer id;
+             
+                 // 해당 애노테이션이 사용 되어야 하는 Validation 그룹으로 ValidateName를 지정한다. 
+                 @NotBlank(groups = ValidateName.class)
+                 private String name;
+             
+                 // 해당 애노테이션이 사용 되어야 하는 Validation 그룹으로 ValidateLimit를 지정한다. 
+                 @Min(value = 0 , groups = ValidateLimit.class) // limit의 값은 최소 0 이상
+                 private Integer limit;
+             
+                 ...
              }
-         
-         }
-         ```
+             ```
+              
+             ```java
+             @Controller
+             public class SampleController {
+             
+                 // ValidateLimit이라는 그룹으로 검증 하도록 한다. 그러면 @NotBlank는 적용되지 않고 @Min만 적용된다.
+                 @PostMapping("/events/name/{name}")
+                 @ResponseBody
+                 public Event getEvent(@Validated(Event.ValidateLimit.class) @ModelAttribute Event event , BindingResult bindingResult){
+                     if(bindingResult.hasErrors()){
+                         System.out.println("==========================");
+                         bindingResult.getAllErrors().forEach(c -> {
+                             System.out.println(c.toString());
+                         });
+                     }
+                     return event;
+                 }
+             
+             }
+             ```
       
 #### 15) 핸들러 메소드 7부 : 폼 서브밋 (에러 처리)
 
-* 바인딩 에러가 발생했을 때, 폼 데이터를 그대로 저장하지 않고 해당 폼(Form)을 다시 보여주면서 입력 값 중에서 잘못된 값을 알려주고 제대로된 값이 들어온 경우에 처리한다. 
+* **[목표]** 바인딩 에러가 발생했을 때, 폼 데이터를 그대로 저장하지 않고 해당 폼(Form)을 다시 보여주면서 입력 값 중에서 잘못된 값을 알려주고 제대로된 값이 들어온 경우에 처리한다. 
 
 * (1) 바인딩 에러 발생 시 Model에 담기는 정보
 
@@ -4644,16 +4625,16 @@
 
 * (4) 타임리프 목록 보여주기
 
-    * https://www.thymeleaf.
+    * https://www.thymeleaf.org/doc/tutorials/2.1/thymeleafspring.html#listing-seed-starter-data
 
-     ```html
-     <a th:href="@{/events/form}">Create New Event</a> 
-     <div th:unless="${#lists.isEmpty(eventList)}"> 
-        <ul th:each="event: ${eventList}">
-            <p th:text="${event.Name}">Event Name</p> 
-        </ul>
-     </div> 
-     ```
+         ```html
+         <a th:href="@{/events/form}">Create New Event</a> 
+         <div th:unless="${#lists.isEmpty(eventList)}"> 
+            <ul th:each="event: ${eventList}">
+                <p th:text="${event.Name}">Event Name</p> 
+            </ul>
+         </div> 
+         ```
 
 * (5) 실습
       
@@ -4681,7 +4662,7 @@
          public class SampleController {
          
              @PostMapping("/events")
-             public String getEvent(@Validated @ModelAttribute Event event ,
+             public String getEvent(@Validated @ModelAttribute Event event,
                                     BindingResult bindingResult){
                  // 에러가 있는 경우 Form을 다시 보여준다.
                  if(bindingResult.hasErrors()){
@@ -4779,9 +4760,9 @@
              public class SampleController {
              
                  @PostMapping("/events")
-                 public String createEvent(@Validated @ModelAttribute Event event ,
-                                        BindingResult bindingResult,
-                                        Model model){
+                 public String createEvent(@Validated @ModelAttribute Event event,
+                                           BindingResult bindingResult,
+                                           Model model){
                      if(bindingResult.hasErrors()){
                          return "/events/form";
                      }
@@ -4810,7 +4791,7 @@
          
              @PostMapping("/events")
              public String createEvent(@Validated @ModelAttribute Event event ,
-                                    BindingResult bindingResult){
+                                       BindingResult bindingResult){
                  if(bindingResult.hasErrors()){
                      return "/events/form";
                  }
@@ -4946,7 +4927,7 @@
       
 * (5) 세션에 모델 애트리뷰트를 저장하는 이유는 무엇일까?
       
-    * 여러 이유가 있겠지만 예를 들어 보면 다음과 같다.
+    * 여러 이유가 있겠지만 예를 들어보면 다음과 같다.
         
         * ① 장바구니에 있는 데이터는 여러 페이지에서 동일하게 유지 되어야 한다.
           
@@ -4956,7 +4937,7 @@
              
             * 또 그 다음 페이지에서는 이름과 limit을 조합하여 Event를 만든다.
             
-    * 즉, 세션에 모델을 저장하면 모델을 재활용 할 수 있다.
+    * 즉, 세션에 모델 정보를 저장하면 모델을 재활용 할 수 있다.
       
 * (6) `SessionStatus`를 사용해서 세션 처리 완료를 알려 줄 수 있다.
             
@@ -4990,7 +4971,7 @@
       
 #### 17) 핸들러 메소드 9부: 멀티 폼 서브밋
 
-* (1) 세션을 사용해서 여러 폼에 걸쳐 데이터를 나눠 입력 받고 저장하기
+* 세션을 사용해서 여러 폼에 걸쳐 데이터를 나눠 입력 받고 저장하기
 
     * ① 컨트롤러를 작성한다.
 
@@ -5048,7 +5029,7 @@
                      return "/events/form-limit"; 
                  }
       
-                 // 완료된 경우에 세션에서 모델 객체 제거한다. 
+                 // 완료된 경우에 세션에서 모델 객체를 제거한다. 
                  // 그 다음, list 화면으로 리다이렉트 한다.
                  sessionStatus.setComplete(); 
                  return "redirect:/events/list";
