@@ -1719,6 +1719,332 @@ int[][] arr = {
 
 ## 12. 스레드(Thread)
 
+#### 1) 프로세스와 쓰레드(process & thread)
+
+* 프로세스와 쓰레드
+
+    * `프로세스` : 실행 중인 프로그램, 자원(메모리, CPU ...)과 쓰레드로 구성
+    
+    * `쓰레드`
+    
+        * 프로세스 내에서 실제 작업을 수행한다.
+        
+        * 모든 프로세스는 최소한 하나의 쓰레드를 가지고 있다.
+        
+        * 싱글 스레드, 멀티 스레드
+        
+    * 하나의 새로운 프로세스를 생성하는 것 보다 하나의 새로운 스레드를 생성하는 것이 더 적은 비용이 든다.
+    
+        * `2 프로세스 1 쓰레드` vs `1 프로세스 2 쓰레드`
+        
+            * 둘 다 결국 2개의 쓰레드를 생성하지만 `1 프로세스 2 쓰레드`가 더 적은 비용이 든다. 
+        
+        * `CGI` 방식은 클라이언트의 요청이 있을 때 마다 프로세스를 만드는 방식 이었으며 `Java Servlet`은 멀티 쓰레드를 지원하므로 하나의 프로세스에 요청이 있을 때 마다 쓰레드를 만드는 방식이다.
+
+#### 2) 멀티 쓰레드의 장단점
+
+* 대부분의 프로그램이 멀티쓰레드로 작성 되어 있다. 그러나 멀티 쓰레드 프로그래밍이 장점만 있는 것은 아니다.
+
+* 장점
+
+    * 시스템 자원을 보다 **효율적**으로 사용 할 수 있다.
+
+    * 사용자에 대한 **응답성**이 향상된다.
+    
+        * 메신저 프로그램에서 파일을 전송하면서 대화를 할 수 있다. (싱글 스레드에서는 한 번에 한 가지 일만 할 수 있음)
+
+    * 작업이 분리되어 **코드가 간결**해 진다.
+    
+    * 즉, "여러 모로 좋다."
+    
+* 단점
+
+    * `동기화(Synchronization)`에 주의해야 한다.
+    
+    * `교착 상태(dead-lock)`가 발생하지 않도록 주의해야 한다.
+    
+    * 각 쓰레드가 효율적으로 고르게 실행될 수 있게 해야 한다.
+    
+    * 즉, "프로그래밍 할 때, 고려해야 할 사항들이 많다."
+    
+#### 3) 쓰레드의 구현과 실행
+
+* (1) 쓰레드를 구현하는 방법은 다음 두 가지가 존재한다.
+
+    * ① `Thread` 클래스를 상속해서 쓰레드를 구현하는 것
+    
+        ```java
+        class MyThread extends Thread{
+          public void run(){ // Thread 클래스의 run()을 오버라이딩
+              /* 쓰레드가 수행할 작업을 작성한다. */
+          }
+        }
+        ```
+      
+        * Thread 클래스를 상속 받으면 다른 클래스를 상속 받을 수 없으므로 인터페이스를 구현하는 것이 좋다. 
+    
+    * ② `Runnable` 인터페이스를 구현해서 쓰레드를 구현하는 것
+    
+        ```java
+        class MyThread implements Runnable{
+          public void run(){ // Runnable 인터페이스의 추상 메서드 run()을 구현 
+              /* 쓰레드가 수행할 작업을 작성한다. */
+          }
+        }
+        ```
+
+* (2) 쓰레드 생성 및 실행
+
+    * ① `Thread` 클래스를 상속하는 경우
+    
+        * Thread의 자손 클래스의 인스턴스를 생성한 다음, 해당 쓰레드를 실행한다.
+    
+            ```java
+            MyThread t1 = new MyThread();
+            t1.start();
+            ```
+
+    * ② `Runnable` 인터페이스를 구현하는 경우
+
+        * Runnable 인터페이스를 구현한 클래스의 인스턴스를 생성한 다음, 이 인스턴스를 Thread 클래스의 생성자의 매개변수로 제공한다. 
+        
+        * 그리고 해당 쓰레드를 실행한다.
+           
+            ```java
+            Runnable r = new MyThread2();
+            Thread t2 = new Thread(r); // Thread(Runnable r)
+            // Thread t2 = new Thread(new MyThread2());
+            t2.start();
+            ```
+
+* (3) 실습 - 쓰레드 생성 및 실행
+
+    ```java
+    public class Ex13_1 {
+        public static void main(String[] args) {
+            ThreadEx1_1 t1 = new ThreadEx1_1();
+    
+            Runnable r = new ThreadEx1_2();
+            Thread t2 = new Thread(r);
+    
+            t1.start();
+            t2.start();
+        }
+    }
+    
+    class ThreadEx1_1 extends Thread{ // Thread 클래스를 상속해서 쓰레드를 구현하는 것
+        public void run(){ // 쓰레드가 수행 할 작업을 작성한다.
+            for(int i = 0; i < 5; i++){
+                // getName() : 쓰레드의 이름을 반환한다.
+                System.out.println(getName()); // 조상인 Thread의 getName()를 호출한다.
+            }
+        }
+    }
+    
+    class ThreadEx1_2 implements Runnable{ // Runnable 인터페이스를 구현해서 쓰레드를 구현하는 것
+        public void run(){ // 쓰레드가 수행 할 작업을 작성한다.
+            for(int i = 0; i < 5; i++){
+                // Thread.currentThread() : 현재 실행중인 쓰레드를 반환한다.
+                System.out.println(Thread.currentThread().getName());
+            }
+        }
+    }
+    ```
+
+* (4) 쓰레드 실행 - start()
+
+    * 쓰레드를 생성한 후에 start()를 호출해야 쓰레드가 작업을 시작한다.
+    
+        ```java
+        ThreadEx1_1 t1 = new ThreadEx1_1(); // 쓰레드 t1를 생성한다.
+        ThreadEx1_1 t2 = new ThreadEx1_1(); // 쓰레드 t2를 생성한다.
+      
+        t1.start();   // 쓰레드 t1를 실행시킨다.
+        t2.start();  // 쓰레드 t2를 실행시킨다.
+        ```
+
+        * 쓰레드에 start()를 호출하면 실행 대기 상태가 되며 자신의 차례가 되면 실행된다.
+        
+        * 쓰레드 t1를 먼저 start() 했다고 해서 반드시 먼저 실행되는 것은 아니다.
+       
+            * 쓰레드의 실행 순서는 운영체제(OS)의 스케줄러가 결정한다.
+
+* (5) start()와 run()
+
+    * 자바의 정석 3판 p728~729를 참고하자.
+
+#### 4) 싱글 쓰레드와 멀티 쓰레드, 쓰레드의 I/O 블락킹
+
+* (1) main 쓰레드
+
+    * `main 쓰레드`는 main 메서드의 코드를 수행하는 쓰레드
+    
+    * 쓰레드는 `사용자 쓰레드`와 `데몬 쓰레드` 두 종류가 있다.
+    
+        * main 쓰레드는 사용자 쓰레드다.
+        
+    * 실행 중인 사용자 쓰레드가 하나도 없을 때, 프로그램은 종료된다.
+    
+    * 실습
+    
+        ```java
+        class Ex13_11 {
+            static long startTime = 0;
+        
+            public static void main(String args[]) {
+                ThreadEx11_1 th1 = new ThreadEx11_1();
+                ThreadEx11_2 th2 = new ThreadEx11_2();
+                th1.start();
+                th2.start();
+                startTime = System.currentTimeMillis();
+        
+                try {
+                    th1.join();	// main 쓰레드가 th1의 작업이 끝날 때까지 기다린다.
+                    th2.join();	// main 쓰레드가 th2의 작업이 끝날 때까지 기다린다.
+                } catch(InterruptedException e) {}
+        
+                System.out.print("소요시간:" + (System.currentTimeMillis() - Ex13_11.startTime));
+            }
+        }
+        
+        class ThreadEx11_1 extends Thread {
+            public void run() {
+                for(int i=0; i < 300; i++) {
+                    System.out.print(new String("-"));
+                }
+            }
+        }
+        
+        class ThreadEx11_2 extends Thread {
+            public void run() {
+                for(int i=0; i < 300; i++) {
+                    System.out.print(new String("|"));
+                }
+            }
+        }
+        ```   
+
+* (2) 싱글 쓰레드와 멀티 쓰레드
+    
+    * 싱글 쓰레드
+    
+        * `-`를 출력하는 작업과 `|`를 출력하는 작업을 하나의 쓰레드가 연속적으로 처리하는 시간을 측정하는 예제다.
+    
+            ```java
+            class Ex13_2 {
+                public static void main(String args[]) {
+                    long startTime = System.currentTimeMillis();
+            
+                    for(int i=0; i < 300; i++)
+                        System.out.printf("%s", new String("-"));
+            
+                    System.out.print("소요시간1:" +(System.currentTimeMillis()- startTime));
+            
+                    for(int i=0; i < 300; i++)
+                        System.out.printf("%s", new String("|"));
+            
+                    System.out.print("소요시간2:"+(System.currentTimeMillis() - startTime));
+                }
+            }
+            ```
+          
+    * 멀티 쓰레드
+    
+        * 새로운 쓰레드를 하나 생성해서 두 개의 쓰레드가 작업을 하나씩 나누어서 수행한 후 실행 결과를 비교하는 코드를 작성한다.
+    
+            ```java
+            class Ex13_3 {
+                static long startTime = 0;
+            
+                public static void main(String args[]) {
+                    ThreadEx3_1 th1 = new ThreadEx3_1();
+                    th1.start();
+                    startTime = System.currentTimeMillis();
+            
+                    for(int i=0; i < 300; i++)
+                        System.out.printf("%s", new String("-"));
+            
+                    System.out.print("소요시간1:" + (System.currentTimeMillis() - Ex13_3.startTime));
+                }
+            }
+            
+            class ThreadEx3_1 extends Thread {
+                public void run() {
+                    for(int i=0; i < 300; i++)
+                        System.out.printf("%s", new String("|"));
+            
+                    System.out.print("소요시간2:" + (System.currentTimeMillis() - Ex13_3.startTime));
+                }
+            }
+            ```
+          
+        * 두 개의 쓰레드로 작업하는데도 더 많은 시간이 걸린 이유는 두 가지다.
+        
+            * 하나는 두 쓰레드가 번갈아가면서 작업을 처리하기 때문에 쓰레드 간의 작업 전환 시간이 소요되기 때문이다.
+            
+                * `컨텍스트 스위칭(context switching)` : 프로세스 또는 쓰레드 간의 작업 전환을 말한다.
+        
+            * 나머지 하나는 한 쓰레드가 화면에 출력하고 있는 동안 다른 쓰레드는 출력이 끝나기를 기다려야하는데, 이때 발생하는 대기시간 때문이다.
+          
+        * 시간이 더 걸리는 멀티스레드를 사용하는 이유는 무엇일까? 시간이 조금 더 걸리더라도 2 가지 작업을 동시에 할 수 있다는 것이 장점이다.
+          
+    * 더 자세한 내용은 자바의 정석 3판 p732~735를 참고하자.
+
+* (3) 쓰레드의 I/O 블락킹(blocking)
+    
+    * `쓰레드의 I/O 블락킹(blocking)` : 입출력 시 작업이 중단되는 것을 말한다.
+
+        * 싱글 쓰레드
+        
+            ```java
+            class Ex13_4 {
+                public static void main(String[] args) throws Exception {
+                    /* A 작업 */
+                    String input = JOptionPane.showInputDialog("아무 값이나 입력하세요."); 
+                    System.out.println("입력하신 값은 " + input + "입니다.");
+            
+                    /* B 작업 : 카운트 다운을 한다 */
+                    for(int i=10; i > 0; i--) {
+                        System.out.println(i);
+                        try {
+                            Thread.sleep(1000);  // 1초간 시간을 지연한다.
+                        } catch(Exception e ) {}
+                    }
+                }
+            }
+            ```
+          
+            * 사용자로 부터 입력을 기다리는 구간에는 아무 일도 하지 않는다. 
+            
+        * 멀티 쓰레드
+        
+            ```java
+            class Ex13_5 {
+                /* A 작업 */
+            	public static void main(String[] args) throws Exception { 
+            		ThreadEx5_1 th1 = new ThreadEx5_1();
+            		th1.start();
+            	
+            		String input = JOptionPane.showInputDialog("아무 값이나 입력하세요."); 
+            		System.out.println("입력하신 값은 " + input + "입니다.");
+            	}
+            }
+            
+            class ThreadEx5_1 extends Thread {
+                /* B 작업 : 카운트 다운을 한다 */
+            	public void run() {
+            		for(int i=10; i > 0; i--) {
+            			System.out.println(i);
+            			try {
+            				sleep(1000);
+            			} catch(Exception e ) {}
+            		}
+            	} // run()
+            }
+            ```
+          
+            * 사용자로 부터 입력을 기다리는 구간에는 B 작업이 수행된다.
+            
 ## 13. 람다와 스트림
 
 ## 14. 입출력(I/O)
