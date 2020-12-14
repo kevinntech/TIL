@@ -2044,7 +2044,328 @@ int[][] arr = {
             ```
           
             * 사용자로 부터 입력을 기다리는 구간에는 B 작업이 수행된다.
+
+#### 5) 쓰레드의 우선순위(priority of thread)
+
+* (1) 쓰레드의 우선순위
+
+    * **쓰레드가 수행하는 작업의 중요도에 따라 쓰레드의 우선순위를 서로 다르게 지정하여 특정 쓰레드가 더 많은 작업시간을 갖도록 할 수 있다.**
+    
+    * `void setPriority(int newPriority)` : 쓰레드의 우선순위를 지정한 값으로 변경한다.
+    
+    * `int getPriority()` : 쓰레드의 우선순위를 반환한다.
+
+        ```java
+        public static final int MAX_PRIORITY = 10 // 최대 우선 순위
+        public static final int MIN_PRIORITY = 1 // 최소 우선 순위
+        public static final int NORM_PRIORITY = 5 // 보통 우선 순위
+        ```
+      
+        * 쓰레드가 가질 수 있는 우선순위의 범위는 1~10이며 숫자가 높을수록 우선순위가 높다.
+        
+            * 사실, 쓰레드의 우선순위는 해당 쓰레드가 수행하는 작업이 중요하므로 더 우선적으로 수행 되었으면 좋겠다는 희망사항을 OS의 스케줄러에 전달하는 것일뿐이다.
             
+            * 쓰레드에 높은 우선순위를 준다고 해서 무조건 더 많은 실행시간을 갖게 될 것이라고 기대 할 수는 없다.
+            
+                * 쓰레드에 높은 우선순위를 주면 더 많은 실행시간을 갖게 되어 빨리 끝날 확률이 더 높아지긴 함
+        
+        * 쓰레드의 우선순위는 쓰레드를 생성한 쓰레드로 부터 상속 받는다.
+        
+* (2) 실습 - 쓰레드의 우선순위
+
+    ```java
+    class Ex13_6 {
+        public static void main(String args[]) {
+            ThreadEx6_1 th1 = new ThreadEx6_1();
+            ThreadEx6_2 th2 = new ThreadEx6_2();
+    
+            th2.setPriority(7);
+    
+            System.out.println("Priority of th1(-) : " + th1.getPriority());
+            System.out.println("Priority of th2(|) : " + th2.getPriority());
+            th1.start();
+            th2.start();
+        }
+    }
+    
+    class ThreadEx6_1 extends Thread {
+        public void run() {
+            for(int i=0; i < 300; i++) {
+                System.out.print("-");
+                for(int x=0; x < 10000000; x++); // 시간 지연용 for문
+            }
+        }
+    }
+    
+    class ThreadEx6_2 extends Thread {
+        public void run() {
+            for(int i=0; i < 300; i++) {
+                System.out.print("|");
+                for(int x=0; x < 10000000; x++); // 시간 지연용 for문
+            }
+        }
+    }
+    ```
+
+* (3) 쓰레드 그룹(thread group)
+
+    * `쓰레드 그룹`은 서로 관련된 쓰레드를 그룹으로 묶어서 다루기 위한 것이다.
+    
+    * 모든 쓰레드는 반드시 하나의 쓰레드 그룹에 포함되어 있어야 한다.
+    
+    * 쓰레드 그룹을 지정하지 않고 생성한 쓰레드는 `main 쓰레드 그룹`에 속한다.
+    
+        * `main 쓰레드`는 `main 쓰레드 그룹`에 속한다.
+        
+        * 우리가 만드는 쓰레드는 `main 쓰레드`에서 만들기 때문에 `main 쓰레드 그룹`에 속하게 된다.
+        
+    * 자신을 생성한 쓰레드(부모 쓰레드)의 그룹과 우선순위를 상속받는다.
+
+    * 쓰레드를 쓰레드 그룹에 포함시키려면 Thread의 생성자를 이용한다.
+
+        ```java
+        Thread(ThreadGroup group, String name)
+        Thread(ThreadGroup group, Runnable target)
+        Thread(ThreadGroup group, Runnable target, String name)
+        Thread(ThreadGroup group, Runnable target, String name, long stackSize)
+        ```
+
+    * Thread의 쓰레드 그룹과 관련된 메서드는 다음과 같다.
+    
+        * `ThreadGroup getThreadGroup()`
+        
+            * 쓰레드 자신이 속한 쓰레드 그룹을 반환한다.
+        
+        * `void uncaughtException(Thread t, Throwable e)`
+        
+            * 처리되지 않은 예외에 의해 쓰레드 그룹의 쓰레드가 실행이 종료되었을 때, JVM에 의해 이 메서드가 자동적으로 호출된다.
+
+#### 6) 데몬 쓰레드, 쓰레드의 상태
+
+* (1) 데몬 쓰레드(daemon thread)
+
+    * `데몬 쓰레드`는 일반 쓰레드(non-daemon thread)의 작업을 돕는 보조적인 역할을 수행한다.
+    
+    * **일반 쓰레드가 모두 종료되면 자동적으로 종료된다.**
+    
+    * 가비지 컬렉터, 자동 저장, 화면 자동 갱신 등에 사용된다.
+    
+    * `데몬 쓰레드`는 무한 루프와 조건을 이용해서 실행 후 대기하고 있다가 특정 조건이 만족되면 작업을 수행하고 다시 대기하도록 작성한다.
+
+    * 데몬 쓰레드 관련 메서드 
+    
+        * `boolean isDaemon()`
+        
+            * 쓰레드가 데몬 쓰레드인지 확인한다. 
+            
+            * 데몬 쓰레드이면 true를 반환한다.
+        
+        * `void setDaemon(boolean on)`
+        
+            * 쓰레드를 데몬 쓰레드로 또는 사용자 쓰레드로 변경한다.
+            
+            * 매개변수 on을 true로 지정하면 데몬 쓰레드가 된다.
+            
+            * setDaemon()은 반드시 start()를 호출하기 전에 실행 되어야 한다. 그렇지 않으면 IllegalThreadStateException이 발생한다. 
+
+    * 실습 - 데몬 쓰레드
+    
+        ```java
+        class Ex13_7 implements Runnable  {
+        	static boolean autoSave = false;
+        
+        	public static void main(String[] args) {
+        		Thread t = new Thread(new Ex13_7());
+        		t.setDaemon(true); // 이 부분이 없으면 종료되지 않는다. (데몬 쓰레드로 만들어서 일반 쓰레드가 종료되면 데몬 쓰레드도 같이 종료된다.)
+        		t.start();
+        
+        		for(int i=1; i <= 10; i++) {
+        			try{
+        				Thread.sleep(1000);
+        			} catch(InterruptedException e) {}
+        			System.out.println(i);
+        
+        			if(i==5) autoSave = true; // 5초 이후 부터 출력 되도록 함
+        		}
+        
+        		System.out.println("프로그램을 종료합니다.");
+        	}
+        
+        	/* 3초 마다 변수 autoSave의 값을 확인해서 그 값이 true이면 autoSave()를 호출하는 일을 무한히 반복하도록 쓰레드를 작성 */
+        	public void run() {
+        		while(true) {
+        			try { 
+        				Thread.sleep(3 * 1000); // 3초마다
+        			} catch(InterruptedException e) {}
+        
+        			// autoSave의 값이 true이면 autoSave()를 호출한다.
+        			if(autoSave) autoSave();
+        		}
+        	}
+        
+        	public void autoSave() {
+        		System.out.println("작업파일이 자동저장되었습니다.");
+        	}
+        }
+        ```
+
+* (2) 쓰레드의 상태
+
+    * ① `NEW` : 쓰레드가 생성되고 아직 start()가 호출되지 않은 상태
+    
+    * ② `RUNNABLE` : 실행 중 또는 실행 가능한 상태
+    
+    * ③ `BLOCKED` : 동기화 블럭에 의해서 일시정지된 상태(lock이 풀릴 때까지 기다리는 상태)
+    
+    * ④ `WAITING`, `TIMED_WAITING`
+    
+        * 쓰레드의 작업이 종료되지는 않았지만 실행 가능 하지 않은 일시 정지 상태
+     
+        * `TIMED_WAITING`은 일시 정지 시간이 지정된 경우를 의미한다.
+        
+    * ⑤ `TERMINATED` : 쓰레드의 작업이 종료된 상태
+    
+    * 더 자세한 내용은 자바의 정석 3판 p749를 참고하자.
+
+* (3) 쓰레드의 실행 제어 
+
+    * 쓰레드의 실행을 제어할 수 있는 메서드가 제공된다.
+
+        * `sleep()`
+        
+            ```java
+            static void sleep(long millis)
+            static void sleep(long millis, int nanos)
+            ```
+        
+            * 지정된 시간(1000분의 1초 단위) 동안 쓰레드를 일시 정지 시킨다.
+            * 지정한 시간이 지나고 나면, 자동적으로 다시 실행 대기 상태가 된다.
+
+        * `join()` 
+               
+            ```java
+            void join() 
+            void join(long millis)
+            void join(long millis)
+            ```
+        
+            * 다른 쓰레드가 끝날 때까지 기다린다.
+            * 지정된 시간이 지나거나 작업이 종료되면 join()을 호출한 쓰레드로 다시 돌아와 실행을 계속한다.
+            
+        * `void interrupt()`
+                       
+            * sleep()이나 join()에 의해 일시 정지 상태인 쓰레드를 깨워서 실행 대기 상태로 만든다.
+            * 해당 쓰레드에서는 Interrupted Exception이 발생함으로써 일시정지 상태를 벗어나게 만든다.
+
+        * `void stop()` : 쓰레드를 즉시 종료시킨다.
+               
+        * `void suspend()` : 쓰레드를 일시 정지 시킨다. resume()을 호출하면 다시 실행 대기 상태가 된다.
+        
+        * `void resume()` : suspend()에 의해 일시 정지 상태에 있는 쓰레드를 실행 대기 상태로 만든다.
+        
+        * `static void yield()` : 실행 중에 자신에게 주어진 실행 시간을 다른 쓰레드에게 양보(yield)하고 자신은 실행 대기 상태가 된다.
+
+    * Thread의 실행제어 메서드 중 static 메서드는 쓰레드 자기 자신에게만 동작한다.
+
+#### 7) sleep(), interrupt()
+
+* (1) sleep()
+
+    * `sleep()`는 현재 쓰레드를 지정된 시간 동안 멈추게 한다. (잠들게 한다.)
+    
+        ```java
+        static void sleep(long millis) // 천분의 일초 단위
+        static void sleep(long millis, int nanos) // 천분의 일초 + 나노초
+        ```
+      
+    * `sleep()`에 의해 일시 정지 상태가 된 쓰레드는 지정된 시간이 다 되거나 interrup()가 호출되면 (`InterruptedException`이 발생함) 잠에서 깨어나 실행 대기 상태가 된다.
+    
+    * `sleep()`을 호출할 때는 예외 처리를 해야 한다.
+
+        ```java
+        try{
+          Thread.sleep(1, 500000); // 쓰레드를 0.0015초 동안 멈추게 한다.
+        }catch(InterruptedException e){}
+        ```
+      
+    * 특정 쓰레드를 지정해서 멈추게 하는 것은 불가능하다.
+    
+        * `th1.sleep(2000);`가 아닌 `Thread.sleep(2000);`으로 작성해야 한다. (에러가 발생하지는 않지만 오해 할 수 있음)
+
+    * 실습
+    
+        ```java
+        class Ex13_8 {
+        	public static void main(String args[]) {
+        		ThreadEx8_1 th1 = new ThreadEx8_1();
+        		ThreadEx8_2 th2 = new ThreadEx8_2();
+        		th1.start(); 
+        		th2.start();
+        
+        		try {
+        			th1.sleep(2000); // Thread.sleep(2000)으로 작성 해야 한다. (main 쓰레드를 잠재우는 것)
+        		} catch(InterruptedException e) {}
+        
+        		System.out.print("<<main 종료>>");
+        	} // main
+        }
+        
+        class ThreadEx8_1 extends Thread {
+        	public void run() {
+        		for(int i=0; i < 300; i++) System.out.print("-");
+        		System.out.print("<<th1 종료>>");
+        	} // run()
+        }
+        
+        class ThreadEx8_2 extends Thread {
+        	public void run() {
+        		for(int i=0; i < 300; i++) System.out.print("|");
+        		System.out.print("<<th2 종료>>");
+        	} // run()
+        }
+        ```
+    
+* (2) interrupt()
+
+    * `interrupt()`는 일시 정지 상태(WAITING)인 쓰레드를 실행 대기 상태(RUNNABLE)로 만든다. (다른 쓰레드를 깨운다.)
+
+        * `void interrupt()` : 쓰레드의 interrupted 상태를 false에서 true로 변경한다.
+
+        * `boolean isInterrupted()` : 쓰레드의 interrupted 상태를 반환한다.
+
+        * `static boolean interrupted()` : 현재 쓰레드의 interrupted 상태를 알려주고, false로 초기화 한다.
+
+    * 실습
+    
+        ```java
+        class Ex13_9 {
+        	public static void main(String[] args) throws Exception {
+        		ThreadEx9_1 th1 = new ThreadEx9_1();
+        		th1.start();
+        
+        		String input = JOptionPane.showInputDialog("아무 값이나 입력하세요."); 
+        		System.out.println("입력하신 값은 " + input + "입니다.");
+        		th1.interrupt();  // interrupt()를 호출하면, interrupted 상태가 true가 된다.
+        		System.out.println("isInterrupted():"+ th1.isInterrupted()); // true
+        	}
+        }
+        
+        class ThreadEx9_1 extends Thread {
+        	public void run() {
+        		int i = 10;
+        
+        		while(i!=0 && !isInterrupted()) {
+        			System.out.println(i--);
+        			for(long x=0;x<2500000000L;x++); // 시간 지연
+        		}
+      
+        		System.out.println("카운트가 종료되었습니다.");
+        	} 
+        }
+        ```
+
+    * `interrupt()`는 sleep()에 의해 쓰레드가 잠시 멈춰있을 때, interrupt()를 호출하면 InterruptedException이 발생되고 쓰레드의 interrupted 상태는 false로 자동 초기화 된다. 
+  
 ## 13. 람다와 스트림
 
 ## 14. 입출력(I/O)
