@@ -9,6 +9,7 @@
 ## Java
 
 * [자바 기본 문법 정리](https://github.com/kevinntech/TIL/tree/main/java/java-basic "자바 기본 문법 정리")
+* [백기선님의 더 자바, 코드를 조작하는 다양한 방법](https://github.com/kevinntech/TIL/tree/main/java/the-java-code "더 자바, 코드를 조작하는 다양한 방법")
 
 ## SPRING
 
