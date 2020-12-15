@@ -2278,7 +2278,7 @@ int[][] arr = {
         static void sleep(long millis, int nanos) // 천분의 일초 + 나노초
         ```
       
-    * `sleep()`에 의해 일시 정지 상태가 된 쓰레드는 지정된 시간이 다 되거나 interrup()가 호출되면 (`InterruptedException`이 발생함) 잠에서 깨어나 실행 대기 상태가 된다.
+    * `sleep()`에 의해 일시 정지 상태가 된 쓰레드는 지정된 시간이 다 되거나 interrupt()가 호출되면 (`InterruptedException`이 발생함) 잠에서 깨어나 실행 대기 상태가 된다.
     
     * `sleep()`을 호출할 때는 예외 처리를 해야 한다.
 
@@ -2365,7 +2365,195 @@ int[][] arr = {
         ```
 
     * `interrupt()`는 sleep()에 의해 쓰레드가 잠시 멈춰있을 때, interrupt()를 호출하면 InterruptedException이 발생되고 쓰레드의 interrupted 상태는 false로 자동 초기화 된다. 
-  
+
+#### 8) suspend(), resume(), stop()
+
+* suspend(), resume(), stop()
+
+    * `suspend()`는 쓰레드를 일시 정지 시킨다.
+    
+    * `resume()`는 일시 정지된 쓰레드를 실행 대기 상태로 만든다.
+    
+    * `stop()`는 쓰레드를 즉시 종료 시킨다.
+    
+    * suspend(), resume(), stop()는 교착 상태(deadlock)에 빠지기 쉬워서 deprecated 되었다.
+    
+        * 그래서 다음과 같이 직접 정의해서 사용하면 된다.
+       
+            ```java
+             class ThreadEx17 {
+                public static void main(String args[]) {
+                    ThreadEx17_1 th1 = new ThreadEx17_1("*");
+                    ThreadEx17_1 th2 = new ThreadEx17_1("**");
+                    ThreadEx17_1 th3 = new ThreadEx17_1("***");
+                    th1.start();
+                    th2.start();
+                    th3.start();
+            
+                    try {
+                        Thread.sleep(2000); // main 쓰레드를 2초 동안 멈추게 한다.
+                        th1.suspend();		// th1 쓰레드를 일시 정지 시킨다.
+                        Thread.sleep(2000);
+                        th2.suspend();
+                        Thread.sleep(3000);
+                        th1.resume();       // th1 쓰레드가 다시 동작 하도록 한다.
+                        Thread.sleep(3000);
+                        th1.stop();   // th1 쓰레드를 강제 종료 시킨다.
+                        th2.stop();
+                        Thread.sleep(2000);
+                        th3.stop();
+                    } catch (InterruptedException e) {}
+                }
+            }
+            
+            class ThreadEx17_1 implements Runnable {
+                /* volatile는 코어의 캐시가 아닌 메모리에서 읽어 오도록 함 (캐시와 메모리 간의 불일치를 해결) */
+                volatile boolean suspended = false; // 일시정지 여부
+                volatile boolean stopped   = false; // 정지 여부
+            
+                Thread th;
+            
+                /* 생성자에서 매개변수로 전달 받은 이름으로 쓰레드를 생성한다. */
+                ThreadEx17_1(String name) {
+                    // Runnable을 구현한 것은 ThreadEx17_1 자신 이므로 this로 지정한다.
+                    th = new Thread(this, name); // Thread(Runnable r, String name)
+                }
+            
+                public void run() {
+                    while(!stopped) {
+                        if(!suspended) {
+                            /* 쓰레드가 수행할 코드를 작성한다. */
+                            System.out.println(Thread.currentThread().getName()); // 쓰레드의 이름을 1초 마다 출력
+                            try {
+                                Thread.sleep(1000);
+                            } catch(InterruptedException e) {}			
+                        }
+                    }
+                    System.out.println(Thread.currentThread().getName() + " - stopped");
+                }
+            
+                public void suspend() { suspended = true;  }
+                public void resume()  { suspended = false; }
+                public void stop()    { stopped   = true;  }
+                public void start()   { th.start();        } // 내부적으로 선언된 쓰레드를 시작한다.
+            }
+            ```
+            
+            * 쓰레드의 실행을 제어하는 메소드가 변수(suspended, stopped) 값을 변경한다.
+
+#### 9) join(), yield()
+
+* (1) join()
+
+    * `join()`는 특정 쓰레드가 지정된 시간 동안 작업하는 것을 기다린다.
+    
+    * 다른 쓰레드의 작업이 먼저 수행 되어야 할 때, join()를 사용한다.
+        
+        ```java
+         void join() : 작업이 모두 끝날 때까지 기다린다.
+         void join(long millis) : 1000분의 1초 동안 기다린다.
+         void join(long millis, int nanos) : 1000분의 1초 + 나노 초 동안 기다린다. 
+        ```
+
+    * `join()`도 `sleep()`처럼 `interrupt()`에 의해 일시 정지 상태에서 벗어날 수 있으며 join()를 호출하는 부분을 예외 처리 해야 한다.
+
+        ```java
+         class Ex13_11 {
+            static long startTime = 0;
+         
+            public static void main(String args[]) {
+                ThreadEx11_1 th1 = new ThreadEx11_1();
+                ThreadEx11_2 th2 = new ThreadEx11_2();
+                th1.start();
+                th2.start();
+      
+                startTime = System.currentTimeMillis();
+         
+                try {
+                    th1.join();	// main 쓰레드가 th1의 작업이 끝날 때까지 기다린다.
+                    th2.join();	// main 쓰레드가 th2의 작업이 끝날 때까지 기다린다.
+                } catch(InterruptedException e) {}
+         
+                System.out.print("소요시간:" + (System.currentTimeMillis() - startTime));
+            } // main
+         }
+         
+         class ThreadEx11_1 extends Thread {
+            public void run() {
+                for(int i=0; i < 300; i++) {
+                    System.out.print(new String("-"));
+                }
+            } // run()
+         }
+         
+         class ThreadEx11_2 extends Thread {
+            public void run() {
+                for(int i=0; i < 300; i++) {
+                    System.out.print(new String("|"));
+                }
+            } // run()
+         }
+        ```    
+
+* (2) yield()
+
+    * `yield()`는 남은 시간을 다음 쓰레드에게 양보하고, 자신(현재 쓰레드)은 실행 대기 상태가 된다.
+    
+        * `yield()`도 OS 스케줄러의 판단하에 동작하게 됨
+    
+    * `yield()`와 `interrupt()`를 적절히 사용하면 응답성과 효율을 높일 수 있다.
+
+        ```java
+         class ThreadEx18_1 implements Runnable {
+         	boolean suspended = false;
+         	boolean stopped   = false;
+         
+         	Thread th;
+         
+         	ThreadEx18_1(String name) {
+         		th = new Thread(this, name); // Thread(Runnable r, String name)
+         	}
+         
+         	public void run() {
+         		String name =th.getName();
+         
+         		while(!stopped) {
+         			if(!suspended) { // 일시 정지 상태가 아니면
+         				System.out.println(name);
+         				try {
+         					Thread.sleep(1000);
+         				} catch(InterruptedException e) {
+         					System.out.println(name + " - interrupted");
+         				}			
+         			} else { // 일시 정지 상태이면 다른 쓰레드에게 양보한다.
+         				Thread.yield();
+         			}
+         		}
+         		System.out.println(name + " - stopped");
+         	}
+         
+         	public void suspend() {
+         		suspended = true;
+         		th.interrupt();
+         		System.out.println(th.getName() + " - interrupt() by suspend()");
+         	}
+         
+         	public void resume() {
+         		suspended = false;
+         	}
+         
+         	public void stop() {
+         		stopped = true;
+         		th.interrupt();
+         		System.out.println(th.getName() + " - interrupt() by stop()");
+         	}
+         
+         	public void start() {
+         		th.start();
+         	}
+         }
+        ```  
+
 ## 13. 람다와 스트림
 
 ## 14. 입출력(I/O)

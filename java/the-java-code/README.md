@@ -161,7 +161,7 @@
             
             * 이때 메소드 영역에 저장하는 클래스 정보
             
-                * `FQCN (Fully Qualified Class Name)` : 클래스가 속한 패키지명을 모두 포함한 이름을 말한다.
+                * `FQCN (Fully Qualified Class Name)` : 클래스가 속한 패키지명을 모두 포함한 이름을 말한다. (+ 클래스 로더)
                 
                 * `클래스(class)`, `인터페이스(interface)`, `enum`
                 
@@ -217,79 +217,362 @@
     
     * 애플리케이션 클래스 로더(Application ClassLoader)에서도 클래스를 읽지 못한다면, `ClassNotFoundException` 예외가 발생한다.
     
-    
-      
-  
-    
-   
 
-    
+## 2. 바이트코드 조작
 
+#### 1) 코드 커버리지는 어떻게 측정할까?
+
+* (1) 실습 준비
+
+    * ① Moim 클래스를 작성한다.
+
+        ```java
+        public class Moim {
+        
+            int maxNumberOfAttendees; // 최대 참가자
+        
+            int numberOfEnrollment; // 현재 신청한 숫자
+        
+            public boolean isEnrollmentFull(){ // 현재 신청이 가득 찼는지 확인하는 메소드
+                if(maxNumberOfAttendees == 0){ // max가 0이면 제한하지 않는다. (무한대로 받음)
+                    return false;
+                }
+        
+                if(numberOfEnrollment < maxNumberOfAttendees){ // max 보다 작다면 full이 아님
+                    return false;
+                }
+        
+                return true; // 이외 경우에는 가득찬 걸로 간주한다.
+            }
             
+        }
+        ```
+      
+    * ② 테스트 코드를 작성한다.
 
-
-    
-
-
-
-
-
-
-
-    
-
-
-
-
-    
-
-
-
-
-
-
+        ```java
+        public class MoimTest {
         
+            @Test
+            public void isFull(){
+                Moim moim = new Moim();
+                moim.maxNumberOfAttendees = 100;
+                moim.numberOfEnrollment = 10;
+                Assert.assertFalse(moim.isEnrollmentFull()); // 모임은 full이 아닐 것으로 기대한다.
+            }
+        }
+        ```
+      
+* (2) 코드 커버리지
 
+    * `코드 커버리지(Code Coverage)`는 소스 코드 중 테스트를 통해 실행된 코드의 비율(%)을 말한다. 
+    
+    * 코드 커버리지는 어떻게 측정할까?
+
+        * `바이트 코드`를 읽어서 코드 커버리지를 측정해야 되는 부분을 개수를 세고 코드가 실행될 때 그 중 몇 개를 지나갔는지 다시 개수를 센다.
         
+        * 그래서 어디는 지나갔고 지나가지 않았는지를 비교하여 그 결과를 보여주는 것이다.
+        
+            * 빨간색 : 해당 라인에서 어떤 명령도 실행되지 않음
+            * 노란색 : 해당 라인에서 일부만 실행됨
+            * 초록색 : 해당 라인에서 모든 명령이 실행됨
 
+* (3) 실습 - JaCoCo 사용
 
+    * ① `pom.xml`에 JaCoCo 0.8.5 버전 의존성을 추가한다. (JaCoCo 0.8.4 버전에서 에러가 발생해서 변경하였음)
     
+        ```html
+        <dependency>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.5</version>
+        </dependency>
+        ```
+
+    * ② `pom.xml`에 JaCoCo 플러그인을 추가한다.
     
+        ```html
+        <build>
+            <plugins>
+              <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.5</version>
+                <executions>
+                  <execution>
+                    <goals>
+                      <goal>prepare-agent</goal>
+                    </goals>
+                  </execution>
+                  <execution>
+                    <id>report</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                      <goal>report</goal>
+                    </goals>
+                  </execution>
+                </executions>
+              </plugin>
+            </plugins>
+        </build>
+        ```
+
+    * ➂ 인텔리제이 터미널에서 `mvn clean verify`로 메이븐 빌드를 한다.
     
+    * ➃ `target/site/jacoco/index.html`를 `Open in Browser`로 실행하세요.
     
+* (4) 실습 - 커버리지를 만족하지 못하면 빌드가 실패 하도록 설정
+
+    * `pom.xml`에 `<execution>`를 하나 더 추가한다. (코드 커버리지가 50% 이상 이어야 빌드가 성공하도록 함)
     
+        ```html
+        <execution>
+            <id>jacoco-check</id>
+            <goals>
+                <goal>check</goal>
+            </goals>
+            <configuration>
+                <rules>
+                    <rule>
+                        <element>PACKAGE</element>
+                        <limits>
+                            <limit>
+                                <counter>LINE</counter>
+                                <value>COVEREDRATIO</value>
+                                <minimum>0.50</minimum>
+                            </limit>
+                        </limits>
+                    </rule>
+                </rules>
+            </configuration>
+        </execution>
+        ```
+      
+    * 코드 커버리지 퍼센트(%)가 90% 이상일 때, 빌드가 성공하도록 하면 빌드에 실패하게 된다.
+
+#### 2) 모자에서 토끼를 꺼내는 마술
+
+* `바이트 코드 조작`은 아무 것도 없는 `Moja`에서 `Rabbit`을 꺼내는 마술을 가능하게 한다.
+
+* (1) 바이트 코드 조작 라이브러리
+
+    * `ASM` : https://asm.ow2.io/
+    * `Javassist` : https://www.javassist.org/
+    * `ByteBuddy` : https://bytebuddy.net/#/
+
+* (2) 실습
+
+    * ① `pom.xml`에 ByteBuddy 의존성을 추가한다.
+
+        ```html
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.10.1</version>
+        </dependency>
+        ```
+
+    * ➁ 실습에서 사용 할 다음 클래스를 작성한다.
     
+        ```java
+        public class Moja {
+        
+            public String pullOut() {
+                return "";
+            }
+        }
+        ```
+      
+        ```java
+        public class Masulsa {
+        
+            public static void main(String[] args) {
+                System.out.println(new Moja().pullOut());
+            }
+        }
+        ```
 
+    * ➂ Masulsa 클래스에서 바이트 코드를 조작하는 부분을 추가하고 나머지 부분은 주석 처리 한 다음, 실행한다.
     
-
+        ```java
+        public class Masulsa {
+        
+            public static void main(String[] args) {
+                try {
+                    /* 바이트 코드를 변경해서 저장한다. */
+                    new ByteBuddy().redefine(Moja.class)
+                            .method(named("pullOut")).intercept(FixedValue.value("Rabbit!"))
+                            .make().saveIn(new File("/Users/FINTFACE/Downloads/classloadersample2/target/classes/"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        
+        //        System.out.println(new Moja().pullOut());
+            }
+        
+        }
+        ```
+      
+    * ➃ Masulsa 클래스를 이전과는 반대로 주석 처리를 하고 실행하면 콘솔에 `Rabbit!`이 출력되는 것을 확인 할 수 있다. 
     
-
+        * 바이트 코드(Moja.class)를 직접 확인하면 소스코드와는 다르게 변경된 것을 확인 할 수 있다.
     
+            ```java
+            public class Masulsa {
+            
+                public static void main(String[] args) {
+            //        try {
+            //            /* 바이트 코드를 변경해서 저장한다. */
+            //            new ByteBuddy().redefine(Moja.class)
+            //                    .method(named("pullOut")).intercept(FixedValue.value("Rabbit!"))
+            //                    .make().saveIn(new File("/Users/FINTFACE/Downloads/classloadersample2/target/classes/"));
+            //        } catch (IOException e) {
+            //            e.printStackTrace();
+            //        }
+            
+                    System.out.println(new Moja().pullOut());
+                }
+            
+            }
+            ```
+          
+            * 위의 코드에서 바이트 코드 조작과 pullOut()를 호출하는 부분을 같이 사용 할 수 없다.
+               
+            * 그 이유는 바이트 코드가 조작되기 전에 클래스 로더에 의해 원본 클래스(Moja.class)가 메모리에 로딩 되어 사용 되기 때문이다.
+              
+            * 즉, `pullOut()` 호출 시, 원본 클래스(Moja.class)를 로딩하여 아무것도 출력되지 않는다.
 
+#### 3) Javaagent 실습
 
+* 바이트 코드를 조작한 다음, 클래스 로더가 클래스를 읽도록 해야 하는데, 이럴때 `Javaagent`를 사용 할 수 있다.
 
+    * 클래스로더가 클래스를 읽어올 때, `Javaagent`를 거쳐서 변경된 바이트 코드를 읽어 들여 사용한다.
 
+* 실습 - Javaagent JAR 파일 만들기
 
-
-
-
-
-
-
-  
-
-  
-
-  
-
-  
-
-  
-
+    * ① premain()를 정의한다. 여기서 바이트 코드 조작 시 ByteBuddy, ASM 등을 사용 할 수 있다.
     
+        ```java
+        public class MasulsaAgent {
+        
+            public static void premain(String agentArgs, Instrumentation inst){
+        
+            }
+            
+        }
+        ```
+      
+    * ➁ `pom.xml`에 ByteBuddy 의존성을 추가한다.
 
+        ```html
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.10.1</version>
+        </dependency>
+        ```
+      
+    * ➂ premain()를 정의한다. 여기서 바이트 코드 조작 시 ByteBuddy, ASM 등을 사용 할 수 있다.
+    
+        ```java
+        public class MasulsaAgent {
+        
+            public static void premain(String agentArgs, Instrumentation inst){
+                new AgentBuilder.Default()
+                        .type(ElementMatchers.any())
+                        .transform((builder, typeDescription, classLoader, javaModule) -> builder.method(named("pullOut")).intercept(FixedValue.value("Rabbit!"))).installOn(inst);
+            }
+        
+        }
+        ```
 
+    * ➃ 에이전트를 JAR로 패키징 하면서 JAR 파일 안에 특정한 값들을 넣어줘야 합니다.
+    
+         ```html
+         <build>
+           <plugins>
+             <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-jar-plugin</artifactId>
+               <version>3.1.2</version>
+               <configuration>
+                 <archive>
+                   <index>true</index>
+                   <manifest>
+                     <addClasspath>true</addClasspath>
+                   </manifest>
+                   <manifestEntries>
+                     <mode>development</mode>
+                     <url>${project.url}</url>
+                     <key>value</key>
+                     <Premain-Class>me.kevinntech.MasulsaAgent</Premain-Class>
+                     <Can-Redefine-Classes>true</Can-Redefine-Classes>
+                     <Can-Retransform-Classes>true</Can-Retransform-Classes>
+                   </manifestEntries>
+                 </archive>
+               </configuration>
+             </plugin>
+           </plugins>
+         </build>
+         ```
+      
+        * `Premain-Class` : 자바 애플리케이션 시작 시, 에이전트를 붙이는 방식 
+        
+        * `Agent-Class` : 자바 애플리케이션 런타임 중에 동적으로 붙이는 방식
+        
+        * 보다 자세한 내용은 아래 링크를 참조하자.
+        
+            * https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html
 
+    * ➄ 인텔리제이 터미널에서 `mvn clean package`로 에이전트를 Jar로 패키징 한다.
+    
+    * ➅ Jar 파일의 경로를 복사한다. 
+    
+    * ➆ 원래 프로젝트(classloadersample)의 JVM Option에서 자바 에이전트를 사용 하도록 설정한 다음, 애플리케이션을 실행한다.
+    
+        * `-javaagent:/Users/FINTFACE/Downloads/MasulsaAgent/target/MasulsaAgent-1.0-SNAPSHOT.jar`
 
+        * 이 방식은 파일 시스템의 파일을 변경하는 것이 아닌 클래스 로딩 시 적용 되도록 한다.
 
-     
+#### 4) 바이트 코드 조작 정리
+
+* 바이트 코드를 조작하는 것은 다음과 같이 활용 될 수 있다.
+
+    * 프로그램 분석
+    
+        * 코드에서 버그 찾는 툴
+        
+        * 코드 복잡도 계산
+        
+    * 클래스 파일 생성
+    
+        * 프록시
+        
+        * 특정 API 호출 접근 제한
+        
+        * 스칼라 같은 언어의 컴파일러
+        
+    * 그 밖에도 자바 소스 코드를 건드리지 않고 코드 변경이 필요한 여러 경우에 사용할 수 있다.
+    
+        * 프로파일러 (newrelic)
+        
+        * 최적화
+        
+        * 로깅
+        
+        * ...
+    
+    * 스프링이 컴포넌트 스캔을 하는 방법 (ASM)
+    
+        * 컴포넌트 스캔으로 빈으로 등록할 후보 클래스 정보를 찾는데 사용한다.
+        
+        * `ClassPathScanningCandidateComponentProvider` -> `SimpleMetadataReader`
+        
+        * `ClassReader`와 `Visitor`를 사용해서 클래스에 있는 메타 정보를 읽어온다. 
+        
+    * 참고
+    
+        * https://www.youtube.com/watch?v=39kdr1mNZ_s
+        
+        * ASM, Javassist, ByteBuddy, CGlib
+        
