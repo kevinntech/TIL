@@ -576,3 +576,448 @@
         
         * ASM, Javassist, ByteBuddy, CGlib
         
+## 3. 리플렉션
+
+#### 1) 스프링의 Depedency Injection은 어떻게 동작할까?
+
+* (1) BookRepository를 작성한다.
+    
+     ```java
+     @Repository
+     public class BookRepository {
+     }
+     ```
+  
+* (2) 그리고 BookService를 작성한다.
+    
+     ```java
+     @Service
+     public class BookService {
+         @Autowired
+         BookRepository bookRepository;
+     }
+     ```
+  
+    * bookRepository 인스턴스는 어떻게 null이 아닌걸까?
+    
+    * 스프링은 어떻게 BookService 인스턴스에 BookRepository 인스턴스를 넣어준 것일까?
+    
+#### 2) 리플렉션 API 1부
+
+* (1) 리플렉션(Reflection)
+
+    * 동적으로 특정 클래스를 로딩하거나, 클래스의 필드나 메소드를 알아내고 값을 가져오거나 메소드를 실행할 수 있는 기능을 말한다.
+    
+    * 리플렉션의 시작은 `Class<T>` 타입의 인스턴스다.
+
+* (2) 실습 준비
+
+    * 실습 코드를 준비한다.
+    
+         ```java
+         public class Book {
+         
+             private static String B = "BOOK";
+         
+             private static final String C = "BOOK";
+         
+             private String a = "a";
+         
+             public String d = "d";
+         
+             protected String e = "e";
+         
+             public Book() {
+             }
+         
+             public Book(String a, String d, String e) {
+                 this.a = a;
+                 this.d = d;
+                 this.e = e;
+             }
+         
+             private void f(){
+                 System.out.println("F");
+             }
+         
+             public void g(){
+                 System.out.println("g");
+             }
+         
+             public Integer h(){
+                 return 100;
+             }
+             
+         }
+         ```
+      
+         ```java
+         public interface MyInterface {
+         }
+         ```
+      
+         ```java
+         public class MyBook extends Book implements MyInterface{
+         
+         }
+         ```
+  
+* (3) Class<T> 타입의 인스턴스에 접근하는 방법
+
+    * 모든 클래스를 로딩 한 다음, `Class<T>`의 인스턴스가 생긴다. `타입.class`로 접근 할 수 있다.
+
+         ```java
+         /*
+         * 클래스 로딩이 끝나면 해당 클래스 타입의 Class 인스턴스를 생성하여 힙 영역에 저장한다.
+         * 그래서 타입.class로 접근 할 수 있다.
+         * */
+         Class<Book> bookClass = Book.class;
+         ```
+
+    * 모든 인스턴스는 `getClass()` 메소드를 가지고 있다. `인스턴스.getClass()`로 접근 할 수 있다.
+
+         ```java
+         /*
+         * 애플리케이션에 이미 생성한 인스턴스가 있다면 인스턴스의 getClass()를 사용하여 접근 할 수 있다.
+         * */
+         Book book = new Book();
+         Class<? extends Book> bookClass2 = book.getClass();
+         ```
+
+    * 문자열(클래스가 속한 패키지명을 포함한 이름)로 `Class<T>`의 인스턴스에 접근 할 수 있다.
+
+        * `Class.forName("FQCN")`로 접근 할 수 있다.
+        
+        * 클래스패스에 해당 클래스가 없다면 `ClassNotFoundException`이 발생한다.
+        
+         ```java
+         /*
+         * Class.forName()는 주어진 문자열과 이름이 같은 클래스 또는 인터페이스의 Class 객체를 리턴한다.
+         * 그리고 런타임 시, 동적으로 클래스를 메모리에 로드하여 정보를 읽어온다.
+         * */
+         Class<?> bookClass3 = Class.forName("me.kevinntech.Book");
+         ```
+      
+* (4) 실습 - Class<T> 인스턴스를 통해 할 수 있는 것
+
+    * 모든 클래스를 로딩 한 다음, `Class<T>`의 인스턴스가 생긴다. `타입.class`로 접근 할 수 있다.
+
+         ```java
+         public class App {
+             public static void main( String[] args ) throws ClassNotFoundException {
+                 Class<Book> bookClass = Book.class;
+         
+                 /*
+                 * getFields()는 public 필드만 리턴한다.
+                 * */
+                 Arrays.stream(bookClass.getFields())
+                         .forEach(System.out::println);
+                 System.out.println();
+         
+                 /*
+                  * getDeclaredFields()는 모든 필드를 리턴한다.
+                  * */
+                 Arrays.stream(bookClass.getDeclaredFields())
+                         .forEach(System.out::println);
+                 System.out.println();
+         
+                 /*
+                  * 모든 필드와 값을 출력한다.
+                  * */
+                 Book book = new Book();
+                 Arrays.stream(bookClass.getDeclaredFields()).forEach( f -> {
+                                     try {
+                                         f.setAccessible(true); // 접근 가능하게 만든다.
+                                         System.out.printf("%s %s \n", f, f.get(book));
+                                     } catch (IllegalAccessException e) {
+                                         e.printStackTrace();
+                                     }
+                                 }
+                         );
+                 System.out.println();
+         
+                 /*
+                  * getMethods()는 조상 클래스로 부터 상속 받은 메소드를 포함한 public 메소드를 리턴한다.
+                  * */
+                 Arrays.stream(bookClass.getMethods()).forEach(System.out::println);
+                 System.out.println();
+         
+                 /*
+                  * getConstructors()는 public 생성자를 리턴한다.
+                  * */
+                 Arrays.stream(bookClass.getConstructors()).forEach(System.out::println);
+                 System.out.println();
+         
+                 /*
+                  * getSuperclass()는 조상 클래스를 리턴한다. (자바는 단일 상속만을 허용)
+                  * */
+                 System.out.println(MyBook.class.getSuperclass());
+                 System.out.println();
+         
+                 /*
+                  * getInterfaces()는 해당 클래스가 구현한 인터페이스를 리턴한다.
+                  * */
+                 Arrays.stream(MyBook.class.getInterfaces()).forEach(System.out::println);
+                 System.out.println();
+         
+                 /*
+                  * 필드의 접근 제어자 정보를 출력한다.
+                  * */
+                 Arrays.stream(Book.class.getDeclaredFields()).forEach( f -> {
+                         int modifiers = f.getModifiers();  // 해당 필드의 접근자 정보를 리턴한다.
+                         System.out.println(f);
+                         System.out.println(Modifier.isPrivate(modifiers));
+                         System.out.println(Modifier.isStatic(modifiers));
+                     }
+                 );
+                 System.out.println();
+             }
+         }
+         ```
+      
+#### 2) 애노테이션과 리플렉션
+
+* (1) 실습 전에 알고 있어야 하는 내용
+
+    * 애노테이션
+
+        * `@Retention` : 해당 애노테이션이 유지되는 기간을 지정한다. (소스, 클래스, 런타임)
+        
+        * `@Inherited` : 해당 애노테이션이 자손 클래스에 상속 되도록 한다.
+        
+        * `@Target` : 해당 애노테이션이 적용 가능한 대상을 지정한다.
+    
+    * 리플렉션
+
+        * `getAnnotations()` : 상속 받은 (@Inherit) 애노테이션까지 조회한다.
+        
+        * `getDeclaredAnnotations()` : 자신에게만 붙어 있는 애노테이션을 조회한다.
+    
+* (2) 실습
+
+    * 애노테이션을 정의한다. (`@Retention`를 런타임으로 지정한다.)
+
+         ```java
+         @Retention(RetentionPolicy.RUNTIME)
+         @Target({ElementType.TYPE, ElementType.FIELD})
+         @Inherited
+         public @interface MyAnnotation {
+         
+             String value() default "kevin";
+         
+             int number() default 100;
+         
+         }
+         ```
+      
+        ```java
+        @Retention(RetentionPolicy.RUNTIME)
+        @Inherited
+        public @interface AnotherAnnotation {
+        
+            String value() default "kevin";
+        
+            int number() default 100;
+        
+        }
+        ```
+      
+    * 애노테이션을 사용한다.
+
+         ```java
+         @MyAnnotation
+         public class Book {
+         
+             private static String B = "BOOK";
+         
+             private static final String C = "BOOK";
+         
+             // 필드에 애노테이션 사용
+             @MyAnnotation
+             private String a = "a";
+         
+             public String d = "d";
+         
+             protected String e = "e";
+         
+             public Book() {
+             }
+         
+             public Book(String a, String d, String e) {
+                 this.a = a;
+                 this.d = d;
+                 this.e = e;
+             }
+         
+             private void f(){
+                 System.out.println("F");
+             }
+         
+             // 메소드에 애노테이션 사용
+             @AnotherAnnotation
+             public void g(){
+                 System.out.println("g");
+             }
+         
+             public Integer h(){
+                 return 100;
+             }
+         
+         }
+         ```
+      
+    * 애노테이션 정보를 출력한다. (애노테이션을 정의할 때, `@Retention`를 런타임으로 지정하지 않는다면 어떠한 정보도 출력되지 않는다.)
+
+         ```java
+         public class App {
+             public static void main( String[] args ) throws ClassNotFoundException {
+                 /*
+                  * 상속 받은 애노테이션까지 조회한다.
+                  * */
+                 Arrays.stream(MyBook.class.getAnnotations()).forEach(System.out::println);
+                 System.out.println();
+         
+                 /*
+                  * 자신에게만 붙어 있는 애노테이션을 조회한다.
+                  * */
+                 Arrays.stream(MyBook.class.getDeclaredAnnotations()).forEach(System.out::println);
+                 System.out.println();
+         
+                 /*
+                 * 필드에 붙어있는 애노테이션 정보를 출력한다.
+                 * */
+                 Arrays.stream(Book.class.getDeclaredFields()).forEach(f -> {
+                     Arrays.stream(f.getAnnotations()).forEach(System.out::println);
+         
+                     //// 필드에 붙어있는 애노테이션 안에 저장된 정보를 출력 할 수도 있다.
+                     //Arrays.stream(f.getAnnotations()).forEach(a -> {
+                     //    if(a instanceof MyAnnotation){
+                     //        MyAnnotation myAnnotation = (MyAnnotation) a;
+                     //        System.out.println(myAnnotation.value());
+                     //        System.out.println(myAnnotation.number());
+                     //    }
+                     //});
+                 });
+             }
+         }
+         ```
+      
+#### 3) 리플렉션 API 2부: 클래스 정보 수정 또는 실행
+
+* (1) 실습 준비
+
+    * Book 클래스를 다음과 같이 수정한다.
+
+         ```java
+         public class Book {
+         
+             public static String A = "A";
+         
+             private String B = "B";
+         
+             public Book() {
+             }
+         
+             public Book(String b) {
+                 B = b;
+             }
+         
+             private void c() {
+                 System.out.println("C");
+             }
+         
+             public int sum(int left, int right){
+                 return left + right;
+             }
+         
+             public static int multiply(int left, int right){
+                 return left * right;
+             }
+         
+         }
+         ```
+
+* (2) 클래스 정보를 수정 또는 실행
+
+    * Class 인스턴스 만들기
+    
+        * `Class.newInstance()`는 Deprecated 되었다.
+        
+        * 그래서 **생성자를 이용하여 Class 인스턴스를 만들어야 한다.**
+                
+    * 생성자로 인스턴스 만들기
+    
+        * Constructor.newInstance(params)
+        
+            * 기본 생성자로 인스턴스 만들기
+            
+                 ```java
+                 Class<?> bookClass = Class.forName("me.kevinntech.Book");
+                 Constructor<?> constructor = bookClass.getConstructor(null);
+                 Book book = (Book) constructor.newInstance();
+                 ```
+              
+            * 매개변수가 있는 생성자로 인스턴스 만들기
+            
+                ```java
+                Class<?> bookClass = Class.forName("me.kevinntech.Book");
+                Constructor<?> constructor = bookClass.getConstructor(String.class);
+                Book book = (Book) constructor.newInstance("myBook");
+                
+                System.out.println(book);
+                ```
+        
+    * 필드 값 가져오기/설정하기
+
+        ```java
+        Field.get(object) // 가져오기
+        Filed.set(object, value) // 설정하기
+        ```
+      
+        * 인스턴스 변수의 값을 가져오거나 설정하려면 `get()` 또는 `set()`의 파라미터로 인스턴스를 전달해야 한다.
+
+            ```java
+            Field b = Book.class.getDeclaredField("B");
+            b.setAccessible(true);
+            System.out.println(b.get(book));
+            b.set(book, "BBBBBBB"); // Book 객체의 b 필드에 값을 설정한다.
+            ```
+         
+        * static 변수의 값을 가져오거나 설정하려면 `get()` 또는 `set()`의 파라미터로 `null`를 전달하면 된다.
+
+            ```java
+            Field b = Book.class.getDeclaredField("B");
+            b.setAccessible(true);
+            System.out.println(b.get(book));
+            b.set(book, "BBBBBBB"); // Book 객체의 b 필드에 값을 설정한다.
+            System.out.println(b.get(book)); // 변경된 것을 확인 할 수 있다.
+            ```
+     
+    * 메소드 실행하기
+
+        ```java
+        Object Method.invoke(object, params) 
+        ```
+      
+        * 인스턴스 메소드를 호출하려면 invoke()의 파라미터로 인스턴스를 전달해야 한다.
+        
+            ```java
+            Method c = Book.class.getDeclaredMethod("c");
+            c.setAccessible(true);
+            c.invoke(book);
+            ```
+          
+            ```java
+            Method sum = Book.class.getDeclaredMethod("sum", int.class, int.class);
+            int invoke = (int) sum.invoke(book, 1, 2);
+            System.out.println(invoke);
+            ```
+          
+        * static 메소드를 호출하려면 invoke()의 파라미터로 `null`를 전달하면 된다.
+        
+            ```java
+            Method multiply = Book.class.getDeclaredMethod("multiply", int.class, int.class);
+            int result = (int) multiply.invoke(null, 2, 3);
+            System.out.println(result);
+            ```
+
