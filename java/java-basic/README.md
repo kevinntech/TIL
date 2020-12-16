@@ -2554,6 +2554,367 @@ int[][] arr = {
          }
         ```  
 
+#### 10) 쓰레드의 동기화
+
+* (1) 쓰레드의 동기화(synchronization)
+
+    * 멀티 쓰레드 프로세스에서는 다른 쓰레드의 작업에 영향을 미칠 수 있다.
+    
+    * 진행 중인 작업이 다른 쓰레드에게 간섭박지 않게 하려면 `동기화`가 필요하다.
+    
+    * 즉, `쓰레드의 동기화`는 한 쓰레드가 진행중인 작업을 다른 쓰레드가 간섭하지 못하게 막는 것을 말한다.
+    
+    * 동기화를 하려면 간섭 받지 않아야 하는 문장들을 `임계 영역`으로 설정한다.
+    
+    * `임계 영역`은 `락(lock)`을 얻은 **단 하나의 쓰레드만 출입 가능**하다. 
+    
+        * 객체 1개 마다 락(lock) 1개를 가진다.
+        
+        * `임계 영역`은 한 번에 하나의 쓰레드만 사용 할 수 있기 때문에 영역을 최소화 해야한다.
+        
+        * 멀티 쓰레드의 장점은 동시에 여러 쓰레드가 동작하는 것인데 `임계 영역`이 많아지면 성능은 떨어진다. 
+        
+* (2) synchronized를 이용한 동기화
+
+    * synchronized로 임계 영역을 설정하는 2가지 방법
+
+        * ① 메서드 전체를 임계 영역으로 지정
+        
+            ```java
+            public synchronized void calcSum(){
+                // 임계 영역(critical section)
+            }
+            ```
+          
+            * 가능하면 메서드 전체를 임계 영역으로 지정하는 것은 사용 하지 않는 것이 좋다.
+        
+        * ② 특정한 영역을 임계 영역으로 지정
+        
+            ```java
+            synchronized(객체의 참조변수){
+                // 임계 영역(critical section)
+            }
+            ```
+
+    * 예시
+    
+        * ① 메서드 전체를 임계 영역으로 지정
+    
+            ```java
+            public synchronized void withdraw(int money){
+              if(balance >= money){
+                  try{
+                      Thread.sleep(1000);
+                  }catch(Exception e){}
+              }
+            
+              balance -= money;
+            }
+            ```
+          
+        * ② 특정한 영역을 임계 영역으로 지정
+    
+            ```java
+            public void withdraw(int money){
+                synchronized(this){
+                    if(balance >= money){
+                        try{
+                            Thread.sleep(1000);
+                        }catch(Exception e){}
+                    }
+                    
+                    balance -= money;
+                }
+            }
+            ```
+      
+    * 실습 - synchronized로 임계 영역을 설정하는 방법
+    
+        ```java
+        class ThreadEx22 {
+        	public static void main(String args[]) {
+        		Runnable r = new RunnableEx22();
+        		new Thread(r).start();
+        		new Thread(r).start();
+        	}
+        }
+        
+        class Account {
+        	private int balance = 1000; // private으로 해야 동기화가 의미가 있다.
+        
+        	public synchronized int getBalance() { // 읽을 때도 동기화 해야 한다. 
+        		return balance;
+        	}
+        
+        	public synchronized void withdraw(int money){ // synchronized로 메서드를 동기화한다.
+        		if(balance >= money) {
+        			try { Thread.sleep(1000);} catch(InterruptedException e) {} // 1초 쉰다.
+        			balance -= money; // 동기화가 되어 있기 때문에 절대 음수가 나오지 않는다.
+        		}
+        	} // withdraw
+        }
+        
+        class RunnableEx22 implements Runnable {
+        	Account acc = new Account();
+        
+        	public void run() {
+        		while(acc.getBalance() > 0) {
+        			// 100, 200, 300중의 한 값을 임으로 선택해서 출금(withdraw)
+        			int money = (int)(Math.random() * 3 + 1) * 100;
+        			acc.withdraw(money);
+        			System.out.println("balance:"+acc.getBalance());
+        		}
+        	} // run()
+        }
+        ```
+
+* (3) wait()과 notify()
+
+    * 동기화의 효율을 높이기 위해 `wait()`, `notify()`를 사용한다.
+    
+    * Object 클래스에 정의되어 있으며, 동기화 블록 내에서만 사용 할 수 있다.
+    
+        * `wait()` : 해당 객체의 lock을 반납하고 쓰레드를 해당 객체의 대기실(waiting pool)에 넣는다.
+
+        * `notify()` : 해당 객체의 대기실(waiting pool)에서 대기중인 쓰레드 중의 하나를 깨운다.
+        
+        * `notifyAll()` : 해당 객체의 대기실(waiting pool)에서 대기중인 모든 쓰레드를 깨운다.
+        
+    * 예시
+    
+        ```java
+        class Account {
+            private int balance = 1000;
+        
+            public synchronized void withdraw(int money){ // 출금
+                // balance : 잔고 , money : 출금액
+                if(balance < money) {  // 잔고가 부족하면
+                    try {
+                        wait(); // 대기 - 락을 풀고 기다린다. 통지를 받으면 락을 재획득(ReEntrance)
+                    } catch(InterruptedException e) {}
+                }
+        
+                balance -= money;
+            } // withdraw
+        
+            public synchronized void deposit(int money){ // 입금
+                balance += money;
+                notify(); // 통지 - 대기 중인 쓰레드 중 하나에게 알린다.
+            }
+        
+        }
+        ```
+      
+    * 실습 1 - 동기화 사용
+    
+        * 요리사는 Table에 음식을 추가하고 손님은 Table의 음식을 소비한다.
+        
+        * 요리사와 손님이 같은 객체(Table)을 공유하므로 동기화가 필요하다.
+        
+            * 즉, 요리사와 손님 쓰레드가 같은 Table 객체를 공유하므로 동기화가 필요하다.
+        
+                ```java
+                /*
+                * Table
+                * */
+                class Table {
+                    String[] dishNames = { "donut", "donut", "burger" };
+                    final int MAX_FOOD = 6;
+              
+                    // 테이블 위에 놓인 접시를 담는 ArrayList (ArrayList는 동기화 처리 X)
+                    private ArrayList<String> dishes = new ArrayList<>();
+                      
+                    /* dishes라는 ArrayList에 추가, 삭제하는 메서드를 동기화 해야 한다. */
+                    // Table에 dish(음식)을 추가하는 메서드
+                    public synchronized void add(String dish) { // synchronized를 추가
+                        // 테이블이 가득차면, 음식을 추가하지 않는다.
+                        if(dishes.size() >= MAX_FOOD) 
+                            return;
+                        dishes.add(dish);
+                        System.out.println("Dishes:" + dishes.toString());
+                    }
+                
+                    // Table에 dish(음식)을 제거하는 메서드
+                    public boolean remove(String dishName) {
+                        synchronized(this) {	
+                            while(dishes.size()==0) {
+                                String name = Thread.currentThread().getName();
+                                System.out.println(name+" is waiting.");
+                                try { Thread.sleep(500);} catch(InterruptedException e) {}	
+                            }
+                
+                            // 지정된 요리와 일치하는 요리를 테이블에서 제거한다.
+                            for(int i=0; i<dishes.size();i++)
+                                if(dishName.equals(dishes.get(i))) {
+                                    dishes.remove(i);
+                                    return true;
+                                }
+                        } // 이번 예제에서는 여기서 처럼 synchronized 블럭이 아닌 메서드에 사용 해도 된다. 
+                
+                        return false;
+                    }
+                
+                    public int dishNum() { return dishNames.length; }
+                }
+                ```
+              
+                ```java
+                /*
+                * Cook
+                * */
+                class Cook implements Runnable {
+                    private Table table;
+                
+                    Cook(Table table) {	this.table = table; }
+                
+                    public void run() {
+                        while(true) {
+                            // 임의의 요리를 하나 선택해서 table에 추가한다.
+                            int idx = (int)(Math.random()*table.dishNum());
+                            // 요리사는 테이블(table)에 음식(dish)을 추가하는 일을 한다.
+                            table.add(table.dishNames[idx]);
+                            try { Thread.sleep(100);} catch(InterruptedException e) {}
+                        } // while
+                    }
+                }
+                ```
+              
+                ```java
+                /*
+                * Customer
+                * */
+                class Customer implements Runnable {
+                    private Table  table;
+                    private String food;
+                
+                    Customer(Table table, String food) {
+                        this.table = table;  
+                        this.food  = food;
+                    }
+                
+                    public void run() {
+                        while(true) {
+                            try { Thread.sleep(10);} catch(InterruptedException e) {}
+                            String name = Thread.currentThread().getName();
+                
+                            // 손님은 table의 음식(dish)을 먹는 일을 한다.
+                            if(eatFood())
+                                System.out.println(name + " ate a " + food);
+                            else 
+                                System.out.println(name + " failed to eat. :(");
+                        } // while
+                    }
+                
+                    // 음식을 먹는 것은 테이블에서 음식(dish)를 제거하는 것이다. 
+                    boolean eatFood() { return table.remove(food); }
+                }
+                ```
+              
+                ```java
+                /*
+                * main 메소드
+                * */
+                class Ex13_14 {
+                	public static void main(String[] args) throws Exception {
+                		Table table = new Table(); // 여러 쓰레드가 공유하는 객체
+                
+                        // 요리사 1명, 손님 2명 생성
+                		new Thread(new Cook(table), "COOK").start();
+                		new Thread(new Customer(table, "donut"),  "CUST1").start();
+                		new Thread(new Customer(table, "burger"), "CUST2").start();
+                
+                		Thread.sleep(5000); // 5초 뒤에 종료된다.
+                		System.exit(0);
+                	}
+                }
+                ```
+              
+                * 위의 코드에서 동기화 코드 없이 실행하면 예외가 발생 할 수 있다.
+                                    
+                    * [문제점] Table을 여러 쓰레드가 공유하기 때문에 작업 중에 끼어들기가 발생
+                    
+                    * [해결책] Table의 add()와 remove()를 synchronized로 동기화 해야 한다.
+                           
+    * 실습 2 - 동기화 + wait()과 notify() 사용
+    
+        * 실습 1에서 처럼 동기화를 처리하면 다음과 같은 문제가 발생한다.
+        
+            * [문제점] 예외는 발생하지 않지만, 손님이 Table의 lock을 쥐고 놓지 않는다.
+            
+            * 그래서 요리사는 Table의 lock을 얻지 못해서 Table에 음식을 추가 할 수 없다. 
+            
+            * [해결책] 음식이 없을 때, wait()로 손님이 lock을 풀고 기다리게 하자.
+    
+            * 요리사가 음식을 추가하면 notify()로 손님에게 알리자. (손님이 lock을 재 획득)
+        
+                ```java
+                /*
+                * Table
+                * */
+                class Table {
+                	String[] dishNames = { "donut","donut","burger" }; // donut의 확률을 높인다.
+                	final int MAX_FOOD = 6;
+                	private ArrayList<String> dishes = new ArrayList<>();
+                
+                	// 테이블에 음식을 추가하는 메소드
+                	public synchronized void add(String dish) {
+                		while(dishes.size() >= MAX_FOOD) { // 테이블에 음식이 가득차면
+                				String name = Thread.currentThread().getName();
+                				System.out.println(name+" is waiting.");
+                				try {
+                					wait(); // 요리사(COOK 쓰레드)를 기다리게 한다.
+                					Thread.sleep(500);
+                				} catch(InterruptedException e) {}	
+                		}
+                		dishes.add(dish); // 테이블에 음식을 추가한 다음, 
+                		notify();  // 음식을 기다리고 있는 손님을 깨우기 위해서 notify()를 한다.
+                		System.out.println("Dishes:" + dishes.toString());
+                	}
+                
+                	// 테이블의 음식을 소비하는 메소드
+                	public void remove(String dishName) {
+                		synchronized(this) {	
+                			String name = Thread.currentThread().getName();
+                
+                			while(dishes.size()==0) { // 테이블의 음식 개수가 0이면
+                					System.out.println(name+" is waiting.");
+                					try {
+                						wait(); // 손님(CUST 쓰레드)이 lock을 반납하고 기다리게 한다.
+                						Thread.sleep(500);
+                					} catch(InterruptedException e) {}	
+                			}
+                
+                			// 테이블의 음식 개수가 0이 아니면 아래 코드가 실행된다.
+                			while(true) {
+                				for(int i=0; i<dishes.size();i++) {
+                					if(dishName.equals(dishes.get(i))) {
+                						dishes.remove(i); // 음식을 하나 소비한다.
+                						notify(); // 요리사(잠자고 있는 COOK)를 깨우기 위함 
+                						return;
+                					}
+                				} // for문의 끝
+                
+                                // 테이블에 원하는 음식이 없는 경우
+                				try {
+                					System.out.println(name+" is waiting.");
+                					wait(); // 원하는 음식이 없는 CUST 쓰레드를 기다리게 한다.
+                					Thread.sleep(500);
+                				} catch(InterruptedException e) {}	
+                			} // while(true)
+                		} // synchronized
+                	}
+                	public int dishNum() { return dishNames.length; }
+                }
+                ```
+              
+                * wait()과 notify()를 사용하면 하나의 쓰레드가 lock을 오래 쥐고 있는 일이 없어지게 되어 효율적으로 바뀐다.
+              
+                * 요리사는 테이블이 가득 차면 대기(`wait()`)하고 음식을 추가하고 나면 손님에게 통보(`notify()`)한다.
+                
+                * 손님은 음식이 없으면 대기(`wait()`)하고 음식을 먹고 나면 요리사에게 통보(`notify()`)한다.
+                
+                * wait()과 notify()의 대상이 명확하지 않아서 이를 해결하려면 `Lock`과 `Condition`을 사용해야 한다.
+                
 ## 13. 람다와 스트림
 
 ## 14. 입출력(I/O)
