@@ -1986,7 +1986,7 @@ int[][] arr = {
         
             * 나머지 하나는 한 쓰레드가 화면에 출력하고 있는 동안 다른 쓰레드는 출력이 끝나기를 기다려야하는데, 이때 발생하는 대기시간 때문이다.
           
-        * 시간이 더 걸리는 멀티스레드를 사용하는 이유는 무엇일까? 시간이 조금 더 걸리더라도 2 가지 작업을 동시에 할 수 있다는 것이 장점이다.
+        * 시간이 더 걸리는 멀티쓰레드를 사용하는 이유는 무엇일까? 시간은 조금 더 걸리더라도 2가지 작업을 동시에 할 수 있다는 것이 장점이다.
           
     * 더 자세한 내용은 자바의 정석 3판 p732~735를 참고하자.
 
@@ -2045,7 +2045,7 @@ int[][] arr = {
           
             * 사용자로 부터 입력을 기다리는 구간에는 B 작업이 수행된다.
 
-#### 5) 쓰레드의 우선순위(priority of thread)
+#### 5) 쓰레드의 우선순위(priority of thread), 쓰레드 그룹(thread group)
 
 * (1) 쓰레드의 우선순위
 
@@ -2166,7 +2166,7 @@ int[][] arr = {
             
             * 매개변수 on을 true로 지정하면 데몬 쓰레드가 된다.
             
-            * setDaemon()은 반드시 start()를 호출하기 전에 실행 되어야 한다. 그렇지 않으면 IllegalThreadStateException이 발생한다. 
+            * `setDaemon()`은 반드시 `start()`를 호출하기 전에 실행 되어야 한다. 그렇지 않으면 `IllegalThreadStateException`이 발생한다. 
 
     * 실습 - 데몬 쓰레드
     
@@ -2211,19 +2211,21 @@ int[][] arr = {
 
 * (2) 쓰레드의 상태
 
-    * ① `NEW` : 쓰레드가 생성되고 아직 start()가 호출되지 않은 상태
+    * ① 생성(`NEW`) : 쓰레드가 생성되고 아직 start()가 호출되지 않은 상태
     
-    * ② `RUNNABLE` : 실행 중 또는 실행 가능한 상태
+    * ② 실행 대기(`RUNNABLE`) : 실행 중 또는 실행 가능한 상태
     
-    * ③ `BLOCKED` : 동기화 블럭에 의해서 일시정지된 상태(lock이 풀릴 때까지 기다리는 상태)
+    * ③ 일시 정지
     
-    * ④ `WAITING`, `TIMED_WAITING`
+        * `BLOCKED` : 동기화 블럭에 의해서 일시 정지된 상태(lock이 풀릴 때까지 기다리는 상태)
     
-        * 쓰레드의 작업이 종료되지는 않았지만 실행 가능 하지 않은 일시 정지 상태
-     
-        * `TIMED_WAITING`은 일시 정지 시간이 지정된 경우를 의미한다.
+        * `WAITING`, `TIMED_WAITING`
+    
+            * 쓰레드의 작업이 종료되지는 않았지만 실행 가능 하지 않은 일시 정지 상태
+         
+            * `TIMED_WAITING`은 일시 정지 시간이 지정된 경우를 의미한다.
         
-    * ⑤ `TERMINATED` : 쓰레드의 작업이 종료된 상태
+    * ④ 소멸(`TERMINATED`) : 쓰레드의 작업이 종료된 상태
     
     * 더 자세한 내용은 자바의 정석 3판 p749를 참고하자.
 
@@ -2232,26 +2234,27 @@ int[][] arr = {
     * 쓰레드의 실행을 제어할 수 있는 메서드가 제공된다.
 
         * `sleep()`
-        
-            ```java
-            static void sleep(long millis)
-            static void sleep(long millis, int nanos)
-            ```
-        
+
             * 지정된 시간(1000분의 1초 단위) 동안 쓰레드를 일시 정지 시킨다.
             * 지정한 시간이 지나고 나면, 자동적으로 다시 실행 대기 상태가 된다.
-
-        * `join()` 
-               
-            ```java
-            void join() 
-            void join(long millis)
-            void join(long millis)
-            ```
+                
+                ```java
+                static void sleep(long millis)
+                static void sleep(long millis, int nanos)
+                ```
         
+        * `join()` 
+
             * 다른 쓰레드가 끝날 때까지 기다린다.
-            * 지정된 시간이 지나거나 작업이 종료되면 join()을 호출한 쓰레드로 다시 돌아와 실행을 계속한다.
             
+            * 지정된 시간이 지나거나 작업이 종료되면 join()을 호출한 쓰레드로 다시 돌아와 실행을 계속한다.
+                          
+                ```java
+                void join() 
+                void join(long millis)
+                void join(long millis)
+                ```
+              
         * `void interrupt()`
                        
             * sleep()이나 join()에 의해 일시 정지 상태인 쓰레드를 깨워서 실행 대기 상태로 만든다.
@@ -2284,7 +2287,7 @@ int[][] arr = {
 
         ```java
         try{
-          Thread.sleep(1, 500000); // 쓰레드를 0.0015초 동안 멈추게 한다.
+          Thread.sleep(1, 500000); // 쓰레드를 0.0015초 동안 멈추게 한다. (밀리초 , 나노초)
         }catch(InterruptedException e){}
         ```
       
@@ -2364,7 +2367,7 @@ int[][] arr = {
         }
         ```
 
-    * `interrupt()`는 sleep()에 의해 쓰레드가 잠시 멈춰있을 때, interrupt()를 호출하면 InterruptedException이 발생되고 쓰레드의 interrupted 상태는 false로 자동 초기화 된다. 
+    * `sleep()`에 의해 쓰레드가 잠시 멈춰있을 때, `interrupt()`를 호출하면 `InterruptedException`이 발생되고 쓰레드의 interrupted 상태는 false로 자동 초기화 된다. 
 
 #### 8) suspend(), resume(), stop()
 
@@ -2445,7 +2448,7 @@ int[][] arr = {
 
 * (1) join()
 
-    * `join()`는 특정 쓰레드가 지정된 시간 동안 작업하는 것을 기다린다.
+    * `join()`는 특정 쓰레드가 끝날 때까지 기다린다.
     
     * 다른 쓰레드의 작업이 먼저 수행 되어야 할 때, join()를 사용한다.
         
@@ -2499,7 +2502,7 @@ int[][] arr = {
 
     * `yield()`는 남은 시간을 다음 쓰레드에게 양보하고, 자신(현재 쓰레드)은 실행 대기 상태가 된다.
     
-        * `yield()`도 OS 스케줄러의 판단하에 동작하게 됨
+        * `yield()`도 OS 스케줄러의 판단 하에 동작하게 됨
     
     * `yield()`와 `interrupt()`를 적절히 사용하면 응답성과 효율을 높일 수 있다.
 
@@ -2560,7 +2563,7 @@ int[][] arr = {
 
     * 멀티 쓰레드 프로세스에서는 다른 쓰레드의 작업에 영향을 미칠 수 있다.
     
-    * 진행 중인 작업이 다른 쓰레드에게 간섭박지 않게 하려면 `동기화`가 필요하다.
+    * 진행 중인 작업이 다른 쓰레드에게 간섭받지 않게 하려면 `동기화(synchronization)`가 필요하다.
     
     * 즉, `쓰레드의 동기화`는 한 쓰레드가 진행중인 작업을 다른 쓰레드가 간섭하지 못하게 막는 것을 말한다.
     
@@ -2659,7 +2662,7 @@ int[][] arr = {
         
         	public void run() {
         		while(acc.getBalance() > 0) {
-        			// 100, 200, 300중의 한 값을 임으로 선택해서 출금(withdraw)
+        			// 100, 200, 300중의 한 값을 임의로 선택해서 출금(withdraw)
         			int money = (int)(Math.random() * 3 + 1) * 100;
         			acc.withdraw(money);
         			System.out.println("balance:"+acc.getBalance());

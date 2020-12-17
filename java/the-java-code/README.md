@@ -1021,3 +1021,139 @@
             System.out.println(result);
             ```
 
+#### 4) 나만의 DI 프레임워크 만들기
+
+* 실습 - `@Inject`라는 애노테이션을 만들어서 필드를 주입 해주는 컨테이너 서비스 만들기
+
+    * `@Inject`라는 애노테이션을 정의한다.
+    
+        ```java
+        @Retention(RetentionPolicy.RUNTIME)
+        public @interface Inject {
+        }
+        ```
+      
+    * `ContainerService`라는 클래스를 정의한다.
+    
+        ```java
+        public class ContainerService {
+        }
+        ```
+      
+    * 테스트 할 때, 사용 할 다음과 같은 클래스들을 작성한다.
+    
+        ```java
+        public class ContainerServiceTest {
+        
+            @Test
+            public void getObject(){
+                BookRepository bookRepository = ContainerService.getObject(BookRepository.class);
+                assertNotNull(bookRepository);
+            }
+        
+            @Test
+            public void getObject_BookService(){
+                BookService bookService = ContainerService.getObject(BookService.class);
+                assertNotNull(bookService);
+        
+                //bookService가 가지고 있는 bookRepository도 null이 아니어야 한다.
+                assertNotNull(bookService.bookRepository);
+            }
+        
+        }
+        ```
+      
+        ```java
+        public class BookService {
+        
+            /*
+            * BookRepository 타입의 객체가 주입되는 것을 기대한다.
+            * */
+            @Inject
+            BookRepository bookRepository;
+        
+        }
+        ```
+      
+        ```java
+        public class BookRepository {
+        }
+        ```
+      
+    * 테스트 코드를 작성하면서 ContainerService 클래스의 코드를 수정한다.
+    
+        ```java
+        public class ContainerService {
+        
+            /*
+            * [제네릭 메소드]
+            * Class<T> 타입을 매개변수로 전달 받으면 그 안에 있는 T를 리턴한다.
+            * 즉, classType에 해당하는 타입의 객체를 만들어 준다.
+            * 그리고 해당 객체의 필드 중에 @Inject가 있다면 해당 필드도 같이 만들어 제공한다.
+            * */
+            public static <T> T getObject(Class<T> classType){
+                T instance = createInstance(classType);
+        
+                // 해당 클래스 타입의 필드를 살펴보면서 @Inject이 붙어 있는지 확인한다.
+                Arrays.stream(classType.getDeclaredFields()).forEach(f -> {
+                    if(f.getAnnotation(Inject.class) != null){ // @Inject이 붙어 있다면
+                        // 해당 필드의 타입(BookRepository)을 가져와서 인스턴스를 생성한다.
+                        Object fieldInstance = createInstance(f.getType());
+                        f.setAccessible(true);
+        
+                        try {
+                            f.set(instance, fieldInstance); // 필드에 인스턴스를 저장한다.
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+        
+                return instance;
+            }
+        
+            private static <T> T createInstance(Class<T> classType){
+                try {
+                    return classType.getConstructor(null).newInstance();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        ```
+      
+    * 인텔리제이 터미널에서 `mvn install`를 한다. 그러면 로컬 메이븐 저장소에 설치된다. 그리고 해당 Jar 파일을 다른 메이븐 프로젝트에서 참조 할 수 있다.
+    
+#### 5) 리플렉션 정리
+
+* 리플렉션 사용 시 주의 할 것
+
+    * 잘못 사용 할 경우, 다음과 문제가 발생 할 수 있다.
+    
+        * 지나친 사용은 성능 이슈를 야기 할 수 있다. 반드시 필요한 경우에만 사용할 것
+        
+        * 컴파일 시, 확인되지 않고 런타임 시에만 발생하는 문제를 만들 가능성이 있다. 
+        
+        * 의도적으로 접근 지시자를 무시하고 데이터에 접근 할 수 있다.
+
+* 리플렉션 활용 예시
+ 
+    * 스프링
+    
+        * 의존성 주입
+        
+        * MVC 뷰에서 넘어온 데이터를 특정 객체에 바인딩 할 때, 사용한다.
+        
+    * 하이버네이트
+    
+        * 특정 @Entity 클래스에 Setter가 없다면 리플렉션을 사용하여 필드에 값을 설정한다.
+        
+    * JUnit
+    
+        * JUnit 프레임워크에서 사용 할 용도로 만든 것 (범용적 X)
+    
+        * https://junit.org/junit5/docs/5.0.3/api/org/junit/platform/commons/util/ReflectionUtils.html
+
+* 참고
+
+    * https://docs.oracle.com/javase/tutorial/reflect/index.html
