@@ -2920,6 +2920,287 @@ int[][] arr = {
                 
 ## 13. 람다와 스트림
 
+#### 1) 람다식 (Lambda Expression)
+
+* (1) 람다식이란?
+
+    * `람다식`은 함수(메서드)를 하나의 `식(Expression)`으로 표현한 것이다.
+    
+        * `(매개변수 선언) -> { 실행문; }`
+        
+    * 익명 함수(이름이 없는 함수, anonymous function) 라고도 한다.
+    
+    * 함수와 메서드의 차이 : 함수는 클래스에 독립적으로 존재하고 메서드는 클래스에 종속적이다.
+    
+* (2) 람다식 작성하기
+
+    * 반환 타입과 메서드의 이름을 제거하고 중괄호{} 앞에 ‘->’를 추가한다. [이것만 적용하더라도 람다식]
+
+        ![image 1](images/img1.png)
+
+    * 반환 값이 있는 경우, 식이나 값만 적고 return 문 생략 가능 (끝에 ‘;’ 을 붙이지 않는다.) 
+
+        ![image 2](images/img2.png)
+
+    * 매개변수의 타입이 추론 가능하면 생략 가능 (대부분의 경우, 생략 가능) 
+
+        ![image 3](images/img3.png)
+ 
+    * 매개변수가 하나인 경우, 소괄호() 생략 가능 (단, 타입이 없을 때만) 
+
+        ![image 4](images/img4.png)
+
+    * 블록 안의 문장이 하나 일 때는 중괄호 {} 생략 가능 (끝에 ‘;’ 을 붙이지 않는다) 
+
+        ![image 5](images/img5.png)  
+  
+    * 단, 하나뿐인 문장이 return문이면 중괄호{} 생략 불가 [대부분, return을 생략하기 때문에 신경 X]
+
+        ![image 6](images/img6.png)  
+
+* (3) 람다식은 익명 함수? 익명 객체!
+
+    * 람다식은 익명 함수가 아니라 `익명 클래스의 객체(익명 객체)`와 같다. 
+    
+        ![image 7](images/img7.png)
+    
+    * 람다식(익명 객체)를 다루기 위한 참조변수가 필요하다. 그런데 참조변수의 타입은 어떻게 지정해야 할까? `함수형 인터페이스`
+    
+        * `타입 obj = (a, b) -> a > b ? a : b;`
+
+#### 2) 함수형 인터페이스
+        
+* (1) 함수형 인터페이스(Functional Interface)
+
+    * `함수형 인터페이스`는 하나의 추상 메서드만 선언된 인터페이스이다.
+
+* (2) 함수형 인터페이스 - 예시
+
+    * ① 예를 들어, 아래와 같이 `max()`라는 메서드가 정의된 `MyFunction` 인터페이스(함수형 인터페이스)를 정의한다.
+    
+        ```java
+         @FunctionalInterface
+         interface MyFunction {
+             public abstract int max(int a, int b);  // 추상 메서드
+         }
+        ```
+
+    * ② 그러면 이 인터페이스를 구현한 익명 클래스의 객체는 다음과 같이 생성한 다음, max()를 호출 할 수 있다.
+    
+        ```java
+         MyFunction f = new MyFunction() {
+                            public int max(int a, int b) {
+                                  return a > b ? a : b;
+                            }
+                        };
+                        
+         int big = f.max(5, 3);
+        ```
+      
+    * ③ MyFunction 인터페이스에 정의된 메서드 max()는 람다식 `(int a, int b) -> a > b ? a : b`과 메서드의 선언부가 일치한다. 
+    
+    * 그래서 위에서 살펴본 코드의 익명 객체를 람다식으로 대체할 수 있다.
+    
+        ```java
+        // 람다식(익명 객체)을 다루기 위한 참조변수의 타입은 "함수형 인터페이스"로 한다.
+        MyFunction f = (int a, int b) -> a > b ? a : b;  // 익명 객체를 람다식으로 대체
+        
+        int big = f.max(5,3); // 익명 객체의 메서드를 호출
+        ```
+
+        * 함수형 인터페이스 타입의 참조변수로 람다식을 참조할 수 있음. 
+        
+        * 단, 함수형 인터페이스의 메서드와 람다식의 매개변수의 타입과 개수 그리고 반환 값이 일치해야 함.
+
+* (3) 함수형 인터페이스 타입의 매개변수와 반환 타입
+
+    * 함수형 인터페이스 타입의 매개변수
+    
+        * 함수형 인터페이스 MyFunction가 정의되어 있다.
+    
+            ```java
+            // 람다식(익명 객체)을 다루기 위한 참조변수의 타입은 "함수형 인터페이스"로 한다.
+            MyFunction f = (int a, int b) -> a > b ? a : b;  // 익명 객체를 람다식으로 대체
+            
+            int big = f.max(5,3); // 익명 객체의 메서드를 호출
+            ```
+    
+        * ① 메서드 호출 시, 람다식을 가리키는 참조변수를 매개변수로 지정하는 경우
+    
+            ```java
+            void aMethod(MyFunction f) {  // 매개변수의 타입이 함수형 인터페이스
+                f.myMethod(); // MyFunction에 정의된 메서드 호출 (람다식 호출)
+            }
+            
+            //...
+            
+            MyFunction f = ()-> System.out.println("myMethod()");
+            
+            aMethod(f);
+            ```
+      
+          * 위와 같이 메서드(aMethod)를 호출할 때, 
+              
+          * "메서드의 매개변수 타입이 함수형 인터페이스(MyFunction)이면 해당 함수형 인터페이스의 추상 메서드와 동등한 람다식을 가리키는 참조변수 또는 직접 람다식을 매개변수로 지정해야 한다"는 뜻이다.
+          
+        * ② 메서드 호출 시, 직접 람다식을 매개변수로 지정하는 경우 
+    
+            ```java
+            aMethod( ()-> System.out.println("myMethod()") );
+            ```
+
+    * 함수형 인터페이스 타입의 반환 타입
+     
+      * "메서드의 반환 타입이 함수형 인터페이스이면 해당 함수형 인터페이스의 추상 메서드와 동등한 람다식을 가리키는 참조변수를 반환하거나 직접 람다식을 반환해야 한다"는 뜻이다.     
+ 
+        ![image 8](images/img8.png)
+
+#### 3) java.util.function 패키지
+        
+* (1) java.util.function 패키지
+
+    * 자주 사용되는 다양한 함수형 인터페이스를 제공한다.
+    
+* (2) 함수형 인터페이스의 종류
+
+    * ① `Runnable` : **매개변수도 없고 반환 값도 없는** 추상 메서드를 가지고 있다.
+    
+        * `void run()`
+        
+        * 예시
+        
+            ```java
+            Runnable runnable = () -> {
+                for(int i=0; i<10; i++){
+                    System.out.println(i);
+                }
+            };
+            
+            Thread thread = new Thread(runnable);
+            thread.start();
+            ```           
+        
+    * ② `Consumer` : **매개변수만 있고 반환 값이 없는 추상** 메서드를 가지고 있다. 
+    
+        * `void accept(T t)`
+        
+    * ③ `Supplier` : **매개변수는 없고 반환 값만 있는 추상** 메서드를 가지고 있다.
+    
+        * `T get()`
+        
+    * ④ `Function`
+    
+        * **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다. 
+    
+            * `R apply(T t)`
+        
+        * 주로 **매개변수의 값을 반환 타입으로 매핑(형 변환)** 할 경우에 사용한다.
+        
+    * ⑤ `Operator`
+      
+        * **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다.
+        
+            * `T apply(T t)`
+            
+            * `T apply(T t, T t)`
+        
+        * 주로 **매개변수의 값을 연산한 다음, 그 결과를 반환** 할 경우에 사용한다.
+        
+    * ⑥ `Predicate`
+      
+        * **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다.
+        
+            * `boolean test(T t)`
+        
+        * **매개변수의 값을 검사하여 boolean 값을 반환** 할 때 사용한다.
+
+* (3) 매개변수가 2개인 함수형 인터페이스
+
+    * ① `BiConsumer<T, U>` : 두 개의 매개변수만 있고 반환 값이 없다.
+    
+    * ② `BiPredicate<T, U>` : 두 개의 매개변수가 있고 반환 값이 boolean이다. 조건식을 표현하는데 사용 됨 
+    
+    * ③ `BiFunction<T, U, R>` : 두 개의 매개변수를 받아서 하나의 결과를 반환한다.
+    
+        * `Bi` : "두 개"를 의미한다.
+        
+        * `T`, `U` : 매개변수 타입 , `R` : 반환 타입
+        
+* (4) 매개변수가 3개인 함수형 인터페이스를 만들기
+
+    * 매개변수가 3개 이상의 함수형 인터페이스가 필요하다면 직접 만들어서 사용해야 한다.
+    
+        ```java
+        @FunctionalInterface
+        interface TriFunction<T, U, V, R>{
+            R apply(T t, U u, V v);
+        }
+        ```
+      
+* (5) 매개변수의 타입과 반환타입이 일치하는 함수형 인터페이스
+
+    * `UnaryOperator<T>` 
+    
+        * `Function`의 자손 
+        
+        * `Function`과 달리, 매개변수와 반환 타입이 같다.
+        
+            * `T apply(T t)`
+    
+    * `BinaryOperator<T>`
+    
+        * `BiFunction`의 자손
+        
+        * `BiFunction`과 달리, 매개변수와 반환 타입이 같다.
+        
+            * `T apply(T t, T t)`
+            
+* (6) 실습
+
+    ```java
+    class Ex14_2 {
+    	public static void main(String[] args) {
+    		Supplier<Integer>  s = ()-> (int)(Math.random() * 100) + 1; // 1 ~ 100 까지 난수 발생
+    		Consumer<Integer>  c = i -> System.out.print(i + ", "); 
+    		Predicate<Integer> p = i -> i % 2 == 0; // 짝수인지 검사한다.
+    		Function<Integer, Integer> f = i -> i / 10 * 10; // i의 일의 자리를 제거한다. (일의 자리를 0으로 만듦)
+    		
+    		List<Integer> list = new ArrayList<>();	
+    		makeRandomList(s, list); // list를 랜덤 값으로 채운다.
+    		System.out.println(list);
+    		printEvenNum(p, c, list); // 짝수를 출력한다.
+  
+    		List<Integer> newList = doSomething(f, list);
+    		System.out.println(newList);
+    	}
+    
+    	static <T> List<T> doSomething(Function<T, T> f, List<T> list) {
+    		List<T> newList = new ArrayList<T>(list.size()); // list의 사이즈와 같은 새로운 List를 만든다.
+    
+    		for(T i : list) {
+    			newList.add(f.apply(i)); // 일의 자리를 제거한 값을 새로운 리스트에 저장한다.
+    		}	
+    
+    		return newList; // 새로운 리스트를 반환한다.
+    	}
+    
+    	static <T> void printEvenNum(Predicate<T> p, Consumer<T> c, List<T> list) {
+    		System.out.print("[");
+    		for(T i : list) {
+    			if(p.test(i)) // 짝수인지 검사하여 콘솔에 i를 출력한다.
+    				c.accept(i);
+    		}	
+    		System.out.println("]");
+    	}
+    
+    	static <T> void makeRandomList(Supplier<T> s, List<T> list) {
+    		for(int i=0;i<10;i++) {
+    			list.add(s.get());
+    		}
+    	}
+    }
+    ```
+   
 ## 14. 입출력(I/O)
 
     

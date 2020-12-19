@@ -7,6 +7,8 @@
 
 * 다음 용어를 구분할 줄 알아야 한다.
 
+    ![image 1](images/img1.png)
+
     * `JVM (Java Virtual Machine) `
     
         * 자바 가상 머신으로 자바 바이트 코드(.class 파일)를 OS에 특화된 코드로 변환(인터프리터와 JIT 컴파일러를 사용)하여 실행한다.
@@ -19,7 +21,7 @@
         
         * 특정 플랫폼에 종속적이다.
         
-    * `JRE (Java Runtime Environment)` : JVM + 라이브러리
+    * `JRE (Java Runtime Environment)` : JVM과 라이브러리(자바 API)로 구성된다.
     
         * 자바 실행 환경으로 자바 애플리케이션을 실행할 수 있도록 구성된 배포판을 말한다.
             
@@ -27,9 +29,9 @@
         
         * 개발 관련 도구는 포함하지 않는다. (그건 JDK에서 제공한다.)
         
-    * `JDK (Java Development Kit)` : JRE + 개발 툴
+    * `JDK (Java Development Kit)` : JRE과 개발 툴로 구성된다.
     
-        * JRE + 개발에 필요할 툴 (컴파일러...)
+        * JRE + 개발에 필요 툴 (컴파일러...)
      
         * 소스 코드를 작성할 때 사용하는 자바 언어는 플랫폼에 독립적.
         
@@ -63,15 +65,17 @@
 
 * JVM 구조
 
+    ![image 2](images/img2.png)
+
     * 클래스 로더 시스템
     
         * 클래스 파일(.class)에서 바이트 코드를 읽고 메모리에 저장한다.
         
             * 로딩(loading) : 클래스 파일에서 바이트 코드를 읽어오는 과정
             
-            * 링크(linking) : 레퍼런스를 연결하는 과정
-            
-            * 초기화(initialization) : static 값들을 초기화 및 변수에 할당하는 과정
+            * 링크(linking) : 검증(Verify), 준비(Prepare), 해석(Resolve)을 수행하는 과정
+
+            * 초기화(initialization) : 모든 클래스 변수를 코드 및 static 블록(있는 경우)에 정의된 값으로 초기화하는 과정
             
     * 메모리(Runtime Data Area)
     
@@ -79,43 +83,43 @@
         
             * 클래스 수준의 정보 (클래스 이름, 부모 클래스 이름, 메소드, 변수)를 저장한다.
             
-            * JVM 당 하나의 영역 밖에 존재하지 않으며 공유 자원이다. (모든 Thread가 공유한다.)
+            * JVM 당 하나의 영역 밖에 존재하지 않으며 공유 자원이다. (모든 Thread가 공유해서 사용한다.)
     
         * `힙(Heap) 영역`
         
             * 객체(인스턴스)를 저장한다.
             
-            * JVM 당 하나의 영역 밖에 존재하지 않으며 공유 자원이다. (모든 Thread가 공유한다.)
+            * JVM 당 하나의 영역 밖에 존재하지 않으며 공유 자원이다. (모든 Thread가 공유해서 사용한다.)
     
         * `스택(Stack) 영역`
         
-            * 쓰레드 마다 런타임 스택을 만들고, 그 안에 메소드 호출을 스택 프레임이라 부르는 블럭으로 쌓는다.
+            * 각 쓰레드 마다 런타임 스택을 하나씩 만들고, 그 안에 메소드 호출을 스택 프레임이라 부르는 블럭으로 쌓는다.
             
             * 쓰레드를 종료하면 런타임 스택도 사라진다.
             
         * `PC(Program Counter) 레지스터 `
         
-            * 쓰레드 마다 현재 실행 중인 명령어(instruction)의 위치를 가리키는 포인터가 생성된다.
+            * 각 쓰레드 마다 하나씩 만들고, PC 레지스터는 현재 실행 중인 JVM 명령의 주소를 가지고 있다.
             
         * `네이티브 메소드 스택`
         
-            * 네이티브(native) 메소드를 호출 할 때 사용하는 별도의 스택을 말한다.
+            * 각 쓰레드 마다 하나씩 만들고, 네이티브(native) 메소드를 호출 할 때 사용하는 별도의 스택을 말한다.
             
             * `네이티브 메소드`는 Java가 아닌 C, C++로 구현된 메소드를 말한다.
             
             * 예를 들어, `Thread.currentThread()`가 있다. native 키워드가 사용 된 것을 확인 할 수 있다.
             
-            * [참고] https://javapapers.com/core-java/java-jvm-run-time-data-areas/#Program_Counter_PC_ Register
+            * [참고] https://javapapers.com/core-java/java-jvm-run-time-data-areas/#Program_Counter_PC_Register
             
-    * 실행 엔진
+    * 실행 엔진(Execution Engine)
     
         * `인터프리터(Interpreter)`
         
             * 바이트 코드를 한줄 씩 읽어서 네이티브 코드로 변환한 다음, 실행한다.
             
-            * 똑같은 코드가 여러 번 나오더라도 매번 네이티브 코드로 변환해야되기 때문에 비효율적이다.
+            * 똑같은 코드가 여러 번 나오더라도 매번 네이티브 코드로 변환해야 되기 때문에 비효율적이다.
             
-        * `JIT 컴파일러(JIT Compiler)`
+        * `JIT 컴파일러(Just-In-Time Compiler)`
         
             * 인터프리터가 반복되는 코드를 발견하면 JIT 컴파일러로 반복되는 코드를 전부 네이티브 코드로 바꿔 놓는다. 
             
@@ -127,13 +131,13 @@
             
     * `JNI(Java Native Interface)`
     
-        * 자바 애플리케이션에서 C, C++, 어셈블리로 작성된 함수를 사용할 수 있는 방법을 제공한다.
+        * 자바 애플리케이션에서 자바 외의 언어(C, C++, 어셈블리)로 작성된 함수를 사용할 수 있는 방법을 제공한다.
          
         * https://medium.com/@bschlining/a-simple-java-native-interface-jni-example-in-java-and-scala-68fdafe76f5f  
     
     * `네이티브 메소드 라이브러리(Native Method Libraries)`
     
-        * 실행 엔진에 필요한 네이티브 라이브러리를 모아놓은 것이다.
+        * 실행 엔진에 필요한 네이티브 라이브러리를 모아 놓은 것이다.
     
 * 자바 실행 과정
  
@@ -153,13 +157,15 @@
 
 * 클래스 로더
 
+    ![image 3](images/img3.png)
+
     * `로딩(loading)` → `링크(linking)` → `초기화(initialization)` 순으로 진행된다.
     
         * 로딩(loading)
         
-            * 클래스 파일(.class)을 읽고, 바이너리 코드(binary code)로 변환 후, JVM의 `메소드 영역`에 클래스 정보를 저장한다.
+            * 클래스 로더는 클래스 파일(.class)을 읽고, 적절한 바이너리 데이터를 만든 다음, 이를 JVM의 `메소드 영역`에 저장한다.
             
-            * 이때 메소드 영역에 저장하는 클래스 정보
+            * 이떄, 메소드 영역에 저장하는 데이터는 다음과 같다.
             
                 * `FQCN (Fully Qualified Class Name)` : 클래스가 속한 패키지명을 모두 포함한 이름을 말한다. (+ 클래스 로더)
                 
@@ -173,19 +179,15 @@
         
             * Verify, Prepare, Resolve 세 단계로 나눠져 있다.
             
-                * `검증(Verify)` : 클래스 파일(.class)의 유효성을 체크한다. 검증에 실패하면 검증 에러가 발생하며 애플리케이션이 실행되지 않는다.
+                * `검증(Verification)` : 클래스 파일(.class)이 올바른 형식으로 되어 있는지 검증한다.
                 
-                * `준비(Prepare)` : 클래스 변수(static 변수)에 대해 메모리가 할당되고 기본 값이 저장된다.
+                * `준비(Preparation)` : 클래스 변수에 메모리를 할당하고 메모리를 기본 값으로 초기화한다.
                 
-                * `해석(Resolve)`
+                * `해석(Resolution)` : 심볼릭 메모리 참조를 메소드 영역에 있는 실제 참조로 변경한다.
                 
-                   * 심볼릭 메모리 참조를 메소드 영역에 있는 실제 참조로 교체한다. (선택사항)
-                
-                   * 링크 과정에서 해당 교체가 이루어 질 수도 있고, 실제 해당 참조를 사용할 때, 교체가 이루어 질 수도 있다.
-
         * 초기화(initialization) 
         
-            * static 변수의 값을 할당한다. (static 블럭이 있다면 이때 실행된다.)
+            * 이 단계에서 모든 클래스 변수가 코드 및 static 블록(있는 경우)에 정의된 값으로 초기화 된다.
    
 * 클래스 로더의 종류
 
@@ -193,23 +195,27 @@
 
     * `부트스트랩 클래스 로더(BootStrap ClassLoader)`
     
-        * `JAVA_HOME\lib`에 있는 코어 자바 API를 제공한다. 최상위 우선순위를 가진 클래스 로더다.
+        * JVM을 기동할 때 생성되며, Object 클래스들을 비롯하여 자바 API들을 로드한다.
         
     * `플랫폼 클래스 로더(Platform ClassLoader)`
     
-        * `JAVA_HOME\lib\ext` 폴더 또는 `java.ext.dirs` 시스템 변수에 해당하는 위치에 있는 클래스를 읽는다.
+        * 기본 자바 API를 제외한 확장 클래스들을 로드한다.
     
-        * 예전에는 확장 클래스 로더(Extension ClassLoader)라고 불렸음
+        * 예전에는 `확장 클래스 로더(Extension ClassLoader)`라고 불렸다.
     
     * `애플리케이션 클래스 로더(Application ClassLoader)`
     
-        * 애플리케이션 클래스패스에서 클래스를 읽는다.
-      
-        * 클래스패스(classpath)
+        * 애플리케이션의 클래스들을 로드한다
         
-            * 클래스를 찾는 경로를 말한다.
+        * 즉, 사용자가 지정한 클래스패스 내의 클래스들을 로드한다.
+      
+            * 클래스패스(classpath)
             
-            * 애플리케이션 실행할 때 주는 -classpath 옵션 또는 java.class.path 환경 변수의 값에 해당하는 위치
+                * 클래스를 찾는 경로를 말한다.
+                
+                * 애플리케이션 실행할 때 주는 -classpath 옵션 또는 java.class.path 환경 변수의 값에 해당하는 위치
+            
+        * `시스템 클래스 로더(System Class Loader)`라고도 한다.
         
 * `ClassLoader`가 클래스를 읽는 순서는 다음과 같다.
 
@@ -217,7 +223,6 @@
     
     * 애플리케이션 클래스 로더(Application ClassLoader)에서도 클래스를 읽지 못한다면, `ClassNotFoundException` 예외가 발생한다.
     
-
 ## 2. 바이트코드 조작
 
 #### 1) 코드 커버리지는 어떻게 측정할까?
