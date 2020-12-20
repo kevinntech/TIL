@@ -3200,7 +3200,418 @@ int[][] arr = {
     	}
     }
     ```
-   
+
+#### 4) Function의 합성, Predicate의 결합, CF와 함수형 인터페이스
+
+* (1) Function의 합성
+
+    * `andThen()`, `compose()`로 두 개의 Function를 합성해서 하나의 새로운 함수를 만들 수 있다.
+    
+        * 즉, 두 람다식을 합쳐서 새로운 람다식을 만들 수 있다.
+      
+    * `andThen()`과 `compose()`의 차이점은 어떠한 함수형 인터페이스부터 적용하는지가 다르다.
+    
+        * `f.andThen(g)`는 함수 f를 먼저 적용하고, 그 다음에 함수 g를 적용한다.
+        
+        * `f.compose(g)`는 반대로, 함수 g를 먼저 적용하고, 그 다음에 함수 f를 적용한다.
+    
+* (2) Predicate의 결합
+
+    * `and()`, `or()`, `negate()`로 두 Predicate를 하나로 결합 할 수 있다. (default 메서드)
+
+        * ① and() : 두 Predicate가 모두 true를 반환 하면 true를 반환
+        
+        * ② or() : 두 Predicate 중 하나만 true를 반환 하면 true를 반환
+        
+        * ③ negate() : Predicate의 결과가 true이면 false, false이면 true를 반환
+
+    * 등가 비교를 위한 Predicate의 작성에는 `isEqual()`를 사용한다. (static 메서드)
+    
+        * `isEqual()`의 매개변수로 비교 대상을 하나 지정하고, 또 다른 비교 대상은 `test()`의 매개변수로 지정한다. 
+    
+    * 예시 - and(), or(), negate()
+          
+        ```java
+        Predicate<Integer> p = i -> i < 100;
+        Predicate<Integer> q = i -> i < 200;
+        Predicate<Integer> r = i -> i % 2 == 0;
+        
+        Predicate<Integer> notP = p.negate();        // i >= 100
+        Predicate<Integer> all = notP.and(q).or(r);  // 100 <= i && i < 200 || i % 2 == 0
+        Predicate<Integer> all2 = notP.and(q.or(r)); // 100 <= i && (i < 200 || i % 2 == 0)
+        ```
+      
+        ```java
+        System.out.println(all.test(2));  // true
+        System.out.println(all2.test(2)); // false
+        ```
+      
+    * 예시 - isEqual()
+          
+        ```java
+        String str1 = "abc";
+        String str2 = "abc";
+
+        Predicate<String> p = Predicate.isEqual(str1); // isEqual()은 static 메서드
+        boolean result = p.test(str2); // str1과 str2가 같은지 비교한 결과를 반환
+        //boolean result = Predicate.isEqual(str1).test(str2);
+        ```
+
+* (3) 항등 함수
+
+    * `항등 함수`는 함수에 x를 대입하면 결과가 x인 함수를 말한다.
+    
+        * 즉, 입력 받은 것을 그대로 반환한다.
+       
+    * 예시
+     
+        ```java
+        Function<String, String> f = x -> x;
+        //Function<String, String> f = Function.identity(); // 위의 문장과 동일
+        
+        System.out.println(f.apply("AAA")); // AAA가 그대로 출력 됨
+        ```
+
+* (4) 실습 - Function의 합성, Predicate의 결합
+
+    ```java
+    class Ex14_3 {
+    	public static void main(String[] args) {
+    		Function<String, Integer>	f  = (s) -> Integer.parseInt(s, 16);
+    		Function<Integer, String>	g  = (i) -> Integer.toBinaryString(i);
+    
+    		Function<String, String>    h  = f.andThen(g);
+    		Function<Integer, Integer>  h2 = f.compose(g);
+    
+    		System.out.println(h.apply("FF")); // "FF" → 255 → "11111111"
+    		System.out.println(h2.apply(2));   // 2 → "10" → 16
+    
+    		Function<String, String> f2 = x -> x; // 항등 함수(identity function)
+    		System.out.println(f2.apply("AAA"));  // AAA가 그대로 출력됨
+    
+    		Predicate<Integer> p = i -> i < 100;
+    		Predicate<Integer> q = i -> i < 200;
+    		Predicate<Integer> r = i -> i%2 == 0;
+    		Predicate<Integer> notP = p.negate(); // i >= 100
+    
+    		Predicate<Integer> all = notP.and(q.or(r));
+    		System.out.println(all.test(150));       // true
+    
+    		String str1 = "abc";
+    		String str2 = "abc";
+    		
+    		// str1과 str2가 같은지 비교한 결과를 반환
+    		Predicate<String> p2 = Predicate.isEqual(str1); 
+    		boolean result = p2.test(str2);   
+    		System.out.println(result);
+    	}
+    }
+    ```
+
+* (5) 컬렉션 프레임워크와 함수형 인터페이스
+
+    * 컬렉션 프레임워크의 인터페이스에 여러 개의 디폴트 메서드가 추가 되었다.
+    
+    * 그 중 함수형 인터페이스를 사용하는 컬렉션 프레임워크의 메서드를 살펴본다.
+    
+        * Collection 인터페이스
+        
+            * `boolean removeIf(Predicate<E> filter)` : 조건(filter)에 맞는 요소를 삭제한다.
+
+        * List 인터페이스
+              
+            * `void replaceAll(UnaryOperator<E> operator)` : 모든 요소를 변환(operator)하여 대체한다.
+      
+        * Iterable 인터페이스
+          
+            * `void forEach(Consumer<T> action)` : 모든 요소에 작업(action)을 수행한다.
+            
+        * Map 인터페이스
+        
+            * `V compute(K key, BiFunction<K, V, V> f)` : 지정된 키(key)의 값에 작업(f)를 수행
+            
+            * `V computeIfAbsent(K key, Function<K, V> f)` : 지정된 키(key)가 없으면, 작업(f)을 수행 후 추가
+            
+            * `V computeIfPresent(K key, BiFunction<K, V, V> f)` : 지정된 키가 있을 때, 작업(f을) 수행
+            
+            * `V merge(K key, BiFunction<V, V, V> f)` : 모든 요소에 병합 작업(f)을 수행
+            
+            * `void forEach(BiConsumer<K, V> action)` : 모든 요소에 작업(action)을 수행
+            
+            * `void replaceAll(BiFunction<K, V, V> f)` : 모든 요소에 치환 작업(f)을 수행
+            
+    * 예시
+    
+        ```java
+        ArrayList<Integer> list = new ArrayList<>();
+        for(int i = 0; i < 10; i++)
+            list.add(i);
+
+        list.forEach(i -> System.out.print(i+","));     // list의 모든 요소를 출력
+        list.removeIf(x -> x % 2 == 0 || x % 3 == 0);   // list에서 2 또는 3의 배수를 제거
+        list.replaceAll(i -> i * 10);                   // list의 모든 요소에 10을 곱한다.
+
+        Map<String, String> map = new HashMap<>();
+        map.put("1", "1");
+        map.put("2", "2");
+        map.put("3", "3");
+        map.put("4", "4");
+
+        // map의 모든 요소를 {k,v}의 형식으로 출력한다.
+        map.forEach((k,v)-> System.out.print("{" + k + "," + v + "},"));
+        ```
+
+* (6) 실습 - 컬렉션 프레임워크와 함수형 인터페이스
+
+        ```java
+        class Ex14_4 {
+            public static void main(String[] args) 	{
+                ArrayList<Integer> list = new ArrayList<>();
+                for(int i = 0; i < 10; i++)
+                    list.add(i);
+        
+                // list의 모든 요소를 출력
+                list.forEach(i -> System.out.print(i + ","));
+                System.out.println();
+        
+                // list에서 2 또는 3의 배수를 제거한다.
+                list.removeIf(x -> x % 2 == 0 || x % 3 == 0);
+                System.out.println(list);
+        
+                list.replaceAll(i -> i * 10); // list의 각 요소에 10을 곱한다.
+                System.out.println(list);
+        
+                Map<String, String> map = new HashMap<>();
+                map.put("1", "1");
+                map.put("2", "2");
+                map.put("3", "3");
+                map.put("4", "4");
+        
+                // map의 모든 요소를 {k,v}의 형식으로 출력한다.
+                map.forEach((k, v)-> System.out.print("{" + k + "," + v + "},"));
+                System.out.println();
+            }
+        }
+        ```
+
+#### 5) 메서드 참조(method reference)
+
+* (1) 메서드 참조
+
+    * 하나의 메서드만 호출하는 람다식은 `메서드 참조`로 더 간단히 할 수 있다.
+    
+    * `클래스명::메서드명`으로 바꿀 수 있다.
+    
+        * ① static 메서드 참조
+        
+            * `클래스명::메서드명` 
+            
+                ![image 9](images/img9.png)
+            
+        * ② 인스턴스 메서드 참조
+        
+            * `클래스명::메서드명`
+            
+                ![image 10](images/img10.png)
+
+        * ③ 특정 객체의 인스턴스 메서드 참조 **(거의 사용 되지 X)**
+
+            * `참조변수명::메서드명`
+            
+                ![image 11](images/img11.png)
+
+                * 이미 생성된 객체의 메서드를 람다식에서 사용한 경우에는 클래스 이름 대신 그 객체의 참조변수를 적어줘야 한다.
+
+* (2) 실습 - 메서드 참조
+
+    ```java
+    public class MethodReferenceEx {
+        public static void main(String[] args) {
+            Function<String, Integer> f = (String s) -> Integer.parseInt(s);
+            //Function<String, Integer> f = Integer::parseInt; // 메서드 참조
+            /*
+            * 참조변수의 타입을 보면 매개변수 타입을 추측 할 수 있기 때문에
+            * (String s)를 생략한 "메서드 참조"로 작성 할 수 있다.
+            * ★★★ 람다식 ↔ 메서드 참조 간의 변환 연습을 해서 익숙해지자.
+            * */
+            System.out.println(f.apply("100") + 200);
+        }
+    }
+    ```
+  
+* (3) 생성자 및 배열 생성의 메서드 참조
+
+    * ① `생성자의 메서드 참조` : 생성자를 호출하는 람다식을 메서드 참조로 변환
+    
+        * `클래스명::new` 
+        
+            ![image 12](images/img12.png)
+                   
+    * ② `배열 생성의 메서드 참조` : 배열을 생성하는 람다식을 메서드 참조로 변환
+    
+        * `배열타입[]::new`
+        
+            ![image 13](images/img13.png)
+
+* (4) 실습 - 생성자 및 배열 생성의 메서드 참조
+
+    ```java
+    public class MethodReferenceEx {
+        public static void main(String[] args) {
+            /*
+            * 생성자의 메서드 참조
+            * */
+            Supplier<MyClass> s = MyClass::new;
+            //Supplier<MyClass> s = () -> new MyClass();
+            System.out.println(s.get()); // MyClass 객체를 생성한 다음, 출력
+            System.out.println(s.get()); // 또 다른 MyClass 객체를 생성한 다음, 출력
+    
+            Function<Integer, MyClass2> f = i -> new MyClass2(i);
+            //Function<Integer, MyClass2> f = MyClass2::new;
+            System.out.println(f.apply(100).iv);
+    
+            /*
+             * 배열 생성의 메서드 참조
+             * */
+            Function<Integer, int[]> f2 = int[]::new;
+            //Function<Integer, int[]> f2 = (i) -> new int[i];
+            // 길이가 100인 배열을 생성한 다음, 그 길이를 출력한다.
+            System.out.println(f2.apply(100).length);
+        }
+    }
+    
+    class MyClass {}
+    
+    class MyClass2 {
+        int iv;
+    
+        MyClass2(int iv){
+            this.iv = iv;
+        }
+    }
+    ```
+
+#### 6) 스트림(Stream)
+
+* (1) 스트림(Stream)
+
+    * `스트림(Stream)`은 다양한 데이터 소스를 표준화된 방법으로 다루기 위한 것
+    
+        * 데이터 소스 : 컬렉션 또는 배열처럼 여러 데이터를 저장하고 있는 것을 말함
+        
+        * 예를 들어, 컬렉션은 List, Set과 Map은 사용 방법이 다르다. (100% 표준화 된 것은 아님)
+        
+    * 스트림으로 작업하는 과정은 다음과 같다.
+    
+        * ① `스트림 생성`
+                      
+        * ② `중간 연산` : 여러 번 가능
+        
+        * ③ `최종 연산` : 1번만 가능
+        
+    * 스트림이 제공하는 기능 - 중간 연산과 최종 연산
+    
+        * `중간 연산` : 연산 결과가 스트림인 연산이다. 반복적으로 적용 가능
+        
+        * `최종 연산` : 연산 결과가 스트림이 아닌 연산이다. 단 한번만 적용 가능 (스트림의 요소를 소모)
+        
+        * `stream.distinct().limit(5).sorted().forEach(System.out::println)`
+        
+            * `distinct().limit(5).sorted()` : 중간 연산
+            
+            * `forEach(System.out::println)` : 최종 연산
+            
+* (2) 스트림의 특징
+
+    * 스트림은 데이터 소스로 부터 데이터를 읽기만 할 뿐 변경하지 않는다. (즉, 원본을 변경하지 않는다.)
+    
+        ```java
+        List<Integer> list = Arrays.asList(3, 1, 5, 4, 2);
+        
+        /*
+        * list를 스트림으로 만들어서 정렬한 다음, 새로운 List에 저장한다.
+        * */
+        List<Integer> sortedList = list.stream().sorted()
+                .collect(Collectors.toList());
+        
+        System.out.println(list); // [3, 1, 5, 4, 2]
+        System.out.println(sortedList); // [1, 2, 3, 4, 5]
+        ```
+      
+    * 스트림은 일회용이다. (필요하면 다시 스트림을 생성해야 한다.)
+    
+        ```java
+        String[] strArr = {"aaa", "ddd", "ccc"};
+        Stream<String> strStream = Arrays.stream(strArr);
+        
+        strStream.forEach(System.out::println); // 모든 요소를 화면에 출력 (최종 연산)
+      
+        /*
+        * 스트림에 더 이상 사용 할 요소가 없어서 스트림이 닫힌다.
+        * 에러. 스트림이 이미 닫혔음.
+        * */
+        int numOfStr = (int) strStream.count();
+        ```
+      
+    * 최종 연산이 수행되기 전까지는 중간 연산이 수행되지 않는다. - 지연된 연산
+    
+        ```java
+        /*
+        * 1~45 범위의 난수를 생성하는 무한 스트림
+        * 즉, 로또 번호를 생성하여 출력한다.
+        * */
+        IntStream intStream = new Random().ints(1, 46);
+        intStream.distinct().limit(6).sorted()
+                .forEach(i -> System.out.print(i + ", "));
+        ```
+      
+    * 스트림은 작업을 내부 반복으로 처리한다.
+    
+        * 내부 반복이라는 것은 반복문을 메서드의 내부에 숨긴 것을 말한다.
+        
+            ```java
+            for (String str : strList) {
+                System.out.println(str);
+            }
+            ```
+          
+        * forEach()는 매개변수에 대입된 람다식을 데이터 소스의 모든 요소에 적용한다. (코드가 간결해 짐)
+        
+            ```java
+            stream().forEach(System.out::println);
+            ```
+          
+    * 스트림의 작업을 병렬로 처리 할 수 있다. - 병렬 스트림
+    
+        * 병렬 스트림은 내부적으로 `fork&join 프레임워크`를 이용해서 자동적으로 연산을 병렬로 수행한다.
+        
+            ```java
+            Stream<String> strStream = Stream.of("dd", "aaa", "CC", "cc", "b");
+            int sum = strStream.parallel()     // 병렬 스트림으로 전환(속성만 변경)
+                    .mapToInt(s -> s.length()) // 모든 문자열의 길이의 합
+                    .sum();
+            ```
+          
+    * 기본형 스트림을 제공한다. - IntStream, LongStream, DoubleStream
+    
+        * 즉, 데이터 소스의 요소를 기본형으로 다루는 스트림을 제공한다.
+    
+        * 오토박싱, 언박싱으로 인한 비효율이 제거된다. (`Stream<Integer>` 대신 `IntStream`을 사용한다.)
+        
+            * Stream<Integer> : Stream의 요소가 Integer다. (기본형은 불가능)
+        
+        * 숫자와 관련된 유용한 메서드를 `Stream<T>` 보다 더 많이 제공한다.
+
+        
+
+        
+        
+        
+    
+    
+    
+    
+
 ## 14. 입출력(I/O)
 
     
