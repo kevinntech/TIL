@@ -3598,20 +3598,198 @@ int[][] arr = {
     
         * 오토박싱, 언박싱으로 인한 비효율이 제거된다. (`Stream<Integer>` 대신 `IntStream`을 사용한다.)
         
-            * Stream<Integer> : Stream의 요소가 Integer다. (기본형은 불가능)
+            * `Stream<Integer> `: Stream의 요소가 Integer다. (기본형은 불가능)
         
         * 숫자와 관련된 유용한 메서드를 `Stream<T>` 보다 더 많이 제공한다.
 
-        
+#### 7) 스트림 만들기
+ 
+* (1) 스트림 만들기 - 컬렉션으로 부터 스트림 만들기
 
-        
-        
-        
+    * `Collection` 인터페이스의 `stream()`로 컬렉션을 스트림으로 변환한다.
     
+        * `Stream<E> stream()` 
     
+    * 예시
     
-    
+        ```java
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
+        Stream<Integer> intStream = list.stream(); // list로 부터 스트림을 생성
 
+        /*
+        * 스트림의 모든 요소를 출력, forEach()는 최종 연산이므로 스트림이 닫힌다.
+        * 즉, stream은 1회용이다. stream에 대해 최종 연산을 수행하면 stream이 닫힌다.
+        * */
+        intStream.forEach(System.out::print); // 12345
+        System.out.println();
+
+        intStream = list.stream(); // list로 부터 스트림을 다시 생성
+        intStream.forEach(System.out::print);
+        ```      
+
+* (2) 스트림 만들기 - 배열로 부터 스트림 만들기
+
+    * 객체 배열로 부터 스트림 생성하기
+    
+        * `Stream<T> Stream.of(T... values)`
+                
+        * `Stream<T> Stream.of(T[])`
+        
+        * `Stream<T> Arrays.stream(T[])`
+        
+        * `Stream<T> Arrays.stream(T[] array, int startInclusive, int endExclusive)` 
+        
+            * 배열의 일부를 스트림으로 만들 때 사용한다. (마지막 요소는 범위에 포함되지 않음)
+                
+    * 기본형 배열로 부터 스트림 생성하기
+    
+        * `IntStream IntStream.of(int... values)`
+        
+        * `IntStream IntStream.of(int[])`
+        
+        * `IntStream Arrays.stream(int[])`
+        
+        * `IntStream Arrays.stream(int[], int startInclusive, int endExclusive)`
+        
+    * 예시
+    
+        ```java
+        // 문자열 스트림 생성
+        Stream<String> strStream1 = Stream.of("a", "b", "c");
+        Stream<String> strStream2 = Stream.of(new String[]{"a", "b", "c"});
+        Stream<String> strStream3 = Arrays.stream(new String[]{"a", "b", "c"});
+        Stream<String> strStream4 = Arrays.stream(new String[]{"a", "b", "c"}, 0, 3);
+        strStream1.forEach(System.out::println);
+        System.out.println();
+
+        int[] intArr = {1, 2, 3, 4, 5};
+        IntStream intStream = Arrays.stream(intArr);
+        intStream.forEach(System.out::println);
+        //System.out.println(intStream.sum());
+        System.out.println();
+      
+        /*
+        * Stream<T>는 숫자 외에도 여러 타입의 스트림이 가능해야 하므로
+        * 숫자 스트림에만 사용 할 수 있는 sum(), average()를 넣지 않은 것이다.
+        * */
+        Integer[] intArr2 = {1, 2, 3, 4, 5};
+        Stream<Integer> intStream2 = Arrays.stream(intArr2);
+        intStream2.forEach(System.out::println);
+        //System.out.println("count=" + intStream2.count());
+        ```  
+    
+* (3) 스트림 만들기 - 임의의 수(난수)
+
+    * 난수를 요소로 갖는 스트림 생성하기
+    
+        * Random 클래스의 `ints()`, `longs()`, `doubles()`는 해당 타입의 난수들로 이루어진 스트림을 반환한다.
+
+            ```
+            Integer.MIN_VALUE <= ints() <= Integer.MAX_VALUE
+            Long.MIN_VALUE <= longs() <= Long.MAX_VALUE
+            0.0 <= doubles() < 1.0
+            ```
+               
+        * 이 메서드들이 반환하는 스트림은 크기가 정해지지 않은 무한 스트림이므로 limit()으로 스트림의 크기를 제한 해주어야 한다.
+                
+        * `limit()`는 스트림의 요소 개수를 제한하는데 사용된다.
+
+            ```java
+            IntStream intStream = new Random().ints(); // 무한 스트림
+            intStream.limit(5).forEach(System.out::println); // 5개의 요소만 출력한다.
+    
+            IntStream intStream2 = new Random().ints(5); // 크기가 5인 난수 스트림을 반환한다.
+            ```
+          
+        * 지정된 범위의 난수를 요소로 갖는 스트림을 생성하는 메서드(Random 클래스)
+
+            ```
+            // begin은 범위에 포함되며 end는 범위에 포함되지 않는다.
+            // 무한 스트림 
+            IntStream ints(int begin, int end)
+            LongStream longs(long begin, long end)
+            DoubleStream doubles(double begin, double end)
+            
+            // 유한 스트림
+            IntStream ints(long streamSize, int begin, int end)
+            LongStream longs(long streamSize, long begin, long end)
+            DoubleStream doubles(long streamSize, double begin, double end)
+            ```
+        
+* (4) 스트림 만들기 - 특정 범위의 정수
+
+    * 특정 범위의 정수를 요소로 갖는 스트림 생성하기(IntStream, LongStream)
+    
+        * `IntStream IntStream.range(int begin, int end)`
+        
+        * `IntStream IntStream.rangeClosed(int begin, int end)`
+        
+            * `rangeClosed()`는 끝 범위(end)가 포함된다.
+        
+    * 예시
+    
+        ```java
+        IntStream intStream1 = IntStream.range(1, 5);        // 1, 2, 3, 4
+        IntStream intStream2 = IntStream.rangeClosed(1, 5); // 1, 2, 3, 4, 5
+
+        intStream1.forEach(System.out::println);
+        intStream2.forEach(System.out::println);
+        ```
+      
+* (4) 스트림 만들기 - 람다식으로 스트림을 만드는 `iterate()`, `generate()`
+
+    * 람다식을 소스로 하는 스트림 생성하기 (무한 스트림)
+    
+        * `static <T> Stream<T> iterate(T seed, UnaryOperator<T> f)` : 이전 요소에 종속적
+    
+        * `static <T> Stream<T> generate(Supplier<T> s)` : 이전 요소에 독립적
+    
+    * `iterate()`는 이전 요소를 seed로 해서 다음 요소를 계산한다.
+
+        ```java
+        // Stream.iterate(초기 값, 람다식)
+        Stream<Integer> evenStream = Stream.iterate(0, n -> n + 2); // 0, 2, 4, 6 ...
+        
+        /*  n -> n + 2
+          ===============
+            0 -> 0 + 2
+            2 -> 2 + 2
+            4 -> 4 + 2
+                ...     */
+        ```
+      
+    * `generate()`는 seed를 사용하지 않는다.
+    
+        ```java
+        // Math.random()를 호출한 값을 계속 생성하는 무한 스트림
+        Stream<Double> randomStream = Stream.generate(Math::random);
+        // 계속해서 1을 만드는 무한 스트림
+        Stream<Integer> oneStream = Stream.generate(() -> 1);
+        ```
+    
+* (5) 스트림 만들기 - 파일과 빈 스트림
+
+    * 파일을 소스로 하는 스트림 생성하기
+    
+        * `Stream<Path> Files.list(Path dir)`
+        
+            * `Path`는 파일 또는 디렉토리
+
+    * 아래 메서드들은 파일의 한 행(line)을 요소로 하는 스트림을 생성한다. 
+
+        ```java
+        Stream<String> Files.lines(Path path)
+        Stream<String> Files.lines(Path path, Charset cs)
+        Stream<String> lines() // BufferedReader 클래스의 메서드
+        ```
+      
+    * 비어있는 스트림 생성하기
+    
+        ```java
+        Stream emptyStream = Stream.empty(); // empty()는 비어있는 스트림을 생성해서 반환한다.
+        long count = emptyStream.count(); // count의 값은 0
+        ```
+        
 ## 14. 입출력(I/O)
 
     
