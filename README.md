@@ -21,3 +21,7 @@
 
 * [김영한님의 실전! 스프링 부트와 JPA 활용1 - 웹 애플리케이션 개발](https://github.com/kevinntech/TIL/tree/main/jpa/jpaUse1 "실전! 스프링 부트와 JPA 활용1")
 * [김영한님의 실전! 스프링 데이터 JPA](https://github.com/kevinntech/TIL/tree/main/jpa/springDataJpa "실전! 스프링 데이터 JPA")
+
+## ETC
+
+* [파이썬 기본 문법 정리](https://github.com/kevinntech/TIL/tree/main/python-summary "파이썬 기본 문법 정리")
