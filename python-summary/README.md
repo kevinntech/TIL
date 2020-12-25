@@ -1099,11 +1099,334 @@
         >>> a, b = b, a
         ```
 
+## 3. 제어문
 
-        
-        
+#### 1) if 문 
 
+* if문의 기본 구조
         
+    ```python
+    if 조건문:
+        수행할 문장1
+        수행할 문장2
+        ...
+    else:
+        수행할 문장A
+        수행할 문장B
+        ...
+    ```
+  
+    * `if 조건문:` 바로 아래 문장부터 if문에 속하는 모든 문장에 들여쓰기를 해야한다. (들여쓰기의 너비가 다르면 오류 발생)
+    
+* 조건문이란?
+
+    * 조건문은 참과 거짓을 판단하는 문장을 말한다.
+    
+    * 조건문에 사용 될 수 있는 연산자
+    
+        * 비교 연산자(<, >, ==, !=, >=, <=)
+    
+            ```python
+            >>> money = 2000
+            >>> if money >= 3000:
+            ...     print("택시를 타고 가라")
+            ... else:
+            ...     print("걸어가라")
+            걸어가라
+            ```
+    
+        * and, or, not
+        
+            * `x or y` : x와 y 둘중에 하나만 참이어도 참이다.
+            
+                * `|`를 사용 할 수도 있다.
+                
+            * `x and y` : x와 y 모두 참이어야 참이다.
+            
+                * `&`를 사용 할 수도 있다.
+            
+            * `not x` : x가 거짓이면 참이다.
+            
+            * 예시
+
+                ```python
+                >>> money = 2000
+                >>> card = True
+                >>> if money >= 3000 or card:
+                ...     print("택시를 타고 가라")
+                ... else:
+                ...     print("걸어가라")
+                ...
+                택시를 타고 가라
+                ```
+
+        * x in s, x not in s
+        
+            * `s`에는 리스트, 튜플, 문자열을 사용 할 수 있다.
+            
+            * `x in s` : x가 s에 있는가?
+            
+            * `x not in s` : x가 s에 없는가?
+            
+            * 예시
+            
+                ```python
+                >>> pocket = ['paper', 'cellphone', 'money']
+                >>> if 'money' in pocket:
+                ...     print("택시를 타고 가라")
+                ... else:
+                ...     print("걸어가라")
+                ...
+                택시를 타고 가라
+                >>>
+                ```
+              
+        * pass : 조건문에서 아무 일도 하지 않게 한다.
+
+* elif문
+
+    * 문법
+            
+        ```python
+        If 조건문1:
+            수행할 문장1 
+            수행할 문장2
+            ...
+        elif 조건문2:
+            # 조건문1의 결과가 False 이고 조건문2의 결과가 True이면 실행된다.  
+            수행할 문장1
+            수행할 문장2
+            ...
+        else:
+           수행할 문장1
+           수행할 문장2
+           ... 
+        ```
+      
+    * 예시
+            
+        ```python
+        >>> pocket = ['paper', 'cellphone']
+        >>> card = True
+        >>> if 'money' in pocket:
+        ...      print("택시를 타고가라")
+        ... elif card: 
+        ...      print("택시를 타고가라")
+        ... else:
+        ...      print("걸어가라")
+        ...
+        택시를 타고가라
+        ```
+      
+* 조건부 표현식
+
+    * 문법
+    
+        * `조건문이 참인 경우` if `조건문` else `조건문이 거짓인 경우`
+                  
+    * 예시
+            
+        ```python
+        # message에 score가 60 이상일 경우 문자열 "success"를, 아닐 경우에는 "failure"를 대입한다. (삼항 연산자와 비슷함)
+        message = "success" if score >= 60 else "failure"
+        ```
+      
+#### 2) 반복문 - while 문 
+
+* while 문의 기본 구조
+
+    * while문은 조건문이 참인 동안에 while문 아래의 문장을 반복해서 수행한다.
+        
+        ```python
+        while 조건문:
+            수행할 문장1
+            수행할 문장2
+            ...
+        ```
+
+* while 문 예시
+
+    * while문은 조건문이 참인 동안에 while문 아래의 문장을 반복해서 수행한다.
+        
+        ```python
+        >>> treeHit = 0
+        >>> while treeHit < 10:
+        ...     treeHit = treeHit +1
+        ...     print("나무를 %d번 찍었습니다." % treeHit)
+        ...     if treeHit == 10:
+        ...         print("나무 넘어갑니다.")
+        ```
+      
+        * treeHit가 10보다 작은 동안에 while문 안의 문장을 계속 수행한다.
+        
+        * treeHit < 10 조건문이 거짓이 되면 while문을 빠져나가게 된다.
+        
+* break 문
+
+    * break 문은 반복문을 종료한다. 
+        
+        ```python
+        >>> coffee = 10
+        >>> money = 300
+        >>> while money:
+        ...     print("돈을 받았으니 커피를 줍니다.")
+        ...     coffee = coffee -1
+        ...     print("남은 커피의 양은 %d개입니다." % coffee)
+        ...     if coffee == 0:
+        ...         print("커피가 다 떨어졌습니다. 판매를 중지합니다.")
+        ...         break
+        ```
+      
+* continue 문
+
+    * continue 문은 다음 반복으로 넘어간다. (즉, 조건문으로 다시 돌아가게 만든다.)
+    
+    * 예시
+        
+        ```python
+        # 1부터 10까지의 숫자 중에서 홀수만 출력한다.      
+        >>> a = 0
+        >>> while a < 10:
+        ...     a = a + 1
+        ...     if a % 2 == 0: continue
+        ...     print(a)
+        ```
+      
+* 무한루프
+
+    * 무한 루프란 무한히 반복한다는 의미다.
+            
+        ```python
+        while True: 
+            수행할 문장1 
+            수행할 문장2
+            ...
+        ```
+      
+    * 문법
+        
+        ```python
+        >>> while True:
+        ...     print("Ctrl+C를 눌러야 while문을 빠져나갈 수 있습니다.")
+        ```
+        
+#### 3) 반복문 - for 문 
+
+* for 문의 기본 구조
+
+    * 리스트나 튜플, 문자열의 첫 번째 요소부터 마지막 요소까지 차례로 변수에 대입되어 for문 아래 문장들이 수행된다.
+        
+        ```python
+        for 변수 in 리스트(또는 튜플, 문자열):
+            수행할 문장1
+            수행할 문장2
+            ...
+        ```
+      
+* for 문 예시
+
+    * `['one', 'two', 'three']` 리스트의 첫 번째 요소인 'one' 부터 마지막 요소 'three' 까지 먼저 변수 i에 대입된 후 print(i) 문장을 수행한다
+        
+        ```python
+        >>> test_list = ['one', 'two', 'three'] 
+        >>> for i in test_list: 
+        ...     print(i)
+        ... 
+        one 
+        two 
+        three
+        ```
+
+    * a 리스트의 요소 값이 튜플이기 때문에 각각의 요소가 자동으로 (first, last) 변수에 대입된다.
+        
+        ```python
+        >>> a = [(1,2), (3,4), (5,6)]
+        >>> for (first, last) in a:
+        ...     print(first + last)
+        ...
+        3
+        7
+        11
+        ```
+      
+* for문과 함께 자주 사용하는 range 함수
+
+    * range()는 해당 범위의 숫자 리스트를 만든다.
+    
+        * `range(10)`은 0부터 10 미만의 숫자 리스트를 만든다.
+        
+        * `range(시작 숫자, 끝 숫자)`로 시작 숫자와 끝 숫자를 지정 할 수 있다.
+
+        * `range(1, 11)`은 1 부터 10 까지의 숫자 리스트를 만든다. (끝 범위는 포함되지 않는다.)
+        
+    * 예시
+    
+        * 1번
+              
+            ```python
+            >>> add = 0 
+            >>> for i in range(1, 11):  # range(1, 11)은 숫자 1부터 10까지(1 이상 11 미만)의 숫자를 데이터로 갖는 객체이다.
+            ...     add = add + i 
+            ... 
+            >>> print(add)
+            ```
+      
+        * 2번
+    
+            ```python
+            marks = [90, 25, 67, 45, 80]
+            for number in range(len(marks)):
+                if marks[number] < 60: 
+                    continue
+                print("%d번 학생 축하합니다. 합격입니다." % (number+1))
+            ```
+      
+            * `len()`는 리스트 안의 요소 개수를 반환한다.
+            
+            * 따라서 `len(marks)`는 5가 될 것이고 `range(len(marks))`는 `range(5)`가 될 것이다. 
+            
+            * number 변수에는 차례로 0부터 4까지의 숫자가 대입된다.
+                
+* 리스트 내포
+
+    * `리스트 내포(List comprehension)`는 리스트 안에 for문을 포함하는 것을 말한다.
+
+        * [`표현식` for `항목` in `반복가능객체` if `조건문`]
+
+    * 예시
+
+        * a 리스트의 각 항목(num)에 3을 곱한 결과를 result 리스트에 담는다.
+
+            ```python
+            >>> a = [1,2,3,4]
+            >>> result = [num * 3 for num in a]
+            >>> print(result)
+            [3, 6, 9, 12]
+            ```
+   
+        * a 리스트의 각 항목(num) 중에서 짝수인 경우에만 3을 곱한 결과를 result 리스트에 담는다.
+
+            ```python
+            >>> a = [1,2,3,4]
+            >>> result = [num * 3 for num in a if num % 2 == 0]
+            >>> print(result)
+            [6, 12] 
+            ```
+          
+        * 구구단의 결과를 리스트 내포를 사용하여 리스트에 담을 수도 있다.
+
+            ```python
+            >>> result = [x * y for x in range(2,10)
+            ...               for y in range(1,10)]
+            >>> print(result)
+            ```
+    
+
+
+
+  
+    
+            
 
     
 
