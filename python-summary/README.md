@@ -1044,7 +1044,7 @@
         >>> a = [3, 4, 5]
         >>> b = a
         ```
-      
+            
 * 리스트 복사하기
 
     * `[:]` 사용
@@ -1098,6 +1098,12 @@
         >>> b = 5
         >>> a, b = b, a
         ```
+
+#### 9) None
+
+* `None`은 아무것도 없다는 것을 의미한다. 
+
+    * 다른 프로그래밍 언어의 널(null)과 같다고 생각하면 된다.
 
 ## 3. 제어문
 
@@ -1188,7 +1194,7 @@
     * 문법
             
         ```python
-        If 조건문1:
+        if 조건문1:
             수행할 문장1 
             수행할 문장2
             ...
@@ -1420,6 +1426,372 @@
             ...               for y in range(1,10)]
             >>> print(result)
             ```
+          
+## 4. 프로그램의 입력과 출력
+
+#### 1) 함수
+
+* 파이썬 함수의 구조
+        
+    ```python
+    def 함수 이름(매개변수):
+        수행할 문장
+        ...
+        return 리턴 값
+    ```
+  
+    * return 문은 값을 반환하고 함수를 종료한다.
+
+* 함수 선언 및 호출
+        
+    ```python
+    def add(a, b): 
+        result = a + b 
+        return result
+    a = add(3, 4)
+    print(a)
+    ```
+  
+* 여러 개의 입력 값을 받는 함수 만들기
+    
+    * 문법
+    
+        ```python
+        def 함수 이름(*매개변수): 
+            수행할 문장
+            ...
+        ```
+      
+    * 예시
+    
+        ```python
+        def add_many(*args):
+             result = 0
+        
+             for i in args:
+                 result = result + i
+        
+             return result
+        
+        many = add_many(1, 2, 3, 4, 5)
+        print(many)
+        ```
+      
+        * `*args` 처럼 매개변수 이름 앞에 `*`을 붙이면 여러 개의 값을 전달 받을 수 있는 매개변수가 된다.
+        
+        * `args`는 매개변수를 뜻하는 `arguments`의 약자이며 관례적으로 자주 사용한다.
+        
+* 키워드 파라미터
+
+    * 키워드 파라미터는 여러 개의 `key=value` 형식의 값을 전달 받을 수 있는 매개변수다.
+    
+        * `**kwargs`
+        
+    * 예시
+    
+        ```python
+        >>> def print_kwargs(**kwargs):
+        ...     print(kwargs)
+        >>> print_kwargs(name='foo', age=3)
+        {'age': 3, 'name': 'foo'}
+        ```
+      
+* 함수의 결과 값은 하나다.
+
+    * 예시
+    
+        ```python
+        def add_and_mul(a, b):
+            return a + b, a * b
+        
+        print(add_and_mul(3, 5))
+        ```
+      
+        * `add_and_mul` 함수의 결과 값 a + b 와 a * b는 튜플 값 하나인 (a + b, a * b)로 반환된다.
+        
+            * 함수의 결과 값은 언제나 하나다.
+            
+* 함수 안에서 선언한 변수의 범위
+
+    * 함수 안에서 선언한 매개변수는 함수 안에서만 사용될 뿐 함수 밖에서는 사용되지 않는다.
+    
+    * 예시
+    
+        ```python
+        a = 1
+        def vartest(a):
+            a = a + 1
+        
+        vartest(a)
+        print(a)
+        ```
+      
+* 함수 안에서 함수 밖의 변수를 변경하는 방법
+
+    * ① return 사용하기
+
+        ```python
+        a = 1 
+        def vartest(a): 
+            a = a + 1 
+            return a
+        
+        a = vartest(a) 
+        print(a)
+        ```
+      
+        * a는 지역변수를 의미한다.
+         
+        * `vartest()`는 입력으로 들어온 값에 1을 더한 값을 반환한다.
+
+    * ② global 명령어 사용하기
+        
+        ```python
+        a = 1 
+        def vartest(): 
+            global a 
+            a = a+1
+        
+        vartest() 
+        print(a)
+        ```
+      
+        * `global a`는 전역변수를 의미한다.
+        
+            * `global a` 문장은 함수 안에서 함수 밖의 a 변수를 직접 사용하겠다는 뜻이다. 
+          
+        * 하지만 프로그래밍을 할 때 global 명령어는 사용하지 않는 것이 좋다. 
+          
+        * 왜냐하면 함수는 독립적으로 존재하는 것이 좋기 때문이다. 
+        
+* 람다(lambda)
+        
+    * `lambda`는 함수를 한줄로 간결하게 만들 때 사용한다.
+    
+        * `lambda` `매개변수1, 매개변수2, ...` : `매개변수를 이용한 표현식`
+        
+    * 예시
+    
+        ```python
+        >>> add = lambda a, b: a+b
+        >>> result = add(3, 4)
+        >>> print(result)
+        7
+        ```
+      
+        * `lambda` 예약어로 만든 함수는 return 문이 없어도 결과 값을 반환한다.
+        
+#### 2) 사용자 입력과 출력
+
+* `input()` : 사용자로 부터 콘솔에 입력 받는다.
+        
+    ```python
+    >>> number = input("숫자를 입력하세요: ")
+    숫자를 입력하세요: 3
+    >>> print(number)
+    3
+    ```
+  
+* `print()` : 콘솔에 출력한다.
+        
+#### 3) 파일 읽고 쓰기
+
+* 코딩 테스트에 사용되지 않을 것으로 보이므로 따로 정리는 하지 않음 
+
+## 5. 파이썬 날개 달기
+
+#### 1) 클래스
+
+* 클래스(class)는 객체를 정의 해 놓은 것을 말한다.
+
+* 클래스 선언하기
+        
+    ```python
+    class 클래스명:
+        def 메서드명(self, 매개변수):
+            수행할 문장
+    ```
+  
+    * 메서드(Method)는 클래스 안에 선언된 함수를 말한다.
+    
+    * 객체를 호출할 때 호출한 객체 자신이 전달되기 때문에 `self`를 사용한다.
+  
+* 객체를 생성하고 메서드 호출하기
+        
+    ```python
+    변수명 = 클래스명() # 객체 생성
+    변수명.메서드명() # 메서드 호출
+    ```
+  
+* 예시 - 클래스 선언 및 객체를 생성하고 메서드 호출하기
+        
+    ```python
+    # 클래스 선언
+    class FourCal:
+        # 메서드 선언
+        def setdata(self, first, second):
+            self.first = first
+            self.second = second
+    
+        def add(self):
+            result = self.first + self.second
+            return result
+    
+    a = FourCal() # a 객체 생성하기
+    a.setdata(4, 2) # 메서드 호출
+    print(a.add()) # 메서드 호출
+    ```
+
+* 생성자
+          
+    * 생성자(Constructor)는 객체가 생성될 때 자동으로 호출되는 메서드를 의미한다.
+    
+        * `__init__()`
+
+    * 예시 - 클래스에서 생성자 선언해서 사용하기
+
+        ```python
+        class FourCal:
+            def __init__(self, first, second):
+                self.first = first
+                self.second = second
+        
+            def setdata(self, first, second):
+                self.first = first
+                self.second = second
+        
+            def add(self):
+                result = self.first + self.second
+                return result
+        
+        a = FourCal(1, 2)
+        print(a.add())
+        ```
+     
+* 상속
+          
+    * `상속(Inheritance)`은 어떤 클래스를 만들 때 다른 클래스의 기능을 물려 받는 것을 말한다. 
+    
+        ```python
+        class 자식 클래스명(부모 클래스명):
+            ...
+        ```
+      
+        * 상속은 기존 클래스를 변경하지 않고 기능을 추가하거나 기존 기능을 변경하려고 할 때 사용한다.
+
+    * 예시
+    
+        ```python
+        class FourCal:
+            def __init__(self, first, second):
+                self.first = first
+                self.second = second
+        
+            def setdata(self, first, second):
+                self.first = first
+                self.second = second
+        
+            def add(self):
+                result = self.first + self.second
+                return result
+        
+        class MoreFourCal(FourCal):
+            def pow(self):
+                result = self.first ** self.second
+                return result
+        
+        a = MoreFourCal(4, 2)
+        
+        print(a.add())
+        print(a.pow())
+        ```
+      
+        * 자식 클래스(MoreFourCal)는 부모 클래스(FourCal)의 모든 기능을 사용 할 수 있다. (__init__()도 사용 할 수 있다.)
+
+* 메서드 오버라이딩
+          
+    * `메서드 오버라이딩(Overriding)`은 부모 클래스로 부터 상속 받은 메서드의 내용을 변경하는 것을 말한다.
+    
+        ```python
+        class FourCal:
+            def __init__(self, first, second):
+                self.first = first
+                self.second = second
+        
+            def setdata(self, first, second):
+                self.first = first
+                self.second = second
+        
+            def add(self):
+                result = self.first + self.second
+                return result
+        
+            def mul(self):
+                result = self.first * self.second
+                return result
+        
+            def sub(self):
+                result = self.first - self.second
+                return result
+        
+            def div(self):
+                result = self.first / self.second
+                return result
+        
+        class SafeFourCal(FourCal):
+            def div(self):  # div()를 오버라이딩 한다.
+                if self.second == 0:  # 나누는 값이 0인 경우 0을 리턴하도록 수정
+                    return 0
+                else:
+                    return self.first / self.second
+        
+        a = SafeFourCal(4, 0) # 상속 받기 전 코드에서는 0으로 나눴을 때 오류가 발생한다.
+        print(a.div())
+        ```
+
+* 클래스 변수
+
+    * 클래스 변수는 같은 클래스의 모든 객체들이 공유하는 변수이다.
+   
+    * 객체 변수는 객체 마다 고유의 변수이다.
+          
+    * 클래스 변수는 `클래스이름.클래스 변수`로 사용한다.
+    
+        ```python
+        class Family:
+            lastname = "김"
+        
+        Family.lastname = "박"
+        print(Family.lastname)
+        
+        a = Family()
+        b = Family()
+        
+        print(a.lastname)
+        print(b.lastname)
+        ```
+      
+
+            
+
+        
+
+        
+ 
+    
+
+
+        
+        
+      
+
+  
+
+
+  
+
+  
+
     
 
 
