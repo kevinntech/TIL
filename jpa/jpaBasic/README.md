@@ -152,9 +152,203 @@
 
         * 두 옵션을 모두 활성화 하면 부모 엔티티를 통해서 자식의 생명주기를 관리할 수 있다.
 
+## 9. 값 타입
 
+### 1. JPA의 데이터 타입 분류
 
+* JPA의 데이터 타입은 크게 `엔티티 타입`과 `값 타입`으로 나눌 수 있다.
 
+    * (1) 엔티티 타입
 
+        * `엔티티 타입`은 `@Entity`로 정의하는 객체이다.
 
+        * 데이터가 변해도 식별자를 통해 지속해서 추적 할 수 있다.
+
+        * 예) 회원 엔티티의 키나 나이 값을 변경해도 식별자로 인식 가능하다. 
+
+    * (2) 값 타입(Value Type)
+
+        * `값 타입`은 int, Integer, String처럼 단순히 값으로 사용하는 자바 기본 타입이나 객체를 말한다.
+
+        * 식별자가 없고 값만 있으므로 변경 시 추적 할 수 없다.
+
+        * 예) 숫자 100을 200으로 변경하면 완전히 다른 값으로 대체된다.
+        
+* 값 타입 분류
+
+    * `값 타입`은 크게 3가지로 나눌 수 있다.
+
+        * ① `기본값 타입`
+    
+            * 자바 기본 타입(int, double)
+        
+            * 래퍼 클래스(Integer, Long)
+        
+            * String
+
+        * ② `임베디드 타입(embedded type, 복합 값 타입)`
+
+        * ③ `컬렉션 값 타입(collection value type)`
+        
+* (1) 기본 값 타입
+
+    * 예를 들어 `String name`, `int age`가 기본 값 타입이다.
+
+    * 생명주기를 엔티티에 의존한다.
   
+        * Ex) 회원 엔티티를 삭제하면 이름, 나이 필드도 함께 삭제된다.
+
+    * 값 타입은 공유하면 안 된다.
+
+        * Ex) 회원 이름 변경 시 다른 회원의 이름도 함께 변경되면 안 되기 때문이다.
+
+    * [참고] 자바의 기본 타입은 절대 공유되지 않는다.
+
+        * int, double 같은 기본 타입(primitive type)은 절대 공유되지 않는다.
+
+        * 기본 타입은 항상 값을 복사하기 때문이다.
+
+        * Integer 같은 래퍼 클래스나 String 같은 특수한 클래스는 공유 가능한 객체이지만 변경 불가능하다.
+        
+* (2) 임베디드 타입(복합 값 타입)
+
+    * 임베디드 타입(embedded type)은 새로운 값 타입을 직접 정의해서 사용하는 것을 말한다.
+    
+    * 주로 기본 값 타입들을 모아서 만들기 때문에 “복합 값 타입”이라고도 한다.
+    
+    * 임베디드 타입은 int, String과 같은 값 타입이다.
+
+    * 사용 방법
+
+        * `@Embeddable` : 값 타입을 정의하는 곳에 사용한다.
+    
+        * `@Embedded` : 값 타입을 사용하는 곳에 사용한다.
+
+        * 예시
+        
+            ```java
+            @Entity
+            public class Member{
+            
+                @Id @GeneratedValue
+                @Column(name = "MEMBER_ID")
+                private Long id;
+            
+                @Column(name = "USERNAME")
+                private String username;
+            
+                // Period
+                @Embedded
+                private Period workPeriod;
+            
+                // 주소
+                @Embedded
+                private Address homeAddress;
+            
+                // Getter, Setter
+            }
+            ```
+          
+            ```java
+            @Embeddable
+            public class Address {
+                private String city;
+                private String street;
+                private String zipcode;
+            
+                // 기본 생성자 필수
+                public Address() {
+                }
+            
+                public Address(String city, String street, String zipcode) {
+                    this.city = city;
+                    this.street = street;
+                    this.zipcode = zipcode;
+                }
+          
+                /*
+                * Getter만 만들기
+                * "값 타입"을 여러 엔티티에서 공유하면 위험하다. 그 이유는 부작용(side effect)이 발생하기 때문이다.
+                * 불변 객체(immutable object)로 만들기 위해, 생성자로만 값을 설정하고 수정자(Setter)는 만들지 않는다.
+                * */
+          
+            }
+
+            ```
+
+    * 임베디드 타입과 테이블 매핑
+    
+        * 임베디드 타입은 엔티티의 값일 뿐이다. 따라서 값이 속한 엔티티의 테이블에 매핑한다.
+    
+        * 임베디드 타입을 사용하기 전과 후에 **매핑하는 테이블은 같다.**
+    
+        * 임베디드 타입 덕분에 객체와 테이블을 아주 세밀하게(find-grained) 매핑하는 것이 가능하다.
+        
+    * @AttributeOverride
+
+        * 한 엔티티에서 같은 값 타입을 사용하면 테이블에 매핑하는 컬럼 명이 중복된다.
+
+        * 이때는 `@AttributeOverrides`, `@AttributeOverride`를 사용해서 컬럼 명 속성을 재 정의한다.
+       
+    * 임베디드 타입과 null
+
+        * 임베디드 타입의 값이 null이면 매핑한 컬럼 값은 모두 null이 된다.
+        
+    * [참고] 자바에서 제공하는 객체 비교는 2가지가 있다.
+
+        * ① `동일성(identity) 비교` : 인스턴스의 참조 값을 비교, == 사용
+
+        * ② `동등성(equivalence) 비교` : 인스턴스의 값을 비교, equals() 사용
+
+* (3) 값 타입 컬렉션
+
+    * 값 타입 컬렉션?
+
+        * `값 타입 컬렉션`은 **값 타입을 컬렉션에 넣어서 사용하는 것**을 말한다.
+
+            * 값 타입을 하나 이상 저장할 때, 값 타입 컬렉션을 사용한다.
+                
+        * `@ElementCollection`, `@CollectionTable`를 사용해서 맵핑한다.
+        
+        * 데이터베이스는 컬렉션을 같은 테이블에 저장할 수 없다. 
+        
+        * 컬렉션을 저장하기 위한 별도의 테이블이 필요하다.
+        
+    * 값 타입 컬렉션 맵핑 예시
+              
+        ```java
+        @Entity
+        public class Member{
+        
+            @Id @GeneratedValue
+            @Column(name = "MEMBER_ID")
+            private Long id;
+        
+            @Column(name = "USERNAME")
+            private String username;
+        
+            @Embedded
+            private Address homeAddress;
+        
+            @ElementCollection
+            @CollectionTable(name = "FAVORITE_FOOD",
+                             joinColumns = @JoinColumn(name = "MEMBER_ID"))
+            @Column(name = "FOOD_NAME")
+            private Set<String> favoriteFoods = new HashSet<>();
+        
+            @ElementCollection
+            @CollectionTable(name = "ADDRESS",
+                             joinColumns = @JoinColumn(name = "MEMBER_ID"))
+            private List<Address> addressHistory = new ArrayList<>();
+        
+            // Getter, Setter
+      
+        }
+        ```
+      
+    * 값 타입 컬렉션 사용 예시
+    
+        * 해당 강좌를 참고하자.
+        
+
+      
