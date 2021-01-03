@@ -314,6 +314,8 @@
         
         * 컬렉션을 저장하기 위한 별도의 테이블이 필요하다.
         
+        * 값 타입 컬렉션은 기본적으로 지연 로딩 전략을 사용한다.
+        
     * 값 타입 컬렉션 맵핑 예시
               
         ```java
@@ -346,9 +348,388 @@
         }
         ```
       
-    * 값 타입 컬렉션 사용 예시
+    * 값 타입 컬렉션의 제약사항
+
+        * 값 타입 컬렉션에 변경사항이 발생하면, 주인 엔티티와 연관된 모든 데이터를 삭제하고, 값 타입 컬렉션에 있는 현재 값을 모두 다시 저장한다.
+
+        * 값 타입 컬렉션을 매핑하는 테이블은 모든 컬럼을 묶어서 기본 키를 구성해야 한다.
+
+        * 컬럼에 null을 입력 할 수 없고, 같은 값을 중복해서 저장 할 수 없다.
+        
+    * 값 타입 컬렉션 대안
+
+        * 실무에서는 `값 타입 컬렉션` 대신에 일대다 관계를 위한 엔티티를 만들고, 여기에서 값 타입을 사용한다.
+        
+            * 다대일 일대다 양방향 관계로 하면 update 쿼리를 없앨 수 있다.
+        
+        * `영속성 전이(Cascade)` + `고아 객체 제거(ORPHAN REMOVE)` 기능을 적용하면 값 타입 컬렉션처럼 사용 할 수 있다.
+        
+        * 예시
+        
+            * ① AddressEntity 만들기
+         
+                ```java
+                @Entity
+                @Table(name = "ADDRESS")
+                public class AddressEntity {
+                
+                    @Id @GeneratedValue
+                    private Long id;
+                
+                    private Address address;
+                
+                    public AddressEntity() {
+                    }
+                
+                    public AddressEntity(String city, String street, String zipcode) {
+                        this.address = new Address(city, street, zipcode);
+                    }
+                
+                    // Getter, Setter
+                
+                }
+                ```
+            
+            * ② Member 엔티티 코드 변경
+            
+                ```java
+                @Entity
+                public class Member{
+                
+                    @Id @GeneratedValue
+                    @Column(name = "MEMBER_ID")
+                    private Long id;
+                
+                    @Column(name = "USERNAME")
+                    private String username;
+                
+                    @Embedded
+                    private Address homeAddress;
+                
+                    // 일대다 단방향 맵핑
+                    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+                    @JoinColumn(name = "MEMBER_ID")
+                    private List<AddressEntity> addressHistory = new ArrayList<>();
+                
+                }
+                ```
+              
+## 10. 객체지향 쿼리 언어
+
+### 1. 객체지향 쿼리 언어 소개 
+
+* JPA는 다양한 쿼리 방법을 지원
+
+    * JPQL
     
-        * 해당 강좌를 참고하자.
+    * JPA Criteria
+    
+    * QueryDSL
+    
+    * 네이티브 SQL
+
+    * JDBC API 직접 사용, MyBatis, SpringJdbcTemplate 함께 사용
+
+* JPQL
+
+    * 애플리케이션이 필요한 데이터만 DB에서 가져오려면 결국 검색 조건이 포함된 SQL이 필요하다. 
+
+    * JPA는 SQL을 추상화한 JPQL이라는 객체 지향 쿼리 언어를 제공한다.
+
+    * SQL과 문법이 유사하다. (SELECT, FROM, WHERE, GROUP BY, HAVING, JOIN 지원)
+    
+    * JPQL은 엔티티 객체를 대상으로 쿼리한다.
+    
+    * SQL은 데이터베이스 테이블을 대상으로 쿼리한다.
+    
+* Criteria
+
+    * JPQL을 생성하는 빌더 역할을 한다.
+    
+    * 문자가 아닌 자바 코드로 JPQL을 작성할 수 있다.
+
+    * **단점: 너무 복잡하고 실용성이 없다.** 
+    
+    * `Criteria` 대신에 `QueryDSL` 사용 권장
+    
+* QueryDSL
+
+    * JPQL을 생성하는 빌더 역할을 한다.
+
+    * 문자가 아닌 자바 코드로 JPQL을 작성할 수 있다.
+   
+    * 컴파일 시점에 문법 오류를 찾을 수 있음
+    
+    * 동적 쿼리를 작성하는데 편리하다.
+    
+        * `동적 쿼리`는 상황에 따라 분기 처리를 통해 SQL을 동적으로 만드는 것을 말한다.
+    
+    * 단순하고 쉽기 때문에 실무에서 사용하는 것을 권장한다.
+
+* 네이티브 SQL
+
+    * SQL을 직접 사용 할 수 있는 기능을 제공한다.
+    
+    * JPQL로 해결할 수 없는 특정 데이터베이스에 의존적인 기능을 사용할 때 이용한다.
+     
+    * 예) 오라클 CONNECT BY, 특정 DB만 사용하는 SQL 힌트
+
+        ```java
+        String sql =
+            “SELECT ID, AGE, TEAM_ID, NAME FROM MEMBER WHERE NAME = ‘kim’";
+        List<Member> resultList =
+                    em.createNativeQuery(sql, Member.class).getResultList();
+        ```
+
+* JDBC 직접 사용, SpringJdbcTemplate 등
+
+    * JPA를 사용하면서 JDBC 커넥션을 직접 사용하거나, 스프링 JdbcTemplate, 마이바티스 등을 함께 사용 할 수 있다.
+    
+    * 단 영속성 컨텍스트를 적절한 시점에 강제로 플러시를 할 필요가 있다.
+    
+        * 예) JPA를 우회해서 SQL을 실행하기 직전에 영속성 컨텍스트를 수동으로 flush() 해야 한다.
+
+### 2. JPQL
+
+* JPQL(Java Persistence Query Language, 자바 영속성 쿼리 언어)
+
+    * JPQL는 테이블이 아닌 엔티티 객체를 대상으로 검색하는 객체지향 쿼리 언어이다.
+    
+    * 애플리케이션이 필요한 데이터만 DB에서 가져오려면 결국 검색 조건이 포함된 SQL이 필요하다. 
+        
+    * JPQL은 SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다.
+    
+    * JPQL은 결국 SQL로 변환된다.
+    
+* JPQL 예시
+
+    * `select m from Member as m where m.age > 18`
+    
+        * 엔티티와 속성은 대소문자를 구분한다. (Member, age)
+        
+        * JPQL 키워드는 대소문자를 구분하지 않는다. (SELECT, FROM, where)
+        
+        * 테이블 이름이 아닌 엔티티 이름을 사용한다. (Member) 
+        
+        * 별칭이 필수다. (m) 
+        
+        * as는 생략 가능하다.
+
+* TypeQuery, Query
+
+    * `TypeQuery` : 반환 타입이 명확할 때 사용한다.
+    
+        ```java
+        TypedQuery<Member> query = em.createQuery("select m from Member m", Member.class);
+        ```
+    
+    * `Query` : 반환 타입이 명확하지 않을 때 사용한다.
+    
+        ```java
+        // username은 String , age는 int이므로 타입 정보가 명확하지 않다.
+        Query query = em.createQuery("select m.username, m.age from Member m");
+        ```
+      
+* 결과 조회 API
+
+    * `query.getResultList()` : 결과가 하나 이상일 때, 리스트를 반환한다.
+    
+        * 결과가 없으면 비어있는 리스트를 반환한다.
+        
+        ```java
+        List<Member> resultList = em.createQuery("select m from Member m", Member.class).getResultList();
+
+        for (Member member1 : resultList) {
+            System.out.println("member = " + member1);
+        }
+        ```
+    
+    * `query.getSingleResult()` : 결과가 정확히 하나일 때, 단일 객체를 반환한다.
+
+        * 결과가 없으면: `javax.persistence.NoResultException` 예외 발생
+        
+        * 둘 이상이면: `javax.persistence.NonUniqueResultException` 예외 발생
+
+* 파라미터 바인딩
+
+    * JPQL는 `이름 기준 파라미터 바인딩`과 `위치 기준 파라미터 바인딩`을 제공한다.
+    
+        * `이름 기준 파라미터`는 파라미터를 이름으로 구분하는 방법이다.
+        
+            * 앞에 `:`를 사용한다.
+            
+                ```java
+                TypedQuery<Member> query = em.createQuery("select m from Member m where m.username = :username", Member.class);
+                query.setParameter("username", "member1");
+                Member singleResult = query.getSingleResult();
+                
+                System.out.println("singleResult = " + singleResult.getUsername());
+                ```
+              
+        * `위치 기준 파라미터`는 ? 다음에 위치 값을 주면 된다. (위치 값은 1부터 시작한다.)
+        
+            ```java
+            Member singleResult = em.createQuery("select m from Member m where m.username = ?1", Member.class)
+                    .setParameter(1, "member1")
+                    .getSingleResult();
+    
+            System.out.println("singleResult = " + singleResult.getUsername());
+            ```
+
+    * `이름 기준 파라미터 바인딩 방식`을 사용하는 것이 좋다.
+    
+* 프로젝션
+
+    * `프로젝션(projection)`은 SELECT 절에 조회할 대상을 지정하는 것을 말한다.
+    
+        * 프로젝션 대상은 엔티티, 임베디드 타입, 스칼라 타입이 있다.
+        
+            * 스칼라 타입은 숫자, 문자 등 기본 데이터 타입을 의미한다.
+            
+        * DISTINCT로 중복을 제거 할 수 있다.
+        
+        * 엔티티 프로젝션으로 조회한 엔티티는 영속성 컨텍스트에서 관리된다.
+    
+    * 예시
+    
+        ```java
+        SELECT m FROM Member m                    // 엔티티 프로젝션 
+        SELECT m.team FROM Member m               // 엔티티 프로젝션
+        SELECT m.address FROM Member m            // 임베디드 타입 프로젝션
+        SELECT m.username, m.age FROM Member m    // 스칼라 타입 프로젝션
+        ```
+      
+    * 프로젝션에서 여러 값을 조회하는 방법
+    
+        * ① Query 타입으로 조회
+        
+        * ② Object[] 타입으로 조회
+
+            ```java
+            List<Object[]> resultList = em.createQuery("select distinct m.username, m.age from Member m")
+                    .getResultList();
+
+            for (Object[] row : resultList) {
+                System.out.println("username = " + row[0]);
+                System.out.println("age = " + row[1]);
+            }
+            ```
+
+        * ③ new 명령어로 조회
+        
+            * DTO를 작성한다.
+
+                ```java
+                public class MemberDTO {
+                
+                    private String username;
+                
+                    private int age;
+              
+                    public MemberDTO(String username, int age) {
+                        this.username = username;
+                        this.age = age;
+                    }
+        
+                    // Getter, Setter
+                }
+                ```
+              
+            * 여러 값을 DTO로 조회한다.
+
+                ```java          
+                List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
+                        .getResultList();
+                
+                for (MemberDTO dto : result) {
+                    System.out.println("username = " + dto.getUsername());
+                    System.out.println("age = " + dto.getAge());
+                }
+                ```
+              
+                * 패키지 명을 포함한 전체 클래스명을 입력해야 한다.
+                
+                * 순서와 타입이 일치하는 생성자가 필요하다.
+
+* 페이징 API
+
+    * JPA는 페이징을 다음 두 API로 추상화 했다.
+
+        * `setFirstResult(int startPosition)` : 조회 시작 위치 (0부터 시작한다)
+        
+        * `setMaxResults(int maxResult)` : 조회할 데이터 수
+        
+    * 예시
+
+        ```java          
+        // 0 번째 부터 시작해서 10개의 데이터를 조회한다.
+        List<Member> result = em.createQuery("select m from Member m order by m.age desc", Member.class)
+                .setFirstResult(0)
+                .setMaxResults(10)
+                .getResultList();
+        ```
+
+* 조인
+
+    * 내부 조인은 INNER JOIN을 사용한다. (INNER는 생략 가능)
+    
+        ```java          
+        // 내부 조인
+        String query = "select m from Member m inner join m.team t";
+        List<Member> result = em.createQuery(query, Member.class)
+                .getResultList();
+        ```
+      
+        * JPQL 조인은 연관 필드를 사용한다.
+        
+            * 연관 필드는 다른 엔티티와 연관관계를 가지기 위해 사용하는 필드를 말한다.
+            
+        * JPQL은 JOIN 명령어 다음에 조인할 객체의 연관 필드를 사용한다.
+        
+    * 외부 조인은 `LEFT [OUTER] JOIN`을 사용한다. (OUTER는 생략 가능)
+    
+        ```java          
+        // 외부 조인
+        String query = "select m from Member m left join m.team t";
+        List<Member> result = em.createQuery(query, Member.class)
+                .getResultList();
+        ```
+      
+    * 세타 조인은 전혀 관계없는 엔티티를 조인할 때 사용한다. (내부 조인만 지원)
+    
+        ```java          
+        // 세타 조인
+        String query = "select m from Member m, Team t where m.username = t.name";
+        ```
+      
+    * ON 절
+    
+        * ON절을 사용하면 **조인 대상을 필터링**하고 조인 할 수 있다.
+        
+            * 예) 회원과 팀을 조인하면서, 팀 이름이 A인 팀만 조인
+            
+                ```java          
+                String query = "select m from Member m left join m.team t on t.name = 'teamA'";
+                ```
+        
+        * **연관관계가 없는 엔티티 외부 조인**이 가능하다.
+        
+            * 예) 회원의 이름과 팀의 이름이 같은 대상 외부 조인
+            
+                ```java          
+                String query = "select m from Member m left join Team t on m.username = t.name";
+                ```
+    
+
+
+
+
+
+
+
+
+        
+
         
 
       
