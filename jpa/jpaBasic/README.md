@@ -90,7 +90,7 @@
 
     * 즉시 로딩은 JPQL에서 N+1 문제를 일으킨다.
 
-        * N+1 문제 : 처음에 쿼리 1개를 실행 했더니 추가 쿼리 N개가 실행되는 문제를 말한다.
+        * `N+1 문제` : 처음에 쿼리 1개를 실행 했을 때, 얻은 결과의 개수(N개)만큼 추가 쿼리가 발생하는 문제를 말한다.
 
         * N+1 문제 해결 방안 (연관된 엔티티를 함께 조회해야 되는 경우)
         
@@ -98,7 +98,7 @@
 
             * 또는 `@EntityGraph`를 이용한다.
             
-            * `@BatchSize + EAGER LOADING`를 이용 할 수도 있다. (추천 X)
+            * 또는 `@BatchSize`를 이용 할 수도 있다.
 
     * `@ManyToOne`, `@OneToOne`은 기본 값이 즉시 로딩이므로 LAZY로 설정해야 한다.
     
@@ -501,23 +501,33 @@
     
     * JPQL은 결국 SQL로 변환된다.
     
-* JPQL 예시
+* JPQL 문법
 
-    * `select m from Member as m where m.age > 18`
+    * 문법
     
-        * 엔티티와 속성은 대소문자를 구분한다. (Member, age)
-        
-        * JPQL 키워드는 대소문자를 구분하지 않는다. (SELECT, FROM, where)
-        
-        * 테이블 이름이 아닌 엔티티 이름을 사용한다. (Member) 
-        
-        * 별칭이 필수다. (m) 
-        
-        * as는 생략 가능하다.
+        ```java
+        SELECT 별칭 (별칭.필드명) 
+        FROM 엔티티명 AS 별칭
+        WHERE 조건식
+        ```
+      
+    * 예시
 
-* TypeQuery, Query
+        * `select m from Member as m where m.age > 18`
+        
+            * 엔티티와 속성은 대소문자를 구분한다. (Member, age)
+            
+            * JPQL 키워드는 대소문자를 구분하지 않는다. (SELECT, FROM, where)
+            
+            * 테이블 이름이 아닌 엔티티 이름을 사용한다. (Member) 
+            
+            * 별칭이 필수다. (m) 
+            
+            * as는 생략 가능하다.
 
-    * `TypeQuery` : 반환 타입이 명확할 때 사용한다.
+* TypedQuery, Query
+
+    * `TypedQuery` : 반환 타입이 명확할 때 사용한다.
     
         ```java
         TypedQuery<Member> query = em.createQuery("select m from Member m", Member.class);
@@ -669,6 +679,58 @@
                 .getResultList();
         ```
 
+* 집합과 정렬
+
+    * 집합은 집합함수와 함께 통계 정보를 구할 때, 사용한다.
+
+        * 집합 함수
+        
+            * `COUNT` : 결과 수를 구한다.
+            
+            * `MAX, MIN` : 최대, 최소 값을 구한다. 문자, 숫자, 날짜 등에 사용한다.
+            
+            * `AVG` : 평균 값을 구한다. 숫자 타입만 사용 할 수 있다.
+            
+            * `SUM` : 합계를 구한다. 숫자 타입만 사용 할 수 있다. 
+
+        * 집합 함수 사용 시 참고사항
+        
+            * NULL 값은 무시하므로 통계에 잡히지 않는다.
+            
+            * 값이 없는데 SUM, AVG, MAX, MIN 함수를 사용하면 NULL 값이 된다. 단 COUNT는 0이 된다.
+            
+            * DISTINCT를 집합 함수 안에 사용해서 중복된 값을 제거하고 집합을 구할 수 있다.
+            
+                * select COUNT(DISTINCT m.age) from Member m
+
+        * GROUP BY, HAVING
+        
+            * `GROUP BY` : 특정 그룹끼리 묶어준다.
+            
+            * `HAVING` : GROUP BY로 그룹화한 통계 데이터를 기준으로 필터링한다.
+
+                ```java          
+                // 팀 이름을 기준으로 그룹별로 묶은 다음, 평균 나이가 10살 이상인 그룹을 조회한다.
+                SELECT t.name, COUNT(m.age), SUM(m.age), AVG(m.age), MAX(m.age), MIN(m.age)
+                FROM Member m LEFT JOIN m.team t
+                GROUP BY t.name  
+                HAVING AVG(m.age) >= 10
+                ```
+
+        * 정렬(ORDER BY)
+        
+            * `ORDER BY` : 결과를 정렬할 때 사용한다.
+            
+                ```java          
+                // 나이를 기준으로 내림차순으로 정렬하고 나이가 같으면 이름을 기준으로 오름차순으로 정렬한다.
+                SELECT t.name, COUNT(m.age) AS cnt  
+                FROM Member m LEFT JOIN m.team t  
+                GROUP BY t.name  
+                ORDER BY t.name ASC, cnt DESC
+                ```
+              
+            * `ASC` : 오름차순(기본 값), `DESC` : 내림차순
+
 * 조인
 
     * 내부 조인은 INNER JOIN을 사용한다. (INNER는 생략 가능)
@@ -719,17 +781,640 @@
                 ```java          
                 String query = "select m from Member m left join Team t on m.username = t.name";
                 ```
+              
+* 서브쿼리
+
+    * `서브쿼리(SubQuery)`은 쿼리문 안에 포함되어 있는 또 다른 쿼리문을 말한다.
     
-
-
-
-
-
-
-
-
+        * JPQL에서 서브쿼리는 WHERE, HAVING 절에서만 사용 할 수 있다.
         
+            * 하이버네이트는 SELECT 절의 서브쿼리도 허용한다.
+            
+            * FROM절의 서브쿼리는 지원하지 않는다.
+            
+                * 조인으로 해결 할 수 있다면 조인으로 해결한다.
+                
+                * 또는 네이티브 쿼리로 해결 할 수도 있다.
+            
+        * 예시 - 나이가 평균보다 많은 회원
+            
+            ```java          
+            select m from Member m
+            where m.age > (select avg(m2.age) from Member m2)
+            ```
 
+    * 서브쿼리 지원 함수
+ 
+        * EXISTS
         
+            * 문법 : `[NOT] EXISTS (subquery)`
+            
+            * 설명 : 서브쿼리에 결과가 존재하면 참이다. (NOT은 반대) 
 
+            ```java          
+            // 팀A에 소속인 회원
+            select m from Member m 
+            where exists ( select t from m.team t WHERE t.name = '팀A')
+            ```
+
+        * {ALL | ANY | SOME} 
+        
+            * 문법 : `{ALL | ANY | SOME} (subquery)`
+            
+            * 설명 : 비교 연산자와 같이 사용한다.
+            
+                * ALL : 조건을 모두 만족하면 참이다.
+                
+                * ANY, SOME: 둘은 같은 의미. 조건을 하나라도 만족하면 참이다.
+
+            ```java          
+            // 전체 상품 각각의 재고보다 주문량이 많은 주문들
+            select o from Order o
+            where o.orderAmount > ALL (select p.stockAmount from Product p)
+          
+            // 어떤 팀이든 팀에 소속된 회원 
+            select m from Member m
+            where m.team = ANY (select t from Team t)
+            ```
+
+        * IN
+        
+            * 문법 : `[NOT] IN (subquery)`
+            
+            * 설명 : 서브쿼리의 결과 중 하나라도 같은 것이 있으면 참이다.
+            
+* 조건식
+
+    * 타입 표현 - 대소문자 구분하지 않음
+    
+        * 문자
+        
+            * 작은 따옴표 사이에 표현
+            
+            * 작음 따옴표를 표현하고 싶으면 작은 따옴표 2개('') 사용
+            
+            * 예시) `'HELLO'`, `'She''s'`
+            
+        * 숫자
+        
+            * L (Long 타입 지정)
+            
+            * D (Double 타입 지정)
+            
+            * F (Float 타입 지정)
+            
+            * 예시) `10L`, `10D`, `10F`
+
+        * 날짜
+        
+            * DATE {d ‘yyyy-mm-dd’}
+            
+            * TIME {t ‘hh:mm:ss’}
+            
+            * TIMESTAMP {ts 'yyyy-mm-dd hh:mm:ss.f}
+            
+            * 예시) `m.createDate = {d ‘2021-01-03’}`
+           
+        * Boolean
+        
+            * TRUE, FALSE
+            
+        * ENUM
+        
+            * 패키지명을 포함한 전체 이름을 사용해야 한다.
+            
+            * 예시) `jpql.MemberType.ADMIN`
+            
+        * 엔티티 타입
+        
+            * 엔티티의 타입을 표현한다. 주로 상속 관계에서 사용한다.
+            
+            * 예시) `TYPE(m) = Member`
+            
+    * CASE 식
+    
+        * 기본 CASE 식
+        
+            * 문법
+            
+                ```java          
+                CASE  
+                    {WHEN <조건식> THEN <스칼라식>}+  
+                    ELSE <스칼라식>  
+                END
+                ```
+
+            * 예시
+            
+                ```java          
+                select
+                    case when m.age <= 10 then '학생요금' 
+                         when m.age >= 60 then '경로요금'
+                         else '일반요금'
+                    end
+                from Member m
+                ```
+              
+        * 단순 CASE 식 
+        
+            * 문법
+            
+                ```java          
+                CASE <조건대상>  
+                    {WHEN <스칼라식1> THEN <스칼라식2>}+
+                    ELSE <스칼라식>
+                END
+                ```
+
+            * 예시
+            
+                ```java          
+                select
+                    case t.name
+                        when '팀A' then '인센티브110%' 
+                        when '팀B' then '인센티브120%'
+                        else '인센티브105%'
+                    end
+                from Team t
+                ```
+              
+        * COALESCE
+        
+            * 문법 : `COALESCE(<스칼라식>, {,<스칼라식>}+)`
+            
+            * 설명 : 스칼라식을 차례대로 조회해서 null이 아니면 반환한다.
+
+            * 예시
+            
+                ```java
+                // m.username이 null이 아니면 m.username을 반환하고, null이면 이름 없는 회원을 반환한다.
+                select coalesce(m.username,'이름 없는 회원') from Member m
+                ```
+              
+        * NULLIF
+        
+            * 문법 : `NULLIF(<스칼라식>, <스칼라식>)`
+            
+            * 설명 : 두 값이 같으면 null을 반환하고 다르면 첫번째 값을 반환한다.
+
+            * 예시
+            
+                ```java
+                // 사용자 이름이 '관리자'면 null을 반환하고 나머지는 본인의 이름을 반환한다. (관리자의 이름을 숨길 때 사용)
+                select NULLIF(m.username, '관리자') from Member m
+                ```
+
+* JPQL 기본 함수
+
+    * 문자 함수
+    
+        * `CONCAT(문자1, 문자2)` : 문자를 합친다.
+        
+            * `CONCAT('A', 'B')` = AB
+            
+        * `SUBSTRING(문자, 위치[, 길이])` : 위치부터 시작해 길이만큼 문자를 구한다. 길이 값이 없으면 나머지 전체 길이를 뜻한다
+        
+            * `SUBSTRING(‘ABCDEF’, 2, 3)` = BCD
+            
+        * `TRIM(문자)` : TRIM 문자를 제거한다. (LEADING : 왼쪽만, TRAILING : 오른쪽만, BOTH : 양쪽, TRIM 문자의 기본 값은 공백)
+        
+            * `TRIM('ABC')` = 'ABC'
+            
+        * `LOWER(문자)` : 소문자로 변경한다.
+        
+            * `LOWER('ABC')` = abc
+
+        * `UPPER(문자)` : 대문자로 변경한다.
+        
+            * `UPPER('abc')` = ABC
+
+        * `LENGTH(문자)` : 문자 길이를 알려준다.
+        
+            * `LENGTH('ABC')` = 3
+            
+        * `LOCATE(찾을 문자, 원본 문자[, 검색 시작 위치])` : 검색위치부터 문자를 검색한다. 1부터 시작하며 못 찾으면 0을 반환한다.
+        
+            * `LOCATE(‘DE’, ‘ABCDEFG’)` = 4
+
+    * 수학함수
+    
+        * `ABS(수학식)` : 절대값을 구한다.
+        
+            * `ABS(-10)` = 10
+            
+        * `SQRT(수학식)` : 제곱근을 구한다
+        
+            * `SQRT(4)` = 2.0
+            
+        * `MOD(수학식, 나눌 수)` : 나머지를 구한다
+        
+            * `MOD(4, 3)` = 1
+            
+        * `SIZE(컬렉션 값 연관 경로식)` : 컬렉션의 크기를 구한다
+        
+            * `SIZE(t.members)`
+
+    * 날짜함수
+    
+        * `CURRENT_DATE` : 현재 날짜
+        
+        * `CURRENT_TIME` : 현재 시간 
+        
+        * `CURRENT_TIMESTAMP` : 현재 날짜 + 시간
+
+        * 하이버네이트는 날짜 타입에서 년,월,일,시간,분,초 값을 구하는 기능을 지원한다.
+        
+            ```java
+            select year(CURRENT_TIMESTAMP), month(CURRENT_TIMESTAMP), day(CURRENT_TIMESTAMP) from Member;
+            ```
+ 
+* 사용자 정의 함수 호출
+
+    * JPA는 사용자 정의 함수를 지원한다.
+    
+        * 하이버네이트를 사용하면 내가 사용하는 DB 방언 클래스를 상속받고 사용자 정의 함수를 등록한다.
+
+            ```java
+            public class MyH2Dialect extends H2Dialect{
+          
+                public MyH2Dialect(){
+                    registerFunction("group_concat", new StandardFunction("group_concat", StandardBasicTypes.STRING));
+                }
+          
+            }
+            ```
+          
+        * 상속받은 방언 클래스를 `hibernate.dialect`에 등록한다.
+
+            ```html
+            <property name="hibernate.dialect" value="dialect.MyH2Dialect" />
+            ```
+
+        * 사용자 정의 함수는 다음과 같이 사용하면 된다.
+        
+            * JPA 문법
+
+                ```java
+                select function('group_concat', m.username) from Member m
+                ```
+              
+            * 하이버네이트 문법
+
+                ```java
+                select group_concat(m.username) from Member m
+                ```
+              
+* 경로 표현식
+
+    * `경로 표현식`은 .(점)을 찍어 객체 그래프를 탐색하는 것을 말한다.
+    
+        ```java
+        SELECT m.username     // 상태 필드
+        FROM Member m
+            JOIN m.team t     // 단일 값 연관 필드
+            JOIN m.orders o   // 컬렉션 값 연관 필드
+        WHERE t.name = '팀A';
+        ```
       
+    * 경로 표현식 용어 정리
+    
+        * 상태 필드(state field) : 단순히 값을 저장하기 위한 필드 
+        
+            * 예시) m.username
+        
+        * 연관 필드(association field) : 연관관계를 위한 필드
+        
+            * 단일 값 연관 필드 : 대상이 엔티티인 필드를 말한다. (@ManyToOne, @OneToOne)
+            
+                * 예시) m.team
+            
+            * 컬렉션 값 연관 필드 : 대상이 컬렉션인 필드를 말한다. (@OneToMany, @ManyToMany)   
+          
+                * 예시) m.orders
+                
+    * 경로 표현식 특징
+    
+        * 상태 필드 경로: 경로 탐색의 끝이다. 더는 탐색 할 수 없다.
+        
+        * 단일 값 연관 경로: 묵시적으로 내부 조인이 발생한다. 계속 탐색 할 수 있다.
+        
+        * 컬렉션 값 연관 경로: 묵시적으로 내부 조인이 발생한다. 더는 탐색 할 수 없다.
+        
+            * 컬렉션은 경로 탐색의 끝이다. 컬렉션에서 경로 탐색을 하고 싶으면 명시적 조인을 통해 별칭을 얻어야 한다.
+            
+            * **묵시적 조인 보다는 항상 명시적 조인을 사용하자. (묵시적 조인은 조인이 일어나는 상황을 파악하기 어려움)**
+           
+    * 경로 표현식 예시
+    
+        * 상태 필드 경로 탐색
+        
+            ```java
+            select m.username from Member m
+            ```
+          
+        * 단일 값 연관 경로 탐색
+        
+            ```java
+            select m.team from Member m
+            ```
+          
+        * 컬렉션 값 연관 경로
+        
+            ```java
+            select t.members from Team t
+            ```
+          
+            * t.members 처럼 컬렉션까지는 경로 탐색이 가능하다.
+            
+            * 하지만 t.members.username 처럼 컬렉션에서 경로 탐색을 시작하는 것은 허락하지 않는다.
+
+            * 만약, 컬렉션에서 경로 탐색을 하고 싶으면, FROM 절에서 명시적 조인을 통해 별칭을 얻으면 별칭으로 탐색 할 수 있다.
+
+                ```java
+                select m.username from Team t join t.members m
+                ```
+              
+    * 명시적 조인, 묵시적 조인
+    
+        * `명시적 조인` : JOIN 키워드를 직접 사용하는 것
+        
+            * select m from Member m join m.team t
+        
+        * `묵시적 조인` : 경로 표현식에 의해 묵시적으로 조인이 발생하는 것 (내부 조인만 가능)
+        
+            * select m.team from Member m
+            
+* 페치 조인(fetch join)
+
+    * `페치 조인`은 **연관된 엔티티나 컬렉션을 SQL 한 번에 같이 조회하는 기능**이다.
+    
+        * SQL 조인의 종류가 아니다.
+        
+        * JPQL에서 성능 최적화를 위해 제공하는 기능이다.
+    
+        * join fetch 명령어를 사용한다.
+        
+            * `[ LEFT [OUTER] | INNER ] JOIN FETCH` 조인경로
+            
+        * `N+1 문제`는 즉시 로딩, 지연 로딩 둘다에서 발생하는 문제다.
+        
+            * 해결 방법으로 페치 조인을 사용 할 수 있다.
+            
+    * 엔티티 페치 조인
+    
+        * 회원을 조회 하면서 연관된 팀도 함께 조회한다. (SQL 한 번에)
+        
+            ```java
+            select m from Member m join fetch m.team
+            ```
+          
+        * 사용 예시 - 다대일 관계
+        
+            ```java      
+            String jpql = "select m from Member m join fetch m.team";
+            List<Member> members = em.createQuery(jpql, Member.class)
+                    .getResultList();
+            
+            for (Member member : members) {
+                //페치 조인으로 회원과 팀을 함께 조회해서 지연 로딩X
+                System.out.println("username = " + member.getUsername() + ", " +
+                                   "teamName = " + member.getTeam().getName());
+            }
+            ```
+      
+    * 컬렉션 페치 조인
+    
+        * 일대다 관계인 컬렉션에서도 페치 조인을 사용 할 수 있다.
+
+            ```java        
+            select t from Team t join fetch t.members where t.name = '팀A'
+            ```
+
+        * 사용 예시 - 일대다 관계
+
+            ```java        
+            String jpql = "select t from Team t join fetch t.members where t.name = '팀A'";
+            List<Team> teams = em.createQuery(jpql, Team.class).getResultList();
+    
+            for(Team team : teams) {
+                System.out.println("teamname = " + team.getName() + ", team = " + team);
+    
+                for (Member member : team.getMembers()) {
+                    //페치 조인으로 팀과 회원을 함께 조회해서 지연 로딩이 발생하지 않는다.
+                    System.out.println("-> username = " + member.getUsername() + ", member = " + member);
+                }
+            }
+            ```
+          
+            * 일대다 조인은 결과는 데이터가 더 많아 질 수 있다. `[주의!]` 
+            
+            * 다대일 조인의 결과는 데이터가 같거나 적어질 수 있다. 
+            
+    * DISTINCT
+    
+        * JPQL의 DISTINCT는 SQL에 DISTINCT를 추가하고 애플리케이션에서 엔티티 중복을 제거한다.
+
+            ```java        
+            select distinct t
+            from Team t join fetch t.members where t.name = '팀A'
+            ```
+          
+            * SQL에 DISTINCT를 추가하더라도 데이터가 다르므로 SQL 결과에서는 중복 제거에 실패한다. (완전히 같아야 중복 제거 됨)
+            
+                * TEAM_ID: 1, TEAM_NAME : 팀A, MEMBER_ID : 1, TEAM_ID : 1, NAME : 회원1
+                
+                * TEAM_ID: 1, TEAM_NAME : 팀A, MEMBER_ID : 2, TEAM_ID : 1, NAME : 회원2
+            
+            * DISTINCT가 추가로 애플리케이션에서 중복 제거를 시도한다. 그리고 같은 식별자를 가진 Team 엔티티를 제거한다.
+                        
+    * 페치 조인과 일반 조인의 차이
+    
+        * 일반 조인 실행 시, 연관된 엔티티를 함께 조회하지 않는다.
+
+            ```java        
+            select t
+            from Team t join t.members m where t.name = '팀A'
+            ```
+       
+        * JPQL은 결과를 반환할 때 연관관계까지 고려하지 않는다. 단지 SELECT 절에 지정한 엔티티만 조회할 뿐이다.
+            
+            * 일반 조인 실행 예시처럼 팀 엔티티만 조회하고, 연관된 회원 컬렉션은 조회하지 않는다.
+            
+            * 만약 회원 컬렉션을 지연 로딩으로 설정하면 프록시나 아직 초기화하지 않은 컬렉션 래퍼를 반환한다.
+    
+        * 페치 조인을 사용할 때만 연관된 엔티티도 함께 조회한다. (즉시 로딩) 
+        
+        * 즉, 페치 조인은 객체 그래프를 SQL 한번에 조회하는 개념이다. 
+        
+    * 페치 조인의 특징과 한계
+    
+        * 페치 조인 대상에는 별칭을 줄 수 없다. 
+        
+            * 하이버네이트는 가능하지만 가급적 사용하지 말자.
+             
+        * 둘 이상의 컬렉션은 페치 조인 할 수 없다.
+        
+            * `컬렉션 * 컬렉션`의 카테시안 곱이 만들어지므로 주의해야 한다.
+
+        * 컬렉션을 페치 조인하면 페이징 API(setFirstResult, setMaxResults)를 사용할 수 없다.
+        
+            * 일대일,다대일 같은 단일 값 연관 필드들은 페치 조인을 사용해도 페이징 API를 사용 할 수 있다.
+                 
+            * 하이버네이트에서 컬렉션을 페치 조인하고 페이징 API를 사용하면 경고 로그를 남기면서 메모리에서 페이징 처리를 한다.
+            
+                * 성능 이슈와 메모리 초과 예외가 발생 할 수 있어서 매우 위험하다.
+
+            * 해결 방법
+            
+                * 일대다 페치조인을 다대일 페치조인으로 뒤집어서 해결 할 수도 있다.
+                
+                    ```java        
+                    select m from Member m join fetch m.team
+                    ```
+                  
+                * 또는 `@BatchSize`를 사용하여 해결 할 수도 있다. (hibernate.default_batch_fetch_size로 글로벌 설정이 가능하다.)
+
+    * 정리 
+    
+        * 연관된 엔티티들을 SQL 한 번으로 조회한다. - 성능 최적화 
+        
+        * 페치 조인은 엔티티에 직접 적용하는 글로벌 로딩 전략보다 우선적으로 적용한다.
+        
+            * @OneToMany(fetch = FetchType.LAZY) //글로벌 로딩 전략
+             
+        * 페치 조인은 객체 그래프를 유지 할 때 사용하면 효과적이다.
+        
+        * 여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 내야 하면, 
+        
+        * 페치 조인 보다는 일반 조인을 사용하고 필요한 데이터들만 조회해서 DTO로 반환하는 것이 효과적이다. 
+        
+            * Ex) 통계 쿼리
+
+* 다형성 쿼리
+
+    * `TYPE`은 엔티티의 상속 구조에서 조회 대상을 특정 자식 타입으로 한정할 때 사용한다.
+
+        * 예) Item 중에 Book, Movie를 조회해라
+
+            ```java        
+            select i from Item i
+            where type(i) IN (Book, Movie)
+            ```
+
+    * `TREAT`은 상속 구조에서 부모 타입을 특정 자식 타입으로 다룰 때 사용한다.
+
+        * JPA 표준은 FROM, WHERE 절에서 사용, 하이버네이트는 SELECT 절에서도 사용 가능
+
+        * 예) 부모인 Item과 자식 Book이 있다.
+
+            ```java        
+            select i from Item i
+            where treat(i as Book).author = 'kim'
+            ```
+          
+* 엔티티 직접 사용
+
+    * 기본 키 값
+
+        * JPQL에서 엔티티를 직접 사용하면 SQL에서는 해당 엔티티의 기본 키 값을 사용한다.
+        
+            ```java        
+            select count(m.id) from Member m //엔티티의 아이디를 사용
+            select count(m) from Member m //엔티티를 직접 사용
+            ```
+          
+        * JPQL의 파라미터로 엔티티를 직접 사용하더라도 SQL에서는 해당 엔티티의 기본 키 값을 사용한다.
+    
+            ```java        
+            String query = "select m from Member m where m = :member"; 
+            List resultList = em.createQuery(query)
+                                .setParameter("member", member)
+                                .getResultList();
+            ```
+          
+    * 외래 키 값
+
+        * 기본 키 값이 1L인 팀 엔티티를 파라미터로 사용하고 있다. m.team은 현재 team_id라는 외래 키와 매핑되어 있다.
+        
+            ```java        
+            Team team = em.find(Team.class, 1L);
+          
+            String qlString = "select m from Member m where m.team = :team"; 
+            List resultList = em.createQuery(qlString)
+                                .setParameter("team", team) .getResultList();
+            ```
+
+* Named 쿼리: 정적 쿼리
+
+    * JPQL 쿼리는 동적 쿼리와 정적 쿼리로 나눌 수 있다.
+
+        * 동적 쿼리: 검색 조건에 따라 실행 시점에 쿼리를 생성하는 것을 말한다. 
+        
+            * `em.createQuery("select ...")`
+
+        * 정적 쿼리: 미리 정의한 쿼리에 이름을 부여해서 필요할 때 사용하는 것을 말한다. `Named 쿼리`라고도 한다.
+        
+            * 애플리케이션 로딩 시점에 JPQL 문법을 체크하여 미리 SQL로 파싱해둔다.
+            
+            * 따라서 오류를 빨리 확인 할 수 있고 사용하는 시점에는 파싱된 결과를 재사용하므로 성능상 이점이 있다.
+            
+                ```java        
+                @Entity
+                @NamedQuery(
+                    name = "Member.findByUsername",
+                    query="select m from Member m where m.username = :username")
+                public class Member {
+                ...
+                }
+              
+                List<Member> resultList = em.createNamedQuery("Member.findByUsername", Member.class)
+                                            .setParameter("username", "회원1")
+                                            .getResultList();
+                ```
+              
+            * 스프링 데이터 JPA에서는 `@Query`를 지원한다.
+        
+* 벌크 연산
+
+    * 벌크 연산은 JPQL로 한 번에 여러 데이터를 수정하거나 삭제하는 것을 말한다. (SQL의 UPDATE, DELETE 문)
+
+        * UPDATE 벌크 연산
+        
+            ```java
+            // 재고가 10개 미만인 모든 상품의 가격을 10% 상승한다.
+            String query = "update Product p " +
+                "set p.prce = p.price * 1.1 " +
+                "where p.stockAmount < :stockAmount";
+            
+            int resultCount = em.createQuery(query)
+                                .setParameter("stockAmount", 10)
+                                .executeUpdate();
+            ```
+          
+            * 벌크 연산은 executeUpdate()를 사용한다. 벌크 연산으로 영향을 받은 엔티티 건수를 반환한다.
+
+        * DELETE 벌크 연산
+        
+            ```java
+            // 가격이 100원 미만인 상품을 삭제한다.
+            String query = "delete from Product p " +
+                           "where p.price < :price";
+            
+            int resultCount = em.createQuery(query)
+                                .setParameter("price", 100)
+                                .executeUpdate();
+            ```
+          
+    * 벌크 연산의 주의사항
+
+        * **벌크 연산은 영속성 컨텍스트를 무시하고 데이터베이스에 직접 쿼리한다**는 점에 주의해야 한다.
+
+        * 해결책은 다음 2가지가 있다.
+        
+            * 벌크 연산을 가장 먼저 실행한다. 
+            
+            * 벌크 연산을 수행한 후, 바로 영속성 컨텍스트를 초기화한다.
+            
+                * 영속성 컨텍스트를 초기화하면 이후 엔티티를 조회할 때, 벌크 연산이 적용된 데이터베이스에서 엔티티를 조회한다.
+            
+    * 스프링 데이터 JPA에서는 `@Modifying`를 지원한다.
