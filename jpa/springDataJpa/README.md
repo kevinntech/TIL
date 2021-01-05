@@ -3,23 +3,68 @@
 
 ## 1. 프로젝트 환경설정
 
-* `@PersistenceContext`: EntityManager를 주입 받을 때 사용한다.
+* `JUnit Vintage` : JUnit 4로 작성한 테스트 코드를 실행할 때, 사용하는 모듈이다.
 
-* JPA 기본편 내용 복습
+* H2 데이터베이스 설치
 
-    * JPA의 모든 데이터 변경은 트랜잭션 안에서 이루어져야 한다.
+    * Mac을 사용하는 경우, `chmod 755 h2.sh`로 권한을 부여해야 된다.
 
-    * JPA는 같은 트랜잭션 안에서 영속성 컨텍스트의 동일성을 보장한다.
+* 모든 로그 출력은 가급적 로거를 통해 남겨야 한다.
 
-    * (예시에서 `member == findMember` 이다.)
-
-* `@Transactional`
-
-    * 트랜잭션을 처리 할 때 사용한다.
+    * `show_sql` 옵션은 `System.out`에 하이버네이트 실행 SQL을 남긴다.
     
-    * @Transactional를 테스트 코드에 사용하면 기본적으로 테스트가 종료된 다음, 바로 롤백을 한다.
+    * `org.hibernate.SQL` 옵션은 `로거(logger)`를 통해 하이버네이트 실행 SQL을 남긴다.
     
-    * @Rollback(false)를 추가하면 롤백을 하지 않고 커밋을 한다. 
+         ```
+        spring:
+          ...
+        
+          jpa:
+            hibernate:
+              ddl-auto: create
+            properties:
+              hibernate:
+                #show_sql: true
+                format_sql: true
+        
+        logging.level:
+          org.hibernate.SQL: debug
+          #org.hibernate.type: trace
+         ```
+
+* 스프링 데이터 JPA 동작 확인
+
+    * `@PersistenceContext`: EntityManager를 주입 받을 때 사용한다.
+    
+    * JPA 기본편 내용 복습
+    
+        * JPA의 모든 데이터 변경은 트랜잭션 안에서 이루어져야 한다.
+    
+        * JPA는 같은 트랜잭션 안에서 영속성 컨텍스트의 동일성을 보장한다.
+    
+            * `member == findMember`도 true가 되어야 한다는 의미다.
+    
+    * `@Transactional`
+    
+        * 트랜잭션을 처리 할 때 사용한다.
+        
+        * 테스트 코드에서 `@Transactional`를 사용하면 기본적으로 테스트가 종료된 다음, 바로 롤백을 한다.
+        
+        * 그리고 `@Rollback(false)`를 추가하면 롤백을 하지 않고 커밋을 한다.
+        
+            * 스프링 데이터 JPA를 공부할 때, 사용하면 편리하다.
+            
+* 쿼리 파라미터 로그 남기기
+
+    * `org.hibernate.type` 옵션은 SQL 실행 파라미터를 로그로 남긴다.
+    
+    * 외부 라이브러리 사용
+    
+        * 스프링 부트를 사용하면 해당 라이브러리만 추가하면 된다.
+        
+            * `implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.7'`
+        
+        * 참고: 쿼리 파라미터를 로그로 남기는 외부 라이브러리는 시스템 자원을 사용하므로, 개발 단계에서는 편하게 사용해도 된다. 하지만 운영시스템에 적용하려면 꼭 성능테스트를 하고 사용하는 것이 좋다.
     
 ## 2. 예제 도메인 모델
 
