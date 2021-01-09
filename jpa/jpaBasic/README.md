@@ -194,7 +194,7 @@
     
         * -> SQL에 의존적인 개발을 피할 수 있다.
 
-### 3. 영속성 관리
+## 3. 영속성 관리
 
 * (1) 영속성 컨텍스트(persistence context)
 
@@ -454,7 +454,7 @@
             em.remove(memberA); //엔티티 삭제
             ```
 
-### 4. 엔티티 매핑
+## 4. 엔티티 매핑
 
 * 객체와 테이블 매핑
 
@@ -622,7 +622,7 @@
               
             * 필요에 따라 유니크 인덱스를 설정해서 사용하는 것을 권장한다.
 
-### 5. 연관관계 매핑 기초
+## 5. 연관관계 매핑 기초
 
 * 연관관계가 필요한 이유
 
@@ -982,7 +982,7 @@
 
         * 단방향은 항상 외래 키가 있는 곳(多)을 기준으로 매핑하면 된다.
 
-### 6. 다양한 연관관계 매핑
+## 6. 다양한 연관관계 매핑
 
 * 연관관계 매핑 시 고려사항 3가지
 
@@ -1027,6 +1027,437 @@
 * `다중성`과 관련해서 자세히 살펴보기
 
     * 다대일 [N:1]
+    
+        * ① 다대일 단방향
+        
+            ![image 6](images/img6.png) 
+    
+            * 관계형 데이터베이스에서는 항상 다 쪽에 외래 키가 있어야 한다.
+    
+            * 다대일 단방향은 가장 많이 사용하는 연관관계다.
+    
+            * **외래 키가 있는 쪽에 참조를 추가하고 연관관계를 매핑한다.**
+    
+            * **"다대일"의 반대는 "일대다"가 된다.**
+            
+        * ② 다대일 양방향
+        
+            ![image 7](images/img7.png)
+
+            * 외래 키가 있는 쪽이 연관관계의 주인이다.
+
+            * 양쪽을 서로 참조하도록 할 때, 사용한다.
+            
+    * 일대다 [1:N]
+    
+        * ① 일대다 단방향
+        
+            ![image 8](images/img8.png)
+
+            * 하나의 팀은 여러 회원을 참조 할 수 있는데 이런 관계를 일대다 관계라 한다. (Team이 연관관계의 주인이 된 구조)
+
+            * 그리고 팀은 회원들을 참조하지만 반대로 회원은 팀을 참조하지 않으면 둘의 관계는 단방향이다.
+
+            * **일대다 단방향 관계**는 **반대편 테이블의 외래 키를 관리하는 특이한 구조**가 된다.
+            
+                * 다 쪽인 Member 엔티티에는 외래 키를 매핑 할 수 있는 참조 필드가 없다.
+    
+                * 대신에 반대 쪽인 Team 엔티티에만 외래 키를 매핑 할 수 있는 참조 필드인 members가 있기 때문이다.
+                
+            * 예시 - 일대다 단방향으로 매핑한 팀(Team) 엔티티
+            
+                ```java
+                @Entity
+                public class Team{
+                  @Id @GeneratedValue
+                  @Column(name = "TEAM_ID")
+                  private Long id;
+              
+                  private String name;
+              
+                  @OneToMany
+                  @JoinColumn(name = "TEAM_ID")
+                  private List<Member> members = new ArrayList<>();
+                }   
+                ```
+              
+                * **일대다 단방향은 일대다(1:N)에서 일(1)이 연관관계의 주인이다.**
+
+                * **일대다 단방향은** `@JoinColumn`**을 꼭 사용해야 한다.**
+
+                * **그렇지 않으면 조인 테이블 방식을 사용하여 중간에 테이블을 하나 추가한다.**
+                
+                * **일대다 단방향 매핑 보다는 다대일 양방향 매핑을 사용하자**
+
+        * ② 일대다 양방향
+        
+            ![image 9](images/img9.png)
+
+            * 일대다 양방향 매핑은 공식적으로 존재하지는 않는다. 
+            
+            * 일대다 단방향 매핑 반대편에 같은 외래 키를 사용하는 다대일 단방향 매핑을 읽기 전용으로 하나 추가하면 된다.
+            
+                * `@JoinColumn(name = "TEAM_ID", insertable=false, updatable=false)`
+                
+            * **일대다 양방향 매핑보다는 다대일 양방향 매핑을 사용하자**
+            
+    * 일대일 [1:1]
+    
+        * 일대일 관계는 그 반대도 일대일 관계다.
+    
+        * 주 테이블이나 대상 테이블 중에 누가 외래 키를 가질지 선택 할 수 있다.
+    
+        * 외래 키에 데이터베이스 유니크(UNI) 제약조건을 추가한다.
+        
+            * ① 주 테이블에 외래 키가 있는 일대일 단방향 관계
+    
+                ![image 10](images/img10.png)
+    
+                * `MEMBER`가 주 테이블이고 `LOCKER`는 대상 테이블이다.
+                
+                * 여기서 말하는 `주 테이블`은 많이 접근(Access)하는 테이블을 말한다.
+                
+                * `@OneToOne`으로 일대일 단방향 관계를 매핑하고 `@JoinColumn`를 지정한다. (다대일 단방향과 거의 비슷함)
+                
+                    ```java
+                    @Entity
+                    public class Member{
+                      @Id @GeneratedValue
+                      @Column(name = "MEMBER_ID")
+                      private Long id;
+                  
+                      @Column(name = "USER_NAME")
+                      private String username;
+                  
+                      @OneToOne
+                      @JoinColumn(name = "LOCKER_ID")
+                      private Locker locker;
+                    }   
+                    ```
+                  
+                    ```java
+                    @Entity
+                    public class Locker{
+                      @Id @GeneratedValue
+                      private Long id;
+                  
+                      private String name;
+                    }   
+                    ```
+                  
+            * ② 주 테이블에 외래 키가 있는 일대일 양방향 관계
+    
+                ![image 11](images/img11.png)
+    
+                * 일대일 **양방향** 관계이므로 **연관관계의 주인**을 정해야 한다.
+                
+                * 다대일 양방향 매핑처럼 **외래 키가 있는 곳이 연관관계의 주인**이며 **반대편은 mappedBy 속성**을 사용한다.
+                
+                * 예시
+
+                    ```java
+                    @Entity
+                    public class Locker{
+                      @Id @GeneratedValue
+                      private Long id;
+                  
+                      private String name;
+                  
+                      @OneToOne(mappedBy = "locker")
+                      private Member member;
+                    }   
+                    ```
+
+                    *  MEMBER 테이블이 외래 키를 가지고 있으므로 Member 엔티티에 있는 `Member.locker`가 연관관계의 주인이다. 
+                    
+                    *  따라서 반대 매핑인 `Locker.member`는 `mappedBy` 속성을 사용해서 연관관계의 주인이 아니라고 설정했다.
+
+            * ③ 대상 테이블에 외래 키가 있는 일대일 단방향 관계
+    
+                ![image 12](images/img12.png)
+    
+                * 대상 테이블에 외래 키가 있는 일대일 단방향 관계는 JPA에서 지원하지 않는다. 
+                
+                    * 이러한 경우에는 양방향 관계로 만들고 Locker를 연관관계의 주인으로 설정해야 한다.
+    
+                    * 즉, **일대일 관계는 자신의 엔티티에 있는 외래 키는 자신이 직접 관리해야 한다.**  
+                    
+            * ④ 대상 테이블에 외래 키가 있는 일대일 양방향 관계
+    
+                ![image 13](images/img13.png)
+    
+                * 주 엔티티인 Member 엔티티 대신에 **대상 엔티티인 Locker를 연관관계의 주인으로 만들어서 LOCKER 테이블의 외래 키를 관리하도록 한다.**
+
+                * 사실, 일대일 주 테이블에 외래 키 양방향과 매핑 방법은 같음
+                    
+                    ```java
+                    @Entity
+                    public class Member{
+                      @Id @GeneratedValue
+                      @Column(name = "MEMBER_ID")
+                      private Long id;
+                  
+                      @Column(name = "USER_NAME")
+                      private String username;
+                  
+                      @OneToOne(mappedBy = "member")
+                      private Locker locker;
+                    }   
+                    ```
+                  
+                    ```java
+                    @Entity
+                    public class Locker{
+                      @Id @GeneratedValue
+                      private Long id;
+                  
+                      private String name;
+                  
+                      @OneToOne
+                      @JoinColumn(name = "MEMBER_ID")
+                      private Member member;
+                    }   
+                    ```
+                  
+    * 다대다 [N:M]
+    
+        * ① 다대다
+          
+            * 관계형 데이터베이스는 정규화된 테이블 2개로 다대다 관계를 표현 할 수 없다.
+              
+            * **연결 테이블을 추가해서 일대다, 다대일 관계로 풀어내야함.**
+            
+        * ② 다대다 매핑의 한계
+
+            * 다대다 매핑은 편리해 보이지만 실무에서 사용할 수 없다.
+            
+            * 연결 테이블이 보통 연결만 하고 끝나지는 않는다.
+
+                * 연결 테이블에 주문 시간, 수량 같은 컬럼이 더 필요한 경우가 많다.
+    
+                * 하지만 연결 테이블에 컬럼을 추가하면 더 이상 `@ManyToMany`를 사용 할 수 없다. 
+                
+        * ③ 다대다 매핑의 한계를 극복
+
+            * **연결 테이블용 엔티티를 추가한다.** (연결 테이블을 엔티티로 승격)
+    
+            * 그리고 `@ManyToMany`를 `@OneToMany`, `@ManyToOne`로 변경한다.
+            
+                ![image 14](images/img14.png)
+                
+                * 연결 테이블(`Order`)에 새로운 기본 키(`ORDER_ID`)를 추가하고 다른 식별자는 외래 키로 사용한다.
+                    
+        * ④ 예시 - 다대다 매핑을 일대다 다대일로 변경
+
+            * 회원과 회원상품을 양방향 관계로 만든다. 회원 상품 엔티티 쪽이 외래 키를 가지고 있으므로 연관관계의 주인이다.
+                
+                ```java
+                @Entity
+                public class Member{
+                  @Id @GeneratedValue
+                  @Column(name = "MEMBER_ID")
+                  private Long id;
+              
+                  //...
+              
+                  @OneToMany(mappedBy = "member")
+                  private List<MemberProduct> memberProducts = new ArrayList<>();
+                }   
+                ```
+              
+            * 회원 상품 엔티티는 기본 키를 매핑하는 @Id와 외래 키를 매핑하는 @JoinColumn을 동시에 사용한다.
+            
+                ```java
+                @Entity
+                public class MemberProduct{
+                  @Id @GeneratedValue
+                  private Long id;
+              
+                  @ManyToOne
+                  @JoinColumn(name = "MEMBER_ID")
+                  private Member member;
+              
+                  @ManyToOne
+                  @JoinColumn(name = "PRODUCT_ID")
+                  private Product product;
+              
+                  private int orderAmount;
+                  
+                  private LocalDateTime orderDateTime;
+                }   
+                ```
+              
+            * 상품 엔티티에서 회원 상품 엔티티로 연관관계를 만들었다.
+            
+                ```java
+                @Entity
+                public class Product{
+                  @Id @GeneratedValue
+                  private Long id;
+              
+                  private String name;
+              
+                  @OneToMany(mappedBy = "product")
+                  private List<MemberProduct> memberProducts = new ArrayList<>();
+                }   
+                ```
+
+* 다양한 연관관계 매핑 정리
+
+    * 다대일 단방향, 양방향 매핑을 사용한다.
+    
+        * (일대다 단방향 매핑, 일대다 양방향 매핑 보다는 다대일 양방향 매핑을 사용하자.)
+    
+    * 또는 일대일 단방향, 양방향 매핑을 사용한다.
+    
+    * 그리고 다대다 관계는 연결 테이블을 추가해서 일대다, 다대일 관계로 풀어내야 한다.
+
+## 7. 고급 매핑
+
+### 1. 상속관계 매핑
+
+* ORM에서 이야기 하는 상속관계 매핑은 객체의 상속 구조와 데이터베이스의 슈퍼타입 서브타입 관계를 매핑하는 것이다.
+
+* 슈퍼타입 서브타입 논리 모델을 실제 물리 모델인 테이블로 구현하는 방법
+
+    * ① `조인 전략` : 엔티티 각각을 모두 테이블로 만들고 조회할 때 조인을 사용한다.
+    
+    * ② `단일 테이블 전략` : 테이블을 하나만 사용해서 통합한다.
+    
+    * ③ `구현 클래스 마다 테이블 전략` : 서브 타입 마다 하나의 테이블을 만든다. (사용 X)
+    
+* 상속관계 매핑을 자세하게 살펴보기
+
+* (1) 조인 전략
+
+    ![image 15](images/img15.png)
+
+    * `조인 전략(Joined Strategy)`은 엔티티 각각을 모두 테이블로 만들고 자식 테이블이 부모 테이블의 `기본 키`를 받아서 `기본 키 + 외래 키`로 사용하는 전략이다. 
+    
+    * 이 전략을 사용할 때 주의할 점이 있는데 객체는 타입으로 구분할 수 있지만 테이블은 타입의 개념이 없다. 
+    
+    * 따라서 타입을 구분하는 컬럼(`DTYPE`)을 추가해야 한다.
+    
+    * 예시
+    
+        ```java
+        @Entity
+        @Inheritance(strategy = InheritanceType.JOINED)
+        @DiscriminatorColumn
+        public abstract class Item{
+          @Id @GeneratedValue
+          private Long id;
+      
+          private String name;
+      
+          private int price;
+        }   
+        ```
+      
+        * 상속 매핑은 부모 클래스에 `@Inheritance`를 사용해야 한다. 매핑 전략을 지정해야 하는데 여기서는 조인 전략을 사용한다.
+        
+        * `@DiscriminatorColumn`는 부모 클래스에 구분 컬럼을 지정한다. 해당 컬럼으로 저장된 자식 테이블을 구분 할 수 있다.
+        
+            * 구분 컬럼의 기본 이름은 DTYPE이다.
+            
+            * `@DiscriminatorColumn`의 name 옵션으로 변경 할 수 있다.
+
+            ```java
+            @Entity
+            @DiscriminatorValue("M")
+            public class Movie extends Item{
+              private String director;
+          
+              private int price;
+            }   
+            ```
+      
+        * `@DiscriminatorValue("M")` : 해당 엔티티를 저장할 때, 구분 컬럼에 입력할 값을 지정한다.
+
+        * 만약 영화(Movie) 엔티티를 저장하면 구분 컬럼인 DTYPE에 M이 저장된다.
+
+* (2) 단일 테이블 전략
+
+    ![image 16](images/img16.png)
+
+    * `단일 테이블 전략(Single-Table Strategy)`은 테이블을 하나만 사용한다.
+    
+    * 그리고 구분 컬럼(DTYPE)으로 어떤 자식 데이터가 저장되었는지 구분한다.
+
+    * 이 전략을 사용할 때 주의점은 자식 엔티티가 매핑한 컬럼은 모두 null을 허용 해야한다는 점이다.
+
+    * 예시
+    
+        ```java
+        @Entity
+        @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+        @DiscriminatorColumn
+        public abstract class Item{
+          @Id @GeneratedValue
+          private Long id;
+      
+          private String name;
+      
+          private int price;
+        }   
+        ```
+      
+        * 예를 들어, Book 엔티티를 저장하면 ITEM 테이블의 AUTHOR, ISBN만 사용하고 다른 엔티티와 매핑된
+    
+        * ARTIST, DIRECTOR, ACTOR 컬럼은 사용하지 않으므로 null이 입력되기 때문이다.
+
+* (3) 구현 클래스 마다 테이블 전략
+
+    * 구현 클래스 마다 테이블 전략(Table-per-Concrete-Class Strategy)은 자식 엔티티 마다 테이블을 만든다.
+      
+        * `@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)`
+      
+    * 그리고 자식 테이블 각각에 필요한 컬럼이 모두 있다.
+      
+    * 여러 자식 테이블을 함께 조회할 때 성능이 느리다. (SQL에 UNION을 사용해야 됨)
+       
+        * 이 전략은 데이터베이스 설계자와 ORM 전문가 둘 다 추천하지 않는다.
+
+### 2. @MappedSuperclass
+
+* (1) @MappedSuperclass
+
+    * `@MappedSuperclass`는 자식 클래스에게 공통 매핑 정보를 제공하는 부모 클래스를 작성할 때 사용한다.
+    
+    * `@MappedSuperclass`로 지정한 클래스는 엔티티가 아니므로 em.find() 나 JPQL에서 사용 할 수 없다.
+    
+    * 해당 클래스를 직접 생성해서 사용할 일은 거의 없으므로 추상 클래스로 만드는 것을 권장한다.
+    
+    * 주로 등록일, 수정일, 등록자, 수정자와 같은 전체 엔티티에서 공통으로 적용하는 정보를 모을 때 사용한다.
+    
+* (2) 예시
+
+    ```java
+    @MappedSuperclass
+    public abstract class BaseEntity{
+      @Column(name = "INSERT_MEMBER")
+      private String createdBy;
+  
+      private LocalDateTime createdDate;
+  
+      @Column(name = "UPDATE_MEMBER")
+      private String lastModifiedBy;
+  
+      private LocalDateTime lastModifiedDate;
+    }   
+    ```
+  
+    ```java
+    @Entity
+    public class Member extends BaseEntity{
+      @Id @GeneratedValue
+      @Column(name = "MEMBER_ID")
+      private Long id;
+  
+      @Column(name = "USER_NAME")
+      private String username;
+    }   
+    ```
 
 ## 8. 프록시와 연관관계 관리
 
