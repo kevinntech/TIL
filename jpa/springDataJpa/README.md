@@ -444,9 +444,13 @@
 
 * 파라미터에 `Pageable`을 사용하면 다음과 같은 `특별한 반환 타입`을 사용 할 수 있다. 
 
-    * `org.springframework.data.domain.Page` : 추가 count 쿼리를 호출하는 페이징
+    * `org.springframework.data.domain.Page` : 추가 count 쿼리를 호출하는 페이징 결과
     
-    * `org.springframework.data.domain.Slice` : 추가 count 쿼리 없이 다음 페이지만 확인 가능하다. (내부적으로 limit + 1 조회)
+    * `org.springframework.data.domain.Slice`
+    
+        * 추가 count 쿼리를 호출하지 않는 페이징 결과 
+        
+        * 다음 페이지만 확인 가능하다. (내부적으로 limit + 1 조회)
     
     * `List` (자바 컬렉션): 추가 count 쿼리 없이 결과만 반환한다.
     
@@ -1001,9 +1005,9 @@
         }
         ```
       
-        * 파라미터로 `Pageable`을 받을 수 있다.
+        * 컨트롤러의 핸들러에서 파라미터로 `Pageable`을 받을 수 있다.
         
-        * `Pageable`은 다음 요청 파라미터 정보로 만들어진다.
+        * `Pageable`은 다음 요청 파라미터 정보로 만들어진다. (실제는 `PageRequest` 객체가 생성되어 주입된다.)
         
             * [예시] /members?page=0&size=3&sort=id,desc&sort=username,desc   
                      
@@ -1011,20 +1015,18 @@
             
             * `size` : 한 페이지에 노출할 데이터 건수
             
-            * `sort` : 정렬 조건을 정의한다.
+            * `sort` : 정렬 조건을 정의한다. (ASC | DESC)
         
-        * `Pageable`은 인터페이스이며 실제는 `PageRequest` 객체가 생성된다.
-        
-    * Pageable 기본값 변경
+    * Pageable 기본 값 변경
 
-        * 글로벌 설정: 스프링 부트
+        * 글로벌 설정 : 스프링 부트
         
             ```java
             spring.data.web.pageable.default-page-size=20 /# 기본 페이지 사이즈/ 
             spring.data.web.pageable.max-page-size=2000 /# 최대 페이지 사이즈/
             ```
           
-        * 개별 설정: `@PageableDefault` 애노테이션을 사용
+        * 개별 설정 : `@PageableDefault` 애노테이션을 사용
         
             ```java
             @GetMapping("/members")
@@ -1051,7 +1053,9 @@
     * Page 내용을 DTO로 변환하기       
 
         * 엔티티를 API로 노출하면 다양한 문제가 발생한다. 그래서 엔티티를 꼭 DTO로 변환해서 반환해야 한다.
-         
+     
+            * API로 반환할 때는 컨트롤러의 리턴 타입을 `Page<Member>`가 아닌 `Page<MemberDto>`로 사용해야 한다.
+     
         * Page는 `map()`을 지원해서 내부 데이터를 다른 것으로 변경할 수 있다.
 
             ```java
@@ -1080,21 +1084,21 @@
 
         * 스프링 데이터는 Page를 0부터 시작한다. 만약 1부터 시작하려면 어떻게 해야 될까?
         
-            * 첫 번째 방법
+            * 첫 번째 방법 - 실질적인 해결책
             
                 * Pageable, Page를 파라미터와 응답 값으로 사용하지 않고, 직접 클래스를 만들어서 처리한다. 
                 
                 * 그리고 직접 PageRequest(Pageable 구현체)를 생성해서 리포지토리에 넘긴다. 
                 
                 * 물론 응답 값도 Page 대신에 직접 만들어서 제공해야 한다.
-              
+                
             * 두 번째 방법
             
-                * spring.data.web.pageable.one-indexed-parameters 를 true로 설정한다. 
+                * `spring.data.web.pageable.one-indexed-parameters`를 true로 설정한다. 
                 
                 * 그런데 이 방법은 web에서 page 파라미터를 -1 처리 할 뿐이다.
                 
-                * 따라서 응답값인 Page 에 모두 0 페이지 인덱스를 사용하는 한계가 있다.
+                * 따라서 응답 값인 Page에 모두 0 페이지 인덱스를 사용하는 한계가 있다.
 
         * 가급적 권장하는 것은 페이지 인덱스를 0 부터 처리하자.
         
@@ -1108,29 +1112,45 @@
     
     * 위에 있는 구현체의 일부 코드를 살펴보자.
     
-        * @Repository 적용
+        * `@Repository` 적용
         
             * 컴포넌트 스캔의 대상이 되어 스프링 빈으로 등록된다.
             
             * JPA 예외를 스프링이 추상화한 예외로 변환한다.
             
-        * @Transactional 트랜잭션 적용
+        * `@Transactional` 적용
             
             * JPA의 모든 변경은 트랜잭션 안에서 이루어져야 한다.
             
-            * 스프링 데이터 JPA는 변경(등록, 수정, 삭제) 메서드에 @Transactional로 트랜잭션 처리가 되어 있다.
-            
-            * 서비스 계층에서 트랜잭션을 시작하지 않으면 리파지토리에서 트랜잭션을 시작한다.
-            
-            * 서비스 계층에서 트랜잭션을 시작하면 리파지토리는 해당 트랜잭션을 전파 받아서 사용한다.
-            
-            * 그래서 스프링 데이터 JPA를 사용할 때 트랜잭션이 없어도 데이터 등록, 변경이 가능했던 것이다. (사실은 트랜잭션이 리포지토리 계층에 이미 걸려있는 것임)
+                * `스프링 데이터 JPA`는 변경(등록, 수정, 삭제) 메소드에 `@Transactional`로 트랜잭션 처리가 되어 있다.
+                
+                    ```java
+                    @Transactional
+                    @Override
+                    public <S extends T> S save(S entity) {
+                
+                        if (entityInformation.isNew(entity)) {
+                            em.persist(entity);
+                            return entity;
+                        } else {
+                            return em.merge(entity);
+                        }
+                    }
+                    ```
+
+                * 서비스 계층에서 트랜잭션을 시작하면 리포지토리는 해당 트랜잭션을 전파 받아서 사용한다.
+             
+                * 서비스 계층에서 트랜잭션을 시작하지 않으면 리포지토리에서 트랜잭션을 시작한다.
+                
+                * 그래서 스프링 데이터 JPA를 사용할 때 트랜잭션이 없어도 데이터 등록, 변경이 가능했던 것이다. (사실은 트랜잭션이 리포지토리 계층에 이미 걸려있는 것임)
 
         * `@Transactional(readOnly = true)`
             
-            * 데이터를 단순히 조회만 하고 변경하지 않는 트랜잭션에서 `readOnly = true` 옵션을 사용하면 플러시를 생략해서 약간의 성능 향상을 얻을 수 있음
+            * 데이터를 조회만 하고 변경하지 않는 트랜잭션에서는 `readOnly = true` 옵션을 사용하면 플러시를 생략해서 약간의 성능 향상을 얻을 수 있음
 
-        * `save()` 메서드
+            * 즉, `readOnly = true`는 플러시를 생략한다.
+
+        * `save()` 메소드
             
             * 새로운 엔티티면 저장(`persist`)하고 새로운 엔티티가 아니면 병합(`merge`)한다.
 
@@ -1154,34 +1174,34 @@
     
     * 따라서 Persistable를 사용해서 새로운 엔티티 확인 여부를 직접 구현하는 것이 효과적이다.
     
-    ```java
-    @Entity
-    @EntityListeners(AuditingEntityListener.class)
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public class Item implements Persistable<String> {
-    
-        @Id
-        private String id;
-    
-        @CreatedDate
-        private LocalDateTime createdDate;
-    
-        public Item(String id) {
-            this.id = id;
+        ```java
+        @Entity
+        @EntityListeners(AuditingEntityListener.class)
+        @NoArgsConstructor(access = AccessLevel.PROTECTED)
+        public class Item implements Persistable<String> {
+        
+            @Id
+            private String id;
+        
+            @CreatedDate
+            private LocalDateTime createdDate;
+        
+            public Item(String id) {
+                this.id = id;
+            }
+        
+            @Override
+            public String getId() {
+                return null;
+            }
+        
+            @Override
+            public boolean isNew() {
+                return createdDate == null;
+            }
+        
         }
-    
-        @Override
-        public String getId() {
-            return null;
-        }
-    
-        @Override
-        public boolean isNew() {
-            return createdDate == null;
-        }
-    
-    }
-    ```
+        ```
   
 ## 7. 나머지 기능들
 
