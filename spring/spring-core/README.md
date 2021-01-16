@@ -33,45 +33,45 @@
 
 #### 1) 제어의 역전(IoC: Inversion of Control)
 
-* `제어의 역전(IoC)`은`의존성 주입(Dependency Injection)`이라고도 하며,어떤 객체가 사용하는 의존 객체를 직접 만들어 사용하는게 아니라,주입 받아 사용하는 방법을 말한다.
+* `제어의 역전(IoC)`은`의존성 주입(Dependency Injection)`이라고도 하며, **어떤 객체가 사용하는 의존 객체를 직접 만들어 사용하는게 아니라 주입 받아 사용하는 방법**을 말한다.
 
 * 의존 객체를 직접 만들어 사용하는 예시는 다음과 같다.
 
-```java
-BookRepository bookRepository = new BookRepository();
- 
-BookService service = new BookService(bookRepository);
-```
+    ```java
+    BookRepository bookRepository = new BookRepository();
+     
+    BookService service = new BookService(bookRepository);
+    ```
 
 * IoC의 예시는 다음과 같다.
 
-```java
-// BookService 타입의 객체가 사용할 bookRepository라는 의존 객체를 
-// 직접 만들어 사용하는게 아니라, 주입 받아 사용하는 방법을 말함
-
-@Autowired
-BookRepository bookRepository;
- 
-BookService service = new BookService(bookRepository);
-```
+    ```java
+    // BookService 타입의 객체가 사용할 bookRepository라는 의존 객체를 
+    // 직접 만들어 사용하는게 아니라, 주입 받아 사용하는 방법을 말함
+    
+    @Autowired
+    BookRepository bookRepository;
+     
+    BookService service = new BookService(bookRepository);
+    ```
 
 #### 2) 빈(Bean)
 
-* `빈(Bean)`은 스프링 IoC 컨테이너가 관리 하는 객체이다
+* `빈(Bean)`은 **스프링 IoC 컨테이너가 관리 하는 객체**이다
 
-* 스프링에서 빈으로 등록될 때의 장점은 다음과 같다.
+* **스프링에서 빈으로 등록될 때의 장점**은 다음과 같다.
   
-    * 의존성 관리
+    * **의존성 관리**
 
         * 의존성 주입을 받으려면 빈이 되어야 한다.
   
-    * 싱글톤 객체로 만들어서 관리 하고 싶을 때, 편리하다.
+    * **싱글톤 객체로 만들어서 관리 하고 싶을 때, 편리하다.**
   
         * 스프링 IoC 컨테이너에 등록되는 빈은 기본적으로 싱글톤 scope으로 등록된다.
         
         * (메모리 측면에서 효율적이며 컨테이너 안에 미리 만들어둔 객체를 사용하므로 런타임 시 성능 최적화에 유리함.)
   
-    * 라이프 사이클 인터페이스를 제공한다. `@PostConstruct`
+    * **라이프 사이클 인터페이스를 제공한다.** `@PostConstruct`
 
 #### 3) 스프링 IoC 컨테이너
 
@@ -161,11 +161,11 @@ BookService service = new BookService(bookRepository);
         
         * `<property>` 태그는 setter를 이용하여 의존성을 주입 받을 때 사용한다.
         
-        * `<property>` 태그의 name은 setter의 이름에서 가져온 것이며 ref는 (해당 setter의 매개변수로 전달 될 수 있는) 다른 bean 의 id를 참조한다.
+        * `<property>` 태그의 name은 setter의 이름에서 가져온 것이며 `ref`는 (해당 setter의 매개변수로 전달 될 수 있는) 다른 bean 의 id를 참조한다.
         
 * 빈(Bean)을 사용하기
 
-    * 빈 설정 파일을 사용하는 ApplicationContext를 ClassPathXmlApplicationContext 클래스를 이용하여 만든 다음, Bean을 사용 할 수 있다.
+    * 빈 설정 파일을 사용하는 `ApplicationContext`를 `ClassPathXmlApplicationContext` 클래스를 이용하여 만든 다음, Bean을 사용 할 수 있다.
 
         ```java
         Applicationcontext context = new ClassPathXmlApplicationContext("application.xml");
@@ -175,14 +175,14 @@ BookService service = new BookService(bookRepository);
     
 ##### 2-2) `application.xml` 과 `<context:component-scan>` 태그를 활용한 빈 등록 
 
-* 빈 설정 파일(application.xml)에 `<context:component-scan>` 태그를 이용하면 base-package에서 부터
-* @Component와 이를 확장한 애노테이션(@Service, @Repository, @Controller)을 스캔하여 해당 클래스를 빈으로 등록한다.
+* 빈 설정 파일(application.xml)에 `<context:component-scan>` 태그를 이용하면 `base-package`에서 부터
+* `@Component`와 이를 확장한 애노테이션(`@Service`, `@Repository`, `@Controller`)을 스캔하여 해당 클래스를 빈으로 등록한다.
 
     ```html
     <context:component-scan base-package="me.whiteship.springapplicationcontext"/>
     ```
   
-* 그리고 @Autowired 애노테이션을 사용하여 빈을 주입 받을 수 있다.  즉, 컨테이너에서 빈을 꺼낼 수 있다.
+* 그리고 `@Autowired` 애노테이션을 사용하여 빈을 주입 받을 수 있다.  즉, 컨테이너에서 빈을 꺼낼 수 있다.
 
     ```java
     @Service
@@ -203,7 +203,7 @@ BookService service = new BookService(bookRepository);
 
 * 방금 전까지 선언 했던 애노테이션(@Repository, @Service, @Autowird)을 모두 제거한다.
 
-* 그리고 @Configuration을 붙인 ApplicationConfig 클래스를 작성한다.
+* 그리고 `@Configuration`을 붙인 `ApplicationConfig` 클래스를 작성한다.
 
     * 빈(Bean) 등록 및 의존성 주입하기
     
@@ -221,11 +221,11 @@ BookService service = new BookService(bookRepository);
             }
             ```
           
-            * @Configuration : 스프링 IoC 컨테이너에게 해당 클래스가 빈 설정 파일이라는 것을 알려준다.
+            * `@Configuration` : 스프링 IoC 컨테이너에게 해당 클래스가 빈 설정 파일이라는 것을 알려준다.
        
-            * @Bean : 메서드의 실행 결과로 반환되는 객체를 Bean으로 등록한다. (클래스에 @Bean 선언 불가능)
+            * `@Bean` : 메서드의 실행 결과로 반환되는 객체를 Bean으로 등록한다. (클래스에 `@Bean` 선언 불가능)
             
-                * @Configuration이 선언된 클래스 내에 있는 메서드에 사용된다.
+                * `@Configuration`이 선언된 클래스 내에 있는 메서드에 사용된다.
                 
                 * 보통 외부 라이브러리들을 Bean으로 등록하고 싶은 경우에 사용된다.
                 
@@ -249,7 +249,7 @@ BookService service = new BookService(bookRepository);
       
     * 빈(Bean)을 사용하기
     
-        * 빈 설정 파일을 사용하는 ApplicationContext를 AnnotionConfigApplicationContext 클래스를 이용하여 만든 다음, Bean을 사용 할 수 있다.
+        * 빈 설정 파일을 사용하는 `ApplicationContext`를 `AnnotionConfigApplicationContext` 클래스를 이용하여 만든 다음, Bean을 사용 할 수 있다.
         
             ```java
             ApplicationContext context = new AnnotationConfigApplicationContext(ApplicationConfig.class)
@@ -259,7 +259,7 @@ BookService service = new BookService(bookRepository);
 
 * 앞서 살펴본 Java 설정도 Bean을 일일이 등록해야 하는 번거로움이 있어서 xml에서 처럼 컴포넌트 스캔을 사용 할 수 있다.
 
-* @ComponentScan 애노테이션을 이용하여 지정한 Class가 위치한 곳부터 컴포넌트 스캔을 하여 Bean으로 등록한다.
+* `@ComponentScan` 애노테이션을 이용하여 지정한 Class가 위치한 곳부터 컴포넌트 스캔을 하여 Bean으로 등록한다.
 
     * 빈(Bean) 등록 및 의존성 주입하기
     
@@ -271,28 +271,28 @@ BookService service = new BookService(bookRepository);
         
         }
         ```
-        * basePackages로 class path를 사용 할 수도 있지만 basePackageClasses가 더 type-safe 하다.
+        * `basePackages`로 classpath를 사용 할 수도 있지만 `basePackageClasses`가 더 type-safe 하다.
         
     * 빈(Bean)을 사용하기
     
-        * 빈 설정 파일을 사용하는 ApplicationContext를 AnnotionConfigApplicationContext 클래스를 이용하여 만든 다음, Bean을 사용 할 수 있다.
+        * 빈 설정 파일을 사용하는 `ApplicationContext`를 `AnnotionConfigApplicationContext` 클래스를 이용하여 만든 다음, Bean을 사용 할 수 있다.
 
 ##### 2-5) @SpringBootApplication  ★★★
 
-* @SpringBootApplication는 내부적으로 @Configuration과 @ComponentScan 애노테이션이 포함되어 있기 때문에
+* `@SpringBootApplication`는 내부적으로 `@Configuration`과 `@ComponentScan` 애노테이션이 포함되어 있기 때문에
 
-* @SpringBootApplication이 붙어 있는 클래스 자체가 Bean 설정 파일이다.
+* `@SpringBootApplication`이 붙어 있는 클래스 자체가 Bean 설정 파일이다.
 
 * 그래서 SpringBoot의 경우, ApplicationConfig 파일이 필요 없다.
            
-```java
-@SpringBootApplication
-public class DemoApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
+    ```java
+    @SpringBootApplication
+    public class DemoApplication {
+        public static void main(String[] args) {
+            SpringApplication.run(DemoApplication.class, args);
+        }
     }
-}
-```
+    ```
 
 ### 2-3. IoC 컨테이너 3부: @Autowired
 
@@ -302,54 +302,54 @@ public class DemoApplication {
 
 #### 2) @Autowired의 required
 
-* @Autowired의 required는 true가 기본 값이다.
+* `@Autowired`의 required는 true가 기본 값이다.
  
 * 필요한 의존 객체의 타입에 해당하는 빈을 찾지 못하면 애플리케이션 구동에 실패한다.
 
-```java
-@Service
-public class BookService {
-
-    BookRepository bookRepository;
-
-    @Autowired
-    public void setBookRepository(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
+    ```java
+    @Service
+    public class BookService {
+    
+        BookRepository bookRepository;
+    
+        @Autowired
+        public void setBookRepository(BookRepository bookRepository) {
+            this.bookRepository = bookRepository;
+        }
     }
-}
-```
+    ```
 
 * BookRepository가 빈으로 등록되어 있지 않다고 가정 할 때, 아래 코드에서 required를 false로 지정 하면, 의존성 주입을 할 수 없더라도 애플리케이션을 구동한다. (필드, 세터만 가능)
 
 * 즉, BookRepository가 의존성 주입이 되지 않은 상태로 BookService가 빈으로 등록된다.
 
-```java
-@Service
-public class BookService {
-
-    BookRepository bookRepository;
-
-    @Autowired(required = false)
-    public void setBookRepository(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
+    ```java
+    @Service
+    public class BookService {
+    
+        BookRepository bookRepository;
+    
+        @Autowired(required = false)
+        public void setBookRepository(BookRepository bookRepository) {
+            this.bookRepository = bookRepository;
+        }
     }
-}
-```
+    ```
 
 * 해당 내용은 필드에도 적용 가능 하다.
 
-```java
-@Service
-public class BookService {
-
-    @Autowired(required = false)
-    BookRepository bookRepository;
-}
-```
+    ```java
+    @Service
+    public class BookService {
+    
+        @Autowired(required = false)
+        BookRepository bookRepository;
+    }
+    ```
 
 #### 3) @Autowired를 사용 할 수 있는 위치
 
-* @Autowired는 생성자, 세터(setter), 필드(field)에 사용 할 수 있다.
+* `@Autowired`는 생성자, 세터(setter), 필드(field)에 사용 할 수 있다.
 
     * 생성자
     
@@ -409,17 +409,17 @@ public class BookService {
 
 * 아래의 BookRepository 인터페이스를 구현한 클래스(MyBookRepository, KeesunBookRepository)가 2개 있다.
 
-```java
-public interface BookRepository { }
-
-@Repository
-public class MyBookRepository implements BookRepository { }
-
-@Repository
-public class KeesunBookRepository implements BookRepository{ }
-```
+    ```java
+    public interface BookRepository { }
+    
+    @Repository
+    public class MyBookRepository implements BookRepository { }
+    
+    @Repository
+    public class KeesunBookRepository implements BookRepository{ }
+    ```
       
-* BookService 클래스에서는 @Autowired로 BookRepository를 주입 받으려고 하는데 에러가 발생한다.    
+* BookService 클래스에서는 `@Autowired`로 BookRepository를 주입 받으려고 하는데 에러가 발생한다.    
 
 * 에러가 발생한 이유는 두 개의 클래스 중 어떤 클래스를 주입해야 하는지 알 수 없기 때문이다. 
 
@@ -435,7 +435,7 @@ public class KeesunBookRepository implements BookRepository{ }
 
     * `@Qualifier`
     
-        * `@Qualifier`는 @Autowired와 함께 사용하며 빈의 이름이 같은 객체를 찾는다.
+        * `@Qualifier`는 `@Autowired`와 함께 사용하며 빈의 이름이 같은 객체를 찾는다.
           
         * `@Qualifier`에 전달하는 빈의 이름은 클래스 명에서 첫 글자만 소문자로 변경하여 지정한다.
         
@@ -445,7 +445,7 @@ public class KeesunBookRepository implements BookRepository{ }
             BookRepository bookRepository;
             ```
                  
-        * @Qualifier 보다 좀 더 type-safe 한 @Primary를 사용하는 것을 권장한다. 
+        * `@Qualifier` 보다 좀 더 type-safe 한 `@Primary`를 사용하는 것을 권장한다. 
 
     * `해당 타입의 모든 빈을 주입 받기`
     
@@ -453,12 +453,12 @@ public class KeesunBookRepository implements BookRepository{ }
 
             ```java
             @Autowired
-            List<BookRepository> bookRepository;
+            List<BookRepository> bookRepositories;
             ```
 
 #### 6) @Autowired 동작 원리
 
-* BeanPostProcessor의 구현체인 AutowiredAnnotationBeanPostProcessor가 Bean의 초기화 라이프 사이클 이전에 @Autowired 애노테이션이 붙어 있는 빈(Bean)을 찾아 주입 한다.
+* `BeanPostProcessor`의 구현체(`AutowiredAnnotationBeanPostProcessor`)가 Bean의 초기화 라이프 사이클(초기화 콜백) 이전에 @Autowired 애노테이션이 붙어 있는 빈(Bean)을 찾아 주입 한다.
 
 * [참고] 스프링 빈의 이벤트 라이프 사이클 ([김영한님의 스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EA%B8%B0%EB%B3%B8%ED%8E%B8 "스프링 핵심 원리 - 기본편") 내용 중 일부를 참고 하였습니다.)
     
@@ -474,7 +474,7 @@ public class KeesunBookRepository implements BookRepository{ }
 
 #### 1) @ComponentScan
 
-* `@ComponentScan`는 @Component 애노테이션이 붙어 있는 클래스들을 스캔하여 빈으로 등록한다.
+* `@ComponentScan`는 `@Component` 애노테이션이 붙어 있는 클래스들을 스캔하여 빈으로 등록한다.
 
     * `BasePackages`는 입력된 패키지의 경로를 기준으로 스캔을 시작한다. 
         * 패키지의 경로를 문자열로 입력 받기 때문에 type-safe 하지 않음

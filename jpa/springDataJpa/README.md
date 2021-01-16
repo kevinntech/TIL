@@ -1080,7 +1080,7 @@
             }
             ```
           
-    * Page를 1부터 시작하기       
+    * Page를 1 부터 시작하기       
 
         * 스프링 데이터는 Page를 0부터 시작한다. 만약 1부터 시작하려면 어떻게 해야 될까?
         
@@ -1158,21 +1158,21 @@
 
 * 새로운 엔티티를 판단하는 기본 전략
 
-    * 식별자가 객체일 때는 `null`로 판단 
+    * 식별자가 객체일 때는 `null`이면 새로운 엔티티로 판단한다.
     
-    * 식별자가 자바 기본 타입일 때는 `0`으로 판단
+    * 식별자가 자바 기본 타입일 때는 `0`이면 새로운 엔티티로 판단한다. 
     
-    * `Persistable` 인터페이스를 구현해서 판단 로직 변경 가능
+    * `Persistable` 인터페이스를 구현해서 판단 로직을 변경 할 수 있다.
     
 * Persistable 구현
 
-    * [참고] JPA 식별자 생성 전략이 `@GenerateValue`면 save() 호출 시점에 식별자가 없으므로 새로운 엔티티로 인식해서 정상 동작한다. 
+    * JPA 식별자 생성 전략이 `@GenerateValue`면 `save()` 호출 시점에 식별자가 없으므로 새로운 엔티티로 인식해서 정상 동작한다. 
     
-    * 그런데 JPA 식별자 생성 전략이 @Id 만 사용해서 직접 할당하게 되면 이미 식별자 값이 있는 상태로 save()를 호출한다. 
+    * 그런데 `@Id`만 사용해서 직접 할당하게 되면 이미 식별자 값이 있는 상태로 `save()`를 호출하게 된다. 
     
-    * 따라서 이 경우에는 merge()가 호출된다. merge()는 우선 DB를 호출해서 값을 확인하고, DB에 값이 없으면 새로운 엔티티로 인지하므로 매우 비효율적이다.
+    * 따라서 이 경우에는 `merge()`가 호출되며 `merge()`는 우선 DB를 호출해서 값을 확인하고, DB에 값이 없으면 새로운 엔티티로 인지하므로 매우 비효율적이다.
     
-    * 따라서 Persistable를 사용해서 새로운 엔티티 확인 여부를 직접 구현하는 것이 효과적이다.
+    * 그래서 `Persistable` 인터페이스를 사용해서 새로운 엔티티 확인 여부를 직접 구현한다.
     
         ```java
         @Entity
@@ -1182,7 +1182,7 @@
         
             @Id
             private String id;
-        
+            
             @CreatedDate
             private LocalDateTime createdDate;
         
@@ -1190,14 +1190,35 @@
                 this.id = id;
             }
         
+            // 오버라이딩
             @Override
             public String getId() {
-                return null;
+                return id;
             }
-        
+            
+            /*
+            * @CreatedDate는 persist()가 되기 전에 호출된다.   
+            * createdDate가 null이면 새로운 객체로 본다.
+            * createdDate의 값이 있다면 새로운 객체가 아니다.
+            * */        
             @Override
             public boolean isNew() {
                 return createdDate == null;
+            }
+        
+        }
+        ```
+      
+        ```java
+        @SpringBootTest
+        class ItemRepositoryTest {
+        
+            @Autowired ItemRepository itemRepository;
+        
+            @Test
+            public void save(){
+                Item item = new Item("A");
+                itemRepository.save(item);
             }
         
         }
