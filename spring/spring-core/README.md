@@ -610,7 +610,7 @@
   
     * scopedProxyMode.DEFAULT가 기본 값이며  이는 Proxy를 사용하지 않는다는 것을 의미한다.
     
-    * `proxyMode = scopedProxyMode.TARGET_CLASS` → 해당 Bean을 클래스 기반의 Proxy로 감싸도록 한다. 
+    * `proxyMode = ScopedProxyMode.TARGET_CLASS` → 해당 Bean을 클래스 기반의 Proxy로 감싸도록 한다. 
 
     * Proxy로 감싸는 이유는 무엇일까?
     
@@ -618,7 +618,7 @@
 
           ```java
           @Component 
-          @Scope(value = "prototype", proxyMode = scopedProxyMode.TARGET_CLASS)
+          @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
           public class proto {
           
           }

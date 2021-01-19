@@ -101,6 +101,7 @@
             ```java
             @SpringBootTest
             @Transactional
+            //@Commit
             class QuerydslApplicationTests {
             
                 @Autowired EntityManager em;
@@ -142,17 +143,21 @@
             username: sa
             password:
             driver-class-name: org.h2.Driver
-        jpa:
-          hibernate:
-            ddl-auto: create
-          properties:
+        
+          jpa:
             hibernate:
-              # show_sql: true
-              format_sql: true
+              ddl-auto: create
+            properties:
+              hibernate:
+                #show_sql: true
+                format_sql: true
         
         logging.level:
           org.hibernate.SQL: debug
         #  org.hibernate.type: trace
         ```
 
+    * 쿼리 파라미터 로그 남기기
+    
+        * `implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.8'`
 
