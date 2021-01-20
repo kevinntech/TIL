@@ -21,7 +21,7 @@
 * [김영한님의 자바 ORM 표준 JPA 프로그래밍 - 기본편](https://github.com/kevinntech/TIL/tree/main/jpa/jpaBasic "자바 ORM 표준 JPA 프로그래밍 - 기본편")
 * [김영한님의 실전! 스프링 부트와 JPA 활용1 - 웹 애플리케이션 개발](https://github.com/kevinntech/TIL/tree/main/jpa/jpaUse1 "실전! 스프링 부트와 JPA 활용1")
 * [김영한님의 실전! 스프링 데이터 JPA](https://github.com/kevinntech/TIL/tree/main/jpa/springDataJpa "실전! 스프링 데이터 JPA")
-* [김영한님의 실전! Querydsl](https://www.inflearn.com/course/Querydsl-실전# "실전! Querydsl")
+* [김영한님의 실전! Querydsl](https://github.com/kevinntech/TIL/tree/main/jpa/querydsl "실전! Querydsl")
 
 ## ETC
 
