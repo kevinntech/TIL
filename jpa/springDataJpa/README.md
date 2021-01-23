@@ -205,7 +205,7 @@
     
     * ② 메소드 이름으로 JPA NamedQuery 호출
     
-    * ③ @Query 어노테이션을 사용해서 리포지토리 인터페이스에 쿼리 직접 정리
+    * ③ `@Query`를 사용해서 리포지토리 메소드에 쿼리 직접 정의
 
 #### 1) 메소드 이름으로 쿼리 생성
 
@@ -221,7 +221,7 @@
 
 * 메소드 이름으로 사용 할 수 있는 키워드
 
- ``   * [스프링 데이터 JPA 공식 문서](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods "") 참고
+    * [스프링 데이터 JPA 공식 문서](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods "") 참고
 
 * 스프링 데이터 JPA가 제공하는 쿼리 메소드 기능
 
@@ -294,7 +294,7 @@
 
 #### 3) @Query, 리포지토리 메소드에 쿼리 정의하기
 
-* 리포지토리 메소드에 `@Query`를 사용하여 직접 쿼리를 정의 할 수 있다. 
+* 리포지토리 메소드에 `@Query`를 사용하여 직접 쿼리를 정의한다.
 
     ```java
     public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -344,7 +344,7 @@
             }
             ```
            
-        * ② DTO로 직접 조회하려면 JPA의 new 명령어를 사용해야 한다. 그리고 아래 코드처럼 DTO에 매칭되는 생성자가 있어야 한다.
+        * ② DTO로 직접 조회하려면 JPA의 new 명령어를 사용해야 한다. 그리고 DTO에서 일치하는 생성자가 있어야 한다.
         
             ```java
             public interface MemberRepository extends JpaRepository<Member, Long> {           
