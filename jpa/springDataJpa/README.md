@@ -205,7 +205,7 @@
     
     * ② 메소드 이름으로 JPA NamedQuery 호출
     
-    * ③ `@Query`를 사용해서 리포지토리 메소드에 쿼리 직접 정의
+    * ③ `@Query`를 사용해서 리포지토리 메소드에 쿼리를 직접 정의
 
 #### 1) 메소드 이름으로 쿼리 생성
 
@@ -294,7 +294,7 @@
 
 #### 3) @Query, 리포지토리 메소드에 쿼리 정의하기
 
-* 리포지토리 메소드에 `@Query`를 사용하여 직접 쿼리를 정의한다.
+* `@Query`를 사용해서 리포지토리 메소드에 쿼리를 직접 정의한다.
 
     ```java
     public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -378,8 +378,6 @@
 #### 6) 반환 타입
 
 * 스프링 데이터 JPA는 `유연한 반환 타입`을 지원한다.
-
-   * 스프링 데이터 JPA는 `유연한 반환 타입`을 지원한다.
    
    * 결과가 한 건 이상이면 `컬렉션 인터페이스`를 사용하고, 단건이면 반환 타입을 지정한다.
    
@@ -389,11 +387,11 @@
         Optional<Member> findOptionalByUsername(String username);   // 단건 Optional
         ```
      
-* 조회 결과가 많거나 없으면 어떻게 될까?
+* **조회 결과가 많거나 없으면 어떻게 될까?**
 
     * ① 컬렉션 조회인 경우
     
-        * 조회 결과가 없으면 빈 컬렉션을 반환
+        * 조회 결과가 없으면 비어있는 컬렉션을 반환
     
     * ② 단건 조회인 경우
     
@@ -457,15 +455,15 @@
 * 예시 - 정의
 
     ```java
-     public interface MemberRepository extends Repository<Member, Long> {
+    public interface MemberRepository extends Repository<Member, Long> {
         Page<Member> findByAge(int age, Pageable pageable); //count 쿼리 사용
-    
+        
         Slice<Member> findByAge(int age, Pageable pageable); //count 쿼리 사용 안 함
-    
+        
         List<Member> findByAge(int age, Pageable pageable); //count 쿼리 사용 안 함
-    
+        
         List<Member> findByAge(int age, Sort sort);
-     }
+    }
     ```
   
 * 예시 - 사용
@@ -497,15 +495,17 @@
   
     * `findByAge()`
     
-        * 두 번째 파라미터 `Pagable`은 인터페이스이며 페이징 처리에 필요한 정보를 제공한다.
+        * 두 번째 파라미터 `Pageable`은 인터페이스이며 페이징 처리에 필요한 정보를 제공한다.
     
-        * 그리고 파라미터 타입이 `Pagable`이면 해당 인터페이스를 구현한 `PageRequest` 객체를 전달한다.
+        * 그리고 파라미터 타입이 `Pageable`이면 해당 인터페이스를 구현한 `PageRequest` 객체를 전달한다.
     
     * `PageRequest.of()`
     
         * **첫 번째 파라미터**에는 **현재 페이지**를, **두 번째 파라미터**에는 **조회할 데이터 수**를 전달한다.
      
-        * 여기에 추가로 정렬 정보도 파라미터로 전달 할 수 있다. 참고로 페이지는 0 부터 시작한다.
+        * 여기에 추가로 **정렬 정보**도 파라미터로 전달 할 수 있다. 참고로 페이지는 0 부터 시작한다.
+
+            * `PageRequest.of(int page, int size, Sort sort)`
 
 * `Page` 인터페이스
 
@@ -590,7 +590,7 @@
 * 스프링 데이터 JPA를 사용한 벌크성 수정 쿼리
 
     ```java
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
     int bulkAgePlus(@Param("age") int age);
     ```
@@ -599,13 +599,13 @@
     
         * 사용하지 않으면 `QueryExecutionRequestException` 예외가 발생한다.
     
-    * 벌크성 쿼리를 실행하고 나서 영속성 컨텍스트를 초기화하려면 `@Modifying(clearAutomatically = true)`로 설정한다.
+    * `@Modifying(clearAutomatically = true)`로 설정하면 벌크성 쿼리를 실행하고 나서 영속성 컨텍스트를 초기화한다.
     
         * 해당 옵션을 사용하지 않고 회원을 `findByUsername()`로 다시 조회하면 영속성 컨텍스트에 과거 값이 남아서 문제가 될 수 있다.
          
         * 만약 다시 조회해야 하면 꼭 영속성 컨텍스트를 초기화 하자.
         
-    * 벌크 연산은 영속성 컨텍스트를 무시하고 실행하기 때문에, 영속성 컨텍스트에 있는 엔티티의 상태와 DB에 있는 엔티티 상태가 달라질 수 있다.
+    * **벌크 연산은 영속성 컨텍스트를 무시하고 실행하기 때문에, 영속성 컨텍스트에 있는 엔티티의 상태와 DB에 있는 엔티티 상태가 달라질 수 있다.**
 
 * 벌크성 수정 쿼리 - 테스트 코드
 
@@ -655,34 +655,38 @@
         List<Member> findMemberFetchJoin();
         ```
       
-    * 엔티티 그래프 기능은 엔티티를 조회하는 시점에 연관된 엔티티를 함께 조회하는 기능이다.
+    * 엔티티 그래프는 엔티티를 조회하는 시점에 연관된 엔티티를 함께 조회하는 기능이다.
     
-        * @EntityGraph는 사실상 페치 조인(FETCH JOIN)의 간편 버전
+        * `@EntityGraph`는 사실상 페치 조인(FETCH JOIN)의 간편 버전이다.
         
         * LEFT OUTER JOIN 사용
     
        ```java
        // 공통 메서드 오버라이드
        @Override
-       @EntityGraph(attributePaths = {"team"}) List<Member> findAll();
+       @EntityGraph(attributePaths = {"team"})
+       List<Member> findAll();
        
        // JPQL + 엔티티 그래프
        // 쿼리는 작성 했는데 페치 조인만 적용하고 싶은 경우에 다음과 같이 할 수 있다.
        @EntityGraph(attributePaths = {"team"})
-       @Query("select m from Member m") List<Member> findMemberEntityGraph();
+       @Query("select m from Member m") 
+       List<Member> findMemberEntityGraph();
        
-       //메소드 이름으로 쿼리를 생성하는 경우에 사용하면 특히 편리하다.
+       // 메소드 이름으로 쿼리를 생성하는 경우에 사용하면 특히 편리하다.
        @EntityGraph(attributePaths = {"team"})
        List<Member> findByUsername(@Param("username") String username);
-       ``` 
+       ```
+      
+        * `attributePaths` : 쿼리 수행 시, 함께 조회 할 필드명을 지정한다
 
     * `@NamedEntityGraph`
     
         * Named 엔티티 그래프는 `@NamedEntityGraph`로 정의한다.
         
-            * name : 엔티티 그래프의 이름을 정의한다.
+            * `name` : 엔티티 그래프의 이름을 정의한다.
             
-            * attributeNodes : 함께 조회할 속성을 선택한다. 이때, @NamedAttributeNode를 사용하고 그 값으로 함께 조회할 속성을 선택하면 된다.
+            * `attributeNodes` : 함께 조회할 속성을 선택한다. 이때, `@NamedAttributeNode`를 사용하고 그 값으로 함께 조회할 속성을 선택하면 된다.
         
            ```java
            @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
@@ -768,13 +772,13 @@
         }
         ```
 
-        * 클래스 이름을 짓는 규칙은 `리포지토리 인터페이스 이름 + Impl` 이다.
+        * 클래스 이름을 짓는 규칙은 `리포지토리 인터페이스명 + Impl` 이다.
         
         * 이렇게 하면 스프링 데이터 JPA가 인식해서 스프링 빈으로 등록한다.
         
-        * 스프링 데이터 2.x 부터는 클래스 이름을 짓는 규칙을 `사용자 정의 인터페이스 명 + Impl`로 하는 것이 가능하다.
+        * **스프링 데이터 2.x 부터**는 클래스 이름을 짓는 규칙을 `사용자 정의 인터페이스명 + Impl`로 하는 것이 가능하다.
     
-            * 예를 들어 아래 예제의 `MemberRepositoryImpl` 대신에 `MemberRepositoryCustomImpl` 같이 작성해도 된다.
+            * 예를 들어 위의 예제에서 `MemberRepositoryImpl` 대신에 `MemberRepositoryCustomImpl` 같이 작성해도 된다.
             
             * 해당 방식이 사용자 정의 인터페이스 이름과 구현 클래스 이름이 비슷하므로 더 직관적이므로 해당 방식을 사용하는 것을 권장한다.
 
@@ -856,46 +860,40 @@
     
         * 설정
         
-            * 스프링 부트 설정 클래스(`DataJpaApplication`)에 `@EnableJpaAuditing`를 적용 해야한다.
+            * ① 스프링 부트 설정 클래스(`DataJpaApplication`)에 `@EnableJpaAuditing`를 적용한다.
             
-                 ```java
-                 @EnableJpaAuditing
-                 @SpringBootApplication
-                 public class DataJpaApplication {
+                ```java
+                @EnableJpaAuditing
+                @SpringBootApplication
+                public class DataJpaApplication {
+                
+                    public static void main(String[] args) {
+                        SpringApplication.run(DataJpaApplication.class, args);
+                    }
+                
+                }
+                ```
+              
+                * `@EnableJpaAuditing` : JPA Auditing을 활성화한다.
+                
+            * ② `BaseEntity` 클래스에 `@EntityListeners(AuditingEntityListener.class)`를 적용한다.
+            
+                * `@EntityListeners(AuditingEntityListener.class)` : 해당 클래스에 Auditing 기능을 포함시킨다.
+            
+            * ③ 그리고 다음 애노테이션을 사용한다.
+            
+                * `@CreatedDate` : 엔티티가 생성되어 저장될 때, 시간이 자동 저장된다.
+                
+                * `@LastModifiedDate` : 조회한 엔티티의 값을 변경할 때, 시간이 자동 저장된다. 
+                
+                * `@CreatedBy` : 엔티티가 생성되어 저장될 때, 생성자가 자동 저장된다.
+                
+                * `@LastModifiedBy` : 조회한 엔티티의 값을 변경할 때, 수정자가 자동 저장된다. 
+            
+        * 예시
                  
-                 	public static void main(String[] args) {
-                 		SpringApplication.run(DataJpaApplication.class, args);
-                 	}
-                 
-                 }
-                 ```
-                     
-            * `BaseEntity`에 `@EntityListeners(AuditingEntityListener.class)`를 적용한다.
+            * 등록일, 수정일에 대해 `스프링 데이터 Auditing`를 적용한다.
             
-        * 등록일, 수정일에 대해 스프링 데이터 Auditing를 적용한다.
-    
-            ```java
-            @EntityListeners(AuditingEntityListener.class)
-            @MappedSuperclass
-            @Getter
-            public class BaseEntity {
-            
-                // 등록일
-                @CreatedDate
-                @Column(updatable = false)
-                private LocalDateTime createdDate;
-            
-                // 수정일
-                @LastModifiedDate
-                private LocalDateTime lastModifiedDate;
-                      
-            }
-            ```
-          
-        * 등록자, 수정자에 대해 스프링 데이터 Auditing를 적용한다.
-        
-            * BaseEntity를 다음과 같이 변경한다.
-    
                 ```java
                 @EntityListeners(AuditingEntityListener.class)
                 @MappedSuperclass
@@ -910,39 +908,63 @@
                     // 수정일
                     @LastModifiedDate
                     private LocalDateTime lastModifiedDate;
-                
-                    /* 등록되거나 수정될 때 마다, auditorProvider()를 호출한 결과를 자동으로 채워넣는다. */
-                    // 등록자
-                    @CreatedBy
-                    @Column(updatable = false)
-                    private String createdBy;
-                
-                    // 수정자
-                    @LastModifiedBy
-                    private String lastModifiedBy;
-                
+                          
                 }
                 ```
               
-            * 등록자, 수정자를 처리해주는 `AuditorAware` 스프링 빈을 등록한다.
-                
-                ```java
-                @Bean
-                public AuditorAware<String> auditorProvider(){
-                    // 랜덤 UUID 생성
-                    return () -> Optional.of(UUID.randomUUID().toString());
-                }
-                ```
+            * 등록자, 수정자에 대해 `스프링 데이터 Auditing`를 적용한다.
             
-                * 실무에서는 세션 정보나, 스프링 시큐리티 로그인 정보에서 ID를 받음
-
-        * 앞서 작성한 클래스를 상속 받는다.
+                * `BaseEntity`를 다음과 같이 변경한다.
         
-            ```java
-            public class Member extends BaseEntity {}
-            ```
+                    ```java
+                    @EntityListeners(AuditingEntityListener.class)
+                    @MappedSuperclass
+                    @Getter
+                    public class BaseEntity {
+                    
+                        // 등록일
+                        @CreatedDate
+                        @Column(updatable = false)
+                        private LocalDateTime createdDate;
+                    
+                        // 수정일
+                        @LastModifiedDate
+                        private LocalDateTime lastModifiedDate;
+                    
+                        /* 등록되거나 수정될 때 마다, auditorProvider()를 호출한 결과를 자동으로 채워 넣는다. */
+                        // 등록자
+                        @CreatedBy
+                        @Column(updatable = false)
+                        private String createdBy;
+                    
+                        // 수정자
+                        @LastModifiedBy
+                        private String lastModifiedBy;
+                    
+                    }
+                    ```
+                  
+                    * `@MappedSuperclass` : Entity 클래스들이 `BaseEntity`를 상속할 경우 필드들(createdDate, lastModifiedDate ...)도 컬럼으로 인식하도록 한다.
+                  
+                * 등록자, 수정자를 처리해주는 `AuditorAware` 스프링 빈을 등록한다.
+                    
+                    ```java
+                    @Bean
+                    public AuditorAware<String> auditorProvider(){
+                        // 랜덤 UUID 생성
+                        return () -> Optional.of(UUID.randomUUID().toString());
+                    }
+                    ```
+                
+                    * 실무에서는 세션 정보나, 스프링 시큐리티 로그인 정보에서 ID를 받음
+    
+            * 앞서 작성한 클래스를 상속 받는다.
+            
+                ```java
+                public class Member extends BaseEntity {}
+                ```
 
-    * @EntityListeners(AuditingEntityListener.class)를 생략하고 스프링 데이터 JPA가 제공하는 이벤트를 엔티티 전체에 적용하는 방법이 있는데 해당 강좌를 참고하자.
+        * `@EntityListeners(AuditingEntityListener.class)`를 생략하고 `스프링 데이터 JPA`가 제공하는 이벤트를 엔티티 전체에 적용하는 방법이 있는데 해당 강좌를 참고하자.
     
 #### 3) Web 확장
 
@@ -1009,7 +1031,7 @@
         
         * `Pageable`은 다음 요청 파라미터 정보로 만들어진다. (실제는 `PageRequest` 객체가 생성되어 주입된다.)
         
-            * [예시] /members?page=0&size=3&sort=id,desc&sort=username,desc   
+            * [예시] `/members?page=0&size=3&sort=id,desc&sort=username,desc   `
                      
             * `page` : 현재 페이지, 0부터 시작한다.
             
@@ -1040,15 +1062,15 @@
 
         * 사용 해야 할 페이징 정보가 둘 이상이면 접두사로 구분한다.
         
-        * `@Qualifier`에 접두사명을 추가한다. "{접두사명}_xxx”
-        
-        * 예시: `/members?member_page=0&order_page=1`
-
-            ```java
-            public String list(
-                    @Qualifier("member") Pageable memberPageable, 
-                    @Qualifier("order") Pageable orderPageable, ...
-            ```
+            * `@Qualifier`에 접두사명을 추가한다. "{접두사명}_xxx”
+            
+            * 예시: `/members?member_page=0&order_page=1`
+    
+                ```java
+                public String list(
+                        @Qualifier("member") Pageable memberPageable, 
+                        @Qualifier("order") Pageable orderPageable, ...
+                ```
                   
     * Page 내용을 DTO로 변환하기       
 
@@ -1110,7 +1132,7 @@
 
     * `org.springframework.data.jpa.repository.support.SimpleJpaRepository`
     
-    * 위에 있는 구현체의 일부 코드를 살펴보자.
+    * `SimpleJpaRepository`의 일부 코드를 살펴보자.
     
         * `@Repository` 적용
         
