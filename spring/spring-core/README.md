@@ -460,15 +460,90 @@
 
 * `BeanPostProcessor`의 구현체(`AutowiredAnnotationBeanPostProcessor`)가 Bean의 초기화 라이프 사이클(초기화 콜백) 이전에 @Autowired 애노테이션이 붙어 있는 빈(Bean)을 찾아 주입 한다.
 
-* [참고] 스프링 빈의 이벤트 라이프 사이클 ([김영한님의 스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EA%B8%B0%EB%B3%B8%ED%8E%B8 "스프링 핵심 원리 - 기본편") 내용 중 일부를 참고 하였습니다.)
+* [참고] 빈 생명주기 콜백 ([김영한님의 스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EA%B8%B0%EB%B3%B8%ED%8E%B8 "스프링 핵심 원리 - 기본편") 내용 중 일부를 참고 하였습니다.)
     
-    * 스프링 컨테이너 생성 -> 스프링 빈 생성 -> 의존 관계 주입 -> 초기화 콜백 -> 사용 -> 소멸전 콜백 -> 스프링 종료    
+    * 개요
+    
+        * 스프링 빈은 객체를 생성하고, 의존관계 주입이 다 끝난 다음에야 필요한 데이터를 사용할 수 있는 준비가 완료된다. 
+        
+        * 따라서 초기화 작업은 의존관계 주입이 모두 완료되고 난 다음에 호출해야 한다. 
+        
+        * 그런데 개발자가 의존관계 주입이 모두 완료된 시점을 어떻게 알 수 있을까?
+        
+        * 스프링은 의존관계 주입이 완료되면 스프링 빈에게 콜백 메서드를 통해서 초기화 시점을 알려주는 다양한 기능을 제공한다. 
+        
+        * 또한 스프링은 스프링 컨테이너가 종료되기 직전에 소멸 콜백을 준다. (싱글톤 빈에만 해당)
+        
+    * 스프링 빈의 이벤트 라이프 사이클
+    
+        * `스프링 컨테이너 생성` -> `스프링 빈 생성` -> `의존 관계 주입` -> `초기화 콜백` -> `사용` -> `소멸전 콜백` -> `스프링 컨테이너 종료`    
 
+            * **생성자 주입**의 경우, 생성자를 호출하면서 의존 관계 주입도 한번에 처리된다. 
+            
+            * `초기화 콜백`: 빈이 생성되고, 빈의 의존관계 주입이 완료된 후 호출
+            
+            * `소멸전 콜백`: 빈이 소멸되기 직전에 호출
+         
     * 빈 생명주기 콜백
     
-        * `@PostConstruct` : 빈이 생성되고, 빈의 의존관계 주입이 완료된 후 호출될 초기화 메소드에 적용한다.
+        * 초기화, 소멸 인터페이스(InitializingBean, DisposableBean)
+
+            * `InitializingBean`은 `afterPropertiesSet()` 메서드로 초기화를 지원한다.
+        
+            * `DisposableBean`은 `destroy()` 메서드로 소멸을 지원한다.
+            
+            * 인터페이스를 사용하는 초기화, 종료 방법은 스프링 초창기에 나온 방법들이고, 지금은 다음의 더 나은 방법들이 있어서 거의 사용하지 않는다.
+            
+        * 설정 정보에 초기화 메서드, 종료 메서드를 지정
+        
+            * 빈 설정 정보에 `@Bean(initMethod = "init", destroyMethod = "close")`처럼 초기화, 소멸 메서드를 지정할 수 있다.
+
+                ```java
+                @Configuration
+                static class LifeCycleConfig {
+              
+                    @Bean(initMethod = "init", destroyMethod = "close")
+                    public NetworkClient networkClient() {
+                        NetworkClient networkClient = new NetworkClient();
+                        networkClient.setUrl("http://hello-spring.dev");
+                        return networkClient;
+                    }
+              
+                }
+                ```
+              
+                ```java
+                public class NetworkClient {
+                    private String url;
+                    
+                    //...
+              
+                    public void init() { 
+                        System.out.println("NetworkClient.init"); 
+                        connect();
+                        call("초기화 연결 메시지");
+                    }
+                    
+                    public void close() {
+                        System.out.println("NetworkClient.close");
+                        disConnect();
+                    } 
+                }
+                ```
+
+        * `@PostConstruct`, `@PreDestory` 애노테이션
+        
+            * `@PostConstruct` : 빈이 생성되고, 빈의 의존관계 주입이 완료된 후 호출될 초기화 메소드에 적용한다.
+        
+            * `@PreDestroy` : 빈이 소멸되기 직전에 호출될 소멸 메소드에 적용한다.
     
-        * `@PreDestroy` : 빈이 소멸되기 직전에 호출될 소멸 메소드에 적용한다.
+            * 특징
+            
+                * 최신 스프링에서 가장 권장하는 방법이다.
+                
+                * 애노테이션 하나만 붙이면 되므로 매우 편리하다.
+                
+                * 코드를 고칠 수 없는 외부 라이브러리를 초기화, 종료해야 하면 `@Bean`의 initMethod, destroyMethod를 사용하자.
     
 ### 2-4. IoC 컨테이너 4부: @Component와 컴포넌트 스캔
 
