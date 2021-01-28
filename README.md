@@ -16,6 +16,7 @@
 * [백기선님의 스프링 프레임워크 핵심 기술](https://github.com/kevinntech/TIL/tree/main/spring/spring-core "스프링 프레임워크 핵심 기술")
 * [백기선님의 스프링 부트 개념과 활용](https://github.com/kevinntech/TIL/tree/main/spring/spring-boot "스프링 부트 개념과 활용")
 * [백기선님의 스프링 웹 MVC](https://github.com/kevinntech/TIL/tree/main/spring/spring-mvc "스프링 웹 MVC")
+* [백기선님의 스프링과 JPA 기반 웹 애플리케이션 개발](https://github.com/kevinntech/TIL/tree/main/spring/spring-jpa-webapp "스프링과 JPA 기반 웹 애플리케이션 개발")
 
 ## JPA
 * [김영한님의 자바 ORM 표준 JPA 프로그래밍 - 기본편](https://github.com/kevinntech/TIL/tree/main/jpa/jpaBasic "자바 ORM 표준 JPA 프로그래밍 - 기본편")
