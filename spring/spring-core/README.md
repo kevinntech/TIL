@@ -710,140 +710,102 @@
          
 #### 1) Environment
 
-* `EnvironmentCapable`는 프로파일과 프로퍼티를 다루는 인터페이스이다. 
+* `Environment`는 프로파일과 프로퍼티를 다루는 인터페이스이다. 
 
-* `ApplicationContext`는 `EnvironmentCapable` 인터페이스를 상속 받는다. 
+    * `ApplicationContext extends EnvironmentCapable`
+    
+        * `ApplicationContext`는 `EnvironmentCapable` 인터페이스를 상속 받기 때문에
+        
+        * `ApplicationContext`의 `getEnvironment()`로 `Environment` 객체를 가져올 수 있다.
 
-    * ApplicationContext extends EnvironmentCapable
-
-    * 그렇기 때문에 ApplicationContext의 getEnvironment()로 Environment 객체를 가져올 수 있다.
-
-    * (EnvironmentCapable로 Environment를 다룰 수 있다.)
-
-- `Environment`의 역할은 활성화 할 프로파일 확인 및 설정
+* `Environment`를 이용하여 활성화 된 프로파일을 확인 하거나 프로파일을 설정 할 수 있다.
 
 #### 2) 프로파일(Profile)
 
-* `프로파일(Profile)`은 특정 실행 환경에서 사용할 빈들의 묶음을 말한다.
+* `프로파일(Profile)`은 특정 실행 환경에서 사용할 **빈들의 묶음**을 말한다.
   
-* 테스트 환경에서는 A라는 빈을 사용하고, 배포 환경에서는 B라는 빈을 사용하고 싶을 때 Profile을 이용할 수 있다.                    
+    * 테스트 환경에서는 A라는 빈을 사용하고, 배포 환경에서는 B라는 빈을 사용하고 싶을 때 `Profile`을 이용할 수 있다.                    
       
 #### 3) 프로파일 확인하기
-
-* `Environment`의 프로파일을 확인할 때 사용하는 메소드
-
-    * `getActiveProfiles()` : 현재 활성화한 프로파일을 가져온다.
   
-    * `getDefaultProfiles()` : 기본적으로 적용되는 프로파일을 가져온다.
-  
-    ```java
-    @Component
-    public class AppRunner implements ApplicationRunner {
-    
-        @Autowired
-        ApplicationContext ctx;
-    
-        @Override
-        public void run(ApplicationArguments args) throws Exception {
-            Environment environment = ctx.getEnvironment();
-            System.out.println(Arrays.toString(environment.getActiveProfiles()));
-            System.out.println(Arrays.toString(environment.getDefaultProfiles()));
-        }
+```java
+@Component
+public class AppRunner implements ApplicationRunner {
+
+    @Autowired
+    ApplicationContext ctx;
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        Environment environment = ctx.getEnvironment();
+        System.out.println(Arrays.toString(environment.getActiveProfiles()));
+        System.out.println(Arrays.toString(environment.getDefaultProfiles()));
     }
-    ```
+}
+```
 
-    * getActiveProfiles()의 경우, Profile을 정의하지 않았기 때문에 []으로 출력 된다.
-  
-    * 그리고 Profile이 정의 되지 않은 Bean들은 모두 Default Profile에 들어가게 된다.
+* `getActiveProfiles()` : 현재 활성화한 프로파일을 가져온다.
+
+* `getDefaultProfiles()` : (어떠한 프로파일을 설정하지 않아도) 기본적으로 적용되는 프로파일을 가져온다.
 
 #### 4) 프로파일 정의하기
 
-* @Profile
-
-    * `@Profile`는 프로파일을 정의하며 클래스, 메서드에 사용 가능하다.
+* `@Profile`는 프로파일을 정의한다.
   
-    * ① 클래스에 정의
+    * ① 클래스에 사용하기
     
         * `@Configuration @Profile("test")`
         
-    * ② 메서드에 정의
+        * `@Component @Profile("test")`
+        
+    * ② 메서드에 사용하기
     
         * `@Bean @Profile("test")`
-
-#### 5) 프로파일 정의하기 - 예시
-
-* 아래 코드에서 지정한 @Profile("test")은 해당 빈 설정 파일(TestConfiguration)이 test 프로파일 일 때만 적용된다는 것을 의미한다.
-
-    ```java
-    @Configuration
-    @Profile("test")
-    public class TestConfiguration {
+          
+* 예시 1 - 빈 설정 파일에서 프로파일 정의하기 
+ 
+    * ① 아래 코드에서 지정한 `@Profile("test")`은 해당 빈 설정 파일(TestConfiguration)이 test 프로파일 일 때만 적용된다는 것을 의미한다.
     
-        @Bean
-        public BookRepository bookRepository(){
-            return new TestBookRepository();
+        ```java
+        @Configuration
+        @Profile("test")
+        public class TestConfiguration {
+        
+            @Bean
+            public BookRepository bookRepository(){
+                return new TestBookRepository();
+            }
         }
-    }
-    ```
+        ```
 
-* AppRunner 클래스에서는 앞서 정의한 빈 설정 파일(TestConfiguration.java)에서 등록한 빈을 주입 받는다.
+    * ② AppRunner 클래스에서는 앞서 정의한 빈 설정 파일(TestConfiguration.java)에서 등록한 빈을 주입 받는다.
+          
+    * ③ 그러나 코드를 실행하면 그 결과는 BookRepository 타입의 빈을 찾을 수 없다는 에러가 발생하게 된다.
+    
+        ```java
+        @Component
+        public class AppRunner implements ApplicationRunner {
+        
+            @Autowired
+            ApplicationContext ctx;
+        
+            @Autowired
+            BookRepository bookRepository;
+        
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                Environment environment = ctx.getEnvironment();
+                System.out.println(Arrays.toString(environment.getActiveProfiles()));
+                System.out.println(Arrays.toString(environment.getDefaultProfiles()));
+            }
+        }
+        ```
       
-* 아래의 코드를 실행하면 그 결과는 BookRepository 타입의 빈을 찾을 수 없다는 에러가 발생하게 된다.
+        * 에러가 발생한 이유는 test 프로파일로 설정하지 않고 애플리케이션을 실행 하였으므로 빈 설정 파일이 적용되지 않는다.
+         
+        * 그래서 BookRepository 빈도 등록되지 않았다.
 
-    * 그 이유는 test 프로파일로 설정하지 않고 애플리케이션을 실행 하였으므로 빈 설정 파일이 적용되지 않는다.
-     
-    * 그래서 BookRepository 빈도 등록되지 않았다.
-
-    ```java
-    @Component
-    public class AppRunner implements ApplicationRunner {
-    
-        @Autowired
-        ApplicationContext ctx;
-    
-        @Autowired
-        BookRepository bookRepository;
-    
-        @Override
-        public void run(ApplicationArguments args) throws Exception {
-            Environment environment = ctx.getEnvironment();
-            System.out.println(Arrays.toString(environment.getActiveProfiles()));
-            System.out.println(Arrays.toString(environment.getDefaultProfiles()));
-        }
-    }
-    ```
-
-#### 6) 프로파일 설정하기
-
-* Active profiles 설정
-
-    * 인텔리제이에서 [Edit Configurations]를 클릭한다.
-
-    * `Active profiles`를 test로 지정한 다음, [Apply] – [OK]를 클릭 한다.
-
-* VM Options 설정
-
-    * [Edit Configurations]를 클릭한 다음, VM options를 `-Dspring.profiles.active="test"`로 지정하는 것도 가능하다.
-
-    * 프로파일 설정을 완료하고 AppRunner를 다시 실행 하면 getActiveProfiles()가 test로 출력되는 것을 확인 할 수 있다.
-
-#### 7) 프로파일 표현식
-
-* ! : not
-
-    * `@Profile("!prod") // prod가 아닌 경우` 
-
-* & : and
-
-    * `@Profile("!prod & test")` 
-    
-* | : or
-
-#### 8) 프로파일 정의하기 [추가 내용]
-
-* 빈 설정 파일을 사용하지 않고 빈(Bean)에 프로파일을 바로 정의 할 수도 있다.
-
-* `@Component @Profile("test")`
+* 예시 2 - 빈 설정 파일이 아닌 해당 빈(Bean)에 바로 프로파일을 정의하기 
 
     ```java
     @Repository
@@ -852,50 +814,79 @@
     }
     ```
 
+#### 5) 프로파일 설정하기
+
+* Active profiles 설정
+
+    * 인텔리제이에서 [Edit Configurations]를 클릭한다.
+
+    * `Active profiles`를 `test`로 지정한 다음, [Apply] – [OK]를 클릭 한다.
+
+* VM Options 설정
+
+    * [Edit Configurations]를 클릭한 다음, VM options를 `-Dspring.profiles.active="test"`로 지정하는 것도 가능하다.
+
+    * 프로파일 설정을 완료하고 AppRunner를 다시 실행 하면 getActiveProfiles()가 test로 출력되는 것을 확인 할 수 있다.
+
+* `@ActiveProfiles`
+
+#### 6) 프로파일 표현식
+
+* `!` : not
+
+    * `@Profile("!prod") // prod가 아닌 경우` 
+
+* `&` : and
+
+    * `@Profile("!prod & test")` 
+    
+* `|` : or
+
 ### 2-6. IoC 컨테이너 6부: Environment 2부. 프로퍼티
          
 #### 1) 프로퍼티
 
-* `프로퍼티`는 다양한 방법으로 정의할 수 있는 `key=value` 형태의 설정 값이다.
+* `프로퍼티`는 다양한 방법으로 정의할 수 있는 **`key=value` 형태의 설정 값**이다.
 
-* Environment의 역할은 프로퍼티 소스 설정 및 프로퍼티 값 가져오기 
+* `Environment`를 이용하여 프로퍼티 소스를 설정하거나 프로퍼티 값을 가져올 수 있다.
 
 #### 2) 프로퍼티 설정 방법
 
 * (1) JVM 시스템 프로퍼티 (-Dkey="value")
 
-    * `-Dkey=value` 형태로 환경변수를 정의할 수 있다.
+    * ① `-Dkey=value`의 형태로 프로퍼티를 설정한다.
     
-    * 예를 들어, `-Dapp.name=spring5`으로 설정한 다음, 이 값을 Environment 객체를 통해 받아올 수 있다.
+    * ② 그리고 `environment.getProperty()`로 프로퍼티 값을 가져온다.
 
-    ```java
-    @Component
-    public class AppRunner implements ApplicationRunner {
-    
-        @Autowired
-        ApplicationContext ctx;
-    
-        @Autowired
-        BookRepository bookRepository;
-    
-        @Override
-        public void run(ApplicationArguments args) throws Exception {
-            Environment environment = ctx.getEnvironment();
-            System.out.println(environment.getProperty("app.name"));
-        }
-    }
-    ```
-
-* (2) @PropertySource
- 
-    * resources에 `app.properties`를 생성한다.
-    
-        * app.properties 파일에 `app.about=spring`와 같이 환경변수를 설정 할 수 있다.
-
-    * `@Configuration`이 붙어있는 클래스에 `@PropertySource` 애노테이션을 추가한다.
-    
-        * @PropertySource 애노테이션에 properties의 경로를 전달하면 Environment에 프로퍼티를 추가한다.
+        ```java
+        @Component
+        public class AppRunner implements ApplicationRunner {
         
+            @Autowired
+            ApplicationContext ctx;
+        
+            @Autowired
+            BookRepository bookRepository;
+        
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                Environment environment = ctx.getEnvironment();
+                System.out.println(environment.getProperty("app.name"));
+            }
+        }
+        ```
+
+* (2) `@PropertySource`를 이용하여 프로퍼티를 체계적으로 관리하기
+
+    * ① `resources`에 `app.properties` 파일을 생성한다.
+
+        ```
+        # app.properties
+        app.about=spring
+        ```
+      
+    * ② `@Configuration`이 붙어있는 클래스에 `@PropertySource` 애노테이션을 추가한다.
+    
         ```java
         @SpringBootApplication
         @PropertySource("classpath:/app.properties")
@@ -909,7 +900,13 @@
         }
         ```
         
-    * 그리고 Environment에서 프로퍼티를 꺼내 쓸 수 있다.
+        * `@PropertySource`에 `properties`의 경로를 전달하면 `Environment`에 프로퍼티를 추가한다.
+        
+        * `classpath:/`는 `target/classes` 디렉토리를 의미한다.
+        
+            * `classpath:/` : 클래스패스를 기준으로 한 루트 디렉토리
+        
+    * ③ 그리고 `environment.getProperty()`로 프로퍼티 값을 가져온다.
     
         ```java
         @Component
@@ -946,78 +943,76 @@
 
 * `MessageSource`는 국제화(i18n) 기능을 제공하는 인터페이스다.
 
-* ApplicationContext는 MessageSource 인터페이스를 상속 받는다.
+* `ApplicationContext`는 `MessageSource` 인터페이스를 상속 받는다.
 
-* ApplcationContext를 주입 받는 것처럼, MessageSource도 주입 받을 수 있다.
+    * `ApplcationContext`를 주입 받을 수 있다면 `MessageSource`도 주입 받을 수 있다.
 
-#### 2) MessageSource - 예시
+#### 2) MessageSource 사용하기
 
-* (1) resources 아래에 기본 메시지와 각 국가에 맞는 메시지 설정 파일을 생성한다. (messages.properties와 messages_ko_KR.properties)
+* (1) `resources` 디렉토리에 메시지 설정 파일을 생성한다.
 
-    * `[파일명]_[언어]_[국가].properties` 형식으로 메시지 파일을 생성 해야한다.  
+    * `[파일명]_[언어]_[국가].properties` 형식으로 메시지 설정 파일을 생성 해야한다.  
     
-    * messages.properties
+        * `messages.properties` : 기본 메시지 설정 파일
+            
+            ```java
+            # message.properties
+            
+            greeting = Hello, {0}
+            ```
+            
+            * 시스템의 언어 및 지역에 맞는 프로퍼티 파일이 존재하지 않을 경우에 사용된다. 
     
-        * 기본 메시지 
+        * `messages_ko_KR.properties` : 한글 메시지 설정 파일 
         
-        * 시스템의 언어 및 지역에 맞는 프로퍼티 파일이 존재하지 않을 경우에 사용된다. 
-
-    * messages_ko_KR.properties : 한글 메시지 
-
-        ```java
-        # message.properties
-        
-        greeting = Hello, {0}
-        ```
-      
-        ```java
-        # message_ko_KR.properties
-        
-        greeting = 안녕, {0}
-        ```
+            ```java
+            # message_ko_KR.properties
+            
+            greeting = 안녕, {0}
+            ```
 
 * (2) AppRunner 클래스에서 아래와 같은 코드를 작성한다.
 
+    ```java
+    @Component
+    public class AppRunner implements ApplicationRunner {
+    
+        @Autowired
+        MessageSource messageSource;
+    
+        @Override
+        public void run(ApplicationArguments args) throws Exception {
+            // 이미 등록 되어 있는 Bean이 어떠한 클래스 인지 확인
+            System.out.println(messageSource.getClass());
+            
+            Locale.setDefault(new Locale("en","US"));
+            
+            // 현재 기본 로케일이 Locale.US 이므로 "messages_en_US" 파일을 읽는다.
+            System.out.println(messageSource.getMessage("greeting", new String[]{"keesun"}, Locale.getDefault())); // 기본 로케일
+            
+            // 로케일이 Locale.KOREA 이므로 "messages_ko_KR" 파일을 읽는다.
+            System.out.println(messageSource.getMessage("greeting", new String[]{"keesun"}, Locale.KOREA));
+        }
+    }
+    ```
+
+    * 스프링 부트에서는 별다른 설정 필요 없이 `messages`로 시작하는 프로퍼티 파일의 내용을 `MessageSource`로 읽어준다.
+    
+        * 그 이유는 `ResourceBundleMessageSource`가 이미 Bean으로 등록되어 있어서 `messages`라는 `Resource Bundle`을 읽도록 되어 있기 때문이다. 
+    
     * `getMessage()` : 다국어가 적용된 메시지를 가져온다. 
 
-        * 첫 번째 매개변수(code) : 메시지 프로퍼티의 Key 값을 지정한다.
+        * 첫 번째 매개변수(`code`) : 메시지 설정 파일의 Key 값을 지정한다.
 
-        * 두 번째 매개변수(args) : 메시지 출력 시, 사용 될 파라미터를 지정한다. properties에서 지정한 {0}에 전달된다.
+        * 두 번째 매개변수(`args`) : 메시지 출력 시, 사용 할 파라미터를 지정한다. `properties`에서 지정한 `{0}`에 전달된다.
 
-        * 세 번째 매개변수(locale) : 로케일 값을 지정한다.
-
-    * 스프링 부트에서는 별다른 설정 필요 없이 `messages.properties`를 사용할 수 있다.
-
-    * 그 이유는 `ResourceBundleMessageSource`가 이미 Bean으로 등록되어 있어서 messages라는 Resource Bundle을 읽기 때문이다 
-
-        ```java
-        @Component
-        public class AppRunner implements ApplicationRunner {
-        
-            @Autowired
-            MessageSource messageSource;
-        
-            @Override
-            public void run(ApplicationArguments args) throws Exception {
-                // 이미 등록 되어 있는 Bean이 어떠한 클래스 인지 확인
-                System.out.println(messageSource.getClass());
-                
-                Locale.setDefault(new Locale("en","US"));
-                
-                // 로케일이 Locale.US 이므로 "messages_en_US" 파일을 읽는다.
-                System.out.println(messageSource.getMessage("greeting", new String[]{"keesun"}, Locale.KOREA));
-      
-                // 한국은 기본 로케일이 Locale.KOREA 이므로 "messages_ko_KR" 파일을 읽는다.
-                System.out.println(messageSource.getMessage("greeting", new String[]{"keesun"}, Locale.getDefault())); // 기본 로케일
-            }
-        }
-        ```
+        * 세 번째 매개변수(`locale`) : 로케일 값을 지정한다.
 
 #### 3) 리로딩 기능이 있는 메시지 소스 사용하기 
 
-* MessageSource의 구현체로 ReloadableResourceBundleMessageSource를 빈으로 등록하여 사용하면 애플리케이션 실행 중에 메시지를 리로드하여 변경사항을 적용할 수 있다. 
+* `MessageSource`의 구현체로 `ReloadableResourceBundleMessageSource`를 빈으로 등록하여 사용하면 애플리케이션 실행 중에 메시지를 리로드하여 변경사항을 적용할 수 있다. 
 
-    * MessageSource 빈을 정의한다. 
+    * ① MessageSource 빈을 등록한다. 
 
         ```java
         @SpringBootApplication
@@ -1032,7 +1027,7 @@
                 var messageSource = new ReloadableResourceBundleMessageSource();
                 messageSource.setBasename("classpath:/messages");
                 messageSource.setDefaultEncoding("UTF-8");
-                messageSource.setCacheSeconds(3); // 3초 마다 메시지를 다시 읽는다. (최대 3초까지 캐싱을 하고 다시 읽음)
+                messageSource.setCacheSeconds(3); // 최대 3초 까지만 캐싱을 하도록 하고 메시지를 다시 읽는다.
                 return messageSource;
             }
         
@@ -1043,9 +1038,9 @@
           
         * `setDefaultEncoding("UTF-8");` : 인코딩을 UTF-8로 설정한다. (한글이 깨지지 않도록 하기 위함)
           
-        * `setCacheSeconds()` : 메시지를 캐시하는 최대 시간(초)를 설정한다. 
+        * `setCacheSeconds()` : 메시지를 캐싱하는 최대 시간(초)를 설정한다. 
 
-    * 1초 마다 메시지를 읽어서 출력하도록 한다.
+    * ② 1초 마다 메시지를 읽어서 출력하도록 한다.
     
         ```java
         @Component
@@ -1067,7 +1062,7 @@
         }
         ```
       
-    * 애플리케이션 실행 도중 `message.properties`와 `message_ko_KR.properties`의 값을 변경한 다음, Build를 하면 메시지가 리로드 되는 것을 확인 할 수 있다.
+    * ③ 애플리케이션 실행 도중 `message.properties`와 `message_ko_KR.properties`의 값을 변경한 다음, `Build Project`를 하면 메시지가 리로드 되는 것을 확인 할 수 있다.
 
 ### 2-8. IoC 컨테이너 8부: ApplicationEventPublisher
          
@@ -1075,17 +1070,15 @@
 
 * `ApplicationEventPublisher`는 옵저버 패턴의 구현체로 이벤트 프로그래밍에 필요한 기능을 제공하는 인터페이스다.
    
-* ApplicationContext는 ApplicationEventPublisher를 상속 받는다.
+* `ApplicationContext`는 `ApplicationEventPublisher`를 상속 받는다.
   
 #### 2) Spring 4.2 이전 버전에서 이벤트 발생 및 처리
 
-* (1) ApplicationEvent를 상속받은 이벤트 클래스 작성 
+* (1) 이벤트 만들기 - `ApplicationEvent` 상속 
   
-    * Spring 4.2 이전 버전에서는 ApplicationEvent를 상속받은 이벤트 클래스를 작성 해야 한다. 
+    * Spring 4.2 이전 버전에서는 `ApplicationEvent`를 상속받은 이벤트를 만들고 빈으로 등록하지는 않는다.
   
-    * 그리고 이벤트는 빈으로 등록하지 않는다. 
-  
-    * 아래 코드에서 MyEvent는 이벤트를 발생시킨 source와 정수 데이터를 담아서 전달하도록 하였다. 
+    * 아래 코드에서 `MyEvent`는 이벤트를 발생시킨 source와 정수 데이터를 담아서 전달하도록 하였다. 
 
         ```java
         public class MyEvent extends ApplicationEvent {
@@ -1108,10 +1101,8 @@
         ```
       
 * (2) 이벤트 발생 시키기 
-  
-    * @Autowired로 ApplicationEventPublisher를 주입 받은 다음 publishEvent() 메서드를 호출하여 이벤트를 발생 시킨다.
-  
-    * ApplicationEventPublisher의 publishEvent() : 이벤트를 발생 시킨다.
+    
+    * `ApplicationEventPublisher.publishEvent()` : 이벤트를 발생 시킨다.
 
         ```java
         @Component
@@ -1129,11 +1120,9 @@
       
 * (3) 이벤트 핸들러 작성 
   
-    * 앞서 만든 이벤트를 받아서 처리하는 "이벤트 핸들러"는 클래스로 작성한 다음, 빈으로 등록해야 한다. 
-      
-    * 그리고 Spring 4.2 이전 버전에서 이벤트 핸들러는 `ApplicationListener`를 구현해야 한다. 
-      
-    * 그 다음 `onApplicationEvent()` 안에 이벤트 발생 시, 처리할 코드를 작성하면 된다.
+    * 이벤트를 받아서 처리하는 `이벤트 핸들러`는 `ApplicationListener`를 구현한 클래스를 작성한 다음, 빈으로 등록한다. (Spring 4.2 이전 버전) 
+        
+    * 그리고 `onApplicationEvent()`에 이벤트 발생 시, 처리할 코드를 작성하면 된다.
  
         ```java
         @Component
@@ -1147,19 +1136,17 @@
 
 * 애플리케이션 실행 순서 
 
-    * ① 스프링 부트 애플리케이션이 구동된다.  
+    * ① 스프링 부트 애플리케이션이 구동되고 `AppRunner`가 실행 되면서 `publishEvent()`로 이벤트를 발생 시킨다.  
     
-    * ② 그리고 AppRunner가 실행 되면서 publishEvent()로 이벤트를 발생 시킨다.  
-  
-    * ③ 등록 되어 있는 Bean 중에서 이벤트 핸들러(MyEventHandler)가 발생된 이벤트를 처리한다.  
+    * ② 등록 되어 있는 Bean 중에서 이벤트 핸들러(`MyEventHandler`)가 발생된 이벤트를 처리한다.  
 
 #### 3) Spring 4.2 이후 버전에서 이벤트 발생 및 처리
 
-* (1) 이벤트 클래스 작성  
+* (1) 이벤트 만들기
       
-    * Spring 4.2부터는 이벤트 클래스는 ApplicationEvent를 상속받을 필요가 없다. 
+    * Spring 4.2 버전 부터는 이벤트를 만들 때, `ApplicationEvent`를 상속받을 필요가 없다. 
     
-    * 그래서 코드를 아래와 같이 변경 하였다. 
+    * 그래서 아래와 같이 코드를 변경 하였다. 
 
         ```java
         public class MyEvent{
@@ -1185,43 +1172,48 @@
 
         * 위의 코드는 스프링 코드가 노출되지 않는 POJO 기반의 프로그래밍이며 이는 개발자가 테스트 및 유지보수 하기 쉽게 만들어 준다.
 
-        * `비침투성(non-invasive)` : 자신의 코드에 스프링 코드가 노출되지 않는 것을 말한다.
+        * `비침투성(non-invasive)` : 프레임워크의 코드가 자신의 코드에 노출되지 않는 것을 말한다.
+        
             * 즉, POJO를 그대로 유지하면서도 스프링의 기능을 제공하는 것을 말한다.
             
         * `POJO(Plain Old Java Object)`
+        
             * 오래된 방식의 간단한 자바 오브젝트를 말한다.
-            * 객체지향적인 원리에 충실하면서, 환경과 기술에 종속되지 않고 필요에 따라 재활용될 수 있는 방식으로 설계된 오브젝트를 말한다.
+            
+            * 객체 지향 적인 원리에 충실하면서, 환경과 기술에 종속되지 않고 필요에 따라 재활용될 수 있는 방식으로 설계된 오브젝트를 말한다.
+            
+                * 토비의 스프링
 
 * (2) 이벤트 발생 시키기  
       
-    * 앞서 작성한 코드와 동일하다.
+    * `ApplicationEventPublisher.publishEvent()` : 이벤트를 발생 시킨다.
     
 * (3) 이벤트 핸들러 작성
 
-    * Spring 4.2 이후 버전에서 이벤트 핸들러는 ApplicationListener를 구현할 필요가 없다.
+    * Spring 4.2 이후 버전에서 이벤트 핸들러는 `ApplicationListener`를 구현할 필요가 없다.
 
-    * 이벤트 핸들러를 빈으로 등록하고 `@EventListener` 애노테이션만 붙여주면된다.다
+    * **이벤트 핸들러는 빈으로 등록하고 이벤트를 처리하는 메소드에 `@EventListener`를 붙여준다.**
     
-    * (이벤트 핸들러를 빈으로 등록 해야 하는 이유는 스프링이 누구에게 이벤트를 전달해야 하는지 알아야 하기 때문이다.)
+        * 이벤트 핸들러를 빈으로 등록 해야 하는 이유는 스프링이 이벤트를 누구에게 전달해야 하는지를 알아야 하기 때문이다.
 
-        ```java
-        @Component
-        public class MyEventHandler {
-        
-            @EventListener
-            public void handle(MyEvent event) { // 메서드명은 사용자 마음대로 결정 가능
-                System.out.println("이벤트 받았다. 데이터는 " + event.getData());
+            ```java
+            @Component
+            public class MyEventHandler {
+            
+                @EventListener
+                public void handle(MyEvent event) { // 메서드 명은 사용자 마음대로 결정 할 수 있다.
+                    System.out.println("이벤트 받았다. 데이터는 " + event.getData());
+                }
             }
-        }
-        ```
-
+            ```
+          
 #### 4) 여러 개 존재하는 이벤트 핸들러
 
-* 이벤트 핸들러가 여러 개인 경우, 하나의 thread에서 순차적으로 실행된다. 
+* 이벤트 핸들러가 여러 개인 경우, 하나의 쓰레드(thread)에서 순차적으로 실행된다. 
 
-    * 여기서 "순차적" 이라는 것은 하나의 핸들러가 실행되고 나서 다른 핸들러가 실행된다는 것을 의미한다. 
+    * 여기서 **순차적**이라는 것은 어떤 핸들러가 먼저 실행 될지는 모르지만, 하나의 핸들러가 실행되고 나서 다른 핸들러가 실행된다는 것을 의미한다. 
 
-* (1) 새로운 핸들러를 작성한다. 그리고 하나의 thread에서 순차적으로 실행되는지 확인 하기 위해 이벤트 핸들러에 Thread 출력 코드를 추가한다.
+* (1) 새로운 이벤트 핸들러를 작성하고 현재 쓰레드를 출력하는 코드를 추가한다.
 
     ```java
     @Component
@@ -1236,7 +1228,7 @@
     }
     ```
 
-* (2) 기존 핸들러(MyEventHandler)의 코드를 변경한다. 실행 결과를 보면 둘 다, main 스레드가 출력되는 것을 확인 할 수 있다.
+* (2) 기존 핸들러(MyEventHandler)의 코드를 변경한다. 실행 결과를 보면 둘 다 main 쓰레드가 출력되는 것을 확인 할 수 있다.
 
     ```java
     @Component
@@ -1252,11 +1244,7 @@
 
 #### 5) 이벤트 핸들러의 처리 순서 정하기 - @Order 
 
-* (1) 아래의 애노테이션을 사용하여 이벤트 핸들러의 처리 순서를 정해 줄 수 있다.
-
-    * `@Order` : 이벤트 핸들러의 처리 순서를 결정한다. @Order 애노테이션에 설정하는 값이 클수록 우선순위가 낮아진다. 
-
-    * `Ordered.HIGHEST_PRECEDENCE`로 설정하면 가장 높은 우선순위를 갖게 됩니다. (가장 먼저 실행 됨)
+* (1) 다음 애노테이션을 사용하여 이벤트 핸들러의 처리 순서를 정할 수 있다.
 
     ```java
     @Component
@@ -1271,7 +1259,11 @@
     }
     ```
   
-* (2) AnotherHandler에는 @Order(Ordered.HIGHEST_PRECEDENCE + 2)를 붙여준다. 그러면 MyEventHandler가 먼저 이벤트를 처리하고 AnotherEventHandler가 나중에 처리하게 된다
+    * `@Order` : 이벤트 핸들러의 처리 순서를 결정한다. @Order 애노테이션에 설정하는 값이 커질수록 우선순위가 낮아진다. 
+
+    * `Ordered.HIGHEST_PRECEDENCE`로 설정하면 가장 높은 우선순위를 갖게 된다. (가장 먼저 실행 됨)
+  
+* (2) AnotherHandler에는 `@Order(Ordered.HIGHEST_PRECEDENCE + 2)`를 붙여준다. 그러면 MyEventHandler가 먼저 이벤트를 처리하고 AnotherEventHandler가 나중에 처리하게 된다.
 
     ```java
     @Component
@@ -1288,7 +1280,7 @@
 
 #### 6) 이벤트 핸들러의 비동기적 실행 - @Async
 
-* (1) 이벤트 핸들러는 기본적으로 동기적으로(synchronized) 실행된다. 비동기적으로 실행 하려면 @EventListener 애노테이션이 붙어 있는 메서드에 `@Async`를 사용한다.
+* (1) 이벤트 핸들러를 비동기적으로 실행 하려면 `@Async`를 사용한다. (각각 별도의 쓰레드에서 동작하게 됨)
 
     ```java
     @Component
@@ -1316,7 +1308,7 @@
     }
     ```
 
-* (2) 그리고 `@SpringBootApplication`이 붙어 있는 클래스에 `@EnableAsync`을 붙여 준다. 
+* (2) 그리고 `@SpringBootApplication`이 붙어 있는 클래스에 `@EnableAsync`을 붙여준다. 
 
     ```java
     @SpringBootApplication
@@ -1334,9 +1326,9 @@
 
 * `ContextRefreshedEvent` : ApplicationContext를 초기화 하거나 리프레쉬 했을 때 발생. 
   
-* `ContextStartedEvent` : ApplicationContext를 start()하여 라이프사이클 빈들이 시작 신호를 받은 시점에 발생. 
+* `ContextStartedEvent` : ApplicationContext를 start()하여 라이프 사이클 빈들이 시작 신호를 받은 시점에 발생. 
   
-* `ContextStoppedEvent` : ApplicationContext를 stop()하여 라이프사이클 빈들이 정지 신호를 받은 시점에 발생. 
+* `ContextStoppedEvent` : ApplicationContext를 stop()하여 라이프 사이클 빈들이 정지 신호를 받은 시점에 발생. 
   
 * `ContextClosedEvent` : ApplicationContext를 close()하여 싱글톤 빈 소멸되는 시점에 발생. 
   
@@ -1378,23 +1370,13 @@ public class MyEventHandler{
 
 * `ResourceLoader`는 리소스를 읽어오는 기능을 제공하는 인터페이스다.
 
-#### 2) ResourceLoader - 예시
+#### 2) 예시
 
-* (1) resources 폴더에 test.txt 파일을 생성 한다.
+* ① `ResourceLoader` 빈을 주입 받은 다음, Resource 객체를 얻는다. 
 
-* (2) `ResourceLoarder`를 주입 받은 다음, 주요 메서드 호출
+    * `ResourceLoader` 대신 `ApplicationContext`를 주입 받아서 사용 할 수도 있지만 가장 구체적인 인터페이스를 주입 받는 것이 직관적이다.
 
-    * ResourceLoader의 `getResource()` : 지정한 리소스의 Resource 객체를 얻는다. 
-    
-    * Resource의 메소드
-    
-        * `exists() `          : 리소스가 존재하는지 확인한다. 
-               
-        * `getDescription()`   : 상세 설명을 반환한다.
-
-* ResourceLoader 빈을 주입 받은 다음, Resource 객체를 얻고 해당 객체의 주요 메서드 결과를 출력한다. 
-
-* (ApplicationContext를 주입 받아서 사용 할 수도 있지만 사용 하고자하는 가장 구체적인 인터페이스를 주입 받는 것이 직관적이므로 더 좋은 코딩 방식이다.)
+* ② Resource 객체의 주요 메서드를 호출한 결과를 출력한다. 
 
     ```java
     @Component
@@ -1413,11 +1395,21 @@ public class MyEventHandler{
     }
     ```
 
-* (3) 프로젝트 빌드
-
-    * 프로젝트를 빌드하면 resources 디렉토리의 파일들은 `target/classes`로 복사된다.
+    * ResourceLoader의 `getResource()` : 지정한 리소스의 Resource 객체를 얻는다. 
     
-    * classpath의 root는 target/classes 이며 getResource()를 호출할 때 "classpath:" 접두어를 지정 하였으므로 target/classes를 기준으로 리소스를 찾게 된다. 
+    * Resource의 메소드
+    
+        * `exists()` : 리소스가 존재하는지 확인한다. 
+               
+        * `getDescription()` : 상세 설명을 반환한다.
+
+* ③ resources 디렉토리에 `test.txt` 파일을 생성한다.
+
+* ④ 프로젝트를 빌드하면 `resources` 디렉토리의 파일들은 `target/classes`로 복사된다.
+    
+    * `클래스패스(classpath)`의 루트 디렉토리는 `target/classes`이다.
+    
+    * 그래서 위의 코드에서 `getResource()`를 호출할 때, `classpath:` 접두어를 지정하면 `target/classes`를 기준으로 리소스를 찾게 된다. 
 
 ## 3. Resource / Validation
 
@@ -1425,124 +1417,135 @@ public class MyEventHandler{
 
 #### 1) Resource
 
-* Resource는 java.net.URL을 추상화한 인터페이스다.
+* `Resource`는 리소스에 접근하기 위한 인터페이스이다.
 
-* 그리고 스프링 내부에서 많이 사용하는 인터페이스이다.
+    * `java.net.URL`을 추상화한 것
 
-#### 2) Resource를 추상화한 이유
+    * 스프링 내부에서 많이 사용하는 인터페이스
 
-* java.net.URL 클래스는 클래스 패스를 기준으로 리소스를 읽어오는 기능이 없다.
+* `Resource`를 추상화한 이유는 다음과 같다.
 
-* ServletContext를 기준으로 상대 경로로 리소스를 읽어오는 기능이 없다.
+    * `java.net.URL` 클래스는 클래스 패스를 기준으로 리소스를 읽어오는 기능이 없다.
+    
+    * `ServletContext`를 기준으로 상대 경로로 리소스를 읽어오는 기능이 없다.
+    
+    * 새로운 핸들러를 등록하여 특별한 URL 접미사를 만들어 사용할 수는 있지만 구현이 복잡하고 편의성 메소드가 부족하다.
 
-* 새로운 핸들러를 등록하여 특별한 URL 접미사를 만들어 사용할 수는 있지만 구현이 복잡하고 편의성 메소드가 부족하다.
+#### 2) Resource 인터페이스의 주요 메서드
 
-#### 3) Resource 인터페이스의 주요 메서드
+* `exists()`: 리소스가 존재하는지 확인한다.
 
-* `exists()`: 리소스가 존재하는지 확인
-
-* `isReadable()` : 리소스를 읽을 수 있는지 확인
+* `isReadable()` : 리소스를 읽을 수 있는지 확인한다.
   
-* `isFile()` : 리소스가 파일인지 확인
+* `isFile()` : 리소스가 파일인지 확인한다.
   
-* `isOpen()` : 리소스가 열려있는지 확인
+* `isOpen()` : 리소스가 열려 있는지 확인한다.
   
-* `getDescription()` : 전체 경로 포함한 파일 이름 또는 실제 URL
+* `getDescription()` : 상세 설명을 반환한다.
 
-#### 4) Resource 인터페이스 구현체
+#### 3) Resource의 구현체
 
-* Resource 인터페이스를 구현한 주요 구현체들은 아래와 같다.
+* `Resource`의 주요 구현체는 다음과 같다.
 
     * `UrlResource`
+        
         * URL을 기준으로 리소스를 찾는다. 
+        
         * 지원하는 프로토콜은 http, https, ftp, file, jar
         
     * `ClassPathResource`
+    
         * 접두어가 classpath: 일 때, 클래스패스를 기준으로 리소스를 찾는다.
  
     * `FileSystemResource`
+    
         * 파일 시스템을 기준으로 리소스를 찾는다.
  
     * `ServletContextResource`
+    
         * 웹 애플리케이션 루트에서 상대 경로로 리소스를 찾는다.
-        * 스프링 부트의 기본적인 내장형 톰캣은 context path가 지정 되어 있지 않으므로 리소스를 찾을 수가 없다. 
+        
+        * 스프링 부트의 기본적인 내장형 톰캣은 `context path`가 지정 되어 있지 않으므로 리소스를 찾을 수가 없다. 
+        
         * 그래서 클래스 패스를 기준으로 찾도록 classpath 접두어를 사용해야 된다.
 
-#### 5) Resource 인터페이스 구현체
+#### 4) 리소스 읽어오기
 
-* **Resource의 타입은 리소스 위치를 지정하는 location 문자열과 ApplicationContext의 타입에 따라 결정된다.**
+* `Resource`의 타입은 리소스 위치를 지정하는 `location` 문자열과 `ApplicationContext`의 타입에 따라 결정된다.
 
-    * ClassPathXmlApplicationContext 이면 ClassPathResource
-    * FileSystemXmlApplicationContext 이면 FileSystemResource 
-    * WebApplicationContext 이면 ServletContextResource
-
-* 예를 들어, ApplicationContext가 ClassPathXmlApplicationContext이면 리소스를 읽어 올 때, classpath를 기준으로 읽어온다.   
-
-    * `ApplicationContext ctx = new ClassPathXmlApplicationContext("xxx.xml");`
+    * ApplicationContext가 `ClassPathXmlApplicationContext`이면 Resource의 타입은 `ClassPathResource`가 된다.
     
-* ApplicationContext가 FileSystemXmlApplicationContext이면 리소스를 읽어 올 때, 파일 시스템을 기준으로 읽어온다. (파일 경로) 
-
-    * `ApplicationContext ctx = new FileSystemXmlApplicationContext("xxx.xml");`
-
-* 대부분 ApplicationContext는 WebApplicationContext 타입을 사용하기 때문에 Resource는 ServletContextResource를 사용하게 된다.  
-
-* 스프링 부트에서 @Autowired으로 ApplicationContext를 주입 받는 경우, WebServerApplicationContext 중 하나를 주입 받게 된다.
-
-  그리고 ApplicationContext가 WebApplicationContext 타입이면 getResource()로 얻는 Resource 구현체의 타입은 ServletContextResource 이다.
-
-  하지만 아래 예제에서는 classpath: 접두어를 사용 했기 때문에 Resource 구현체의 타입이 ClassPathResource 이다.
-
-    ```java
-    @Component
-    public class AppRunner implements ApplicationRunner {
+        * 즉, 리소스를 읽어 올 때 클래스패스(classpath)를 기준으로 읽어온다. 
     
-        @Autowired
-        ApplicationContext resourceLoader;
+    * ApplicationContext가 `FileSystemXmlApplicationContext`이면 Resource의 타입은 `FileSystemResource`가 된다. 
+
+        * 즉, 리소스를 읽어 올 때 파일 시스템을 기준으로 읽어온다. (파일 경로) 
+
+    * ApplicationContext가 `WebApplicationContext`이면 Resource의 타입은 `ServletContextResource`가 된다.
+
+        * 즉, 리소스를 읽어 올 때 웹 애플리케이션 루트에서 상대 경로로 리소스를 찾는다.
+
+* **`ApplicationContext`의 타입에 상관없이 리소스 타입을 강제하려면 `java.net.URL` 접두어와 `classpath:` 중 하나를 사용할 수 있다.**
+
+    * 접두어를 사용하는 방법을 권장하며 그 이유는 명시적이기 때문이다.
     
-        @Override
-        public void run(ApplicationArguments args) throws Exception {
-            System.out.println(resourceLoader.getClass()); // ApplicationContext의 타입을 출력
+        * `classpath:me/whiteship/config.xml` → ClassPathResource
+        
+        * `file:///some/resource/path/config.xml` → FileSystemResource
+
+* 예시
     
-            Resource resource = resourceLoader.getResource("classpath:test.txt");
-            // 기본적으로 Resource는 ServletContextResource를 사용하지만 접두어를 사용하므로 classpath로 바뀜
-            System.out.println(resource.getClass()); // Resource의 타입을 출력
+    * 스프링 부트에서 `@Autowired`으로 `ApplicationContext`를 주입 받는 경우, `WebApplicationContext` 구현체 중 하나를 주입 받게 된다.
     
-            System.out.println(resource.exists());
-            System.out.println(resource.getDescription());
-            System.out.println(Files.readString(Path.of(resource.getURI())));
+    * 그리고 `ApplicationContext`가 `WebApplicationContext` 타입이면 `getResource()`로 얻는 Resource 구현체의 타입은 `ServletContextResource`이다.
+    
+    * 하지만 아래 예제에서는 `classpath:` 접두어를 사용 했기 때문에 Resource 구현체의 타입은 `ClassPathResource`이다.
+    
+        ```java
+        @Component
+        public class AppRunner implements ApplicationRunner {
+        
+            @Autowired
+            ApplicationContext resourceLoader;
+        
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                System.out.println(resourceLoader.getClass()); // ApplicationContext의 타입을 출력
+        
+                Resource resource = resourceLoader.getResource("classpath:test.txt");
+                // 기본적으로 Resource는 ServletContextResource를 사용하지만 접두어를 사용하므로 classpath로 바뀜
+                System.out.println(resource.getClass()); // Resource의 타입을 출력
+        
+                System.out.println(resource.exists());
+                System.out.println(resource.getDescription());
+                System.out.println(Files.readString(Path.of(resource.getURI())));
+            }
         }
-    }
-    ```
-
-* **ApplicationContext의 타입에 상관없이 리소스 타입을 강제하려면 java.net.URL 접두어와 classpath: 중 하나를 사용할 수 있다.**
-  
-  (접두어를 사용하는 방법을 권장하며 그 이유는 명시적이기 때문이다.)
-  
-    * `classpath: me/whiteship/config.xml `    → ClassPathResource
-
-    * `file:/// some/resource/path/config.xml ` → FileSystemResource
-
+        ```
+    
 ### 3-2. Validation 추상화
 
 #### 1) Validator 인터페이스 
 
-* `Validator`는 애플리케이션에서 사용하는 객체를 검증하는 기능을 제공하는 인터페이스이다.
+* `Validator`는 애플리케이션에서 사용하는 객체를 검증하는 기능을 제공한다.
 
-* 어떤 특정 계층에 사용하는 기능이 아닌 모든 계층에서 사용할 수 있다. (웹, 서비스,  데이터 계층 등...)
+* 어떤 특정 계층에 사용하는 기능이 아닌 모든 계층에서 사용할 수 있다. (웹, 서비스, 데이터 계층 등...)
 
-* Java EE 표준 스펙 중 하나인 Bean Validation의 애노테이션들을 사용해서 객체를 검증할 수 있다.
+* Java EE 표준 스펙 중 하나인 `Bean Validation`용 애노테이션들을 사용해서 객체를 검증할 수도 있다.
+
+    * `JSR-303(Bean Validation 1.0)`과 `JSR-349(Bean Validation 1.1)`
 
 #### 2) Validator 인터페이스를 구현하는 클래스 
 
 * Validator 인터페이스를 구현하는 클래스는 아래의 메서드를 구현해야 한다.
 
-    * `boolean supports(Class clazz)` : 파라미터로 전달되는 클래스 타입이 해당 Validator가 검증할 수 있는 클래스인지를 확인한다.
+    * `boolean supports(Class clazz)` : 파라미터로 전달되는 클래스 타입이 해당 Validator가 검증 할 수 있는지를 확인할 때, 사용한다.
     
-    * `void validate(Object target, Errors error)` : 실제 검증 작업을 한다. 구현할 때 ValidationUtils를 사용하여 편리하게 작성 가능
+    * `void validate(Object target, Errors error)` : 실제 검증 작업을 한다.
 
 #### 3) Validator 생성 및 사용 
 
-* 아래와 같은 Event 클래스를 작성하는데 title 필드가 비어 있거나 null이면 안된다고 가정한다.
+* 다음과 같은 Event 클래스를 작성하는데 title 필드가 비어 있거나 null이면 안된다고 가정한다.
 
     ```java
     public class Event {
@@ -1569,16 +1572,10 @@ public class MyEventHandler{
     }
     ```
 
-* 그러면 Event에 대한 Validator를 아래와 같이 구현할 수 있다.
+* 그러면 Event에 대한 Validator를 다음과 같이 구현할 수 있다.
 
     * ① Validator 만들기
     
-        * supports()는 파라미터로 전달되는 클래스 타입이 Event인지 확인하도록 작성한다.
-        
-        * ValidationUtils의 rejectIfEmptyOrWhitespace()를 호출한다.
-          
-          rejectIfEmptyOrWhitespace()는 객체의 title 필드가 비어있거나 공백일 경우에는 errors에 에러 코드 “notempty” 를 추가하며 디폴트 메시지로 "Empty title is now allowed."를 지정한다.
-
         ```java
         public class EventValidator implements Validator {
         
@@ -1594,13 +1591,29 @@ public class MyEventHandler{
         }
         ```
 
-        * ValidationUtils.rejectIfEmptyOrWhitespace()
+        * `supports()`는 파라미터로 전달되는 클래스 타입이 `Event` 인지 확인하도록 구현한다.
         
-          객체의 필드가 비어있거나 공백일 경우에 에러 코드를 추가한다.  
-          
-          파라미터로는 Errors 객체, 필드명, 에러코드, 디폴트 메시지를 전달한다.
-          
-          에러코드는 메시지를 가져올 때 사용할 key가 되며 디폴트 메시지는 지정한 에러코드에 해당하는 메시지를 찾지 못할 경우 사용할 메시지다.
+        * `validate()`는 다음 메소드를 이용하여 구현한다.
+        
+            * `ValidationUtils.rejectIfEmptyOrWhitespace()`
+            
+                * 객체의 필드가 비어있거나 공백일 경우에 에러 코드를 추가한다.  
+                  
+                * 파라미터로는 Errors 객체, 필드명, 에러코드, 디폴트 메시지를 전달한다.
+                  
+                * 에러코드는 메시지를 가져올 때 사용할 key가 되며 디폴트 메시지는 지정한 에러코드에 해당하는 메시지를 찾지 못할 경우 사용할 메시지를 지정한다.
+
+        * `validate()`를 구현 할 때, `ValidationUtils`를 사용하지 않고 다음과 같이 처리 할 수도 있다.
+
+            ```java
+            @Override
+            public void validate(Object target, Errors errors) {
+                Event event = (Event) target;
+                if (event.getTitle() == null) {
+                    errors.rejectValue("title", "notempty", "Empty title is not allowed");
+                }
+            }
+            ```
 
     * ② Validator 사용
 
@@ -1621,13 +1634,13 @@ public class MyEventHandler{
                 Errors errors = new BeanPropertyBindingResult(event, "event");
         
                 // EventValidator의 validate() 메서드로 검증을 합니다.
-                // 파라미터로 검증할 객체 event와 검증 시 발생한 에러 정보를 담을 객체 errors를 전달한다.
+                // 파라미터로 검증할 객체 event와 검증 시 발생한 에러 정보를 담을 errors 객체를 전달한다.
                 eventValidator.validate(event, errors);
         
                 // 에러가 있는지 확인
                 System.out.println(errors.hasErrors());
         
-                // 발생한 모든 에러를 가져와서 순차적으로 순회하며 에러코드와 디폴트 메시지를 출력
+                // 발생한 모든 에러를 가져와서 순차적으로 순회하며 에러코드와 디폴트 메시지를 출력한다.
                 errors.getAllErrors().forEach( e -> {
                     System.out.println("===== error code =====");
                     Arrays.stream(e.getCodes()).forEach(System.out::println);
@@ -1639,29 +1652,15 @@ public class MyEventHandler{
          
         * BeanPropertyBindingResult 클래스는 Errors 인터페이스의 구현체이며 객체에 대한 에러 정보를 담을 때 사용한다. 
         
-          Spring MVC를 사용할 경우, BeanPropertyBindingResult는 Spring MVC가 자동으로 생성해서 파라미터에 전달하므로
-            
-          해당 클래스를 직접 사용하는 경우는 거의 없다.
+        * Spring MVC를 사용할 경우, BeanPropertyBindingResult는 Spring MVC가 자동으로 생성해서 파라미터에 전달하므로 해당 클래스를 직접 사용하는 경우는 거의 없다.
           
-        * validate()를 구현 할 때  ValidationUtils를 사용하지 않고 다음과 같이 처리 할 수도 있다.
-
-            ```java
-            @Override
-            public void validate(Object target, Errors errors) {
-                Event event = (Event) target;
-                if (event.getTitle() == null) {
-                    errors.rejectValue("title", "notempty", "Empty title is not allowed");
-                }
-            }
-            ```
-
 #### 4) LocalValidatorFactoryBean
 
-* 스프링 부트 2.05 이상 버전을 사용할 때, LocalValidatorFactoryBean이 빈으로 자동 등록된다.
+* 스프링 부트 2.05 이상 버전을 사용할 때, `LocalValidatorFactoryBean`이 빈으로 자동 등록된다.
 
     * ① Validator 빈을 주입 받기
     
-         * 앞서 살펴본 것처럼 Validator를 직접 구현하지 않고 Validator 타입의 필드에 @Autowired로 의존성 주입을 받으면 LocalValidatorFactoryBean이 주입된다.
+         *  Validator를 직접 구현하지 않고 Validator 타입의 필드에 의존성 주입을 받으면 `LocalValidatorFactoryBean`이 주입된다.
 
             ```java
             @Component
@@ -1677,9 +1676,7 @@ public class MyEventHandler{
                    
     * ② Bean Validation 애노테이션을 사용
     
-         * 먼저 이 객체를 검증 하려면 Bean Validation 애노테이션을 붙여 줘야 한다. (@NotEmpty,  @Min , @Email ...)
-
-         * LocalValidatorFactoryBean는 @NotEmpty, @Email 와 같은 Bean Validation을 체크하여 검증한다.
+         * `LocalValidatorFactoryBean`는 `@NotEmpty`, `@Email`과 같은 Bean Validation 애노테이션을 체크하여 검증한다.
          
             ```java
             public class Event {
@@ -1735,7 +1732,7 @@ public class MyEventHandler{
              
                      Errors errors = new BeanPropertyBindingResult(event, "event");
              
-                     validator.validate(event, errors); // 빈으로 주입 받은 Validator를 사용한다.
+                     validator.validate(event, errors); // 빈으로 주입 받은 Validator를 사용하여 검증한다.
              
                      System.out.println(errors.hasErrors());
              
@@ -1747,71 +1744,210 @@ public class MyEventHandler{
                  }
              }
              ``` 
-         
+
 ## 4. 데이터 바인딩
 
 ### 4-1. 데이터 바인딩 추상화 : PropertyEditor
 
 #### 1) 데이터 바인딩
 
-* 데이터 바인딩은 사용자가 입력한 값을 애플리케이션 도메인 객체에 동적으로 변환해 넣어주는 기능이다.
+* 데이터 바인딩이란?
 
-* 즉, 사용자가 입력한 값은 주로 문자열이며 이 문자열을 객체가 가지고 있는 다양한 프로퍼티 타입으로 변환해서 넣어주는 기능을 말한다.
+    * `[기술적인 관점]` 프로퍼티 값을 타겟 객체에 설정하는 기능을 말한다.
+    
+    * `[사용자 관점]` 사용자가 입력한 값을 도메인 객체에 동적으로 변환해 넣어주는 기능을 말한다.
 
-* Spring은 데이터 바인딩 기능을 여러 인터페이스(PropertyEditor, Converter, Formatter)로 추상화하여 제공한다.
+    * 정리하자면, 사용자가 입력하는 값은 주로 문자열이며 그 값을 객체가 가지고 있는 다양한 프로퍼티 타입으로 변환해서 넣어주는 기능을 말한다.
 
-* PropertyEditor는 DataBinder 인터페이스를 통해 사용되며 Converter와 Formatter는 ConversionService를 통해 사용된다.
+* 스프링은 데이터 바인딩 기능을 여러 인터페이스(`PropertyEditor`, `Converter`, `Formatter`)로 추상화하여 제공한다.
 
 #### 2) PropertyEditor
 
-* `PropertyEditor`는 스프링 3.0 이전까지 DataBinder가 변환 작업에 사용한 인터페이스이다.
+* PropertyEditor
 
-* 상태 정보을 저장 하고 있어서 쓰레드-세이프 하지 않다.
+    * `PropertyEditor`는 스프링 3.0 이전까지 `DataBinder`가 변환 작업에 사용한 인터페이스이다.
+    
+        * 상태 정보을 저장 하고 있어서 쓰레드-세이프 하지 않다. (서로 다른 쓰레드에게 value가 공유된다.)
+    
+        * 따라서 `PropertyEditor`는 싱글톤 scope 빈으로 등록해서 사용하면 안된다. 
+    
+        * 대신 `@InitBinder`로 등록해서 사용한다. 
+    
+        * `Object`와 `String` 간의 변환만 할 수 있어 사용 범위가 제한적이다.
 
-* 즉, `PropertyEditor`는 일반적인 싱글톤 scope 빈으로 등록해서 사용하면 안 된다.
+* 예시 - PropertyEditor를 이용하지 않는 경우
 
-    * @InitBinder로 등록해서 사용한다. 
+    * (1) 도메인 클래스 작성
 
-* Object와 String 간의 변환만 할 수 있어 사용 범위가 제한적임
+        ```java
+        public class Event {
+        
+            private Integer id;
+        
+            private String title;
+        
+            public Event(Integer id) {
+                this.id = id;
+            }
+        
+            public Integer getId() {
+                return id;
+            }
+        
+            public void setId(Integer id) {
+                this.id = id;
+            }
+        
+            public String getTitle() {
+                return title;
+            }
+        
+            public void setTitle(String title) {
+                this.title = title;
+            }
+        
+            @Override
+            public String toString() {
+                return "Event{" +
+                        "id=" + id +
+                        ", title='" + title + '\'' +
+                        '}';
+            }
+        }
+        ```
 
-* PropertyEditorSupport 클래스를 상속 받아서 필요한 메서드만 선택해서 구현할 수 있다.
+    * (2) 컨트롤러 작성
 
-    * `getAsText()`: 객체(Object)를 문자열(String)으로 변환한다.
+        ```java
+        @RestController // Spring Mvc 관련 내용은 다른 강좌에서 진행
+        public class EventController {
+        
+            @GetMapping("/event/{event}")
+            public String getEvent(@PathVariable Event event){
+                System.out.println(event);
+                return event.getId().toString();
+            }
+        
+        }
+        ```
+      
+    * (3) 테스트 코드 작성
 
-    * `setAsText()`: 문자열(String)을 객체(Object)로 변환한다.
+        ```java
+        @RunWith(SpringRunner.class)
+        @WebMvcTest
+        public class EventControllerTest {
+        
+            @Autowired
+            MockMvc mockMvc;
+        
+            @Test
+            public void getTest() throws Exception {
+                mockMvc.perform(get("/event/1"))            // "/event/1"로 get 요청을 하면
+                        .andExpect(status().isOk())         // 상태가 200 OK인 것을 바라며
+                        .andExpect(content().string("1"));  // 결과가 1이 되길 바란다.
+            }
+        }
+        ```
+      
+        * 테스트 코드를 실행하면 String을 Event 타입으로 변환 할 수 없다는 에러가 나타난다.  
+
+* 예시 - PropertyEditor를 이용한 데이터 바인딩
+
+    * (1) `PropertyEditorSupport`를 상속받은 클래스 작성
+     
+        * PropertyEditor 인터페이스를 직접 구현해도 되지만 구현해야 하는 메서드가 너무 많기 때문에 
+    
+        * PropertyEditorSupport 클래스를 상속 받은 다음, `getAsText()`, `setAsText()`를 구현 하면 된다.
+            
+            ```java
+            public class EventEditor extends PropertyEditorSupport {
+                @Override
+                public String getAsText() {
+                    // PropertyEditor가 받은 객체를 getValue()로 가져 올 수 있다.
+                    Event event = (Event) getValue(); 
+                    return super.getAsText();
+                }
+            
+                @Override
+                public void setAsText(String text) throws IllegalArgumentException {
+                    // 전달 받은 문자열을 숫자로 변환한 다음, Event 객체로 변환한다.
+                    setValue(new Event(Integer.parseInt(text)));
+                }
+            }
+            ```
+                                      
+            * `getAsText()`: 객체(Object)를 문자열(String)으로 변환한다.
+        
+            * `setAsText()`: 문자열(String)을 객체(Object)로 변환한다.
+
+    * (2) 컨트롤러에 등록 
+
+        * `@InitBinder`으로 컨트롤러에서 사용할 바인더를 등록할 수 있다. 
+        
+        * 즉, PropertyEditor는 쓰레드-세이프 하지 않기 때문에 빈(Bean)으로 등록하지 못하며 `@InitBinder`로 등록해서 사용한다.
+
+            ```java
+            @RestController
+            public class EventController {
+            
+                @InitBinder
+                public void init(WebDataBinder webDataBinder){ // WebDataBinder는 DataBinder의 구현체 중 하나이다.
+                    // webDataBinder에 Event 클래스 타입을 처리할 PropertyEditor를 등록한다.
+                    webDataBinder.registerCustomEditor(Event.class, new EventEditor());
+                }
+            
+                @GetMapping("/event/{event}")
+                public String getEvent(@PathVariable Event event){
+                    System.out.println(event);
+                    return event.getId().toString();
+                }
+                
+            }
+            ```
+          
+            * 컨트롤러는 어떠한 요청을 처리하기 전에 컨트롤러에서 정의한 데이터 바인더(webDataBinder)에 들어 있는 PropertyEditor를 사용한다.  
+            
+            * 그래서 문자열로 들어온 1을 숫자로 변환한 다음, Event 객체로 변환한다.
+            
+    * (3) 앞서 작성한 테스트 코드를 다시 실행하면 성공적으로 처리된다. 
 
 ### 4-2. 데이터 바인딩 추상화: Converter와 Formatter
 
 #### 1) Converter
 
-* `Converter`는 S 타입을 T 타입으로 변환 할 수 있는 변환기이다.
+* Converter
 
-* 상태 정보가 없으므로(Stateless) 쓰레드 세이프하다.
-
-* ConverterRegistry에 등록해서 사용한다. (빈으로 등록해서 사용 할 수도 있다.)
-
-    ```java
-    public class EventConverter {
-        
-        // Converter<Source, Target> : 즉, 아래 코드는 String을 Event로 변환
-        //@Component
-        public static class StringToEventConverter implements Converter<String, Event>{
-            @Override
-            public Event convert(String source) {
-                return new Event(Integer.parseInt(source));
+    * `Converter`는 서로 다른 타입 간의 변환을 담당한다.
+    
+        * S 타입 -> T 타입
+    
+    * 상태 정보가 없으므로(Stateless) 쓰레드 세이프하다.
+    
+    * `ConverterRegistry`에 등록해서 사용한다. (즉, 빈으로 등록해서 사용 할 수도 있다.)
+    
+        ```java
+        public class EventConverter {
+            
+            // Converter<Source, Target> : 즉, 아래 코드는 String을 Event로 변환
+            //@Component
+            public static class StringToEventConverter implements Converter<String, Event>{
+                @Override
+                public Event convert(String source) {
+                    return new Event(Integer.parseInt(source));
+                }
+            }
+     
+            // Converter<Source, Target> : 즉, 아래 코드는 Event를 String으로 변환
+            //@Component   
+            public static class EventToStringConverter implements Converter<Event, String>{
+                @Override
+                public String convert(Event source) {
+                    return source.getId().toString();
+                }
             }
         }
- 
-        // Converter<Source, Target> : 즉, 아래 코드는 Event를 String으로 변환
-        //@Component   
-        public static class EventToStringConverter implements Converter<Event, String>{
-            @Override
-            public String convert(Event source) {
-                return source.getId().toString();
-            }
-        }
-    }
-    ```
+        ```
 
 #### 2) Formatter
 
@@ -1858,6 +1994,10 @@ public class MyEventHandler{
 * 스프링 부트의 경우, 자동으로 DefaultFormattingConversionSerivce를 상속하여 만든 WebConversionService를 빈으로 등록해 준다.
 
 * 스프링 부트는 자동으로 Formatter와 Converter 빈을 찾아 ConversionService에 등록해 준다.
+
+
+
+* PropertyEditor는 DataBinder 인터페이스를 통해 사용되며 Converter와 Formatter는 ConversionService를 통해 사용된다.
 
 ## 5. SpEL (Spring Expression Language)
 
