@@ -1924,13 +1924,17 @@ public class MyEventHandler{
     
     * 상태 정보가 없으므로(Stateless) 쓰레드 세이프하다.
     
-    * `ConverterRegistry`에 등록해서 사용한다. (즉, 빈으로 등록해서 사용 할 수도 있다.)
+    * `ConverterRegistry`에 등록해서 사용한다.
+    
+* 예시 - Converter를 이용한 데이터 바인딩
+
+    * (1) Converter를 구현한 클래스를 작성한다.
     
         ```java
         public class EventConverter {
             
             // Converter<Source, Target> : 즉, 아래 코드는 String을 Event로 변환
-            //@Component
+            //@Component // 빈으로 등록 할 때, 사용한다.
             public static class StringToEventConverter implements Converter<String, Event>{
                 @Override
                 public Event convert(String source) {
@@ -1948,56 +1952,96 @@ public class MyEventHandler{
             }
         }
         ```
+      
+    * (2) 스프링 부트 없이 `Spring Web MVC`만 사용하는 경우에 컨버터 등록하기
+
+        * 스프링 웹 설정 파일(WebConfig)에서 `addFormatters()`를 오버라이딩 한 다음, `FormatterRegistry`의 `addConverter()`로 컨버터를 등록한다.
+
+            ```java
+            @Configuration
+            public class WebConfig implements WebMvcConfigurer {
+                @Override
+                public void addFormatters(FormatterRegistry registry) {
+                    registry.addConverter(new EventConverter.StringToEventConverter());
+                }
+            }
+            ```
 
 #### 2) Formatter
 
-* `Formatter`는 PropertyEditor 대체재이며 Object와 String 간의 변환을 담당한다.
+* Formatter
 
-* Locale에 따라 문자열을 다국화 하는 기능도 제공한다.
-
-* FormatterRegistry에 등록해서 사용
-
-* thread-safe 하므로 빈으로 등록해서 사용 할 수도 있다.
-
-    ```java
-    //@Component
-    public class EventFormatter implements Formatter<Event> {
+    * `Formatter`는 Object와 String 간의 변환을 담당한다. (PropertyEditor 대체재)
     
-        @Override
-        public Event parse(String text, Locale locale) throws ParseException {
-            return new Event(Integer.parseInt(text));
-        }
+    * 문자열을 Locale에 따라 다국화 하는 기능도 제공한다.
+
+    * `FormatterRegistry`에 등록해서 사용한다.
     
-        @Override
-        public String print(Event object, Locale locale) {
-            return object.getId().toString();
+    * thread-safe 하므로 빈으로 등록해서 사용 할 수도 있다.
+    
+* 예시 - Formatter를 이용한 데이터 바인딩 
+
+    * (1) `Formatter`를 구현한 클래스를 작성한다.
+
+        ```java
+        //@Component
+        public class EventFormatter implements Formatter<Event> {
+        
+            @Override
+            public Event parse(String text, Locale locale) throws ParseException {
+                return new Event(Integer.parseInt(text));
+            }
+        
+            @Override
+            public String print(Event object, Locale locale) {
+                return object.getId().toString();
+            }
         }
-    }
-    ```
+        ```
   
-    * `parse()` : 문자열(String)을 객체(Object)로 변환한다. 
+        * `parse()` : 문자열(String)을 객체(Object)로 변환한다. 
+    
+        * `print()` : 객체(Object)를 문자열(String)으로 변환한다.
+        
+            * PropertyEditor와 차이점은 문자열을 Locale에 따라 다국화 하는 기능도 제공한다.
+              
+    * (2) 스프링 부트 없이 `Spring Web MVC`만 사용하는 경우에 Formatter 등록하기
+                
+        * 스프링 웹 설정 파일(WebConfig)에서 `addFormatters()`를 오버라이딩 한 다음, `FormatterRegistry`의 `addFormatter()`로 포매터를 등록한다.
 
-    * `print()` : 객체(Object)를 문자열(String)으로 변환한다.
+            ```java
+            @Configuration
+            public class WebConfig implements WebMvcConfigurer {
+                @Override
+                public void addFormatters(FormatterRegistry registry) {
+                    registry.addFormatter(new EventFormatter());
+                }
+            }
+            ```
 
 #### 3) ConversionService
 
-* `Converter`와 `Formatter`는 `ConversionService`에 등록 되어 실제 변환 작업을 하게 된다.
+![image 2](images/img2.png)
+
+* `Converter`와 `Formatter`는 `ConversionService`에 등록 되어 실제 변환 작업을 하게된다.
+
+    * [참고] `PropertyEditor`는 `DataBinder` 인터페이스를 통해 사용된다.
 
 * 스프링 MVC, 빈 (value) 설정, SpEL에서 사용한다.
 
-* Spring이 제공하는 여러 가지 ConversionService 구현체 중 DefaultFormattingConversionService가 자주 사용된다.
+* 스프링이 제공하는 여러 가지 `ConversionService` 구현체 중 `DefaultFormattingConversionService`가 자주 사용된다.
 
-* DefaultFormattingConversionService는 ConversionService와 FormatterRegistry를 구현하고 있다.
+    * 해당 클래스는 `ConversionService`와 `FormatterRegistry`를 구현하였다.
+    
+    * 여러가지 기본 컨버터와 포매터가 등록 되어 있다.
+    
+* `FormatterRegistry`는 사실상 `ConverterRegistry`를 상속 받고 있기 때문에 `FormatterRegistry`에 컨버터도 등록 할 수 있다.
 
-#### 4) 스프링 부트에서의 Converter와 Formatter
+#### 4) 스프링 부트에서 Converter와 Formatter
 
-* 스프링 부트의 경우, 자동으로 DefaultFormattingConversionSerivce를 상속하여 만든 WebConversionService를 빈으로 등록해 준다.
+* 웹 애플리케이션인 경우에 `DefaultFormattingConversionSerivce`를 상속해서 만든 `WebConversionService`를 빈으로 등록해 준다.
 
-* 스프링 부트는 자동으로 Formatter와 Converter 빈을 찾아 ConversionService에 등록해 준다.
-
-
-
-* PropertyEditor는 DataBinder 인터페이스를 통해 사용되며 Converter와 Formatter는 ConversionService를 통해 사용된다.
+* 스프링 부트를 사용하면 자동으로 `Converter`와 `Formatter` 빈을 찾아서 `ConversionService`에 등록해 준다.
 
 ## 5. SpEL (Spring Expression Language)
 
@@ -2064,9 +2108,9 @@ public class MyEventHandler{
     }
     ```
 
->AOP 관련 내용을 작성할 때, [jojoldu님의 블로그](https://jojoldu.tistory.com/71?category=635883 "jojoldu")를 일부 참조 하였습니다.
-
 ## 6. 스프링 AOP : 개념 소개
+
+>AOP 관련 내용을 작성할 때, [jojoldu님의 블로그](https://jojoldu.tistory.com/71?category=635883 "jojoldu")를 일부 참조 하였습니다.
 
 #### 1) AOP
 
