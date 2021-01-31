@@ -2116,8 +2116,8 @@ public class MyEventHandler{
 
 * `AOP (Aspect-Oriented Programming : 관점 지향 프로그래밍)`
 
-    <img src="./images/img3.png" width="700" height="940">
-    
+    ![image 3](images/img3.png)
+        
     * `AOP`는 OOP를 보완하는 수단으로, **핵심 기능에서 부가 기능을 분리해서 `Aspect`라는 모듈 형태로 만드는 프로그래밍 기법**을 말한다.
 
         * 즉, 부가 기능의 관점에서 바라볼때, 공통된 요소를 추출하는 것을 말한다.
