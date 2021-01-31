@@ -2116,9 +2116,7 @@ public class MyEventHandler{
 
 * `AOP (Aspect-Oriented Programming : 관점 지향 프로그래밍)`
 
-    ![image 3](images/img3.png)
-    
-    <img src="./images/img3.png" width="300" height="300">
+    <img src="./images/img3.png" width="700" height="940">
     
     * `AOP`는 OOP를 보완하는 수단으로, **핵심 기능에서 부가 기능을 분리해서 `Aspect`라는 모듈 형태로 만드는 프로그래밍 기법**을 말한다.
 
@@ -2144,7 +2142,7 @@ public class MyEventHandler{
  
     * **부가 기능을 모듈화한 것**을 말한다.
 
-    * `Aspect`는 부가 기능을 정의한 `Advice`와 `Advice`를 어디에 적용할지를 결정하는 `PointCut`을 함께 갖고 있다.
+    * `Aspect`는 부가 기능을 정의한 `Advice`와 `Advice`를 어디에 적용할지를 결정하는 `PointCut`을 함께 가지고 있다.
 
 * `Target`
 
@@ -2162,7 +2160,7 @@ public class MyEventHandler{
 
     * **Advice가 적용될 수 있는 위치**를 말한다.
    
-    * 메서드 실행 시점, 생성자 호출 시점 등이 `JoinPoint`에 해당한다. (여러 가지 끼어들 수 있는 지점을 의미함)
+    * 메소드 호출 시점, 생성자 호출 시점 등이 `JoinPoint`에 해당한다. (여러 가지 끼어들 수 있는 지점을 의미함)
     
         * 스프링에서는 메소드 `JoinPoint`만 제공한다.
 
@@ -2178,17 +2176,19 @@ public class MyEventHandler{
 
 #### 4) AOP 적용 방법
 
-* (1) `컴파일 시점` - AspectJ
+* `위빙(Weaving)`은 지정된 객체에 Aspect를 적용해서 새로운 프록시 객체를 생성하는 과정을 말한다.
 
-    * 자바 파일을 클래스 파일로 만들 때 부가 기능을 추가
-
-* (2) `클래스 로딩 시점` - AspectJ
-
-    * JVM이 클래스를 로딩하는 시점에 부가 기능을 추가 
-
-* (3) `런타임 시점` - Spring AOP
-
-    * JVM이 클래스를 로딩 한 후 Bean을 생성할 때, 해당 클래스 타입의 프록시 빈을 생성하여 적용
+    * (1) `컴파일 시점` - AspectJ
+    
+        * 자바 파일을 클래스 파일로 만들 때, 위빙이 이루어지는 방식이다.
+    
+    * (2) `클래스 로딩 시점` - AspectJ
+    
+        * JVM이 클래스를 로딩할 때, 위빙이 이루어지는 방식이다.
+    
+    * (3) `런타임 시점` - Spring AOP
+    
+        * 런타임 시에 위빙이 이루어지는 방식이다.
 
 ## 7. 스프링 AOP : 프록시 기반 AOP
 
@@ -2206,7 +2206,7 @@ public class MyEventHandler{
 
     ![image 1](images/img1.png)
 
-    * **프록시 패턴**에서 `클라이언트`는 `해당 인터페이스 타입(Subject)`으로 `프록시 객체(Proxy)`를 사용하게 된다.
+    * `프록시 패턴`에서 `클라이언트(Client)`는 `해당 인터페이스 타입(Subject)`으로 `프록시 객체(Proxy)`를 사용하게 된다.
     
     * 그리고 `프록시 객체`는 `타겟 객체(Real Subject)`를 참조하고 있다.
     
@@ -2230,7 +2230,7 @@ public class MyEventHandler{
       
     ```java
     @Service
-    Public class SimpleEventService implements EventService {
+    public class SimpleEventService implements EventService {
     
         @Override
         public void createEvent() {
@@ -2275,9 +2275,7 @@ public class MyEventHandler{
             
     * `publishEvent()`를 호출하고 나서 2초 후에 "Published an event" 메시지가 출력된다.
   
-* EventService에 deleteEvent()를 새롭게 추가하고 `Real Subject`에 해당하는 SimpleEventService에
-
-* createEvent()와 publishEvent()의 실행 시간을 측정하는 기능을 추가한다. 그리고 AppRunner에 deleteEvent()를 호출하는 코드를 추가한다.
+* EventService에 deleteEvent()를 새롭게 추가하고 `Real Subject`에 해당하는 SimpleEventService에 createEvent()와 publishEvent()의 실행 시간을 측정하는 기능을 추가한다. 
       
     ```java
     public interface EventService {
@@ -2323,6 +2321,8 @@ public class MyEventHandler{
     }
     ```
 
+* 그리고 AppRunner에 deleteEvent()를 호출하는 코드를 추가한다.
+
     ```java
     @Component
     public class AppRunner implements ApplicationRunner {
@@ -2339,11 +2339,11 @@ public class MyEventHandler{
     }
     ```
 
-* 매번 측정 할 때 마다 기존의 코드에 성능을 측정하는 코드를 추가해주어야 한다.
+* 성능 측정이 필요하다면 매번 기존 코드에 성능을 측정하는 코드를 추가해주어야 한다.
   
 * 기존의 코드를 건들지 않고 성능을 측정 할 수는 없을까? 라는 생각에 적용 할 수 있는 것이 Proxy 패턴이다.
   
-* 일단, SimpleEventSerivce 클래스에서 성능을 측정하는 코드를 제거한다.
+* 일단, SimpleEventService 클래스에서 성능을 측정하는 코드를 제거하자.
 
     ```java
     @Service
@@ -2362,11 +2362,11 @@ public class MyEventHandler{
         @Override
         public void publishEvent() {
             try {
-                Thread.sleep(2000);            // 2초 취고
+                Thread.sleep(2000);            
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("Published an event"); // 메시지 출력
+            System.out.println("Published an event");
         }
     
         public void deleteEvent(){
@@ -2385,25 +2385,25 @@ public class MyEventHandler{
     public class ProxySimpleEventService implements EventService {
     
         @Autowired
-        SimpleEventSerivce simpleEventSerivce; // Proxy는 Real Subject의 빈을 주입 받아 사용해야 한다.
+        SimpleEventService simpleEventService; // Proxy는 Real Subject의 빈을 주입 받아 사용해야 한다.
     
         @Override
         public void createEvent() {
             long begin = System.currentTimeMillis(); // 흩어진 관심사
-            simpleEventSerivce.createEvent(); // Proxy는 SimpleEventSerivce로 위임을 한다.
+            simpleEventService.createEvent(); // Proxy는 SimpleEventService로 위임을 한다.
             System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
         }
     
         @Override
         public void publishEvent() {
             long begin = System.currentTimeMillis(); // 흩어진 관심사
-            simpleEventSerivce.publishEvent();
+            simpleEventService.publishEvent();
             System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
         }
     
         @Override
         public void deleteEvent() {
-            simpleEventSerivce.deleteEvent();  
+            simpleEventService.deleteEvent();  
         }
     }
     ```
@@ -2416,7 +2416,7 @@ public class MyEventHandler{
 
 * 앞서 Proxy 클래스를 만들어서 모든 문제가 해결된 것처럼 보이지만 아직도 문제점이 존재한다.
  
-    * 매번 프록시 클래스를 작성해야 되며 이를 여러 클래스, 여러 메서드에 적용해야 한다면 상당히 번거롭다고 느끼게 될 것이다.
+    * 매번 Proxy 클래스를 작성해야 되며 이를 여러 클래스와 메소드에 적용해야 한다면 상당히 번거롭다고 느끼게 될 것이다.
       
     * 이러한 이유로 등장하게 된 것이 `스프링 AOP`이다.
     
@@ -2480,63 +2480,15 @@ public class MyEventHandler{
     }
     ```
   
-    * 어드바이스(Advice)
+    * `@Around` : 타겟 메소드를 호출하기 전과 후에 어드바이스 기능을 수행한다.
+              
+    * `logPerf()`는 어드바이스 메소드이다.
 
-        * @Around는 어드바이스를 정의할 때 사용하는 애노테이션이다.
+    * 그리고 파라미터로 지정된 `ProceedingJoinPoint`는 해당 Advice가 적용되는 대상을 의미한다.
 
-        * 앞서 살펴본 것처럼 어드바이스는 Aspect가 ‘무엇을’, ‘언제’ 할지를 정의하고 있다.
+    * 여기서 주의할 점은 `@Around`의 경우, 반드시 `proceed()`가 호출되어야 한다"는 것이다.
 
-        * 여기서 ‘무엇’이란 logPerf() 메소드를 말한다. 그리고 ‘언제’는 @Around가 된다. 
-
-        * 이 **언제**라는 시점의 경우, @Around를 포함하여 총 5가지가 존재한다.
-
-            * @Before (이전)
-
-                * 타겟 메소드가 호출 되기 전에 어드바이스 기능을 수행
-
-            * @After (이후)
-
-                * 타겟 메소드의 결과에 관계없이 (즉 성공, 예외 관계없이) 타겟 메소드가 완료 되면 어드바이스 기능을 수행
-
-            * @AfterReturning (정상적 반환 이후)
-
-                * 타겟 메소드가 성공적으로 결과 값을 반환 후에 어드바이스 기능을 수행
-
-            * @AfterThrowing (예외 발생 이후)
-
-                * 타겟 메소드가 수행 중 예외를 발생 시키면 어드바이스 기능을 수행
-                
-            * @Around (메소드 실행 전후)
-
-                * 어드바이스가 타겟 메소드를 감싸서 타겟 메소드 호출 전과 후에 어드바이스 기능을 수행
-
-                * 예를 들어 타겟 메소드의 호출 전, 후에 어드바이스 메소드를 수행하고 싶다면, 다음과 같이 작성하면 된다. 
-
-                    ```java
-                    @Around("포인트컷 표현식") 
-                    public void 어드바이스메소드() { 
-                        ...
-                    
-                    }
-                    ```
-                  
-                * 위의 예제에서 작성한 logPerf()가 바로 어드바이스 메소드이다.
-
-                * 그리고 파라미터로 지정된 ProceedingJoinPoint는 해당 advice가 적용되는 대상을 의미한다.
-
-                * 여기서 주의할 점은 "@Around의 경우, 반드시 proceed() 메서드가 호출되어야 한다"는 것이다.
-
-                * proceed() 메서드는 타겟 메서드를 의미하며 proceed() 메서드를 호출 해야 타겟 메서드가 실행된다.
-
-    * 포인트컷 표현식
-
-        * 어드바이스의 value로 들어간 문자열을 "포인트컷 표현식"이라 한다.
-
-        * 포인트 컷에는 다양한 지정자가 존재하는데, 그 중 execution을 살펴본다.
-
-        * execution 지정자는 Advice를 적용할 타겟 메소드를 지정한다.
-
-        * `execution([접근제어자] 리턴타입 [클래스이름].메소드이름(파라미터))`
+    * `proceed()`는 타겟 메서드를 의미하며 `proceed()`를 호출 해야 타겟 메소드가 실행된다.
 
 #### 2) 특정 메소드에만 AOP를 적용하기
 
@@ -2554,14 +2506,24 @@ public class MyEventHandler{
     }
     ```
   
-    * RetentionPolicy : 애노테이션 정보를 얼마나 유지할 것인지를 지정한다.
+    * `@Retention` : 애노테이션 정보가 유지되는 기간을 지정한다.
 
-        * @Retention(RetentionPolicy.RUNTIME) : 컴파일 이후에도 JVM에 의해서 참조가 가능하다.
-
-        * @Retention(RetentionPolicy.CLASS) : 컴파일러가 클래스를 참조할 때까지 유효하다. (기본 값)
-
-        * @Retention(RetentionPolicy.SOURCE) : 어노테이션 정보는 컴파일 이후 없어진다. 
-
+        * `SOURCE`
+        
+            * 소스코드까지만 유지된다.
+            
+            * 컴파일 이후 해당 애노테이션 정보는 사라진다.
+            
+        * `CLASS`
+        
+            * 컴파일 이후 클래스 파일(.class)까지 유지된다. (기본 값)
+            
+            * 런타임 시, 클래스를 메모리로 읽어오면 해당 애노테이션 정보는 사라진다.
+            
+        * `RUNTIME`
+        
+            * 애플리케이션 실행 중에도 애노테이션 정보가 유지된다. 
+            
 * 스프링 AOP를 적용하고 싶은 메소드에 앞서 정의한 애노테이션을 붙여준다.
 
     ```java
