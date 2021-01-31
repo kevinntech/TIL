@@ -900,7 +900,7 @@ public class AppRunner implements ApplicationRunner {
         }
         ```
         
-        * `@PropertySource`에 `properties`의 경로를 전달하면 `Environment`에 프로퍼티를 추가한다.
+        * `@PropertySource`는 `Environment`에 프로퍼티 파일(`properties`)의 프로퍼티를 주입한다.
         
         * `classpath:/`는 `target/classes` 디렉토리를 의미한다.
         
@@ -1180,7 +1180,7 @@ public class AppRunner implements ApplicationRunner {
         
             * 오래된 방식의 간단한 자바 오브젝트를 말한다.
             
-            * 객체 지향 적인 원리에 충실하면서, 환경과 기술에 종속되지 않고 필요에 따라 재활용될 수 있는 방식으로 설계된 오브젝트를 말한다.
+            * 객체 지향적인 원리에 충실하면서, 환경과 기술에 종속되지 않고 필요에 따라 재활용될 수 있는 방식으로 설계된 오브젝트를 말한다.
             
                 * 토비의 스프링
 
@@ -2114,99 +2114,107 @@ public class MyEventHandler{
 
 #### 1) AOP
 
-* AOP (Aspect-Oriented Programming : 관점 지향 프로그래밍)
+* `AOP (Aspect-Oriented Programming : 관점 지향 프로그래밍)`
 
-    * AOP는 OOP를 보완하는 수단으로, 핵심 기능에서 부가 기능을 분리하여 이 분리한 부가 기능을 Aspect라는 모듈 형태로 만드는 프로그래밍 기법을 말합니다.
-
-    * 핵심 기능(Core Concerns)
+    ![image 3](images/img3.png)
     
-        * 비즈니스 로직을 말합니다.
-        
-        * Ex) 게시글 관리, 회원 관리 등
-
-    * 부가 기능(Cross-cutting Concerns, 흩어진 관심사)
+    <img src="./images/img3.png" width="300" height="300">
     
-        * 핵심 기능을 도와주는 부가적인 기능을 말합니다.
+    * `AOP`는 OOP를 보완하는 수단으로, **핵심 기능에서 부가 기능을 분리해서 `Aspect`라는 모듈 형태로 만드는 프로그래밍 기법**을 말한다.
 
-        * Ex) 로깅, 보안, 트랜잭션 처리 등
+        * 즉, 부가 기능의 관점에서 바라볼때, 공통된 요소를 추출하는 것을 말한다.
+
+    * 핵심 기능과 부가 기능
+    
+        * `핵심 기능(Core Concerns)`
         
+            * **비즈니스 로직**을 말한다.
+            
+            * Ex) 게시글 관리, 회원 관리 등
+    
+        * `부가 기능(Cross-cutting Concerns : 흩어진 관심사)`
+        
+            * **핵심 기능을 도와주는 부가적인 기능**을 말한다.
+    
+            * Ex) 로깅, 트랜잭션 처리 등
+
 #### 2) AOP 관련 용어 
 
-* Aspect 
+* `Aspect` 
  
-    * 부가 기능을 모듈화한 것을 말한다.
+    * **부가 기능을 모듈화한 것**을 말한다.
 
-    * Aspect는 부가 기능을 정의한 Advice와 Advice를 어디에 적용할지를 결정하는 PointCut을 함께 갖고 있다.
+    * `Aspect`는 부가 기능을 정의한 `Advice`와 `Advice`를 어디에 적용할지를 결정하는 `PointCut`을 함께 갖고 있다.
 
-* Target  
+* `Target`
 
-    * 핵심 기능을 담고 있는 모듈로 Target은 부가 기능을 적용할 대상이 된다.
+    * **부가 기능을 적용할 대상**을 말한다. 
+    
+    * `Target`은 핵심 기능을 담고 있는 모듈을 말하며 `Aspect`가 적용되는 곳이다. 
 
-    * Aspect가 적용되는 곳 
+* `Advice` 
 
-* Advice 
+    * **실질적으로 부가 기능을 담은 구현체**를 말한다. (해야 할 일) 
 
-    * 실질적인 부가 기능을 담은 구현체를 말한다. (해야 할 일) 
+    * `Advice`는 `Aspect`가 **무엇**을 **언제** 할지를 정의하고 있다.
 
-    * Advice는 Aspect가 '무엇'을 '언제' 할지를 정의하고 있다.
+* `JoinPoint` 
 
-* Join Point 
-
-    * Advice가 적용될 수 있는 위치를 말한다.
+    * **Advice가 적용될 수 있는 위치**를 말한다.
    
-    * 메서드 실행 시점, 생성자 호출 시점 등이 JoinPoint에 해당한다.  (여러 가지 끼어들 수 있는 지점을 의미)
+    * 메서드 실행 시점, 생성자 호출 시점 등이 `JoinPoint`에 해당한다. (여러 가지 끼어들 수 있는 지점을 의미함)
+    
+        * 스프링에서는 메소드 `JoinPoint`만 제공한다.
 
-* PointCut 
+* `PointCut` 
 
-    * 부가 기능이 적용될 대상(메소드)를 선정하는 방법을 말한다.
-
-    * 즉, Advice를 적용할 JoinPoint를 선별하는 기능을 정의한 모듈이다.
-
+    * 어떤 `JoinPoint`에 `Advice`가 적용되어야 하는지를 정의한다.
+            
 #### 3) Java의 AOP 구현체
 
-* AspectJ : 다양한 Join Point와 기능을 제공함
+* `AspectJ` : 다양한 `JoinPoint`와 기능을 제공함
 
-* 스프링 AOP : AspectJ에 비해 다소 적은 기능을 제공함
+* `스프링 AOP` : `AspectJ`에 비해 다소 적은 기능을 제공함
 
 #### 4) AOP 적용 방법
 
-* (1) 컴파일 시점 (AspectJ)
+* (1) `컴파일 시점` - AspectJ
 
     * 자바 파일을 클래스 파일로 만들 때 부가 기능을 추가
 
-* (2) 클래스 로딩 시점 (AspectJ)
+* (2) `클래스 로딩 시점` - AspectJ
 
-    * JVM이 클래스를 로딩하는 시점에 바이트 코드에 부가 기능을 추가 
+    * JVM이 클래스를 로딩하는 시점에 부가 기능을 추가 
 
-* (3) 런타임 시점 (Spring AOP)
+* (3) `런타임 시점` - Spring AOP
 
-    * JVM이 클래스를 로딩 한 후 Bean을 생성할 때 해당 클래스 타입의 프록시 빈을 생성하여 적용
+    * JVM이 클래스를 로딩 한 후 Bean을 생성할 때, 해당 클래스 타입의 프록시 빈을 생성하여 적용
 
 ## 7. 스프링 AOP : 프록시 기반 AOP
 
 #### 1) 스프링 AOP 
 
-* 스프링 AOP는 프록시 기반의 AOP 구현체이다.
+* `스프링 AOP`는 **프록시 기반의 AOP 구현체**이다.
 
-* 스프링 빈(Bean)에만 AOP를 적용 할 수 있다. 
+* **스프링 빈(Bean)에만 AOP를 적용 할 수 있다.** 
 
-* 모든 AOP 기능을 제공하는 것이 목적이 아니라, 스프링 IoC와 연동하여 엔터프라이즈 애플리케이션에서 가장 흔한 문제에 대한 해결책을 제공하는 것이 목적. 
+* 모든 AOP 기능을 제공하는 것이 목적이 아니라, 스프링 IoC와 연동하여 엔터프라이즈 애플리케이션에서 가장 흔한 문제에 대한 해결책을 제공하는 것이 목적이다.
 
 #### 2) 프록시 패턴
 
-* 프록시 패턴을 사용하는 이유는 접근 제어 또는 부가 기능을 추가하기 위해 사용된다.
+* **프록시 패턴을 사용하는 이유는 접근 제어 또는 부가 기능을 추가하기 위해 사용된다.**
 
-* 프록시 패턴에서 클라이언트는 해당 인터페이스 타입으로 프록시 객체를 사용하게 된다.
+    ![image 1](images/img1.png)
 
-  그리고 프록시 객체는 타겟 객체(Real Subject)를 참조하고 있다.
+    * **프록시 패턴**에서 `클라이언트`는 `해당 인터페이스 타입(Subject)`으로 `프록시 객체(Proxy)`를 사용하게 된다.
+    
+    * 그리고 `프록시 객체`는 `타겟 객체(Real Subject)`를 참조하고 있다.
+    
+    * `프록시 객체`가 원래 해야 할 일을 가지고 있는 `타겟 객체`를 감싸서 `클라이언트`의 요청을 처리하게 된다.
 
-  프록시 객체가 원래 해야 할 일을 가지고 있는 타겟 객체를 감싸서 실제 클라이언트의 요청을 처리하게 된다.
+#### 3) 예제
 
-![image 1](images/img1.png)
- 
-#### 3) 프록시 패턴 - 예시
-
-* 앞서 살펴본 그림의 Subject에 해당하는 EventService 인터페이스를 작성한다.
+* 앞서 살펴본 그림의 `Subject`에 해당하는 EventService 인터페이스를 작성한다.
 
     ```java
     public interface EventService {
@@ -2218,13 +2226,11 @@ public class MyEventHandler{
     }
     ```
 
-* 앞서 살펴본 "그림"의 Real Subject에 해당하는 SimpleEventSerivce 클래스를 작성한다. 
-
-  그리고 해당 클래스를 빈으로 등록한다. (@Service)
+* 그리고 `Real Subject`에 해당하는 SimpleEventService 클래스를 작성한 다음, 빈으로 등록한다.
       
     ```java
     @Service
-    Public class SimpleEventSerivce implements EventService {
+    Public class SimpleEventService implements EventService {
     
         @Override
         public void createEvent() {
@@ -2248,12 +2254,8 @@ public class MyEventHandler{
     }
     ```
 
-* 앞서 살펴본 "그림"의 Client에 해당하는 AppRunner 클래스를 작성한다.
+* `Client`에 해당하는 AppRunner 클래스를 작성한다.
       
-  해당 코드는 createEvent()를 호출하고 1초 후에 "Created an event” 메시지를 출력하고
-      
-  publishEvent()를 호출하고 나서 2초 후에 "Published an event“ 메시지를 출력하게 된다.
-
     ```java
     @Component
     public class AppRunner implements ApplicationRunner {
@@ -2269,9 +2271,13 @@ public class MyEventHandler{
     }
     ```
   
-* EventService 인터페이스에 deleteEvent()를 새롭게 추가하고 그림의 "Real Subject"에 해당하는 SimpleEventService에 createEvent()와 publishEvent()의 실행 시간을 측정하는 기능을 추가한다.
-       
-  그리고 AppRunner에는 deleteEvent()를 호출하는 코드를 추가한다.
+    * 위의 코드를 실행하면 `createEvent()`를 호출하고 1초 후에 "Created an event" 메시지가 출력되고
+            
+    * `publishEvent()`를 호출하고 나서 2초 후에 "Published an event" 메시지가 출력된다.
+  
+* EventService에 deleteEvent()를 새롭게 추가하고 `Real Subject`에 해당하는 SimpleEventService에
+
+* createEvent()와 publishEvent()의 실행 시간을 측정하는 기능을 추가한다. 그리고 AppRunner에 deleteEvent()를 호출하는 코드를 추가한다.
       
     ```java
     public interface EventService {
@@ -2285,7 +2291,7 @@ public class MyEventHandler{
     ```
   
     ```java
-    public class SimpleEventSerivce implements EventService {
+    public class SimpleEventService implements EventService {
     
         @Override
         public void createEvent() {
@@ -2335,15 +2341,13 @@ public class MyEventHandler{
 
 * 매번 측정 할 때 마다 기존의 코드에 성능을 측정하는 코드를 추가해주어야 한다.
   
-  기존의 코드를 건들지 않고 성능을 측정할 수는 없을까?
+* 기존의 코드를 건들지 않고 성능을 측정 할 수는 없을까? 라는 생각에 적용 할 수 있는 것이 Proxy 패턴이다.
   
-  이러한 문제를 해결 하기 위해 Proxy 패턴을 적용한다.
-  
-  다음과 같이 SimpleEventSerivce 클래스에서 성능을 측정하는 코드를 제거한다.
+* 일단, SimpleEventSerivce 클래스에서 성능을 측정하는 코드를 제거한다.
 
     ```java
     @Service
-    public class SimpleEventSerivce implements EventService {
+    public class SimpleEventService implements EventService {
     
         @Override
         public void createEvent() {
@@ -2371,12 +2375,10 @@ public class MyEventHandler{
     }
     ```
 
-* 그 다음, Proxy 클래스를 작성하는데 SimpleEventService와 동일한 인터페이스를 구현 해야한다.
+* 그 다음, SimpleEventService와 동일한 인터페이스를 구현한 Proxy 클래스를 작성한 다음, 빈으로 등록한다.
   
-  그리고 빈으로 등록한 다음, @Primary로 우선 순위를 가지는 빈으로 지정하여 해당 빈이 주입 되도록 한다.
+* 그리고 @Primary로 우선 순위를 가지는 빈으로 지정해서 해당 빈이 주입 되도록 한다.
   
-  프록시는 "그림"의 Real Subject에게 위임을 하여 일을 대신 처리 하도록 한 다음, 부가 기능(성능을 측정하는 코드)를 추가한다.
-
     ```java
     @Primary
     @Service
@@ -2401,50 +2403,53 @@ public class MyEventHandler{
     
         @Override
         public void deleteEvent() {
-            simpleEventSerivce.deleteEvent();
-    
+            simpleEventSerivce.deleteEvent();  
         }
     }
     ```
 
-  그러면 "그림"의 Client에 해당하는 AppRunner는 @Autowired로 EventService를 주입 받는데 @Primary로 지정한
+    * 프록시는 `Real Subject`에게 일을 대신 처리 하도록 위임을 한 다음, 부가 기능(성능을 측정하는 코드)를 수행한다.
 
-  ProxySimpleEventService 빈을 주입 받게 된다.
-  
+    * 그러면 `Client`에 해당하는 AppRunner는 @Autowired로 EventService를 주입 받는데 
+    
+    * @Primary로 지정한 ProxySimpleEventService 빈이 주입된다.
+
 * 앞서 Proxy 클래스를 만들어서 모든 문제가 해결된 것처럼 보이지만 아직도 문제점이 존재한다.
  
-  매번 프록시 클래스를 작성해야 되며 이를 여러 클래스, 여러 메서드에 적용해야 된다면 상당히 번거롭다고 느끼게 될 것이다.
+    * 매번 프록시 클래스를 작성해야 되며 이를 여러 클래스, 여러 메서드에 적용해야 한다면 상당히 번거롭다고 느끼게 될 것이다.
+      
+    * 이러한 이유로 등장하게 된 것이 `스프링 AOP`이다.
+    
+#### 4) 동적 프록시 (Dynamic Proxy)
+
+* 스프링 IoC 컨테이너가 제공하는 기반 시설과 동적 프록시를 사용하여 여러 복잡한 문제를 해결한 것이 바로 스프링 AOP이다.
   
-  이러한 이유로 등장한 것이 스프링 AOP 이다.
-  
-  스프링 IoC 컨테이너가 제공하는 기반 시설과 동적 프록시를 사용하여 여러 복잡한 문제 해결 하였다.
-  
-  * 동적 프록시 (Dynamic Proxy)
+  * `동적 프록시 (Dynamic Proxy)`
   
     * 동적으로 프록시 객체를 생성하는 방법을 말한다.
   
     * 여기서 말하는 동적이란 런타임에 생성된다는 것을 의미한다.
-  
-  * AbstractAutoProxyCreator
-  
-    * 특정 클래스가 빈으로 등록될 때, 해당 Bean을 대체하는 동적 프록시 빈을 만들어 등록 시켜준다.
-  
-    * AbstractAutoProxyCreator 클래스는 BeanPostProcessor의 구현체 이다.
+
+  * 스프링 IoC 컨테이너는 특정 클래스가 빈으로 등록될 때, 해당 Bean을 대체하는 동적 프록시 빈을 만들어 등록 시켜준다.
+
+      * 이때, 사용되는 것이 AbstractAutoProxyCreator이다.
+      
+      * 그리고 AbstractAutoProxyCreator는 BeanPostProcessor의 구현체이다.
 
 ## 8. 스프링 AOP : @AOP
 
-#### 1) 애노테이션 기반 스프링 AOP 구현하기
+#### 1) 애노테이션 기반의 스프링 AOP 구현하기
 
-* (1) 스프링 AOP를 구현하기 위해서는 다음과 같은 의존성을 추가해야 한다.  
+* (1) 다음과 같은 의존성을 추가한다.  
 
     ```html
-     <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-aop</artifactId>
-     </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-aop</artifactId>
+    </dependency>
     ```
   
-* (2) @Aspect를 적용하여 Aspect 클래스를 작성한다. 그리고 @Component를 적용하여 빈(Bean)으로 등록한다.
+* (2) `@Aspect`를 붙인 Aspect 클래스를 작성한 다음, 빈(Bean)으로 등록한다.
   
     ```java
     @Component
@@ -2454,7 +2459,7 @@ public class MyEventHandler{
     }
     ```
 
-* (3) ProceedingJoinPoint의 proceed() 메서드로 타겟 메서드를 호출하고 그 결과 값을 전달 받는다.
+* (3) `ProceedingJoinPoint`의 `proceed()`로 타겟 메서드를 호출하고 그 결과 값을 전달 받는다.
 
     ```java
     @Component
@@ -2467,7 +2472,7 @@ public class MyEventHandler{
             long begin = System.currentTimeMillis();
             
             Object retVal = pjp.proceed();
-            System.out.println(System.currentTimeMillis() - begin);
+            System.out.println(System.currentTimeMillis() - begin); // 실행 시간 출력
             
             return retVal;
         }  
@@ -2481,9 +2486,9 @@ public class MyEventHandler{
 
         * 앞서 살펴본 것처럼 어드바이스는 Aspect가 ‘무엇을’, ‘언제’ 할지를 정의하고 있다.
 
-          여기서 ‘무엇’이란 logPerf() 메소드를 말한다. 그리고 ‘언제’는 @Around가 된다. 
+        * 여기서 ‘무엇’이란 logPerf() 메소드를 말한다. 그리고 ‘언제’는 @Around가 된다. 
 
-        * 이 '언제' 라는 시점의 경우, @Around를 포함하여 총 5가지가 존재한다.
+        * 이 **언제**라는 시점의 경우, @Around를 포함하여 총 5가지가 존재한다.
 
             * @Before (이전)
 
@@ -2510,7 +2515,7 @@ public class MyEventHandler{
                     ```java
                     @Around("포인트컷 표현식") 
                     public void 어드바이스메소드() { 
-                         ...
+                        ...
                     
                     }
                     ```
@@ -2521,19 +2526,19 @@ public class MyEventHandler{
 
                 * 여기서 주의할 점은 "@Around의 경우, 반드시 proceed() 메서드가 호출되어야 한다"는 것이다.
 
-                *  proceed() 메서드는 타겟 메서드를 의미하며 proceed() 메서드를 호출 해야 타겟 메서드가 실행된다.
+                * proceed() 메서드는 타겟 메서드를 의미하며 proceed() 메서드를 호출 해야 타겟 메서드가 실행된다.
 
     * 포인트컷 표현식
 
         * 어드바이스의 value로 들어간 문자열을 "포인트컷 표현식"이라 한다.
 
-          포인트 컷에는 다양한 지정자가 존재하는데, 그 중 execution을 살펴본다.
+        * 포인트 컷에는 다양한 지정자가 존재하는데, 그 중 execution을 살펴본다.
 
         * execution 지정자는 Advice를 적용할 타겟 메소드를 지정한다.
 
-          `execution([접근제어자] 리턴타입 [클래스이름].메소드이름(파라미터))`
+        * `execution([접근제어자] 리턴타입 [클래스이름].메소드이름(파라미터))`
 
-#### 2) 특정 메서드에만 AOP를 적용하기
+#### 2) 특정 메소드에만 AOP를 적용하기
 
 * 앞서 살펴본 예제에서 deleteEvent()는 적용 대상에서 제외를 해야 된다면 어떻게 해야 될까? 애노테이션을 직접 정의하는 방법으로 해결 가능하다. 
 
@@ -2544,7 +2549,7 @@ public class MyEventHandler{
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS) // 기본 값인 CLASS 이상을 유지해야 됨
-    public @interface PerLogging {
+    public @interface PerfLogging {
     
     }
     ```
@@ -2557,13 +2562,13 @@ public class MyEventHandler{
 
         * @Retention(RetentionPolicy.SOURCE) : 어노테이션 정보는 컴파일 이후 없어진다. 
 
-*  AOP를 적용할 메서드에 앞서 정의한 애노테이션을 붙여준다. 
+* 스프링 AOP를 적용하고 싶은 메소드에 앞서 정의한 애노테이션을 붙여준다.
 
     ```java
     @Service
-    public class SimpleEventSerivce implements EventService {
+    public class SimpleEventService implements EventService {
     
-        @PerLogging
+        @PerfLogging
         @Override
         public void createEvent() {
             try {
@@ -2574,7 +2579,7 @@ public class MyEventHandler{
             System.out.println("Created an event");
         }
     
-        @PerLogging
+        @PerfLogging
         @Override
         public void publishEvent() {
             try {
@@ -2591,14 +2596,15 @@ public class MyEventHandler{
     }
     ```
 
-*  애노테이션 표현식으로 @PerLogging 애노테이션이 붙여진 곳에 Advice를 적용한다.
+* 포인트컷 표현식이 아닌 애노테이션 표현식으로 변경한다.
 
     ```java
     @Component
     @Aspect
     public class PerfAspect {
     
-        @Around("@annotation(PerLogging)")
+        // @PerfLogging 애노테이션이 붙여진 곳에 Advice를 적용하라
+        @Around("@annotation(PerfLogging)")
         public Object logPerf(ProceedingJoinPoint pjp) throws Throwable{
     
             long begin = System.currentTimeMillis();
