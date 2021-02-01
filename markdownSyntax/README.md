@@ -214,6 +214,8 @@ ___
     <summary>접기 / 펼치기</summary>
     <div markdown="1">
     
+    <br>
+    
     상세 내용을 이렇게 작성 할 수 있습니다.
     
     ```
