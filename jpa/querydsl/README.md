@@ -483,9 +483,695 @@
 
 #### 7) 집합
 
-* 
+* 집합 함수
+
+    ```java
+    @Test
+    public void aggregation(){
+        List<Tuple> result = queryFactory
+                .select(member.count(), // 회원 수
+                        member.age.sum(), // 나이 합계 
+                        member.age.avg(), // 평균 나이
+                        member.age.max(), // 최대 나이
+                        member.age.min()) // 최소 나이
+                .from(member)
+                .fetch();
+    
+        Tuple tuple = result.get(0);
+        assertThat(tuple.get(member.count())).isEqualTo(4);
+        assertThat(tuple.get(member.age.sum())).isEqualTo(100);
+        assertThat(tuple.get(member.age.avg())).isEqualTo(25);
+        assertThat(tuple.get(member.age.max())).isEqualTo(40);
+        assertThat(tuple.get(member.age.min())).isEqualTo(10);
+    
+    }
+    ```
   
+* GroupBy 사용
 
+    ```java
+    @Test
+    public void aggregation(){
+        List<Tuple> result = queryFactory
+                .select(member.count(), // 회원 수
+                        member.age.sum(), // 나이 합계 
+                        member.age.avg(), // 평균 나이
+                        member.age.max(), // 최대 나이
+                        member.age.min()) // 최소 나이
+                .from(member)
+                .fetch();
+    
+        Tuple tuple = result.get(0);
+        assertThat(tuple.get(member.count())).isEqualTo(4);
+        assertThat(tuple.get(member.age.sum())).isEqualTo(100);
+        assertThat(tuple.get(member.age.avg())).isEqualTo(25);
+        assertThat(tuple.get(member.age.max())).isEqualTo(40);
+        assertThat(tuple.get(member.age.min())).isEqualTo(10);
+    
+    }
+    ```
 
+* GroupBy 사용
 
+    ```java
+    /*
+    * 팀의 이름과 각 팀의 평균 연령을 구해라.
+    * */
+    @Test
+    public void group() throws Exception {
+        List<Tuple> result = queryFactory
+                .select(team.name, member.age.avg())
+                .from(member)
+                .join(member.team, team)
+                .groupBy(team.name)
+                .fetch();
+    
+        Tuple teamA = result.get(0);
+        Tuple teamB = result.get(1);
         
+        assertThat(teamA.get(team.name)).isEqualTo("teamA");
+        assertThat(teamA.get(member.age.avg())).isEqualTo(15); // (10 + 20) / 2
+    
+        assertThat(teamB.get(team.name)).isEqualTo("teamB");
+        assertThat(teamB.get(member.age.avg())).isEqualTo(35); // (30 + 40) / 2
+    }
+    ```
+
+* groupBy(), having() 예시
+
+    ```java
+    .groupBy(item.price)
+    .having(item.price.gt(1000))
+    ```
+
+* **[TIP]** Live Templates 기능
+
+    * `[IntelliJ IDEA]` - `[Preferences]` 를 클릭한다.
+    
+    * `live template`으로 검색한다.
+    
+    * + 버튼을 클릭한 다음, `Template Group...`으로 그룹을 생성한다.
+    
+    * 다시 + 버튼을 클릭한 다음, `Live Template`으로 다음과 같은 라이브 템플릿을 작성한다.
+    
+        ```java
+        @Test
+        public void $NAME$() throws Exception {
+            //given
+            $END$
+            //when
+            
+            //then
+        }
+        ```
+      
+        * `Define`를 클릭하여 `Java`를 체크한다.
+        
+        * `Use static import if possible` , `Shorten FQ names`를 체크한다.
+
+#### 8) 조인(Join) - 기본 조인
+
+* 기본 조인
+
+    * 조인의 기본 문법은 다음과 같다.
+
+        ```java
+        join(조인 대상, 별칭으로 사용할 Q타입)
+        ```
+
+        * `첫 번째 파라미터` : 조인 대상을 지정한다.
+        
+        * `두 번째 파라미터` : 별칭(alias)으로 사용할 Q 타입을 지정한다.
+
+    * 종류
+    
+        * `join()` , `innerJoin()` : 내부 조인(inner join) 
+        
+        * `leftJoin()` : left 외부 조인(left outer join) 
+        
+        * `rightJoin()` : right 외부 조인(right outer join)
+
+    * 예시 - 기본 조인
+    
+        ```java
+        /**
+         * 팀A에 소속된 모든 회원를 찾아라
+         */
+        @Test
+        public void join() {
+            /*
+            * member는 QMember.member와 같다.
+            * team는 QTeam.team와 같다.
+            * */
+        
+            List<Member> result = queryFactory
+                    .selectFrom(member)
+                    .join(member.team, team)
+                    .where(team.name.eq("teamA"))
+                    .fetch();
+        
+            assertThat(result)
+                    .extracting("username")
+                    .containsExactly("member1", "member2");
+        }
+        ```
+      
+* `세타 조인` : 연관관계가 없는 필드로 조인을 한다.
+
+    ```java
+    @Test
+    public void theta_join(){
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        
+        /*
+        * MEMBER 테이블과 TEAM 테이블의 모든 행을 조인한 결과를 WHERE 절로 걸러낸다.
+        * 이 과정에서 DB가 성능 최적화를 함
+        * */
+        List<Member> result = queryFactory
+                .select(member)
+                .from(member, team)
+                .where(member.username.eq(team.name))
+                .fetch();
+    
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("teamA", "teamB");
+    
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("teamA", "teamB");
+    }
+    ```
+  
+    * from 절에 여러 엔티티를 선택해서 세타 조인을 한다.
+  
+    * 외부 조인(outer join)이 불가능하다.
+    
+        * 조인 on을 사용하면 외부 조인이 가능
+
+#### 9) 조인(Join) - ON 절
+
+* ON 절을 활용한 조인 (JPA 2.1 부터 지원)
+
+    * ① 조인 대상 필터링
+      
+    * ② 연관관계가 없는 엔티티를 외부 조인
+
+* (1) 조인 대상 필터링
+
+    ```java
+    /*
+    * 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인하고 회원은 모두 조회한다.
+    * JPQL : select m, t from Member m left join m.team t on t.name = 'teamA'
+    * */
+    @Test
+    public void join_on_filtering(){
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(member.team, team)
+                .on(team.name.eq("teamA"))
+                .fetch();
+    
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+    }
+    ```
+  
+    * on 절을 활용해 조인 대상을 필터링 할 때, 외부 조인이 아니라 내부 조인(inner join)을 사용하면, where 절에서 필터링 하는 것과 기능이 동일하다. 
+    
+    * 따라서 내부조인 이면 where 절로 해결하자.
+    
+* (2) 연관관계가 없는 엔티티를 외부 조인
+
+    ```java
+    /*
+     * 연관관계가 없는 엔티티를 외부 조인
+     * 회원 이름이 팀 이름과 같은 대상을 외부 조인해라.
+     * */
+    @Test
+    public void join_one_no_relation(){
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+    
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(team).on(member.username.eq(team.name))
+                .fetch();
+    
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+    }
+    ```
+  
+    * 일반 조인과 on 조인 차이
+    
+        * `일반 조인` : leftJoin(member.team, team)
+        
+        * `on 조인` : from(member).leftJoin(team).on(xxx)
+
+#### 10) 조인(Join) - 페치 조인
+
+* 페치 조인은 SQL 조인을 활용해서 연관된 엔티티를 SQL 한번에 조회하는 기능이다. 
+
+    * 주로 성능 최적화에 사용한다.
+    
+* (1) 페치 조인 미적용
+
+    ```java
+    @PersistenceUnit
+    EntityManagerFactory emf;
+    
+    @Test
+    public void fetchJoinNo() {
+        em.flush();
+        em.clear();
+    
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .where(member.username.eq("member1"))
+                .fetchOne();
+    
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(loaded).as("페치 조인 미적용").isFalse(); // 지연 로딩이므로 false가 맞다.
+    }
+    ```
+
+* (2) 페치 조인 적용
+
+    * 사용 방법
+    
+        * `join()`, `leftJoin()` 등 조인 기능 뒤에 `fetchJoin()`를 추가하면 된다.
+
+            ```java
+            @Test
+            public void fetchJoinUse(){
+                em.flush();
+                em.clear();
+            
+                Member findMember = queryFactory
+                        .selectFrom(member)
+                        .join(member.team, team)
+                        .fetchJoin()
+                        .where(member.username.eq("member1"))
+                        .fetchOne();
+            
+                boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+                assertThat(loaded).as("페치 조인 적용").isTrue(); // 즉시 로딩을 하므로 true가 맞다.
+            }
+            ```
+  
+            * 즉시 로딩으로 Member, Team SQL 쿼리 조인으로 한번에 조회한다.
+
+#### 11) 서브쿼리
+
+* `com.querydsl.jpa.JPAExpressions`를 사용한다.
+
+* 예시
+
+    * (1) 서브 쿼리 eq 사용
+
+        ```java
+        /*
+        * 나이가 가장 많은 회원 조회
+        * */
+        @Test
+        public void subQuery(){
+        
+            // 별칭이 중복되면 안되는 경우에는 직접 생성 할 수 있다.
+            QMember memberSub = new QMember("memberSub");
+        
+            List<Member> result = queryFactory
+                    .selectFrom(member)
+                    .where(member.age.eq(
+                            JPAExpressions
+                                    .select(memberSub.age.max())
+                                    .from(memberSub) // 회원의 나이가 가장 많은 사람
+                    ))
+                    .fetch();
+        
+            assertThat(result).extracting("age")
+                    .containsExactly(40);
+        }
+        ```
+
+    * (2) 서브쿼리 여러 건 처리 in 사용
+
+        ```java
+        @Test
+        public void subQueryIn(){
+        
+            QMember memberSub = new QMember("memberSub");
+        
+            List<Member> result = queryFactory
+                    .selectFrom(member)
+                    .where(member.age.in(
+                            JPAExpressions
+                                    .select(memberSub.age)
+                                    .from(memberSub)
+                                    .where(memberSub.age.gt(10))
+                    ))
+                    .fetch();
+        
+            assertThat(result).extracting("age")
+                    .containsExactly(20, 30, 40);
+        }
+        ```
+      
+    * (3) select 절에 subquery
+
+        ```java
+        @Test
+        public void selectSubQuery(){
+        
+            QMember memberSub = new QMember("memberSub");
+        
+            List<Tuple> result = queryFactory
+                    .select(member.username,
+                            JPAExpressions
+                                    .select(memberSub.age.avg())
+                                    .from(memberSub))
+                    .from(member)
+                    .fetch();
+        
+            for (Tuple tuple : result) {
+                System.out.println("tuple = " + tuple);
+            }
+        
+        }
+        ```
+
+    * (4) `JPAExpressions`에도 static import 문을 사용 할 수 있다.
+    
+    * (5) from 절의 서브쿼리 한계와 해결방안
+    
+        * 한계
+
+            * JPQL의 서브쿼리는 FROM 절의 서브쿼리(인라인 뷰)는 지원하지 않는다.
+
+            * Querydsl 또한 지원하지 않는다. SELECT, WHERE 절에서는 서브쿼리를 사용 할 수 있다.
+
+                * 하이버네이트 구현체를 사용하면 select 절의 서브쿼리는 지원한다.
+
+        * 해결방안
+
+            * ① 서브쿼리를 join으로 변경한다. (가능한 상황도 있고, 불가능한 상황도 있다.)
+
+            * ② 애플리케이션에서 쿼리를 2번 분리해서 실행한다.
+
+            * ③ 네이티브 쿼리를 사용한다.
+
+#### 12) case 문
+
+* case 문은 select, where 절에서 사용 가능하다.
+
+* 예시
+
+    * 단순한 조건
+
+        ```java
+        @Test
+        public void basicCase(){
+            List<String> result = queryFactory
+                    .select(member.age
+                            .when(10).then("열살")
+                            .when(20).then("스무살")
+                            .otherwise("기타"))
+                    .from(member)
+                    .fetch();
+        
+            for (String s : result) {
+                System.out.println("s = " + s);
+            }
+        }
+        ```
+      
+    * 복잡한 조건
+
+        ```java
+        @Test
+        public void complexCase(){
+            List<String> result = queryFactory
+                    .select(new CaseBuilder()
+                            .when(member.age.between(0, 20)).then("0~20살")
+                            .when(member.age.between(21, 30)).then("21~30살")
+                            .otherwise("기타"))
+                    .from(member)
+                    .fetch();
+        
+            for (String s : result) {
+                System.out.println("s = " + s);
+            }
+        }
+        ```
+
+    * orderBy에서 case 문 함께 사용하기
+
+        ```java
+        NumberExpression<Integer> rankPath = new CaseBuilder()
+                .when(member.age.between(0, 20)).then(2) // 0 ~ 20살 회원을 두 번째 출력
+                .when(member.age.between(21, 30)).then(1) // 21 ~ 30살 회원을 세 번째 출력
+                .otherwise(3); // 0 ~ 30살이 아닌 회원을 첫 번째 출력
+        
+        List<Tuple> result = queryFactory
+                .select(member.username, member.age, rankPath)
+                .from(member)
+                .orderBy(rankPath.desc())
+                .fetch();
+        ```
+      
+        * Querydsl은 자바 코드로 작성하기 때문에 `rankPath`처럼 복잡한 조건을 변수로 선언해서 select 절, orderBy 절에서 사용 할 수 있다.
+                
+#### 13) 상수, 문자 더하기
+
+* 상수가 필요하면 Expressions.constant(xxx) 사용
+
+    ```java
+    @Test
+    public void constant(){
+        List<Tuple> result = queryFactory
+                .select(member.username, Expressions.constant("A"))
+                .from(member)
+                .fetch();
+    
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+    
+    }
+    ```
+
+* 문자 더하기
+
+    ```java
+    @Test
+    public void concat(){
+        List<String> result = queryFactory
+                .select(member.username.concat("_").concat(member.age.stringValue()))
+                .from(member)
+                .where(member.username.eq("member1"))
+                .fetch();
+    
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+    ```
+  
+    * `stringValue()` : 문자가 아닌 다른 타입들을 문자로 변환한다. (ENUM을 처리할 때도 자주 사용)
+
+## 4. 중급 문법
+
+#### 1) 프로젝션과 결과 반환 - 기본
+
+* 프로젝션
+
+    * `프로젝션`은 select 대상을 지정하는 것을 말한다.
+
+    * 프로젝션 대상이 하나면 타입을 명확하게 지정 할 수 있다.
+    
+    * 프로젝션 대상이 둘이면 튜플이나 DTO로 조회한다.
+
+* 프로젝션 대상이 하나
+
+    ```java
+    List<String> result = queryFactory
+            .select(member.username)
+            .from(member)
+            .fetch();
+    ```
+
+* 튜플 조회
+
+    ```java
+    List<Tuple> result = queryFactory
+            .select(member.username, member.age)
+            .from(member)
+            .fetch();
+    ```
+  
+#### 2) 프로젝션과 결과 반환 - DTO 조회
+
+* (1) DTO를 작성한다.
+
+    ```java
+    @Data
+    @NoArgsConstructor
+    public class MemberDto {
+    
+        private String username;
+    
+        private int age;
+    
+        public MemberDto(String username, int age) {
+            this.username = username;
+            this.age = age;
+        }
+    
+    }
+    ```
+  
+* (2) DTO로 조회한다.
+
+    * 순수 JPA에서 DTO 조회
+
+        ```java
+        List<MemberDto> result = em.createQuery("select new study.querydsl.dto.MemberDto(m.username, m.age) from Member m", MemberDto.class)
+                .getResultList();
+        ```
+      
+        * 순수 JPA에서 DTO를 조회할 때는 new 명령어를 사용해야 한다. 
+        
+        * DTO의 패키지 명을 다 기술해야 하므로 지저분해진다. 그리고 생성자 방식만 지원한다.
+
+    * Querydsl 빈 생성(Bean population)
+
+        * 결과를 DTO 반환할 때 사용
+        
+        * 다음 3가지 방법을 지원한다.
+        
+            * `프로퍼티 접근` : Setter를 이용하여 지정
+
+                ```java
+                List<MemberDto> result = queryFactory
+                        .select(Projections.bean(MemberDto.class,
+                                member.username,
+                                member.age))
+                        .from(member)
+                        .fetch();
+                ```
+
+            * `필드 직접 접근` : Setter 없이 직접 접근하여 지정
+            
+                ```java
+                List<MemberDto> result = queryFactory
+                        .select(Projections.fields(MemberDto.class,
+                                member.username,
+                                member.age))
+                        .from(member)
+                        .fetch();
+                ```
+            
+            * `생성자 사용`
+            
+                ```java
+                List<MemberDto> result = queryFactory
+                        .select(Projections.constructor(MemberDto.class,
+                                member.username,
+                                member.age))
+                        .from(member)
+                        .fetch();
+                ```
+                
+                * 생성자는 이름이 아닌 타입과 관련이 있다.
+
+        * 프로퍼티나, 필드 접근 생성 방식에서 이름이 다를 때 해결 방안
+
+            * 다음과 같은 DTO를 작성한다.
+
+                ```java
+                @Data
+                public class UserDto {
+                    
+                    private String name;
+                    
+                    private int age;
+                    
+                }
+                ```
+
+            * 프로퍼티나, 필드 접근 생성 방식에서 DTO와 엔티티의 필드 이름이 다른 경우, 필드 값이 null로 지정된다.
+            
+            * 이를 해결하기 위해 다음과 같이 작성한다.
+                 
+                ```java
+                QMember memberSub = new QMember("memberSub");
+                
+                List<UserDto> result = queryFactory
+                        .select(Projections.fields(UserDto.class,
+                                member.username.as("name"),
+                                ExpressionUtils.as(JPAExpressions
+                                        .select(memberSub.age.max())
+                                        .from(memberSub), "age")
+                        ))
+                        .from(member)
+                        .fetch();
+                ```
+              
+                * `username.as("name")` : 필드에 별칭을 적용한다.
+                
+                * `ExpressionUtils.as(source, alias)` : 필드나, 서브 쿼리에 별칭을 적용한다. 
+
+#### 3) 프로젝션과 결과 반환 - @QueryProjection
+
+* (1) 생성자 + @QueryProjection
+
+    * DTO 생성자에 `@QueryProjection`를 붙인다.
+                
+        ```java
+        @Data
+        @NoArgsConstructor
+        public class MemberDto {
+        
+            private String username;
+        
+            private int age;
+            
+            @QueryProjection
+            public MemberDto(String username, int age) {
+                this.username = username;
+                this.age = age;
+            }
+        
+        }
+        ```
+      
+    * `Gradle`의 `compileQuerydsl`으로 컴파일 함으로써 `QMemberDto`를 생성한다.
+
+    * `@QueryProjection`를 사용하기
+    
+        ```java
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(member.username, member.age))
+                .from(member)
+                .fetch();
+        ```
+      
+        * 이 방법은 컴파일 시, 타입을 체크하여 오류를 발견 할 수 있다는 장점이 있으며
+        
+        * DTO에 QueryDSL 애노테이션을 유지해야 하는 점과 DTO까지 Q 파일을 생성해야 하는 단점이 있다.
+        
+* (2) distinct
+
+    * JPQL의 distinct와 같다.
+
+        ```java
+        List<String> result = queryFactory
+                .select(member.username).distinct()
+                .from(member)
+                .fetch();
+        ```
