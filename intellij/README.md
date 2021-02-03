@@ -1,176 +1,76 @@
-# 타임리프(Thymeleaf)
-> 아래 내용은 타임리프를 정리 하였습니다.
+# 자주 사용하는 인텔리제이(IntelliJ) 단축키
+> 아래 내용은 Mac OS를 기준으로 작성 되었습니다.
 
-## 1. 프로젝트 만들기
+* 단축 키워드
 
-* https://start.spring.io/ 에서 다음과 같이 프로젝트를 생성 할 수 있다. 
+    * `psvm` : main 메서드를 선언한다.
 
-    ![image 1](images/img1.png)
+    * `sout` : System.out.println();를 자동으로 생성한다.
+
+    * `iter` : for문을 자동으로 생성한다.
+
+* `Command + N`
+
+    * 프로젝트(Project) 탭에서는 디렉토리, 패키지, 클래스 등 생성 목록 보기
+
+    * 소스코드 탭에서는 생성자, getter/setter, 오버라이딩 등 목록 보기
+
+* `Ctrl + Space` : 자동 완성 기능 (변수 선언 또는 new 연산자 뒤에 사용)
+
+* `Command + 마우스 왼쪽 버튼 클릭` : 코드를 링크처럼 타고 이동하기
+
+* `Command + Shift + T` : 테스트 코드 만들기
+
+* `Option + Enter` : 퀵 픽스
+
+* `Shift + Shift` : 전체 검색
+
+* `Shift + Shift + Tab` : 전체 검색 (클래스 찾기)
+
+* `Shift + Command + F` : 코드 검색하기
+
+* 리팩토링
+
+    * `Command + Option + V` : 변수로 추출하기
     
-## 2. 타임리프 동작 확인하기
-
-* (1) 컨트롤러 작성
-
-    ```java
-    @Controller
-    public class HelloController {
+    * `Command + Option + M` : 메소드로 추출하기
     
-        @GetMapping("/hello")
-        public String hello(Model model){
-            model.addAttribute("hello", "Hello Thymeleaf !!!");
+    * `Shift + F6` : 변수, 메서드 이름을 일괄 변경하기
     
-            return "hello";
-        }
+* `Ctrl + Shift + R` : 메인 메소드 실행하기
+
+* `Command + F9` : 빌드하기
+
+* `Ctrl + Option + O` : 사용하지 않은 import 문 정리하기
+
+* 프로젝트(Project) 탭
+
+    * ① `Command + 1` : 프로젝트 탭으로 이동하기
+
+    * ② `Esc` : 소스코드 화면으로 돌아가기
+
+    * ③ `Command + 1 ` : 소스코드 화면에서 해당 단축키를 두번 누르면 프로젝트 탭이 사라진다.
+
+* `Shift + Option + ← 또는 →` : 단어 단위로 드래그 하기
+
+* `Command + p` : 메소드 파라미터 정보 확인하기
+
+* `Command + Option + ← 또는 →` : 이전 / 이후 화면으로 돌아가기
+
+* `Command + Option + N` : Inline Variable
+
+    * return 문이나 변수명에 포커스를 두고 단축키를 누른다.
+
+* 주석 처리
+
+    * `Command + /` : 한줄 주석 처리하기 
     
-    }
-    ```
+    * `Command + Option + /` : 여러 줄 주석 처리하기
 
-* (2) 템플릿 페이지 작성하기
+* `F1` : Java Doc 보기 (Quick Documentation)
 
-    * ① 타임리프 네임 스페이스를 선언
-    
-        ```html
-        <html lang="en" xmlns:th="http://www.thymeleaf.org">
-        ```
+* `Command + D` : 현재, 코드 라인 복사하기
 
-    * ② 타임리프를 이용한 템플릿 페이지(`hello.html`)를 작성한다.
+* `Command + Shift + Enter` : 현재 문장 자동 완성하기 (if문 등 ...) 
 
-        ```html
-        <!DOCTYPE html>
-        <html lang="en" xmlns:th="http://www.thymeleaf.org">
-        <head>
-            <meta charset="UTF-8">
-            <title>Thymeleaf Test</title>
-        </head>
-        <body>
-        <h1 th:text="${hello}">Thymeleaf</h1>
-        </body>
-        </html>
-        ```
-
-## 3. 타임리프 문법 살펴보기
-
-* (1) 준비하기
- 
-    * 앞으로 살펴볼 예제에서 사용할 코드를 작성한다. 
- 
-        * ① `SignUpForm`을 작성한다. 
-    
-            ```java
-            @Data
-            @AllArgsConstructor
-            public class SignUpForm {
-            
-                private String id;
-            
-                private String password;
-            
-                private String name;
-            
-                private LocalDateTime createdDate;
-            
-            }
-    
-            ```
-    
-        * ② `MemberController` 클래스를 작성한다.
-        
-            ```java
-            @Controller
-            public class MemberController {
-            
-                @GetMapping("/sign-up")
-                public String hello(Model model){
-            
-                    SignUpForm signUpForm = new SignUpForm(1L, "123456", "관리자", LocalDateTime.now());
-            
-                    model.addAttribute("signUpForm", signUpForm);
-            
-                    return "sign-up";
-          
-                }
-            
-            }
-            ```
-          
-* (2) 객체를 화면에 출력하기 (`sign-up.html`)
-
-    * `th:text`는 태그의 내용물로 문자열을 출력한다.
-  
-        ```html
-        <!DOCTYPE html>
-        <html lang="en" xmlns:th="http://www.thymeleaf.org">
-        <head>
-            <meta charset="UTF-8">
-            <title>Thymeleaf Test</title>
-        </head>
-        <body>
-        <h1 th:text="${signUpForm}">데이터 없음</h1>
-        </body>
-        </html>
-        ```
-      
-* (3) HTML 출력하기 (`sign-up.html`)
-
-    * `th:utext`는 태그의 내용물로 HTML 자체를 출력한다.
-  
-        ```html
-        <div th:utext='${"<h1>" + signUpForm.name + "</h1>"}'></div>
-        ```
-
-* (4) 리스트를 화면에 출력하기 (`sign-up.html`)
-
-    * `MemberController`에서 여러 개의 `signUpForm` 객체를 리스트에 담아서 뷰로 전달한다.
-  
-        ```java
-        @Controller
-        public class MemberController {
-        
-            @GetMapping("/sign-up")
-            public String hello(Model model){
-        
-                List<SignUpForm> signUpForms = new ArrayList<>();
-        
-                for(long i = 0; i < 100; i++){
-                    SignUpForm signUpForm = new SignUpForm(i, "123456", "사용자 " + i, LocalDateTime.now());
-                    signUpForms.add(signUpForm);
-                }
-        
-                model.addAttribute("signUpForms", signUpForms);
-        
-                return "sign-up";
-            }
-        
-        }
-        ```
-
-    * 모델(Model)에 담아서 뷰로 전달한 리스트는 `th:each`를 이용하여 반복해서 출력한다.
-  
-        ```html
-        <!DOCTYPE html>
-        <html lang="en" xmlns:th="http://www.thymeleaf.org">
-        <head>
-            <meta charset="UTF-8">
-            <title>Thymeleaf Test</title>
-        </head>
-        <body>
-            <table border="1">
-                <tr>
-                    <td>아이디</td>
-                    <td>패스워드</td>
-                    <td>이름</td>
-                    <td>생성일</td>
-                </tr>
-        
-                <tr th:each="signUpForm : ${signUpForms}">
-                    <td th:text="${signUpForm.id}">아이디</td>
-                    <td th:text="${signUpForm.password}">패스워드</td>
-                    <td th:text="${signUpForm.name}">이름</td>
-                    <td th:text="${signUpForm.createdDate}">생성일</td>
-                </tr>
-            </table>
-        </body>
-        </html>
-        ```
-      
-
+* `Command + Shift + ↑↓` : 라인 단위로 코드 이동 시키기
