@@ -1367,3 +1367,49 @@
             .where(member.username.eq(member.username.lower()))
             .fetch();
     ```
+  
+## 5. 실무 활용 - 순수 JPA와 Querydsl
+
+#### 1) JPAQueryFactory 스프링 빈 등록
+
+* `JPAQueryFactory`를 스프링 빈으로 등록해서 주입 받아 사용해도 된다.
+
+    * `JPAQueryFactory`를 스프링 빈으로 등록하기
+    
+        ```java
+        @SpringBootApplication
+        public class QuerydslApplication {
+        
+            // ...
+        
+            @Bean
+            JPAQueryFactory jpaQueryFactory(EntityManager em){
+                return new JPAQueryFactory(em);
+            }
+        
+        }
+        ```
+      
+        * 동시성 문제는 걱정하지 않아도 된다. 
+        
+        * 왜냐하면 여기서 스프링이 주입해주는 엔티티 매니저는 실제 동작 시점에 진짜 엔티티 매니저를 찾아주는 프록시용 가짜 엔티티 매니저이다. 
+        
+        * 이 가짜 엔티티 매니저는 실제 사용 시점에 트랜잭션 단위로 실제 엔티티 매니저(영속성 컨텍스트)를 할당해준다.
+
+    * `JPAQueryFactory` 빈을 주입 받아 사용하기
+    
+        ```java
+        @Repository
+        public class MemberJpaRepository{
+      
+            private final EntityManager em;
+        
+            private final JPAQueryFactory queryFactory;
+        
+            public MemberJpaRepository(EntityManager em, JPAQueryFactory queryFactory){
+                this.em = em;
+                this.queryFactory = queryFactory;
+            }
+      
+        }
+        ```
