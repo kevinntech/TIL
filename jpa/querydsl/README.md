@@ -316,6 +316,18 @@
     member.username.contains("member") // like ‘%member%’ 검색 
     member.username.startsWith("member") //like ‘member%’ 검색
     ```
+  
+    * **eq** (`=`) : equals
+    
+    * **ne** (`!=`) : not equal to
+    
+    * **gt** (`>`) : greater than
+    
+    * **goe** (`>=`) : greater than or equal to
+    
+    * **lt** (`<`) : less than
+    
+    * **loe** (`<=`) : less than or equal to
 
 * AND 조건 처리
 
@@ -1207,7 +1219,7 @@
          
     * (2) Where 다중 파라미터 사용
     
-        * `BooleanExpression` 타입을 리턴하는 매소드를 만들어서 where 조건으로 추가하는 방식이다.
+        * `BooleanExpression` 타입을 리턴하는 메소드를 만들어서 where 조건으로 추가하는 방식이다.
         
             * `BooleanExpression`은 `where()`에서 사용 할 수 있는 값이며 `,`를 and 조건으로 사용한다.
         
@@ -1233,7 +1245,9 @@
           
             * 메서드를 다른 쿼리에서도 재활용 할 수 있으며 쿼리 자체의 가독성이 높아진다.
             
-        * 여러 가지 조건을 조립한 메소드를 만들어서 사용 할 수도 있다.
+            * 해당 방식을 사용하는 것을 기본으로 하고 사용 할 수 없는 경우에 `BooleanBuilder`를 사용한다.
+            
+        * 여러 가지 조건을 조립한(합친) 메소드를 만들어서 사용 할 수도 있다.
                
             ```java
             private List<Member> searchMember2(String usernameCond, Integer ageCond) {
@@ -1370,9 +1384,7 @@
   
 ## 5. 실무 활용 - 순수 JPA와 Querydsl
 
-#### 1) JPAQueryFactory 스프링 빈 등록
-
-* `JPAQueryFactory`를 스프링 빈으로 등록해서 주입 받아 사용해도 된다.
+* (1) `JPAQueryFactory`를 스프링 빈으로 등록해서 주입 받아 사용해도 된다.
 
     * `JPAQueryFactory`를 스프링 빈으로 등록하기
     
@@ -1413,3 +1425,18 @@
       
         }
         ```
+      
+* (2) 스프링에서 제공하는 `StringUtils.hasText()`는 null과 빈 문자열이 아니고 공백이 포함되어 있지 않은 문자열인지를 검사한다.
+
+* (3) 프로파일 관련 내용
+
+    * 일반적으로 사용되는 **프로파일 이름**은 다음과 같다.
+
+        * `local` : 로컬 환경
+        
+        * `dev` , `develop` : 개발 서버
+        
+        * `real` : 운영 서버
+    
+    * 스프링 부트를 구동할 때, `The following profiles are active: local`으로 현재 활성화 되어 있는 프로파일을 확인 할 수 있다.
+    
