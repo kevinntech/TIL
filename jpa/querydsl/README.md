@@ -1175,3 +1175,195 @@
                 .from(member)
                 .fetch();
         ```
+      
+#### 4) 동적 쿼리 - BooleanBuilder 사용
+
+* 동적 쿼리를 해결하는 두 가지 방식
+
+    * (1) BooleanBuilder
+    
+        * `BooleanBuilder`를 이용해서 OR 또는 AND 조건을 이어 붙일 수 있으며 이를 WHERE에 사용한다.
+        
+        * 해당 방식은 WHERE 절의 조건을 한눈에 알아보기 어렵다는 단점이 있다.
+        
+            ```java
+            private List<Member> searchMember1(String usernameCond, Integer ageCond) {
+                BooleanBuilder builder = new BooleanBuilder();
+            
+                if(usernameCond != null){
+                    builder.and(member.username.eq(usernameCond));
+                }
+            
+                if(ageCond != null){
+                    builder.and(member.age.eq(ageCond));
+                }
+            
+                return queryFactory
+                        .selectFrom(member)
+                        .where(builder)
+                        .fetch();
+            }
+            ```
+         
+    * (2) Where 다중 파라미터 사용
+    
+        * `BooleanExpression` 타입을 리턴하는 매소드를 만들어서 where 조건으로 추가하는 방식이다.
+        
+            * `BooleanExpression`은 `where()`에서 사용 할 수 있는 값이며 `,`를 and 조건으로 사용한다.
+        
+        * Querydsl의 `where()`는 파라미터로 `null`을 전달 받으면 무시한다. (조건으로 추가 X)
+               
+            ```java
+            private List<Member> searchMember2(String usernameCond, Integer ageCond) {
+                return queryFactory
+                        .selectFrom(member)
+                        .where(usernameEq(usernameCond), ageEq(ageCond))
+                        .fetch();
+            }
+            
+            private BooleanExpression usernameEq(String usernameCond) {
+                return usernameCond != null ? member.username.eq(usernameCond) : null;
+            }
+            
+            private BooleanExpression ageEq(Integer ageCond) {
+                return ageCond != null ? member.age.eq(ageCond) : null;
+            }
+            
+            ```
+          
+            * 메서드를 다른 쿼리에서도 재활용 할 수 있으며 쿼리 자체의 가독성이 높아진다.
+            
+        * 여러 가지 조건을 조립한 메소드를 만들어서 사용 할 수도 있다.
+               
+            ```java
+            private List<Member> searchMember2(String usernameCond, Integer ageCond) {
+                return queryFactory
+                        .selectFrom(member)
+                        .where(allEq(usernameCond, ageCond))
+                        .fetch();
+            }
+            
+            private BooleanExpression allEq(String usernameCond, Integer ageCond){
+                return usernameEq(usernameCond).and(ageEq(ageCond));
+            }
+            ```
+          
+            * `null` 체크는 주의해서 처리해야 한다.
+            
+#### 5) 수정, 삭제 - 벌크 연산
+
+* 수정(update)
+
+    * 쿼리 한번에 여러 데이터 수정하기
+
+        ```java
+        @Test
+        //@Commit
+        public void bulkUpdate(){
+            /*
+            * member1 = 10 -> 비회원
+            * member2 = 20 -> 비회원
+            * member3 = 30 -> 유지
+            * member4 = 40 -> 유지
+            * */
+        
+            long count = queryFactory
+                    .update(member)
+                    .set(member.username, "비회원")
+                    .where(member.age.lt(28))
+                    .execute();
+        }
+        ```
+      
+    * 기존 숫자에 특정 숫자만큼 더하기
+
+        ```java
+        @Test
+        public void bulkAdd(){
+            long count = queryFactory
+                    .update(member)
+                    .set(member.age, member.age.add(1))
+                    .where(member.age.lt(28))
+                    .execute();
+        }
+        ```
+      
+        * 더하기 : `add(1)`
+        
+        * 빼기 : `add(-1)`
+        
+        * 곱하기 : `multiply(2)`
+    
+* 삭제(delete)
+
+    * 쿼리 한번에 여러 데이터 삭제하기
+    
+        ```java
+        @Test
+        public void bulkDelete(){
+            // 나이가 18살 보다 많은 회원을 삭제하라.
+            long count = queryFactory
+                    .delete(member)
+                    .where(member.age.gt(18))
+                    .execute();
+        }
+        ```
+    
+* 벌크 연산은 영속성 컨텍스트를 무시하고 실행되기 때문에 벌크 연산을 실행하고 나면 영속성 컨텍스트를 초기화 하는 것이 안전하다.
+
+    ```java
+    em.flush();
+    em.clear();
+    ```
+        
+    * 영속성 컨텍스트와 DB의 내용이 달라지는 것을 방지하기 위해서 이러한 코드를 적용한다.
+    
+#### 6) SQL function 호출하기
+
+* `SQL function`은 JPA와 같이 Dialect에 등록된 내용만 호출할 수 있다.
+
+    * 회원 이름에서 member라는 단어를 M으로 변경하기 위해 replace 함수를 사용한다.
+    
+        ```java
+        @Test
+        public void sqlFunction(){
+            List<String> result = queryFactory
+                    .select(Expressions.stringTemplate(
+                            "function('replace', {0}, {1}, {2})",
+                            member.username, "member", "m"))
+                    .from(member)
+                    .fetch();
+        
+            for (String s : result) {
+                System.out.println("s = " + s);
+            }
+        }
+        ```
+    
+    * 회원 이름을 소문자로 변경하여 `where()`에서 비교한다.
+    
+        ```java
+        @Test
+        public void sqlFunction2(){
+            List<String> result = queryFactory
+                    .select(member.username)
+                    .from(member)
+                    .where(member.username.eq(
+                            Expressions.stringTemplate("function('lower', {0})", member.username)))
+                    .fetch();
+        
+            for (String s : result) {
+                System.out.println("s = " + s);
+            }
+        }
+        ```
+
+* Querydsl은 `lower()`와 같은 ANSI 표준 함수들을 상당 부분 내장하고 있다. 따라서 다음과 같이 처리 할 수도 있다.
+
+    ```java
+    List<String> result = queryFactory
+            .select(member.username)
+            .from(member)
+            .where(member.username.eq(member.username.lower()))
+            .fetch();
+    ```
