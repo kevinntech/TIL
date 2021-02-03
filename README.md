@@ -26,4 +26,5 @@
 
 ## ETC
 
+* [자주 사용하는 인텔리제이 단축키](https://github.com/kevinntech/TIL/tree/main/intellij "자주 사용하는 인텔리제이 단축키")
 * [파이썬 기본 문법 정리](https://github.com/kevinntech/TIL/tree/main/python-summary "파이썬 기본 문법 정리")
