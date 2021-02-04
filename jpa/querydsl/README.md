@@ -73,22 +73,38 @@
             ```
           
         * 검증용 Q 타입 생성
+
+            * Maven
         
-            * 인텔리제이(IntelliJ)에서 Gradle인 경우, 사용법
+                * 인텔리제이(IntelliJ)에서 생성 방법
+            
+                    * `Generate Sources and Update Folders For All Projects`
+                    
+                        ![image 2](images/img2.png)
+                    
+            * Gradle
         
-                * `Gradle` → `Tasks` → `build` → `clean`
-                
-                * `Gradle` → `Tasks` → `other` → `compileQuerydsl`
-                
-            * 콘솔에서 Gradle인 경우, 사용법
-        
-                * `./gradlew clean compileQuerydsl`
+                * 인텔리제이(IntelliJ)에서 생성 방법
+            
+                    * `Gradle` → `Tasks` → `build` → `clean`
+                    
+                    * `Gradle` → `Tasks` → `other` → `compileQuerydsl` (★★★)
+                    
+                * 콘솔에서 생성 방법
+            
+                    * `./gradlew clean compileQuerydsl`
                 
         * Q 타입 생성 확인
         
-            * `build` → `generated` → `querydsl`
+            * Maven
             
-            * `study.querydsl.entity.QHello.java` 파일이 생성되어 있어야 함
+                * `target` → `generated-sources` → `java`
+        
+            * Gradle
+        
+                * `build` → `generated` → `querydsl`
+                
+                * `study.querydsl.entity.QHello.java` 파일이 생성되어 있어야 함
                 
         * [참고] Q 타입은 컴파일 시점에 자동 생성되므로 버전 관리를 하지 않는 것이 좋다. 
         
