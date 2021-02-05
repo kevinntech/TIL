@@ -136,30 +136,30 @@
 * (1) 자동 설정 개요
 
     * `@SpringBootApplication`은 다음 3개의 애노테이션을 합친 것이다.
-    
+
         * `@SpringBootConfiguration`, `@ComponentScan`, `@EnableAutoConfiguration`
       
     * 스프링 부트 애플리케이션은 2 단계에 걸쳐 빈(Bean)을 등록한다.
     
         * `@ComponentScan`으로 빈을 읽어서 등록한 다음, `@EnableAutoConfiguration`으로 추가적인 Bean을 읽어서 등록한다.
-        
-* (2) 첫 번째 단계 (@ComponentScan)
 
-    * @ComponentScan은 @Component 애노테이션이 붙어있는 클래스들을 스캔하여 스프링 IoC 컨테이너에 빈으로 등록한다.
+* (2) 첫 번째 단계 (`@ComponentScan`)
+
+    * `@ComponentScan`은 `@Component` 애노테이션이 붙어있는 클래스들을 스캔하여 스프링 IoC 컨테이너에 빈으로 등록한다.
 
     * 다음 애노테이션이 붙은 클래스는 컴포넌트 스캔 대상이다.
 
-        * @Component, @Configuration , @Repository , @Service , @Controller , @RestController
+        * `@Component`, `@Configuration`, `@Repository`, `@Service`, `@Controller`, `@RestController`
 
-* (3) 두 번째 단계 (@EnableAutoConfiguration)
+* (3) 두 번째 단계 (`@EnableAutoConfiguration`)
 
-    * `spring-boot-autoconfigure` 라는 프로젝트에 `spring.factories`라는 스프링 메타 파일이 있다.
+    * `spring-boot-autoconfigure`라는 프로젝트에 `spring.factories`라는 스프링 메타 파일이 있다.
     
     * 해당 파일에 설정된 `EnableAutoConfiguration` 키 값과 일치하는 클래스들을 빈으로 등록한다.  
 
     * 그런데 모두 빈으로 등록되는 것은 아니며 조건에 따라 등록된다. 
     
-        * 예를 들어, `WebMvcAutoConfiguration` 클래스를 살펴보면 @ConditionalXXX 형식의 애노테이션들이 많이 사용되며 해당 애노테이션은 조건에 따라 빈 등록 여부를 결정할 때 사용된다. 
+        * 예를 들어, `WebMvcAutoConfiguration` 클래스를 살펴보면 `@ConditionalXXX` 형식의 애노테이션들이 많이 사용되며 해당 애노테이션은 조건에 따라 빈 등록 여부를 결정할 때 사용된다. 
 
 #### 4) 자동 설정 만들기 1부: Starter와 Autoconfigure
 
@@ -170,12 +170,12 @@
     * `Xxx-Spring-Boot-Starter` 모듈 : 필요한 의존성 정의
     
         * 그냥 하나로 만들고 싶다면? `Xxx-Spring-Boot-Starter`
-  
+
 * (2) `Xxx-Spring-Boot-Starter`만 만드는 구현 방법
 
-    * ① 먼저, maven 프로젝트를 xxx-spring-boot-starter 형식으로 생성한다.
+    * ① 먼저, maven 프로젝트를 `xxx-spring-boot-starter` 형식으로 생성한다.
 
-    * ② pom.xml에 의존성을 추가한다.
+    * ② `pom.xml`에 의존성을 추가한다.
 
         ```html
         <dependencies>
@@ -238,7 +238,7 @@
         }
         ```
       
-    * ④ 자동 설정 파일(@Configuration)을 만든다.
+    * ④ 자동 설정 파일(`@Configuration`)을 만든다.
    
         ```java
         @Configuration
@@ -262,10 +262,11 @@
           me.kevinntech.HolomanConfiguration
         ```
       
-    * ⑥ 터미널에서 `mvn install` 명령어를 실행 하거나 인텔리제이의 Maven 탭에서 install를 클릭한다.
-    * 그러면 해당 프로젝트를 빌드하여 jar 파일을 생성하며 이 파일을 다른 maven 프로젝트에서도 사용 할 수 있도록 로컬 maven 저장소에 설치한다.
+    * ⑥ 터미널에서 `mvn install` 명령어를 실행 하거나 인텔리제이의 Maven 탭에서 `install`를 클릭한다.
     
-    * ⑦ 기존 프로젝트(spring-boot-second)의 pom.xml에 아래 코드를 추가한다.
+        * 그러면 해당 프로젝트를 빌드하여 jar 파일을 생성하며 이 파일을 다른 maven 프로젝트에서도 사용 할 수 있도록 로컬 maven 저장소에 설치한다.
+    
+    * ⑦ 기존 프로젝트(spring-boot-second)의 `pom.xml`에 아래 코드를 추가한다.
     
         ```html
         <dependency>
@@ -292,7 +293,7 @@
         }
         ```
       
-    * 그리고 ApplicationRunner 인터페이스를 구현한 클래스를 작성하여 자동 설정에 의해 빈을 주입 받을 수 있다는 것을 확인 할 수 있다.    
+    * 그리고 `ApplicationRunner` 인터페이스를 구현한 클래스를 작성하여 자동 설정에 의해 빈을 주입 받을 수 있다는 것을 확인 할 수 있다.    
     
         ```java
         @Component
@@ -310,9 +311,9 @@
       
     * 앞서 살펴본 구현 방식은 문제점이 존재한다.
 
-        * 스프링 부트의 메인 애플리케이션에 명시적으로 빈을 등록하면 `@ComponentScan`에 의해서 빈으로 등록 된 다음, 
+        * 스프링 부트의 메인 애플리케이션에 명시적으로 빈을 등록하게 되면 `@ComponentScan`이 빈으로 등록한 다음, 
         
-        * `@EnableAutoConfiguration`이 자동 설정 파일을 읽어 빈으로 등록하며 이때, 명시적으로 등록한 빈을 덮어쓰게 된다는 문제점이 있다.
+        * `@EnableAutoConfiguration`이 자동 설정 파일을 읽어 빈으로 등록하는데 이때, 명시적으로 등록한 빈을 덮어쓰게 된다는 문제점이 있다.
 
             ```java
             @SpringBootApplication
@@ -333,9 +334,9 @@
           
 #### 5) 자동 설정 만들기 2부: @ConfigurationProperties
 
-이전에 발생한 문제점을 해결하기 위한 방법을 아래에서 하나씩 살펴본다.
+* 이전에 발생한 문제점을 해결하기 위한 방법을 아래에서 하나씩 살펴본다.
 
-* (1) @ConditionalOnMissingBean으로 덮어쓰기 방지하기 
+* (1) `@ConditionalOnMissingBean`으로 덮어쓰기 방지하기
 
     * ① `kevin-spring-boot-starter` 프로젝트의 `HolomanConfiguration`를 다음과 같이 수정한다.
 
@@ -357,9 +358,9 @@
 
         * `@ConditionalOnMissingBean`
         
-            * 해당 bean이 생성되어 있지 않은 경우에만 조건을 만족한다.
+            * 해당 bean이 등록되어 있지 않은 경우에만 조건을 만족한다.
             
-            * @Bean과 함께 사용되어 조건을 만족하는 경우에만 빈을 생성한다.
+            * `@Bean`과 함께 사용되어 조건을 만족하는 경우에만 빈을 등록한다.
             
         * `@ConditionalOnClass`
         
@@ -367,20 +368,20 @@
             
     * ② 그리고 `Maven install`을 한다.
     
-    * ③ 기존 프로젝트(spring-boot-second)에서 Maven을 refresh 한다.
+    * ③ 기존 프로젝트(spring-boot-second)에서 Maven을 `refresh`한다.
     
     * ④ 애플리케이션을 다시 실행하면 내가 직접 등록한 빈이 출력되는 것을 확인 할 수 있다.
     
-필요한 빈(Bean)을 일일이 재정의하는 것이 아닌 값만 변경하고 싶다면 다음과 같이 할 수 있다.
+* 필요한 빈(Bean)을 일일이 재정의하는 것이 아닌 값만 변경하고 싶다면 다음과 같이 할 수 있다.
     
-* (2) @ConfigurationProperties
+* (2) `@ConfigurationProperties`
 
     * ① 기존 프로젝트(spring-boot-second)의 `src\main\resources`에 `application.properties` 파일을 만든다.
 
     * ② `key = value` 형식으로 Bean에 설정할 값을 작성한다.    
 
-        ```java
-        holoman.name = gildong
+        ```
+        holoman.name = kevin
         holoman.how-long = 9
         # howLong도 가능(camel case)
         ```
@@ -413,7 +414,9 @@
         }
         ```
       
-    * ④ 인텔리제이 얼티메이트 버전에서는 알림이 나타나는데 해당 링크의 의존성을 pom.xml에 추가한다.
+        * `@ConfigurationProperties`는 `*.properties` 파일의 프로퍼티 값을 자바 클래스에 바인딩 한다.
+      
+    * ④ 인텔리제이 얼티메이트 버전에서는 알림이 나타나는데 해당 링크의 의존성을 `pom.xml`에 추가한다.
 
         ```html
         <dependency>
@@ -423,7 +426,7 @@
         </dependency>
         ```
       
-    * ⑤ Bean 설정을 담당하고 있는 HolomanConfiguration 클래스가 properties 파일을 읽어와 값을 사용할 수 있도록 @EnableConfigurationProperties 애노테이션을 붙인다.
+    * ⑤ Bean 설정을 담당하고 있는 HolomanConfiguration 클래스가 properties 파일을 읽어와 값을 사용할 수 있도록 `@EnableConfigurationProperties` 애노테이션을 붙인다.
 
         ```java
         @Configuration
@@ -442,15 +445,15 @@
         }
         ```
       
-    * ⑥ kevin-spring-boot-starter 프로젝트에서 mvn install를 하고 spring-boot-second 프로젝트에서 refresh를 한 다음, 실행한다.
+    * ⑥ kevin-spring-boot-starter 프로젝트에서 `mvn install`를 하고 spring-boot-second 프로젝트에서 `refresh`를 한 다음, 실행한다.
 
 #### 6) 내장 서블릿 컨테이너
 
 * 스프링 부트는 웹 서버가 아니다.
 
     * 스프링 부트는 내장 서블릿 컨테이너를 쉽게 사용 할 수 있도록 해주는 도구(Tool)일 뿐, 스프링 부트 자체가 웹 서버는 아니다.
-    
-    * 자바 코드로 톰캣을 만들 수 있다.
+
+    * 자바 코드로 웹 서버를 만들 수 있는 기능을 제공한다. (즉, 자바 코드로 톰캣을 만들 수 있다.)
     
         ```java
         @SpringBootApplication
@@ -463,7 +466,7 @@
         
         		Context context = tomcat.addContext("/", "/"); // 톰캣에 컨텍스트 추가
         
-                // 서블릿 만들기
+        		// 서블릿 만들기
         		HttpServlet servlet = new HttpServlet() {
         			@Override
         			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -476,14 +479,14 @@
         			}
         		};
         
-                // 톰캣에 서블릿 추가              
+        		// 톰캣에 서블릿 추가              
         		String servletName = "helloServlet";
         		tomcat.addServlet("/", servletName, servlet);
       
-                // 컨텍스트에 서블릿 맵핑 
+        		// 컨텍스트에 서블릿 맵핑 
         		context.addServletMappingDecoded("/hello", servletName);
 
-                // 톰캣 실행 및 대기             
+        		// 톰캣 실행 및 대기             
         		tomcat.start();
         		tomcat.getServer().await();
         	}
@@ -492,21 +495,23 @@
       
         ```
       
-* 앞서 살펴본 모든 과정을 보다 상세하게 설정하고 실행 해주는 것이 바로 스프링 부트의 자동 설정이다.
-
-    * `spring-boot-autoconfigure`에서 `spring.factories`를 열어보면 자동 설정 파일들이 있다.
+    * 이 모든 과정을 보다 상세하게 설정하고 실행 해주는 것이 바로 스프링 부트의 자동 설정이다.
     
-    * `ServletWebServerFactoryAutoConfiguration`는 서블릿 웹 서버를 생성하는 자동 설정 파일이다.
-    
-        * `TomcatServletWebServerFactoryCustomizer`는 웹 서버를 커스터마이징한다.
+        * `spring-boot-autoconfigure`에서 `spring.factories`를 열어보면 자동 설정 파일들이 있다.
         
-    * `DispatcherServletAutoConfiguration`
-    
-        * 서블릿을 만들고 서블릿 컨테이너에 등록한다.
+        * 서블릿 웹 서버를 생성하는 것과 디스패처 서블릿을 생성한 다음, 서블릿 컨테이너에 등록하는 것은 2개의 자동 설정 파일로 나뉘어져 있다.
         
-    * `DispatcherServlet`는 `HttpServlet`를 상속해서 만든 Spring MVC의 핵심 클래스이다
+            * `ServletWebServerFactoryAutoConfiguration`는 서블릿 웹 서버를 생성하는 자동 설정 파일이다.
+            
+                * `TomcatServletWebServerFactoryCustomizer`는 웹 서버를 커스터마이징한다.
+                
+            * `DispatcherServletAutoConfiguration`
+            
+                * `DispatcherServlet`를 만들고 서블릿 컨테이너에 등록한다.
+                
+                * `DispatcherServlet`는 `HttpServlet`를 상속해서 만든 Spring MVC의 핵심 클래스이다.
         
-* 즉, 스프링 부트의 자동 설정이 내장 서블릿 컨테이너(Tomcat, Jetty, Undertow)를 설정하고 실행 시킨다.
+* 즉, 스프링 부트의 자동 설정이 내장 서블릿 컨테이너(Tomcat, Jetty, Undertow)를 생성하고 실행 시킨다.
 
 #### 7) 내장 서블릿 컨테이너 응용 1부 : 컨테이너와 서버 포트
 
@@ -516,7 +521,7 @@
     
         * ① `spring-boot-starter-web`는 다음과 같이 `spring-boot-starter-tomcat`을 포함하고 있다.
         
-        * ② `pom.xml`에 톰캣의 의존성을 제외하기 위해 `<exclusions>` 엘리먼트를 추가하고 jetty 의존성을 추가한다.
+        * ② `pom.xml`에 톰캣의 의존성을 제외하기 위해 `<exclusions>` 엘리먼트를 추가하고 Jetty 의존성을 추가한다.
             
             ```html
             <dependencies>
@@ -541,9 +546,13 @@
             </dependencies>
             ```
           
-        * ③ 톰캣 의존성은 사라지고 jetty 의존성이 추가 되었음을 확인 할 수 있으며 실행 또한 jetty로 실행된다. 
+        * ③ 톰캣 의존성은 사라지고 Jetty 의존성이 추가 되었음을 확인 할 수 있으며 실행 또한 Jetty로 실행된다. 
 
 * 웹 서버 사용 하지 않기
+
+    *  웹 관련 의존성이 추가 되어 있다면 스프링 부트는 웹 애플리케이션으로 만들려고 시도한다.
+    
+        * 여기서 웹 관련 의존성이란 `spring-boot-starter-web`, `spring-boot-starter-undertow` 등을 말한다.
 
     * 어떤 웹 서버도 사용하고 싶지 않으면 `application.properties`에 `spring.main.web-application-type=none`를 추가하면 된다.
     
@@ -551,19 +560,19 @@
 
     * ① 원하는 포트로 변경
     
-        ```java
+        ```
         #application.properties
         server.port=7070
         ```
       
     * ② 랜덤 포트로 사용
     
-        ```java
+        ```
         #application.properties      
         server.port=0
         ```
       
-    * ③ 런타임 시 HTTP 포트 검색
+    * ③ 런타임 시 HTTP 포트 찾기
     
         * `ApplicationListener<ServletWebServerInitializedEvent>`를 이용한다.
     
@@ -582,9 +591,9 @@
 
 #### 8) 내장 웹 서버 응용 2부: HTTPS와 HTTP2
 
-* KeyStore는 암호화 / 복호화 및 디지털 서명에 사용되는 키(Key)와 인증서(Certificate)를 추상화한 Java의 인터페이스이다.
+* `KeyStore`는 암호화 / 복호화 및 디지털 서명에 사용되는 키(Key)와 인증서(Certificate)를 추상화한 Java의 인터페이스이다.
 
-* keytool은 KeyStore 기반으로 인증서와 key를 관리할 수 있는 명령어 방식의 유틸리티로 JDK에 포함되어 있다. 
+* `keytool`은 KeyStore 기반으로 인증서와 key를 관리할 수 있는 명령어 방식의 유틸리티로 JDK에 포함되어 있다. 
 
 * (1) HTTPS 설정하기
 
@@ -635,54 +644,54 @@
 
     * 그래서 http와 https를 모두 사용하고 싶다면 멀티 커넥터를 설정해야 한다.
 
-    ```java
-    @SpringBootApplication
-    @RestController
-    public class SpringBootWebserverApplication {
-    
-        // GET 요청 시 처리
-        @GetMapping("/hello")
-        public String hello() {
-            return "Hello Spring";
+        ```java
+        @SpringBootApplication
+        @RestController
+        public class SpringBootWebserverApplication {
+        
+            // GET 요청 시 처리
+            @GetMapping("/hello")
+            public String hello() {
+                return "Hello Spring";
+            }
+        
+            public static void main(String[] args) {
+                SpringApplication.run(SpringBootWebserverApplication.class, args);
+            }
+        
+            // 멀티 커넥터 설정 
+            @Bean
+            public ServletWebServerFactory serverFactory(){
+                TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory();
+                tomcat.addAdditionalTomcatConnectors(createStandardConntor()); // 커넥터 추가
+                return tomcat;
+            }
+        
+            private Connector createStandardConntor() {
+                Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
+                connector.setPort(8080);
+                return connector; // 커넥터를 리턴
+            }
+        
         }
-    
-        public static void main(String[] args) {
-            SpringApplication.run(SpringBootWebserverApplication.class, args);
-        }
-    
-        // 멀티 커넥터 설정 
-        @Bean
-        public ServletWebServerFactory serverFactory(){
-            TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory();
-            tomcat.addAdditionalTomcatConnectors(createStandardConntor()); // 커넥터 추가
-            return tomcat;
-        }
-    
-        private Connector createStandardConntor() {
-            Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
-            connector.setPort(8080);
-            return connector; // 커넥터를 리턴
-        }
-    
-    }
-    ```
+        ```
   
     * http는 8080, https는 8443으로 포트 번호를 설정한다.
     
-    ```
-    server.ssl.key-store = keystore.p12
-    server.ssl.key-store-type = PKCS12
-    server.ssl.key-store-password = 123456
-    server.ssl.keyAlias = spring
-    server.port = 8443
-    ```
+        ```
+        server.ssl.key-store = keystore.p12
+        server.ssl.key-store-type = PKCS12
+        server.ssl.key-store-password = 123456
+        server.ssl.keyAlias = spring
+        server.port = 8443
+        ```
   
     * 터미널에서 다음과 같은 요청으로 확인 할 수 있다.
 
-    ```
-    curl -I -k --http2 http://localhost:8080/hello
-    curl -I -k --http2 https://localhost:8443/hello
-    ```
+        ```
+        curl -I -k --http2 http://localhost:8080/hello
+        curl -I -k --http2 https://localhost:8443/hello
+        ```
   
 * (3) HTTP2 설정
 
@@ -694,23 +703,23 @@
     
     * 그러므로 Undertow를 사용하기 위해 다음과 같이 pom.xml을 설정한다.
     
-    ```html
-    <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-starter-web</artifactId>
-    	<exclusions>
-    		<exclusion>
-    			<groupId>org.springframework.boot</groupId>
-    			<artifactId>spring-boot-starter-tomcat</artifactId>
-    		</exclusion>
-    	</exclusions>
-    </dependency>
-    
-    <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-starter-undertow</artifactId>
-    </dependency>
-    ```
+        ```html
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+        ```
   
     * http2로 요청을 보내면 http2를 사용하고 있는 것을 확인 할 수 있다.
         
@@ -726,14 +735,15 @@
 
     * 스프링 부트 버전에 따라 아래 설정은 필요 없을 수도 있다. 
 
-    ```html
-    <properties>
-        <java.version>11</java.version>
-        <tomcat.version>9.0.10</tomcat.version>
-    </properties>
-    ```
+        ```html
+        <properties>
+            <java.version>11</java.version>
+            <tomcat.version>9.0.10</tomcat.version>
+        </properties>
+        ```
         
     * 만약, 기존에 Java 9 이전 버전을 사용 하고 있었다면 JDK 버전을 변경해야 한다.
+    
     * 그래서 인텔리제이의 [Project Structure]-[Project]에서 Project SDK 그리고 [Project Structure] - [Modules] - [Dependencies]에서 Module SDK를 변경한다.
 
 * http2로 요청을 보내면 정상적인 응답을 확인 할 수 있다.
@@ -765,7 +775,7 @@
         }
         ```
       
-    * 인텔리제이 터미널에서 `mvn clean`를 이용하여 maven으로 빌드 시 생성 되었던 target 디렉토리의 내용을 모두 삭제한다.
+    * 인텔리제이 터미널에서 `mvn clean`를 이용하여 Maven으로 빌드 시 생성 되었던 target 디렉토리의 내용을 모두 삭제한다.
     
     * `mvn package`를 이용하여 컴파일된 결과물을 패키지 파일로 생성한다. (JAR, WAR ...)
     
@@ -775,7 +785,7 @@
 
     * 그리고 다음 명령어로 target 디렉토리로 이동한 다음, JAR 파일이 생성 되었는지 확인한다.
     
-        ```java
+        ```
         cd target
         ls
         ```
@@ -790,15 +800,15 @@
     
 * (3) JAR 파일 하나로 애플리케이션이 실행되는 이유는 무엇일까?
 
-    * 하나의 JAR 파일 안에 프로젝트에서 사용되는 JAVA 클래스, 리소스, 외부 라이브러리 파일 등이 포함 되어 있기 때문이다.
+    * **하나의 JAR 파일 안에 프로젝트에서 사용되는 JAVA 클래스, 리소스, 외부 라이브러리 JAR 파일 등이 포함 되어 있기 때문이다.**
     
-    * JAVA에는 내장 JAR를 읽을 수 있는 표준 방법이 없다.
+    * `JAVA`에는 `내장 JAR`를 읽을 수 있는 표준 방법이 없다.
     
-    * 하지만 스프링 부트는 내장 JAR 파일을 읽을 수 있는 로더가 있으며 실행 할 수 있다.
+    * 하지만 `스프링 부트`는 `내장 JAR` 파일을 읽을 수 있는 로더가 있으며 실행도 할 수 있다.
     
     * 독립적으로 실행 가능한 JAR 관련 용어
     
-        * 내장 JAR : JAR 파일 안에 있는 JAR 파일을 말한다.
+        * `내장 JAR` : JAR 파일 안에 있는 JAR 파일을 말한다.
         
         * `spring-boot-maven-plugin` : 패키징을 처리한다.
         
