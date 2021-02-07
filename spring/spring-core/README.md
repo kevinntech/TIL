@@ -2633,4 +2633,104 @@ public class MyEventHandler{
     ```
   
   그래서 IDE의 경고 메시지를 통해 Null을 방지하기 위해 인텔리제이의 설정을 변경 해야 하는데 해당 강좌를 참고하도록 하자.
-     
+
+## 10. PSA
+
+* `PSA (Portable Service Abstraction)` : 환경의 변화와 관계없이 일관된 방식의 기술 접근 환경을 제공하려는 추상화 구조를 말한다.
+
+* 추상화 계층을 사용하는 이유
+
+    * `편의성` : 우리는 Spring이 제공하는 추상화 계층을 사용함으로써 `Servlet`과 같은 Row 레벨의 기능을 사용하지 않아도 된다.
+    
+	* `Portable` : 어떠한 기술을 다른 기술로 변경 할 수 있다는 의미다.
+	         
+        * 코드를 거의 변경하지 않고 `Servlet` 또는 `Reactive` 기반으로 개발 하도록 변경 할 수 있다.
+    
+	        * 즉, 우리는 Spring이 제공하는 추상화 계층을 사용하지만, 실제로는 `Tomcat` 또는 `Netty`를 사용한다.
+        
+        * 직접 톰캣, 제티, 언더토우와 같은 서버를 변경 할 수도 있다.
+
+* PSA 예시
+
+    * 스프링 웹 MVC
+
+        * 기존의 서블릿을 이용한 애플리케이션
+        
+            ```java
+            // /owner/create
+            public class OwnerCreateServlet extends HttpServlet {
+            
+                // GET
+                @Override
+                protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+                    super.doGet(req, resp);
+                }
+            
+                // POST
+                @Override
+                protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+                    super.doPost(req, resp);
+                }
+            
+            }
+            ```
+          
+            * `HttpServlet`를 상속받은 클래스를 작성한 다음, `doGet()` 또는 `doPost()`를 오버라이딩 해서 GET 또는 POST 요청을 처리한다.
+            
+        * 스프링이 제공하는 추상화 계층 : `@Controller`, `@RequestMapping`
+        
+            ```java
+            @Controller
+            class OwnerController {
+            
+            	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
+          
+            	// ...
+          
+            	@GetMapping("/owners/new")
+            	public String initCreationForm(Map<String, Object> model) {
+            		Owner owner = new Owner();
+            		model.put("owner", owner);
+            		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
+            	}
+            
+            	@PostMapping("/owners/new")
+            	public String processCreationForm(@Valid Owner owner, BindingResult result) {
+            		if (result.hasErrors()) {
+            			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
+            		}
+            		else {
+            			this.owners.save(owner);
+            			return "redirect:/owners/" + owner.getId();
+            		}
+            	}
+    
+            }
+            ```
+          
+            * 스프링의 PetClinic 예제를 보면 서블릿 애플리케이션을 만들고 있는데도 서블릿을 전혀 사용하고 있지 않다.
+            
+    * 스프링 트랜잭션
+
+        * 기존 JDBC의 트랜잭션 처리
+
+            ```java
+            dbConnection = getDBConnect();
+            
+            // SQL를 여러 번 호출 하더라도 커밋을 하지 않는다.
+            dbConnection.setAutoCommit(false); // 기본 값 true
+            
+            // INSERT 문
+            
+            dbConnection.commit();
+            dbConnection..setAutoCommit(true);
+            ```
+            
+            * JDBC의 트랜잭션 처리는 Low Level의 처리가 필요하다.
+
+        * 스프링이 제공하는 추상화 계층 : `@Transactional`
+        
+            * `@Transactional` : 해당 애노테이션이 붙어 있는 메소드는 트랜잭션 처리가 된다.
+
+            * JDBC를 사용하는 `Datesource Transaction Manager` 또는 `Jpa Transaction Manager`로 변경해서 사용 할 수도 있다.
+
