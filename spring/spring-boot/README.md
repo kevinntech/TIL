@@ -61,19 +61,17 @@
 
 #### 1) 의존성 관리 이해
 
-* 의존성 관리
+* 의존성 관리(dependency management)
 
-    * 앞서 생성한 프로젝트의 `pom.xml`을 보면 의존성을 정의할 때, 라이브러리 버전을 명시하지 않았지만 적절한 버전을 가져오고 있다.
-
-    * 그 이유는 스프링 부트에서 제공하는 `의존성 관리(dependency management) 기능` 때문이다.
-   
+    * `의존성 관리` 기능은 `pom.xml`에 의존성을 정의할 때, 라이브러리 버전을 명시하지 않더라도 적절한 버전을 가져 올 수 있도록 한다.
+    
     * `spring-boot-starter`는 프로젝트에 설정 해야되는 많은 의존성들을 미리 정의하여 제공한다.
    
     * `spring-boot-dependencies`에서 의존성 버전을 관리하고 있다.
    
     * 스프링 부트가 제공하는 의존성 관리 기능은 개발자가 직접 관리해야하는 의존성의 개수를 줄여주는 장점이 있다.
     
-    * (스프링 버전을 올렸을 때, 다른 라이브러리와의 호환성을 신경쓰지 않아도 됨)
+        * 스프링 부트 버전을 업그레이드하면 관련 라이브러리와의 호환성을 신경쓰지 않아도 된다.
     
 #### 2) 의존성 관리 응용
 
@@ -453,7 +451,7 @@
 
     * 스프링 부트는 내장 서블릿 컨테이너를 쉽게 사용 할 수 있도록 해주는 도구(Tool)일 뿐, 스프링 부트 자체가 웹 서버는 아니다.
 
-    * 자바 코드로 웹 서버를 만들 수 있는 기능을 제공한다. (즉, 자바 코드로 톰캣을 만들 수 있다.)
+    * 자바 코드로 웹 서버를 만들 수 있다.
     
         ```java
         @SpringBootApplication
@@ -499,7 +497,7 @@
     
         * `spring-boot-autoconfigure`에서 `spring.factories`를 열어보면 자동 설정 파일들이 있다.
         
-        * 서블릿 웹 서버를 생성하는 것과 디스패처 서블릿을 생성한 다음, 서블릿 컨테이너에 등록하는 것은 2개의 자동 설정 파일로 나뉘어져 있다.
+        * 서블릿 웹 서버를 생성하는 것과 디스패처 서블릿을 생성한 다음, 서블릿 웹 서버에 등록하는 것은 2개의 자동 설정 파일로 나뉘어져 있다.
         
             * `ServletWebServerFactoryAutoConfiguration`는 서블릿 웹 서버를 생성하는 자동 설정 파일이다.
             
@@ -507,7 +505,7 @@
                 
             * `DispatcherServletAutoConfiguration`
             
-                * `DispatcherServlet`를 만들고 서블릿 컨테이너에 등록한다.
+                * `DispatcherServlet`를 만들고 서블릿 웹 서버에 등록한다.
                 
                 * `DispatcherServlet`는 `HttpServlet`를 상속해서 만든 Spring MVC의 핵심 클래스이다.
         
@@ -699,9 +697,9 @@
     
     * 그리고 웹 서버 마다 제약 사항이 다른데, Undertow의 경우, HTTPS만 적용 되어 있다면 추가 설정이 필요 없다.
 
-    * 하지만 톰캣의 경우, Tomcat 9.0.x 과 JDK 9 이상의 버전을 사용하지 않으면 설정이 매우 복잡해진다. 
+    * 하지만 톰캣의 경우, `Tomcat 9.0.x` 과 `JDK 9` 이상의 버전을 사용하지 않으면 설정이 매우 복잡해진다. 
     
-    * 그러므로 Undertow를 사용하기 위해 다음과 같이 pom.xml을 설정한다.
+    * 그러므로 Undertow를 사용하기 위해 다음과 같이 `pom.xml`을 설정한다.
     
         ```html
         <dependency>
@@ -744,7 +742,7 @@
         
     * 만약, 기존에 Java 9 이전 버전을 사용 하고 있었다면 JDK 버전을 변경해야 한다.
     
-    * 그래서 인텔리제이의 [Project Structure]-[Project]에서 Project SDK 그리고 [Project Structure] - [Modules] - [Dependencies]에서 Module SDK를 변경한다.
+    * 그래서 인텔리제이의 `[File]-[Project Structure]-[Project]`에서 **Project SDK** 그리고 `[File]-[Project Structure] - [Modules] - [Dependencies]`에서 **Module SDK**를 변경한다.
 
 * http2로 요청을 보내면 정상적인 응답을 확인 할 수 있다.
     
@@ -796,7 +794,7 @@
 
     * JAR 파일 하나를 실행하면 스프링 부트 애플리케이션이 동작한다.
     
-    * `java -jar springinit-0.0.1-SNAPSHOT.jar` 
+        * `java -jar springinit-0.0.1-SNAPSHOT.jar` 
     
 * (3) JAR 파일 하나로 애플리케이션이 실행되는 이유는 무엇일까?
 
@@ -839,7 +837,7 @@
       
     * 하지만 이렇게 사용하게 되면 스프링 애플리케이션이 제공하는 다양한 커스터마이징 기능을 사용하기가 어렵다.
     
-    * 그래서 SpringApplication 인스턴스를 만든 다음, run()를 호출하는 방법을 사용한다.
+    * 그래서 `SpringApplication` 인스턴스를 만든 다음, `run()`를 호출하는 방법을 사용한다.
           
         ```java
         @SpringBootApplication
@@ -853,7 +851,7 @@
         }
         ```
       
-    * 그리고 SpringApplicationBuilder로 애플리케이션을 실행하고 커스터마이징 기능을 사용하는 것도 가능하다.
+    * 그리고 `SpringApplicationBuilder`로 애플리케이션을 실행하고 커스터마이징 기능을 사용하는 것도 가능하다.
           
         ```java
         @SpringBootApplication
@@ -870,15 +868,15 @@
 
 * (2) 기본 로그 레벨 INFO
 
-    * 어떠한 옵션도 변경하지 않고 실행하면 기본 로그 레벨은 INFO다.
+    * 어떠한 옵션도 변경하지 않고 실행하면 **기본 로그 레벨은 INFO다**.
     
     * 로그 관련 실습
 
-        * ① [Edit Configurations...]를 클릭한다.
+        * ① `[Edit Configurations...]`를 클릭한다.
         
             ![image 3](images/img3.png)
             
-        * ② `VM option`에 -Ddebug를 작성하거나 `Program arguments`에 —debug를 작성한 다음, 실행하면 디버그 모드로 애플리케이션이 동작되며 애플리케이션 로그도 디버그 레벨까지 출력된다.
+        * ② `VM option`에 `-Ddebug`를 작성하거나 `Program arguments`에 `--debug`를 작성한 다음, 실행하면 애플리케이션 로그가 디버그 레벨까지 출력된다.
 
         * ③ 다음 그림처럼 디버그 레벨로 출력된 로그를 확인 할 수 있다.
 
@@ -888,13 +886,13 @@
 
 * (3) FailureAnalyzer
 
-    * `FailureAnalyzer`는 애플리케이션 에러가 발생 했을 때 에러 메시지를 좀 더 예쁘게 출력 해주는 기능이다.
+    * `FailureAnalyzer`는 애플리케이션 에러가 발생 했을 때, 에러 메시지를 좀 더 예쁘게 출력 해주는 기능이다.
 
-    * 스프링 부트 애플리케이션은 기본적으로 여러 가지 FailureAnalyzer들이 등록 되어 있다.
+    * 스프링 부트 애플리케이션은 기본적으로 여러 가지 `FailureAnalyzer`들이 등록 되어 있다.
 
 * (4) 배너
 
-    * 스프링 애플리케이션 실행 시 처음 나타나는 로고를 "배너"라고 한다.
+    * 스프링 부트 애플리케이션 실행 시 처음 나타나는 로고를 `배너`라고 한다.
     
         ![image 5](images/img5.png)
         
@@ -904,13 +902,13 @@
         
         * 또는 banner를 gif, jpg, png로도 만들 수 있다.
 
-    * 배너를 표시할 때, 여러가지 변수를 사용 할 수 있다.
+    * 배너를 표시할 때, 여러가지 변수를 사용 할 수도 있다.
     
         * `${spring-boot.version}`를 사용하면 스프링 부트 버전이 출력된다.
 
-        * MANIFEST 파일이 존재해야 스프링 부트 버전이 출력된다.
-
-            * JAR 파일로 패키징할 때, MANIFEST 파일도 만들어 주기 때문에 JAR 파일로 패키징을 한 다음, 해당 JAR 파일을 실행하면 된다.
+            * 전제 조건은 MANIFEST 파일이 존재해야 된다. 
+    
+                * JAR 파일로 패키징 할 때, MANIFEST 파일도 만들어 주기 때문에 JAR 파일로 패키징을 한 다음, 해당 JAR 파일을 실행하면 된다.
 
     * 배너 파일의 위치를 변경하는 방법
 
@@ -957,7 +955,7 @@
   
 #### 2) SpringApplication : 2부 - `핵심 기능`
 
-* (1) ApplicationEvent와 Listener
+* (1) `ApplicationEvent`와 `Listener`
 
     * ① 이벤트 리스너 만들기
     
@@ -978,17 +976,17 @@
           
     * ② 이벤트 리스너를 빈(Bean)으로 등록하기
     
-        * 이벤트 리스너를 빈(Bean)으로 등록하기 위해 @Component 애노테이션을 붙여준다.
+        * 이벤트 리스너를 빈(Bean)으로 등록하기 위해 `@Component` 애노테이션을 붙여준다.
         
-        * 해당 이벤트가 발생하면 리스너가 실행 되는데, 리스너를 빈으로 등록하면 등록되어 있는 빈 중에 해당하는 이벤트의 리스너를 알아서 실행시켜준다.
+        * 그러면 이벤트가 발생하면 빈으로 등록되어 있는 해당 이벤트 리스너가 실행된다.
 
     * ③ 여기서 발생 할 수 있는 문제점
     
-        * `ApplicationContext`가 만들어진 다음, 발생하는 이벤트들은 해당 이벤트의 리스너가 빈(Bean)인 경우, 알아서 호출 할 수 있는데, 문제는 `ApplicationContext`가 만들어 지기 전에 발생하는 이벤트다.
+        * `ApplicationContext`가 만들어진 다음, 발생하는 이벤트들은 해당 이벤트의 리스너가 빈(Bean)인 경우, 알아서 호출 할 수 있는데, 문제는 `ApplicationContext`가 만들어지기 이전에 발생하는 이벤트다.
 
-        * `ApplicationStartingEvent`는 `ApplicationContext`가 만들어지기 전에 발생하는 이벤트이며 해당 이벤트에 대한 리스너를 빈으로 등록하더라도 실행 되지 않는다.
+        * `ApplicationStartingEvent`는 `ApplicationContext`가 만들어지기 이전에 발생하는 이벤트이며 해당 이벤트에 대한 리스너를 빈으로 등록하더라도 실행 되지 않는다.
 
-        * 발생한 문제를 해결하려면 `addListeners()`를 사용하면 된다. (리스너에 붙였던 @Component 애노테이션은 의미가 없기 때문에 제거하자.)
+        * 이러한 문제를 해결하려면 `addListeners()`를 사용하면 된다. (리스너에 붙였던 @Component 애노테이션은 의미가 없기 때문에 제거하자.)
     
             ```java
             @SpringBootApplication
@@ -1013,47 +1011,51 @@
     
         * `WebApplicationType.NONE`는 둘 다 없을 때 사용되는 타입이다. (내장 웹 서버가 실행 되지 않음)
     
-    * Spring MVC, Spring Webflux 둘 다 있다면 WebApplicationType.SERVLET으로 설정된다.
+    * `Spring MVC`와 `Spring Webflux` 둘 다 있다면 `WebApplicationType.SERVLET`으로 설정된다.
    
-        * 이러한 상황에서 Spring Webflux를 선택하고 싶다면 다음과 같이 메인 애플리케이션에 명시적으로 지정하면 된다.
+        * 이러한 상황에서 `Spring Webflux`를 선택하고 싶다면 다음과 같이 메인 애플리케이션에 명시적으로 지정하면 된다.
     
-        * `app.setWebApplicationType(WebApplicationType.REACTIVE);`
+            * `app.setWebApplicationType(WebApplicationType.REACTIVE);`
         
 * (3) 애플리케이션 아규먼트(Argument) 사용하기
 
     * 아규먼트(Argument)
     
-        * JVM option는 `-D`로 시작하며 JVM 설정과 관련된 Argument이다.
+        * `JVM option`는 `-D`로 시작하며 JVM 설정과 관련된 Argument이다.
     
-        * 애플리케이션 아규먼트는 `--`로 시작하며 애플리케이션 설정과 관련된 Argument이다. `Program arguments:`
-
-    * ① `[Edit Configurations...]`에서 다음과 같이 설정한다.
-
-        ![image 6](images/img6.png)
-
-    * ② 그리고 `SampleListener`의 코드를 다음과 같이 변경한 다음, 애플리케이션을 실행한다.
-
-        ```java
-        @Component
-        public class SampleListener{
+        * `애플리케이션 아규먼트`는 `--`로 시작하며 애플리케이션 설정과 관련된 Argument이다. 
         
-            /* 어떤 빈(Bean)에 생성자가 1개이고 그 생성자의 파라미터가
-                빈(Bean)인 경우, 스프링이 해당 빈을 자동으로 주입한다. */
-            public SampleListener(ApplicationArguments arguments){
-                System.out.println("foo: " + arguments.containsOption("foo"));
-                System.out.println("bar: " + arguments.containsOption("bar"));
+            * `Program arguments:`
+            
+    * 실습
+
+        * ① `[Edit Configurations...]`에서 다음과 같이 설정한다.
+    
+            ![image 6](images/img6.png)
+    
+        * ② 그리고 `SampleListener`의 코드를 다음과 같이 변경한 다음, 애플리케이션을 실행한다.
+    
+            ```java
+            @Component
+            public class SampleListener{
+            
+                /* 어떤 빈(Bean)에 생성자가 1개이고 그 생성자의 파라미터가
+                    빈(Bean)인 경우, 스프링이 해당 빈을 자동으로 주입한다. */
+                public SampleListener(ApplicationArguments arguments){
+                    System.out.println("foo: " + arguments.containsOption("foo"));
+                    System.out.println("bar: " + arguments.containsOption("bar"));
+                }
+            
             }
-        
-        }
-        ```
-      
-    * ③ 실행 결과를 보면 foo는 출력되지 않고 bar는 출력된다.
-        
-    * 즉, ApplicationArguments 객체에는 JVM option 값이 전달 되지 않는다는 것을 알 수 있다.
+            ```
+          
+        * ③ 실행 결과를 보면 foo는 false로 출력되고 bar는 true로 출력된다.
+            
+        * 즉, ApplicationArguments 객체에는 JVM option 값이 전달 되지 않는다는 것을 알 수 있다.
     
-* (4) 애플리케이션이 실행된 이후, 뭔가 추가적으로 실행하고 싶을 때, 사용 할 수 있는 방법
+* (4) 스프링 부트 애플리케이션이 실행된 이후, 뭔가 추가적으로 더 실행하고 싶을 때, 사용하는 방법
 
-    * ① ApplicationRunner `추천`
+    * ① `ApplicationRunner` **[추천]**
 
         ```java
         @Component
@@ -1068,24 +1070,36 @@
         }
         ```
       
-    * ② CommandLineRunner
+        * `ApplicationRunner` 인터페이스를 구현한다.
+      
+    * ② `CommandLineRunner`
     
     * `@Order`로 순서를 지정 할 수도 있다. (값이 낮을수록 우선 순위가 높다)
 
 #### 3) 외부 설정 : 1부 - `핵심 기능`
 
-* (1) 사용 할 수 있는 외부 설정
+* (1) `외부 설정`은 애플리케이션에서 사용하는 여러 가지 설정 값들을 정의한다.
 
-    * `외부 설정`은 애플리케이션에서 사용하는 여러 가지 설정 값들을 정의한다.
+    * `properties`
     
-    * application.properties
-   
-        * `application.properties`는 스프링 부트가 애플리케이션을 구동할 때, 자동으로 로딩하는 외부 설정 파일이다. (해당 이름은 컨벤션으로 정해진 것이다.)
+    * `YAML`
+    
+    * `환경변수`
+    
+    * `커맨드 라인 아규먼트`
 
+* (2) `application.properties` 또는 `application.yml`
+
+    * `application.properties`는 스프링 부트 애플리케이션이 구동될 때, 자동으로 로딩하는 **외부 설정 파일**이다.
+                
+        * 해당 이름은 컨벤션으로 정해진 것이다.
+
+    * 실습
+    
         * ① 설정 값 정의하기
         
-            * `키 = 값` 형태로 설정 값을 지정한다.
-
+            * `키 = 값` 형태로 설정 값을 정의한다.
+    
                 ```java
                 #application.properties
                 kevin.name = kevin
@@ -1093,8 +1107,8 @@
               
         * ② 애플리케이션에서 설정 값 참조하기
         
-            * 애플리케이션에서 설정 값을 참조하려면 @Value를 사용하면 된다.
-
+            * 애플리케이션에서 설정 값을 참조하려면 `@Value`를 사용하면 된다.
+    
                 ```java
                 @Component
                 public class SampleRunner implements ApplicationRunner {
@@ -1110,8 +1124,6 @@
                     }
                 }
                 ```
-
-    * YAML, 환경변수, 커맨드 라인 아규먼트를 사용하는 방법도 있다.
     
 * (2) 프로퍼티 우선 순위
 
@@ -1149,7 +1161,7 @@
 
     * ⑰ 기본 프로퍼티 (SpringApplication.setDefaultProperties)
     
-* (3) 테스트 코드에서 외부 설정 - 문제가 발생 할 수 있는 방법
+* (3) 테스트 코드에서 외부 설정 - 에러가 발생 할 수도 있는 방법
 
     * ① 다음과 같은 테스트 코드를 작성한다.
     
@@ -1170,23 +1182,25 @@
         }
         ```
       
-    * ② 테스트에서만 사용되는 `application.properties` 파일이 필요하다고 가정한다. `test/resources`에 `application.properties` 파일을 생성한다.
+    * ② 테스트에서만 사용되는 `application.properties` 파일이 필요하다고 가정한다.
     
-        * 해당 경로에 resources 디렉토리가 없다면 생성한다.
+        * 다음과 같은 경로에 `resources` 디렉토리가 없다면 생성한다.
         
             ![image 7](images/img7.png)
             
-        * 인텔리제이에서 [File] - [Project Structure]를 클릭한 다음, 아래 그림처럼 [src]-[test]에 있는 `resources`를 선택하고 `Test Resources` 아이콘을 클릭한다. 그리고 [Apply] , [OK] 버튼을 클릭한다.
+        * 인텔리제이에서 `[File]` - `[Project Structure]`를 클릭한 다음, 아래 그림처럼 `src/test`에 있는 `resources`를 선택하고 `Test Resources` 아이콘을 클릭한다. 
+        
+        * 그 다음, `[Apply]`와 `[OK]` 버튼을 클릭한다.
           
             ![image 8](images/img8.png)
             
-        * `test/resources`에 만든 `application.properties` 파일의 내용은 다음과 같이 작성한다.
+        * `test/resources`에 `application.properties` 파일을 생성한 다음, 아래 내용처럼 작성한다.
         
             ```
             kevin.name=kevinntech
             ```
                 
-    * ③ 그리고 테스트 코드를 그대로 실행하면 에러가 발생하므로 다음과 같이 변경한 다음, 실행하자.
+    * ③ 그리고 테스트 코드를 그대로 실행하면 에러가 발생하므로 다음과 같이 코드를 변경한 다음, 실행하자.
     
         ```java
         @RunWith(SpringRunner.class)
@@ -1205,18 +1219,16 @@
         }
         ```
 
-* (4) 테스트 코드에서 외부 설정 - 문제가 발생하는 이유
-
-    * 문제가 발생하는 이유에 대해서 하나씩 살펴보자.
+* (4) 테스트 코드에서 외부 설정 - 에러가 발생하는 이유
     
     * ① `src/main/resources`에 있는 `application.properties`를 다음과 같이 수정한다.
 
         ```
         kevin.name=kevin
-        kevin.age=${random.int}
+        kevin.age=${random.int} # 수정된 부분
         ```
       
-    * ② SampleRunner 코드를 수정한다. 
+    * ② SampleRunner 코드를 다음과 같이 수정한다. 
 
         ```java
         @Component
@@ -1225,9 +1237,11 @@
             @Value("${kevin.name}")
             private String name;
         
+            // 수정된 부분
             @Value("${kevin.age}")
             private int age;
         
+            // 수정된 부분
             @Override
             public void run(ApplicationArguments args) throws Exception {
                 System.out.println("================");
@@ -1238,21 +1252,21 @@
         }
         ```
       
-    * ③ `src/main`에 있는 SampleRunner를 실행하면 문제가 없지만 테스트 코드를 실행하면 에러가 발생한다.
-    
-        * 에러가 발생한 이유는 다음과 같다.
-        
-        * 테스트 코드를 실행하면 main 디렉토리를 빌드한 다음, test 디렉토리를 빌드한다.
+    * ③ `src/main`에 있는 SampleRunner를 실행하면 문제가 없지만 테스트 코드를 실행하면 에러가 발생한다. 그 이유는 무엇일까?
+            
+        * 테스트 코드를 실행하면 먼저 `src` 디렉토리를 빌드해서 클래스패스에 놓는다. 그 다음, `test` 디렉토리를 빌드해서 클래스패스에 놓는다.
           
-        * 이 과정에서 test 디렉토리에 있는 `application.properties`가 main 디렉토리에 있는 것을 덮어쓰게 된다.
-          
-        * 그리고 test 디렉토리에 있는 `application.properties` 파일은 kevin.age가 정의되어 있지 않으므로 에러가 발생하게 되는 것이다.
-        
-        * 그래서 에러가 발생하지 않도록 하려면 test 디렉토리에도 `kevin.age = ${random.int}`를 추가해야 한다. 이러한 방식으로 관리 하기는 힘들다.
+            * 이 과정에서 `test` 디렉토리에 있는 외부 설정 파일(`application.properties`)로 `src` 디렉토리에 있는 것을 덮어쓰게 된다.
+              
+            * 그리고 test 디렉토리에 있는 외부 설정 파일은 `kevin.age`가 정의되어 있지 않으므로 에러가 발생하게 되는 것이다.
+            
+            * 그래서 에러가 발생하지 않도록 하려면 `test` 디렉토리에 있는 외부 설정 파일을 삭제하거나 `kevin.age = ${random.int}` 부분을 추가해야 한다. 
+            
+            * 이러한 방식으로 관리 하기는 힘들다.
     
 * (5) 테스트 코드에서 외부 설정 - 해결방법
 
-    * ① `@SpringBootTest`의 properties 속성을 이용하는 방법
+    * ① `@SpringBootTest`의 `properties` 속성을 이용하는 방법
     
         ```java
         @RunWith(SpringRunner.class)
@@ -1276,7 +1290,7 @@
         ```java
         @RunWith(SpringRunner.class)
         @TestPropertySource(properties = "kevin.name=kevin3")
-        // @TestPropertySource(properties = {"kevin.name=kevin3", "kevin.age=20"})
+        // @TestPropertySource(properties = {"kevin.name=kevin3", "kevin.age=20"}) // 여러 설정 값 지정
         @SpringBootTest
         public class SpringinitApplicationTests {
         
@@ -1292,13 +1306,13 @@
         }
         ```
 
-    * ③ 테스트 용도의 외부 설정 파일을 다른 이름(test.properties)으로 만든 다음, @TestPropertySource로 지정하는 방법
+    * ③ 테스트 용도의 외부 설정 파일을 다른 이름(`test.properties`)으로 만든 다음, `@TestPropertySource`로 외부 설정 파일 경로를 지정하는 방법
 
-        * 외부 설정 파일 이름이 다르기 때문에 `application.properties` 파일을 덮어 쓰지 않게된다.
+        * 외부 설정 파일 이름이 다르기 때문에 `application.properties` 파일을 덮어 쓰지 않게 된다.
     
             ```java
             @RunWith(SpringRunner.class)
-            @TestPropertySource(locations = "classpath:/test.properties") // 테스트에서는 클래스 패스를 기준으로 test.properties를 사용한다.
+            @TestPropertySource(locations = "classpath:/test.properties") // 테스트에서는 클래스패스를 기준으로 test.properties를 사용한다.
             @SpringBootTest
             public class SpringinitApplicationTests {
             
@@ -1308,7 +1322,7 @@
                 @Test
                 public void contextLoads() {
                     assertThat(environment.getProperty("kevin.name"))
-                            .isEqualTo("kevinTest");
+                            .isEqualTo("kevin2");
                 }
             
             }
@@ -1332,116 +1346,125 @@
 
     * 우선 순위가 높은 설정 파일이 낮은 설정 파일을 덮어쓴다.
     
-        ```
-        ① file:./config/
-        ② file:./
-        ③ classpath:/config/      
-        ④ classpath:/
-        ```
-      
+        * ① `file:./config/`
+        
+        * ② `file:./`
+        
+        * ③ `classpath:/config/`      
+        
+        * ④ `classpath:/`
+          
 #### 4) 외부 설정 : 2부 - `핵심 기능`
 
-* (1) 외부 설정을 Bean으로 등록하기
+* (1) 외부 설정을 빈(Bean)으로 등록하기
 
-    * 같은 key로 시작하는 외부 설정이 많은 경우, 하나의 클래스로 정의한 다음, 빈으로 등록 할 수 있다. (자동 완성, 타입 컨버전 등이 가능해진다.)
+    * 같은 `key`로 시작하는 외부 설정을 묶어서 하나의 클래스로 정의한 다음, 빈으로 등록 할 수 있다. 
     
-        ```
-        kevin.name = kevin
-        kevin.age = ${random.int(0,100)}
-        kevin.fullName = ${kevin.name} Kim
-        ```
+        * 자동 완성, 타입 컨버전 등이 가능해진다.
+   
+            ```
+            kevin.name = kevin
+            # random.int(0, 100) 처럼 , 다음에 공백이 있으면 에러 발생함
+            kevin.age = ${random.int(0,100)} 
+            kevin.fullName = ${kevin.name} Kim
+            ```
 
-    * ① 클래스를 다음과 같이 작성한다.
+    * 실습
+            
+        * ① 클래스를 다음과 같이 작성한다.
+        
+            * `@ConfigurationProperties`는 외부 설정 파일의 프로퍼티 값을 클래스에 바인딩을 한다.
     
-        * `@Component`는 빈으로 등록되도록 하며 `@ConfigurationProperties`는 application.properties와 바인딩 되도록 한다.
-
+                ```java
+                @Component
+                @ConfigurationProperties("kevin")
+                public class KevinProperties {
+                
+                    String name;
+                
+                    int age;
+                
+                    String fullName;
+                
+                    // Getter, Setter
+                    public String getName() {
+                        return name;
+                    }
+                
+                    public void setName(String name) {
+                        this.name = name;
+                    }
+                
+                    public int getAge() {
+                        return age;
+                    }
+                
+                    public void setAge(int age) {
+                        this.age = age;
+                    }
+                
+                    public String getFullName() {
+                        return fullName;
+                    }
+                
+                    public void setFullName(String fullName) {
+                        this.fullName = fullName;
+                    }
+                }
+                ```
+              
+                * 빈으로 등록한 다음, Getter, Setter를 만든다.
+     
+        * ② `pom.xml`에 다음과 같은 의존성을 추가한다.
+        
+            ```html
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-configuration-processor</artifactId>
+            </dependency>
+            ```
+          
+            * 해당 애노테이션(`@ConfigurationProperties`)이 붙어 있는 클래스를 분석해서 메타 정보를 생성해주는 플러그인에 대한 의존성을 추가해주어야 한다.
+          
+        * ③ SampleRunner 코드를 외부 설정 클래스(KevinProperties)의 Bean을 주입 받아서 사용하도록 한다.
+        
             ```java
             @Component
-            @ConfigurationProperties("kevin")
-            public class KevinProperties {
-            
-                String name;
-            
-                int age;
-            
-                String fullName;
-            
-                // Getter, Setter
-                public String getName() {
-                    return name;
-                }
-            
-                public void setName(String name) {
-                    this.name = name;
-                }
-            
-                public int getAge() {
-                    return age;
-                }
-            
-                public void setAge(int age) {
-                    this.age = age;
-                }
-            
-                public String getFullName() {
-                    return fullName;
-                }
-            
-                public void setFullName(String fullName) {
-                    this.fullName = fullName;
+            public class SampleRunner implements ApplicationRunner {
+                
+                /*  // 기존 코드
+                    @Value("${kevin.fullName}")
+                    private String name;
+                
+                    @Value("${kevin.age}")
+                    private int age;    */
+                
+                @Autowired
+                KevinProperties kevinProperties;
+                
+                @Override
+                public void run(ApplicationArguments args) throws Exception {
+                    System.out.println("================");
+                    System.out.println(kevinProperties.getName());
+                    System.out.println(kevinProperties.getAge());
+                    System.out.println("================");
                 }
             }
-            ```
-     
-    * ② pom.xml에 의존성을 추가한다.
-    
-        ```html
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-        </dependency>
-        ```
-      
-    * ③ SampleRunner 코드를 다음과 같이 변경한다. 외부 설정 클래스의 Bean을 주입 받아서 사용하도록 한다.
-    
-        ```java
-        @Component
-        public class SampleRunner implements ApplicationRunner {
-            
-            /*  // 기존 코드
-                @Value("${kevin.fullName}")
-                private String name;
-            
-                @Value("${kevin.age}")
-                private int age;    */
-            
-            @Autowired
-            KevinProperties kevinProperties;
-            
-            @Override
-            public void run(ApplicationArguments args) throws Exception {
-                System.out.println("================");
-                System.out.println(kevinProperties.getName());
-                System.out.println(kevinProperties.getAge());
-                System.out.println("================");
-            }
-        }
         ```
       
 * (2) 융통성 있는 바인딩 (Relaxed Binding)
 
-    * `application.properties`에서 사용되는 키(key)에  `_ (under score)` 또는 `- (kebab)`이 포함되어 있더라도 적절하게 camelcase로 변환하여 바인딩 된다.
+    * `application.properties`에서 사용되는 키(key)에  `_ (under score)` 또는 `- (kebab)`이 포함되어 있더라도 적절하게 `캐멀 케이스(camelcase)`로 변환하여 바인딩 된다.
   
         ```
         kevin.name = kevin
-        # ${random.int(0, 100)}와 같이 공백이 있으면 에러가 발생함
         kevin.age = ${random.int(0,100)} 
         kevin.full_name = ${kevin.name} Kim
         ```
       
 * (3) 프로퍼티 타입 컨버전
 
-    * `application.properties`에 있는 설정 값이 외부 설정 클래스와 바인딩 될 때, 해당 클래스의 필드에 적절한 타입(int, String, Duration 등)으로 타입 컨버전이 된다.
+    * `application.properties`에 있는 설정 값이 외부 설정 클래스에 바인딩 될 때, 해당 클래스의 필드에 적절한 타입(int, String, Duration 등)으로 타입 컨버전이 된다.
 
         ```java
         @Component
@@ -1461,18 +1484,18 @@
         }
         ```
       
-    * `application.properties`에서 외부 설정을 지정할 때 s, m, h, d 와 같은 suffix를 사용하면 `@DurationUnit`을 사용하지 않더라도 Duration으로 타입 컨버전이 된다.
+    * `application.properties`에서 설정 값을 지정할 때 s, m, h, d 와 같은 `suffix`를 사용하면 `@DurationUnit`을 사용하지 않더라도 `Duration`으로 타입 컨버전이 된다.
 
         ```
         kevin.name = kevin
-        kevin.age = ${random.int(0,100)} // ${random.int(0, 100)}와 같이 공백이 있으면 에러가 발생함
+        kevin.age = ${random.int(0,100)}
         kevin.full_name = ${kevin.name} Kim
         kevin.sessionTimeout=25s
         ```
 
 * (4) 프로퍼티 값 검증
 
-    * `@Validated`와 JSR-303 Validation API의 구현체 (@NotNull ...)를 사용하여 프로퍼티 값을 검증 할 수 있다.
+    * `@Validated`와 `JSR-303` 애노테이션 (`@NotNull` 등...)를 사용하여 프로퍼티 값을 검증 할 수 있다.
     
         ```java
         @Component
@@ -1487,19 +1510,28 @@
         }
         ```
 
-* (5) @Value과 @ConfigurationProperties 비교
+    * `kevin.name`의 값을 비어 있도록 만든 다음, 애플리케이션을 실행하면 프로퍼티 값이 검증 되는 것을 확인 할 수 있다.
 
-    * @Value 보다는 @ConfigurationProperties를 사용하는 것이 좋다.
+        ```
+        kevin.name = 
+        kevin.age = ${random.int(0,100)}
+        kevin.full_name = ${kevin.name} Kim
+        kevin.sessionTimeout=25s
+        ```
+
+* (5) `@Value`과 `@ConfigurationProperties` 비교
+
+    * `@Value` 보다는 `@ConfigurationProperties`를 사용하는 것이 좋다.
       
-    * 그 이유는 @Value는 SpEL을 사용 할 수 있지만 위에서 언급된 기능들은 전부 사용 할 수 없기 때문이다.   
+    * 그 이유는 `@Value`는 SpEL을 사용 할 수 있지만 위에서 언급된 기능들은 전부 사용 할 수 없기 때문이다.   
 
 #### 5) 프로파일 - `핵심 기능`
 
 * (1) Profile 이란
 
-    * `Profile`은 환경(테스트, 운영 등)마다 다른 설정을 할 수 있도록 하는 기능이다.
+    * `프로파일(Profile)`은 특정 실행 환경에서 사용할 빈들의 묶음을 말한다.
 
-    * 예를 들어, 테스트와 운영 환경에서 서로 다른 빈이 사용 되도록 할 수 있다.
+    * 예를 들어, 운영 환경과 테스트에서 서로 다른 빈이 사용 되도록 할 수 있다.
 
 * (2) Profile 설정
 
@@ -1559,26 +1591,30 @@
           
     * ③ Profile 활성화
 
-        * `application.properties`에서 `spring.profiles.active`로 활성화 할 프로파일을 지정 할 수 있다.
-        
+        * `application.properties`에서 `spring.profiles.active`로 활성화 할 프로파일을 지정한다.
+
+            ```
+            spring.profiles.active=prod
+            ```
+
 * (3) Profile용 프로퍼티 파일 만들기
 
-    * ① Profile용 프로퍼티 파일 만들기
-    
-        * Profile용 프로퍼티 파일을 `application-{profile}.properties`로 만든다.
+    * ① `application-{profile}.properties`라는 이름으로 Profile용 프로퍼티 파일을 만든다.
         
-            ![image 9](images/img9.png)
+        ![image 9](images/img9.png)
             
-        * 그리고 각 파일에 맞는 설정을 지정한다.
+        * 그리고 각 파일에 맞는 설정 값을 지정한다.
         
             ```
             # application-prod.properties
             kevin.name = kevin prod
-            
+            ```
+          
+            ```
             # application-test.properties
             kevin.name = kevin test
             ```
-          
+                   
     * ② Profile 사용
     
         * SampleRunner의 코드를 변경한다.
@@ -1604,51 +1640,77 @@
             ```
           
         * `Profile용 프로퍼티 파일`이 `기본 application.properties` 보다 우선순위가 더 높다.
+        
+            * `application-prod.properties`, `application-test.properties` **>** `application.properties`
           
         * 그렇기 때문에 `application-prod.properties`의 값(kevin.name)이 `application.properties`에 있는 값(kevin.name)을 오버라이딩 한다.        
 
-* (4) 다른 프로파일을 포함하기
+* (4) 다른 Profile용 프로퍼티 파일을 포함하기
 
-    * `Profile용 프로퍼티 파일`을 `spring.profiles.include`로 포함 할 수 있다.  
+    * `spring.profiles.include`는 `Profile용 프로퍼티 파일`을 포함할 때, 사용한다.  
     
-    * ① Profile용 프로퍼티 파일 만들기
-
-        ```
-        # application-proddb.properties
-        kevin.full-name = dbdbdb
-        ```    
-
-    * ② 프로파일 용 프로퍼티 파일을 포함한다.
+        * ① Profile용 프로퍼티 파일 만들기
     
-        ```
-        /# application-prod.properties
-        kevin.name = kevin prod
-        spring.profiles.include=proddb
-        ```
-      
+            ```
+            # application-proddb.properties
+            kevin.full-name = dbdbdb
+            ```    
+    
+        * ② 프로파일 용 프로퍼티 파일을 포함한다.
+        
+            ```
+            # application-prod.properties
+            kevin.name = kevin prod
+            spring.profiles.include=proddb
+            ```
+          
+            * `spring.profiles.include`는 해당 `Profile용 프로퍼티 파일`의 설정들을 가져 올 수 있다.
+
 #### 6) 로깅 1부 : 스프링 부트 기본 로거 설정 - `핵심 기능`
 
 * (1) 로깅 퍼사드 VS 로거
 
-    * 스프링 부트는 기본적으로 `Commons Logging`을 사용하며 결국에는 SLF4j를 사용하게 된다.
+    * 스프링 부트는 기본적으로 `Commons Logging`을 사용하며 결국에는 `SLF4j`를 사용하게 된다.
 
-    * `Commons Logging`과 `SLF4j`는 실제 로깅을 하는 것이 아닌 로거(Logger) API 들을 추상화 해놓은 인터페이스다. 그리고 `로깅 퍼사드` 라고도 부른다.
+    * `로깅 퍼사드(Logging Facade)` : 실제 로깅을 하는 것이 아닌 **로거(Logger) API 들을 추상화 해놓은 인터페이스**다.
+    
+        * Ex) `Commons Logging`, `SLF4j`
+    
+        * `로깅 퍼사드`를 사용하면 원하는 로거로 바꿔서 사용 할 수 있다.
 
-    * `로깅 퍼사드`를 사용하면 원하는 로거로 바꿔서 사용 할 수 있다.
-
-    * `로거`에는 JUL, Log4J2 , LogBack이 있다.
+    * `로거(Logger)` : 로그를 기록하는 구현체를 말한다. 
+    
+        * Ex) `JUL`, `Log4J2` , `LogBack`
     
 * (2) 스프링 5에 로거 관련 변경 사항
 
-    * 스프링 5 부터 `pom.xml`에서 `Commons Logging`를 제외하지 않더라도 컴파일 시점에 SLF4j 또는 Log4j2로 변경 할 수 있는 기능을 가진 `Spring-JCL`이라는 모듈을 만들었다.
-    
-    * `Commons Logging` → `SLF4j` 또는 `Log4j2` → `Logback`
-    
-        * Commons Logging을 SLF4j 또는 Log4j2로 변환해주며 SLF4j는 SLF4j의 구현체인 Logback으로 보낸다.
-      
-        * 그리고 Log4j2를 사용하더라도 SLF4j로 보내기 때문에 결국에는 Logback으로 로그를 남기게 된다.
+    * 스프링 5 이전까지
+
+        * `Commons Logging`은 런타임 시 클래스 로딩 관련 이슈를 포함한 여러 가지 문제들이 있었다. 
         
-    * 즉, 스프링 부트는 최종적으로 `Logback`을 사용하게 된다.
+        * 그래서 개발자들은 `Commons Logging`을 기피하게 되었고 `SLF4j`라는 새로운 로깅 퍼사드가 만들어지게 되었다.
+        
+        * 그럼에도 불구하고 스프링이 `Commons Logging`을 사용하는 이유는 스프링 프레임워크 코어 모듈이 만들어질 때는 `SLF4j`가 만들어지기 전이었으며 
+        
+        * 스프링 개발자들이 `Commons Longging`을 사용하고 있었기 때문이다.
+    
+        * 스프링 부트 1.x 버전에서는 `Commons Logging`에 대한 의존성을 제외시키고 `SLF4j` 의존성을 추가해서 사용 했었다고 한다. 하지만 이러한 과정은 너무 귀찮은 문제가 있었다.
+
+    * `Spring-JCL`
+
+        * 스프링 5 부터는 `pom.xml`에서 `Commons Logging`를 제외하지 않더라도 `Commons Logging` 코드를
+        
+        * 컴파일 시점에 `SLF4j` 또는 `Log4j2`로 변경 할 수 있는 기능을 가진 `Spring-JCL`이라는 모듈을 만들었다.
+    
+    * 정리
+    
+        * `Commons Logging` → `SLF4j` → `Logback`
+
+            * `Commons Logging`을 `SLF4j`로 변환해주며 `SLF4j`는 `Logback`으로 보낸다.
+          
+                * `Logback` : SLF4j의 구현체
+          
+            * 즉, 스프링 부트는 최종적으로 `Logback`을 사용해서 로그를 남기게 된다.
     
 * (3) 스프링 부트 로깅
 
@@ -1656,7 +1718,7 @@
      
         ![image 10](images/img10.png)
         
-    * 더 많은 내용의 로그를 출력하고 싶다면 `[Edit Configurations...]에`서 `Program arguments`에 --debug를 지정하거나 `VM options`에 -Ddebug를 지정한다.  
+    * 더 많은 내용의 로그를 출력하고 싶다면 `[Edit Configurations...]에`서 `Program arguments`에 `--debug`를 지정하거나 `VM options`에 `-Ddebug`를 지정한다.  
 
         * `--debug` : 일부 핵심 라이브러리(내장 컨테이너, 하이버네이트, 스프링 부트)만 디버깅 모드로 더 많은 정보를 출력한다.
         
@@ -1668,37 +1730,30 @@
  
     * 로그를 파일로 출력
     
-        * `logging.file` : 지정한 로그 파일로 기록한다.
+        * 로그는 기본적으로 콘솔에 출력된다.
+    
+        * 로그를 파일로 출력하는 방법은 다음과 같이 2가지가 있다.
         
-        * `logging.path` : 지정한 경로에 spring.log 파일로 기록한다. 
-        
-        * 예를 들어, `logging.path=logs`를 지정하면 logs 디렉토리 안에 `spring.log` 파일로 기록된다.
+            * `logging.file` : 지정한 로그 파일에 기록한다.
+            
+            * `logging.path` : 지정한 경로에 `spring.log` 파일로 기록한다. 
+            
+                * 예를 들어, `logging.path=logs`를 지정하면 logs 디렉토리 안에 `spring.log` 파일로 기록된다.
         
     * 로그 레벨 조정
     
-        * `logging.level.패키지경로 = 로그 레벨`과 같이 패키지 마다 로그 레벨을 지정 할 수 있다.
+        * `logging.level.패키지경로 = 로그 레벨`처럼 패키지 마다 로그 레벨을 지정 할 수 있다.
         
-        * `logging.level.me.kevinntech = DEBUG`로 지정하면 로그 레벨을 디버그로 지정한다.
+            * `logging.level.me.kevinntech = DEBUG`로 지정하면 해당 패키지의 로그 레벨을 디버그로 지정한다.
         
     * 로거 만들기
     
-        * `LoggerFactory` 클래스의 `getLogger()` 메소드로 `Logger` 객체를 생성한다. (SLF4j 사용)
+        * `LoggerFactory` 클래스의 `getLogger()` 메소드로 `Logger` 객체를 얻는다. (이때, SLF4j를 사용)
 
-        * 로그 레벨 마다 로그를 출력하는 메소드를 제공한다.
-        
-            * 아래로 내려 갈수록 심각한 오류를 의미한다.
-            
-                * `logger.trace()` : debug 보다 더 상세한 정보를 표시한다.
-                  
-                * `logger.debug()` : 디버깅하기 위한 정보를 표시한다.
-                  
-                * `logger.info()` : 로그인, 상태 변경과 같은 정보성 메시지를 표시한다. 
-                  
-                * `logger.warn()` : 오류는 아니지만, 잠재적인 오류의 원인이 될 수 있는 경고성 정보를 표시한다.
-                  
-                * `logger.error()` : 요청을 처리하는 도중 오류가 발생한 경우, 표시한다.
-            
             ```java
+            import org.slf4j.Logger;
+            import org.slf4j.LoggerFactory;
+          
             @Component
             public class SampleRunner implements ApplicationRunner {
             
@@ -1721,11 +1776,29 @@
             }
             ```
           
+        * 로그 레벨 마다 로그를 출력하는 메소드를 제공한다.
+        
+            * 위에서 아래쪽으로 내려 갈수록 심각한 오류를 의미한다.
+
+                * ① `logger.trace()` : debug 보다 훨씬 상세한 정보를 표시한다.
+
+                * ② `logger.debug()` : 디버깅하기 위한 정보를 표시한다.
+
+                * ③ `logger.info()` : 로그인, 상태 변경과 같은 정보성 메시지를 표시한다. 
+                
+                * ④ `logger.warn()` : 오류는 아니지만, 잠재적인 오류의 원인이 될 수 있는 경고성 정보를 표시한다.
+                
+                * ⑤ `logger.error()` : 요청을 처리하는 도중 오류가 발생한 경우, 표시한다.
+
+                    * 개발 할 때는 로그를 조금 더 자세히 보고 싶을 수도 있고, 실제 운영 중일 때는 그 정도까지는 필요 없을 수도 있기 때문에
+                    
+                    * 필요에 따라 로그 레벨을 조정하여 원하는 레벨로 로그를 남길 수 있다.
+          
 #### 7) 로깅 2부 : 커스터마이징 - `핵심 기능`
 
 * (1) 실습 준비
 
-    * ① info에서 debug 레벨로 로그를 출력 하도록 변경한다.
+    * ① 로그를 INFO에서 DEBUG 레벨로 출력 하도록 변경한다.
 
         ```java
         @Component
@@ -1752,13 +1825,21 @@
       
     * ② `[Edit Configurations...]`에서 `VM Options`와 `Program arguments`에 설정한 내용을 제거한다.
     
-    * ③ `application.properties`에서 `logging.level.me.kevinntech = DEBUG`를 추가하고 실행한 다음, 결과를 확인하고 제거한다.
+    * ③ `application.properties`에서 `logging.level.org.springframework=debug`를 추가하고 실행한 다음, 결과를 확인한다.
+    
+        * 그러면 위의 코드에서 `logger.debug(hello)`와 같이 내가 DEBUG 레벨로 출력한 로그는 콘솔에 표시되지 않는다.
         
+        * 그 이유는 `me.kevinntech` 패키지는 여전히 INFO 레벨이기 때문이다.
+
+    * ④ 그래서 `application.properties`에서 `logging.level.me.kevinntech=debug`를 추가하고 실행하면 정상적으로 출력되는 것을 확인 할 수 있다.
+
+        ![image 11](images/img11.png)
+
 * (2) 커스텀 로그 설정 파일 사용하기
 
     * 로거에 맞는 커스텀 로그 설정 파일을 다음과 같이 생성한다.
       
-        * Logback: `logback-spring.xml`
+        * Logback : `logback-spring.xml`
         
             ```html
             <?xml version="1.0" encoding="UTF-8"?>
@@ -1767,52 +1848,54 @@
                 <logger name="me.kevinntech" level="DEBUG"/>
             </configuration>
             ```
+          
+            * `application.properties` 보다 더 많은 로거 관련 설정이 필요하다면 커스텀 로그 설정 파일을 생성한다.
     
-        * Log4J2: `log4j2-spring.xml`
+        * Log4J2 : `log4j2-spring.xml`
       
-        * JUL (추천X): `logging.properties`
+        * JUL (추천 X) : `logging.properties`
         
-        * Logback extension
-        
-            * 프로파일 <springProfile name=”프로파일”>
-            
-            * Environment 프로퍼티 <springProperty>
-
-    * 애플리케이션을 실행하면 다음과 같이 DEBUG 레벨로 출력되는 것을 확인 할 수 있다.
+    * `Logback extension`
     
-        ![image 11](images/img11.png)
-        
+        * Logback 설정 파일 안에서 `프로파일` 또는 `Environment 프로퍼티`를 사용 할 수 있다.
+    
+            * 프로파일 : `<springProfile name="프로파일">`
+            
+                * 특정 프로파일 일 때만, 특정 로그 설정이 적용 되도록 할 수 있다.
+            
+            * Environment 프로퍼티 : `<springProperty>`
+
 * (3) 로거를 Log4j2로 변경하기
 
     * 기본적으로는 Logback을 사용하게 되는데 Log4j2로 변경하는 방법은 다음과 같다.
    
-    * 일단, 이전 실습에서 만들었던 `logback-spring.xml`를 삭제한다.
-    
-    * ① pom.xml에서 기본적으로 들어오는 로깅을 `<exclusion>`으로 제외한다.
-    
-    * ② 그리고 log4j2 의존성을 추가한다.
-    
-        ```html
-        <dependency>
-        	<groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-web</artifactId>
-        	<exclusions>
-        		<exclusion>
-        			<groupId>org.springframework.boot</groupId>
-        			<artifactId>spring-boot-starter-logging</artifactId>
-        		</exclusion>
-        	</exclusions>
-        </dependency>
+        * 일단, 이전 실습에서 만들었던 `logback-spring.xml`를 삭제한다.
         
-        <dependency>
-        	<groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
-        ```
+        * ① `pom.xml`에서 기본적으로 들어오는 로깅을 `<exclusion>`으로 제외한다.
+        
+        * ② 그리고 `log4j2` 의존성을 추가한다.
+        
+            ```html
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-log4j2</artifactId>
+            </dependency>
+            ```
+    
+        * ③ `application.properties`에 `logging.level.me.kevinntech = debug`를 추가한 다음, 애플리케이션을 실행한다.
 
-    * ③ `application.properties`에 `logging.level.me.kevinntech = debug`를 추가한 다음, 애플리케이션을 실행한다.
-
-    * 이제, 최종적으로 로그 메시지를 출력하는 것은 Log4J2가 된다.
+        * ④ 이제, 최종적으로 로그 메시지를 출력하는 것은 Log4J2가 된다.
     
 #### 8) 테스트 - `핵심 기능`
 
@@ -1820,7 +1903,9 @@
 
     * ① 새로운 프로젝트를 생성한다.
     
-    * ② 그리고 `Controller`와 `Service` 클래스를 작성한다. 그리고 `Controller`가 `Service`를 호출하고 "hello kevin"를 리턴하도록 한다.
+    * ② `Controller`와 `Service` 클래스를 작성한다. 
+    
+    * 그리고 `Controller`가 `Service`를 호출하고 "hello kevin"를 리턴하도록 한다.
     
         ```java
         @RestController
@@ -1847,9 +1932,9 @@
         }
         ```
       
-    * ③ 테스트 코드를 작성 하기 전에 pom.xml에 다음 의존성이 존재하는지 확인한다.
+    * ③ 테스트 코드를 작성 하기 전에 `pom.xml`에 다음과 같은 의존성이 존재하는지 확인한다.
     
-        * `spring-boot-starter-test` 의존성을 추가하였다면 테스트에 필요한 라이브러리는 대부분 있다고 보면 된다. 
+        * `spring-boot-starter-test`라는 의존성이 추가되어 있다면 테스트에 필요한 라이브러리는 대부분 있다고 보면 된다. (`JUnit`, `Mockito`, `JsonPath` 등...)
     
             ```html
             <dependency>
@@ -1865,25 +1950,25 @@
     
         * 스프링 부트의 통합 테스트 애노테이션이며 테스트에 필요한 모든 의존성을 제공한다.
 
-        * JUnit 4에서는 @RunWith(SpringRunner.class)와 같이 사용해야 한다.
-        
-        * JUnit 5에서는 @SpringBootTest 안에 @ExtendWith(SpringExtension.class)가 포함되어 때문에 생략 가능하다.
+            * JUnit 4에서는 `@RunWith(SpringRunner.class)`와 같이 사용해야 한다.
+            
+            * JUnit 5에서는 `@SpringBootTest` 안에 `@ExtendWith(SpringExtension.class)`가 포함되어 때문에 생략 가능하다.
         
         * `webEnvironment`의 타입
         
-            * MOCK : 내장 톰캣을 구동 하지 않는다. (기본 값)
+            * `MOCK` : 내장 서블릿 컨테이너를 구동 하지 않고 서블릿 컨테이너를 Mocking 한 것을 실행한다. (기본 값)
             
-                * `webEnvironment`가 Mock 타입이면 서블릿 컨테이너를 구동 하지 않고 서블릿을 Mocking 한 것을 띄워준다.
+                * `webEnvironment`가 Mock 타입이면 실제 서블릿 컨테이너를 구동 하지 않고 서블릿 컨테이너를 Mocking 한 것을 실행한다.
  
-                * 이 때, Mockup 된 서블릿과 상호 작용을 하려면 `MockMVC`라는 클라이언트를 사용해야 한다.
+                * 이 때는 `MockMVC`라는 클라이언트를 사용해야 한다.
             
-            * RANDOM_PORT, DEFINED_PORT : 내장 톰캣을 구동한다.
+            * `RANDOM_PORT`, `DEFINED_PORT` : 내장 서블릿 컨테이너를 구동한다.
             
-                * `webEnvironment`가 RANDOM_PORT 또는 DEFINED_PORT 타입이면 해당 포트로 서블릿 컨테이너(내장 톰캣)를 구동한다.
+                * `webEnvironment`가 `RANDOM_PORT` 또는 `DEFINED_PORT` 타입이면 해당 포트로 내장 서블릿 컨테이너를 구동한다.
                 
-                * 이 때는 MockMvc가 아닌 `TestRestTemplate` 이나 `WebTestClient`를 사용해야 한다.
+                * 이 때는 `MockMvc`가 아닌 `TestRestTemplate` 이나 `WebTestClient`라는 클라이언트를 사용해야 한다.
                         
-            * NONE : 서블릿 환경을 제공 하지 않는다.
+            * `NONE` : 서블릿 환경을 제공하지 않는다.
 
     * `MockMvc` 사용
     
@@ -1909,34 +1994,33 @@
             }
             ```
           
-            * ① @RunWith(SpringRunner.class)
+            * ① `@RunWith(SpringRunner.class)`
             
                 * JUnit에서 기본적으로 내장된 Runner가 아닌 스프링 Runner를 사용 하도록 한다.
         
-            * ② mockMvc.perform(get("/hello"))
+            * ② `mockMvc.perform(get("/hello"))`
             
                 * MockMvc를 통해 해당 주소로 HTTP GET 요청을 한다.
 
-            * ③ .andExpect(status().isOk())
+            * ③ `.andExpect(status().isOk())`
             
-                * mockMvc.perform()의 결과를 검증한다.
+                * `mockMvc.perform()`의 결과를 검증한다.
                 
                 * HTTP Header의 상태(Status)가 200 OK 인지 검증한다.
         
-            * ④ .andExpect(content().string("hello kevin"))
+            * ④ `.andExpect(content().string("hello kevin"))`
             
-                * mockMvc.perform()의 결과를 검증한다.
+                * `mockMvc.perform()`의 결과를 검증한다.
                 
                 * 응답 본문의 내용을 검증한다.
         
     * `TestRestTemplate` 사용
      
-        * 다음과 같이 webEnvironment를 RANDOM_PORT 타입으로 지정하고 `TestRestTemplate`를 사용한다.
+        * 다음과 같이 webEnvironment를 RANDOM_PORT 타입으로 지정하고 `TestRestTemplate`를 주입 받아서 사용한다.
         
             ```java
             @RunWith(SpringRunner.class)
             @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-            @AutoConfigureMockMvc
             public class SampleControllerTest {
             
                 @Autowired
@@ -1950,10 +2034,12 @@
             
             }
             ```
+          
+            * 위의 코드는 테스트용 서블릿 컨테이너가 랜덤 포트로 구동된다.
         
-            * `getForObject(url, responsetype)`는 해당 URL에 HTTP GET 방식으로 요청하여 결과를 responsetype 타입으로 받는다.
+            * `getForObject(url, responsetype)`는 해당 URL에 HTTP GET 방식으로 요청하여 결과를 `responsetype` 타입으로 받는다.
          
-        * 만약 `Service` 단까지 가지않고 `Controller`만 테스트 하고 싶다면 어떻게 해야할까?
+        * 만약 `Service` 단까지 가지 않고 `Controller`만 테스트 하고 싶다면 어떻게 해야할까?
        
             ```java
             @RunWith(SpringRunner.class)
@@ -1978,9 +2064,9 @@
             }
             ```
           
-          * `@MockBean`으로 컨트롤러가 사용하는 서비스(SampleService) 타입의 Mock 객체를 정의한다. (Mocking)
+          * `@MockBean`으로 컨트롤러가 사용하는 서비스(`SampleService`) 타입의 Mock 객체를 정의한다. (Mocking)
         
-          * 그러면 SampleController가 사용하는 ApplicationContext에 있는 SampleService 빈을 Mock 객체(mockSampleService)로 교체한다.
+          * 그러면 `SampleController`가 사용하는 `ApplicationContext`에 있는 `SampleService` 빈을 Mock 객체(`mockSampleService`)로 교체한다.
         
           * 그래서 원본이 아닌 Mock 객체를 사용해서 테스트 할 수 있다.
           
@@ -1988,106 +2074,110 @@
      
         * `WebTestClient`를 사용하면 비동기적으로 클라이언트 요청을 할 수 있다.
         
-        * ① 먼저, pom.xml에 `WebFlux` 의존성을 추가한다.
-        
-            ```html
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-webflux</artifactId>
-            </dependency>
-            ```
-          
-        * ② 코드를 다음과 같이 수정한다.
-        
-            ```java
-            @RunWith(SpringRunner.class)
-            @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-            @AutoConfigureMockMvc
-            public class SampleControllerTest {
+            * ① 먼저, `pom.xml`에 `WebFlux` 의존성을 추가한다.
             
-                @Autowired
-                WebTestClient webTestClient;
+                ```html
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-webflux</artifactId>
+                </dependency>
+                ```
+              
+            * ② 코드를 다음과 같이 수정한다.
             
-                @MockBean
-                SampleService mockSampleService;
-            
-                @Test
-                public void hello() throws Exception {
-                    when(mockSampleService.getName()).thenReturn("kevin");
-            
-                    webTestClient.get().uri("/hello").exchange() // 요청
-                            .expectStatus().isOk()
-                            .expectBody(String.class).isEqualTo("hello kevin");
+                ```java
+                @RunWith(SpringRunner.class)
+                @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+                @AutoConfigureMockMvc
+                public class SampleControllerTest {
+                
+                    @Autowired
+                    WebTestClient webTestClient;
+                
+                    @MockBean
+                    SampleService mockSampleService;
+                
+                    @Test
+                    public void hello() throws Exception {
+                        when(mockSampleService.getName()).thenReturn("kevin");
+                
+                        webTestClient.get().uri("/hello").exchange() // 요청
+                                .expectStatus().isOk()
+                                .expectBody(String.class).isEqualTo("hello kevin");
+                    }
+                
                 }
-            
-            }
-            ```
-          
-        * @SpringBootTest 애노테이션은 스프링 메인 애플리케이션(@SpringBootApplication)을 찾아가서 
-        
-        * 해당 패키지를 기준으로 하위의 모든 Bean을 Scan 한 다음, 테스트용 ApplicationContext를 만들면서 빈으로 등록해주고, @MockBean을 찾아서 해당 빈(Bean)만 Mock 객체로 교체한다.
-          
-        * 그리고 @MockBean는 @Test 마다 자동으로 리셋된다.
+                ```
+              
+                * `@SpringBootTest` 애노테이션은 스프링 메인 애플리케이션(`@SpringBootApplication`)을 찾아가서 
+                
+                * 해당 패키지를 기준으로 하위에 있는 모든 빈(Bean)을 스캔한 다음, 테스트용 `ApplicationContext`를 만들면서 스캔한 모든 빈을 등록해주고, 
+                
+                * `@MockBean`을 찾아서 해당 빈(Bean)만 Mock 객체로 교체한다. 그리고 `@MockBean`는 @Test 마다 자동으로 리셋된다.
             
     * 슬라이스 테스트 (단위 테스트)
-
-        * 단위 테스트를 위한 @JsonTest, @WebMvcTest, @WebFluxTest, @DataJpaTest 애노테이션을 제공한다.
-         
-        * 레이어 별로 잘라서 테스트를 하고 싶을 때 사용된다. (레이어 별로 빈이 등록된다.)
-                     
-        * 슬라이스 테스트 - 예시
+    
+        * 단위 테스트를 위한 `@JsonTest`, `@WebMvcTest`, `@WebFluxTest`, `@DataJpaTest` 애노테이션을 제공한다.
         
-            * 다음과 같이, 하나의 컨트롤러만 테스트 할 수 있다.
-              
-            * `@WebMvcTest`를 사용하면 Web과 관련된 것(Controller ...)만 빈(Bean)으로 등록되고 
+            * 수많은 빈들을 등록하는 것이 아닌 내가 테스트 하고자 하는 빈만 등록하고 싶을 때, 해당 애노테이션을 사용한다.
+            
+            * 즉, 레이어 별로 잘라서 테스트를 하고 싶을 때 사용된다. (레이어 별로 빈이 등록된다.)
+                     
+        * 예시
+        
+            * `@WebMvcTest`는 내부에 `@AutoConfigureMockMvc`를 포함하고 있다.
+        
+            * `@WebMvcTest`를 사용하면 하나의 컨트롤러만 테스트 할 수도 있으며 Web과 관련된 것(Controller ...)만 빈(Bean)으로 등록된다. 
             
             * 일반적인 컴포넌트(Service, Repository)는 빈으로 등록되지 않기 때문에 `@MockBean`으로 Mock 객체를 정의해야 한다.
           
             * 그리고 `@WebMvcTest`는 `MockMvc`로 테스트 해야 한다.
         
-            ```java
-            @RunWith(SpringRunner.class)
-            @WebMvcTest(SampleController.class)
-            public class SampleControllerTest {
-            
-                @MockBean
-                SampleService mockSampleService;
-            
-                @Autowired
-                MockMvc mockMvc;
-            
-                @Test
-                public void hello() throws Exception {
-                    when(mockSampleService.getName()).thenReturn("kevin");
-            
-                    mockMvc.perform(get("/hello"))
-                            .andExpect(content().string("hello kevin"));
+                ```java
+                @RunWith(SpringRunner.class)
+                @WebMvcTest(SampleController.class)
+                public class SampleControllerTest {
+                
+                    @MockBean
+                    SampleService mockSampleService;
+                
+                    @Autowired
+                    MockMvc mockMvc;
+                
+                    @Test
+                    public void hello() throws Exception {
+                        when(mockSampleService.getName()).thenReturn("kevin");
+                
+                        mockMvc.perform(get("/hello"))
+                                .andExpect(content().string("hello kevin"));
+                    }
+                
                 }
-            
-            }
-            ```
+                ```
           
-            * @WebMvcTest()에 테스트 하고자 하는 클래스(SampleController.class)를 지정한다.
-            
-            * SampleController 하나만 Bean으로 등록 되기 때문에, 훨씬 더 가벼운 테스트가 된다.
+                * `@WebMvcTest()`에 테스트 하고자 하는 클래스(SampleController.class)를 지정한다.
+                
+                    * SampleController 하나만 Bean으로 등록 되기 때문에, 훨씬 더 가벼운 테스트가 된다.
         
 * (3) 테스트 유틸
 
     * 스프링 테스트가 제공하는 유틸은 다음과 같다.
     
-        * ① **OutputCapture**
-          
-        * ② TestPropertyValues
-          
-        * ③ TestRestTemplate
-          
-        * ④ ConfigFileApplicationContextInitializer
+        * ① **`OutputCapture`**
         
-    * 이 중 제일 유용할 것 같은 OutputCapture에 대해서 알아본다.
-    
-    * OutputCapture는 JUnit의 Rule을 확장해서 만든 것이며 로그를 비롯한 console에 출력되는 모든 것을 캡처한다.
-    
-    * OutputCapture - 실습
+            * 이 중 제일 유용할 것 같은 `OutputCapture`에 대해서만 아래 실습에서 살펴본다.
+            
+            * `OutputCapture`는 JUnit의 Rule을 확장해서 만든 것이며 로그를 비롯한 콘솔(console)에 출력되는 모든 것을 캡처한다.
+          
+            * 로그 메시지를 대상으로 테스트 코드를 작성할 때, 사용 할 수 있다.
+          
+        * ② `TestPropertyValues`
+          
+        * ③ `TestRestTemplate`
+          
+        * ④ `ConfigFileApplicationContextInitializer`
+        
+    * 실습
     
         * ① SampleController에서 로거를 만든 다음, 로그를 출력한다.
         
@@ -2147,7 +2237,7 @@
 
     * 캐시 설정을 개발 환경에 맞게 변경한다.
     
-    * 클래스패스에 있는 파일을 변경하고 Build를 하면 자동으로 애플리케이션을 재시작한다.
+    * 클래스패스에 있는 파일이 변경될 때 마다(Build) 자동으로 애플리케이션을 재시작한다.
     
         * 재시작하는 속도가 직접 톰캣을 종료 했다가 구동하는 것 보다 훨씬 빠르다. 왜냐하면 스프링 부트는 2개의 클래스 로더를 사용하기 때문이다.
         
