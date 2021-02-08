@@ -447,11 +447,61 @@
 
 #### 6) 내장 서블릿 컨테이너
 
-* 스프링 부트는 웹 서버가 아니다.
+* 용어 정리
 
-    * 스프링 부트는 내장 서블릿 컨테이너를 쉽게 사용 할 수 있도록 해주는 도구(Tool)일 뿐, 스프링 부트 자체가 웹 서버는 아니다.
+    * `[참고]` https://gmlwjd9405.github.io/2018/10/27/webserver-vs-was.html
 
-    * 자바 코드로 웹 서버를 만들 수 있다.
+    * **(1) 정적 페이지(Static Pages)와 동적 페이지(Dynamic Pages)**
+	
+        * 정적 페이지
+     
+            * 고정된 결과가 출력되는 자원
+        
+            * Ex) image, html, css, javascript 파일과 같이 컴퓨터에 저장되어 있는 파일들
+    
+        * 동적 페이지
+     
+            * 시간이나 특정 조건에 따라 응답 데이터가 달라지는 자원
+    
+            * Ex) JSP, PHP, ASP.net 등
+
+    * **(2) 웹 서버(Web Server)와 WAS(Web Application Server)**
+	
+        * `웹 서버(Web Server)`
+ 
+            * 웹 브라우저로 부터  HTTP 요청을 받아 정적인 컨텐츠(.html .jpeg .css 등)를 제공하는 프로그램
+
+            * 웹 서버의 기능
+            
+                * ① 정적인 컨텐츠를 제공 (WAS를 거치지 않고 바로 자원을 제공한다)
+    
+                * ② 동적인 컨텐츠를 제공하기 위해 클라이언트의 요청(Request)을 WAS에 보내고, WAS가 처리한 결과를 클라이언트에게 전달(응답, Response)한다.
+    
+            * 웹 서버의 예시
+            
+                * Ex) Apache Server, Nginx, IIS 등
+
+        * `WAS(Web Application Server)`
+ 
+            * DB 조회나 다양한 로직 처리를 요구하는 동적인 컨텐츠를 제공하기 위해 만들어진 Application Server를 말한다.
+
+            * 웹 컨테이너(Web Container) 또는 서블릿 컨테이너(Servlet Container)라고도 불린다.
+            
+                * Container란 JSP, Servlet을 실행시킬 수 있는 소프트웨어를 말한다. 즉, WAS는 JSP, Servlet 구동 환경을 제공한다.
+
+            * WAS의 역할
+
+                * `WAS` = `Web Server + Web Container`
+
+            * WAS의 예시
+            
+                * Ex) Tomcat, Jboss, Jeus, Web Sphere 등
+
+* 스프링 부트가 서블릿 컨테이너는 아니다.
+
+    * 스프링 부트는 내장 서블릿 컨테이너를 쉽게 사용 할 수 있도록 해주는 도구(Tool)일 뿐, 스프링 부트 자체가 서블릿 컨테이너는 아니다.
+
+    * 자바 코드로 서블릿 컨테이너를 만들 수 있다.
     
         ```java
         @SpringBootApplication
@@ -501,7 +551,7 @@
         
             * `ServletWebServerFactoryAutoConfiguration`는 서블릿 웹 서버를 생성하는 자동 설정 파일이다.
             
-                * `TomcatServletWebServerFactoryCustomizer`는 웹 서버를 커스터마이징한다.
+                * `TomcatServletWebServerFactoryCustomizer`는 서블릿 웹 서버를 커스터마이징한다.
                 
             * `DispatcherServletAutoConfiguration`
             
@@ -513,7 +563,7 @@
 
 #### 7) 내장 서블릿 컨테이너 응용 1부 : 컨테이너와 서버 포트
 
-* 내장 웹 서버(서블릿 컨테이너) 변경
+* 내장 서블릿 컨테이너 변경
 
     * 서블릿 기반의 웹 애플리케이션을 개발할 때, 기본적으로 톰캣을 사용하게 된다. 이를 변경해보자.
     
@@ -546,13 +596,13 @@
           
         * ③ 톰캣 의존성은 사라지고 Jetty 의존성이 추가 되었음을 확인 할 수 있으며 실행 또한 Jetty로 실행된다. 
 
-* 웹 서버 사용 하지 않기
+* 내장 서블릿 컨테이너 사용 하지 않기
 
     *  웹 관련 의존성이 추가 되어 있다면 스프링 부트는 웹 애플리케이션으로 만들려고 시도한다.
     
         * 여기서 웹 관련 의존성이란 `spring-boot-starter-web`, `spring-boot-starter-undertow` 등을 말한다.
 
-    * 어떤 웹 서버도 사용하고 싶지 않으면 `application.properties`에 `spring.main.web-application-type=none`를 추가하면 된다.
+    * 어떠한 서블릿 컨테이너도 사용하고 싶지 않으면 `application.properties`에 `spring.main.web-application-type=none`를 추가하면 된다.
     
 * 포트 변경하기
 
@@ -577,7 +627,7 @@
             ```java
             @Component
             public class PortListener implements ApplicationListener<ServletWebServerInitializedEvent> {
-                // 웹 서버가 생성(초기화)되면 해당 이벤트의 리스너가 호출된다.
+                // 서블릿 웹 서버가 생성(초기화)되면 해당 이벤트의 리스너가 호출된다.
                 @Override
                 public void onApplicationEvent(ServletWebServerInitializedEvent event) {
                     // 이벤트에서 WebServerApplicationContext를 꺼낸다.
@@ -695,7 +745,7 @@
 
     * HTTP2를 활성화 하려면 `application.properties`에 `server.http2.enabled = true`를 추가한다.
     
-    * 그리고 웹 서버 마다 제약 사항이 다른데, Undertow의 경우, HTTPS만 적용 되어 있다면 추가 설정이 필요 없다.
+    * 그리고 서블릿 컨테이너 마다 제약 사항이 다른데, Undertow의 경우, HTTPS만 적용 되어 있다면 추가 설정이 필요 없다.
 
     * 하지만 톰캣의 경우, `Tomcat 9.0.x` 과 `JDK 9` 이상의 버전을 사용하지 않으면 설정이 매우 복잡해진다. 
     
@@ -1009,7 +1059,7 @@
     
         * `WebApplicationType.REACTIVE`는 Spring Webflux가 있을 때 사용되는 타입이다.
     
-        * `WebApplicationType.NONE`는 둘 다 없을 때 사용되는 타입이다. (내장 웹 서버가 실행 되지 않음)
+        * `WebApplicationType.NONE`는 둘 다 없을 때 사용되는 타입이다. (내장 서블릿 컨테이너가 실행 되지 않음)
     
     * `Spring MVC`와 `Spring Webflux` 둘 다 있다면 `WebApplicationType.SERVLET`으로 설정된다.
    
