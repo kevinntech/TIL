@@ -2044,7 +2044,6 @@
             ```java
             @RunWith(SpringRunner.class)
             @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-            @AutoConfigureMockMvc
             public class SampleControllerTest {
             
                 @Autowired
@@ -2088,7 +2087,6 @@
                 ```java
                 @RunWith(SpringRunner.class)
                 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-                @AutoConfigureMockMvc
                 public class SampleControllerTest {
                 
                     @Autowired
@@ -2235,34 +2233,50 @@
 
 * `Spring-Boot-Devtools`는 개발할 때, 유용한 기능을 포함하고 있는 스프링 부트 모듈이다.
 
-    * 캐시 설정을 개발 환경에 맞게 변경한다.
-    
-    * 클래스패스에 있는 파일이 변경될 때 마다(Build) 자동으로 애플리케이션을 재시작한다.
-    
-        * 재시작하는 속도가 직접 톰캣을 종료 했다가 구동하는 것 보다 훨씬 빠르다. 왜냐하면 스프링 부트는 2개의 클래스 로더를 사용하기 때문이다.
-        
-            * ① `base classloader`: 의존성을 읽어 들이는 클래스 로더다.
-            
-            * ② `restart classloader`: 애플리케이션을 읽어 들이는 클래스 로더다.
-    
-    * 애플리케이션을 재시작 했을 때, 브라우저를 자동 새로고침(refresh)하는 기능(live reload)를 제공한다.
-    
-        * 해당 기능을 적용 하려면 웹 브라우저에 플러그인을 설치해야 한다.
-        
-        * live reload 서버를 사용하지 않으려면 `spring.devtools.liveload.enabled = false`로 설정한다.
-        
-    * 글로벌 설정
-    
-        * `spring-boot-devtools` 의존성이 추가되면 `~/.spring-boot-devtools.properties`가 프로퍼티 우선 순위가 가장 높아진다.
-        
-* `Spring-Boot-Devtools`를 사용 하려면 pom.xml에 다음과 같은 의존성을 추가해야 한다.
+    * `Spring-Boot-Devtools` 사용하기
 
-    ```html
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-devtools</artifactId>
-    </dependency>
-    ```
+        * `pom.xml`에 다음과 같은 의존성을 추가해야 한다.
+        
+            ```html
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-devtools</artifactId>
+            </dependency>
+            ```
+          
+    * 주요 기능
+
+        * ① **캐시 설정을 개발 환경에 맞게 변경한다.** `[Property Defaults]`
+        
+            * 캐싱은 운영 환경에서는 매우 유용하지만 개발 환경에서는 방금 애플리케이션에서 변경 한 내용을 볼 수 없기 때문에 불편한 점이 있다.
+            
+            * 이러한 이유로 `spring-boot-devtools`는 개발 단계에서는 캐시 설정을 비활성화한다.
+        
+                * `캐시(Cache)`란 데이터를 미리 복사해 놓는 임시 저장소를 말한다.
+        
+        * ② **클래스패스에 있는 파일이 변경될 때 마다** (Build Project) **자동으로 애플리케이션을 재시작한다.** `[Automatic Restart]`
+        
+            * 재시작하는 속도가 직접 톰캣을 종료 했다가 구동하는 것 보다 훨씬 빠르다. 그 이유는 스프링 부트가 2개의 클래스 로더를 사용하기 때문이다.
+            
+                * ① `base classloader`: 의존성을 읽어 들이는 클래스 로더다.
+                
+                * ② `restart classloader`: 애플리케이션을 읽어 들이는 클래스 로더다.
+        
+        * ③ **애플리케이션을 재시작 했을 때, 웹 브라우저를 자동 새로고침(refresh)하는 기능(live reload)를 제공한다.** `[LiveReload]`
+        
+            * 해당 기능을 적용 하려면 웹 브라우저에 플러그인을 설치해야 한다.
+            
+            * Live Reload 서버를 사용하지 않으려면 `spring.devtools.liveload.enabled = false`로 설정한다.
+            
+        * ④ **글로벌 설정** `[Global Settings]`
+        
+            * `spring-boot-devtools` 의존성이 추가되어 있다면 `~/.spring-boot-devtools.properties`가 프로퍼티 우선 순위가 가장 높아진다.
+            
+        * ⑤ 리모트 애플리케이션 `[Remote Applications]`
+        
+            * 원격에서 동작하고 있는 애플리케이션을 종료하거나 재시작할 수 있는 기능이다. 
+            
+            * 운영 환경에서 사용하는 기능은 아니며 개발용이다. 설정하는 것도 복잡하기 때문에 사용하는 것을 추천하지 않는다.
 
 #### 10) 스프링 웹 MVC 1부 : 소개
 
