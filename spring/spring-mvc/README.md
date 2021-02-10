@@ -7,7 +7,7 @@
 
 * (1) 롬복(Lombok)
 
-    * 롬복(Lombok)은 자바로 개발할 때, 자주 사용하는 코드(Getter, Setter, 기본 생성자, toString 등)를 애노테이션으로 자동 생성 해준다.
+    * `롬복(Lombok)`은 자바로 개발할 때, 자주 사용하는 코드(Getter, Setter, 기본 생성자, toString 등)를 애노테이션으로 자동 생성 해준다.
     
     * 롬복 설치 과정
     
@@ -48,25 +48,25 @@
 
 * (2) MVC 란?
     
-    * 모델(Model)
+    * `모델(Model)`
     
         * 화면에 전달 할 또는 화면에서 전달 받은 데이터를 담고 있는 객체이다.
     
         * 도메인 객체 또는 DTO를 말한다.
     
-    * 뷰(View)
+    * `뷰(View)`
     
         * 모델이 담고 있는 데이터를 보여주는 역할을 한다.
     
         * 다양한 형태로 보여 줄 수 있다. (HTML, JSON, XML ...)
     
-    * 컨트롤러(Controller)
+    * `컨트롤러(Controller)`
     
         * 사용자의 입력을 받아 모델 객체의 데이터를 변경하거나 모델 객체를 뷰에 전달하는 역할을 한다.
     
             * ① 입력 값 검증
         
-            * ② 입력 받은 데이터로 모델 객체를 변경
+            * ② 입력 받은 데이터로 모델 객체의 데이터를 변경
         
             * ③ 변경된 모델 객체를 뷰에 전달
     
@@ -202,7 +202,7 @@
     
         * 뷰, 모델, 컨트롤러는 각각 독립적이다.
 
-        * (서로 간에 독립적이다.)
+            * 서로 간에 독립적이다.
 
     * 개발 용이성
     
@@ -212,7 +212,7 @@
 
 * (6) MVC 패턴의 단점
 
-    * 코드 내비게이션 복잡함
+    * 코드 내비게이션이 복잡함
 
     * 코드 일관성 유지에 노력이 필요함
     
@@ -236,9 +236,9 @@
 
     * 자바 엔터프라이즈 에디션은 웹 애플리케이션 개발용 스펙과 API를 제공한다.
 
-    * 그 중에 가장 중요한 클래스 중 하나가 `HttpServlet`이며 요청 마다 새로운 프로세스를 만드는 것이 아닌 한 프로세스 내의 자원을 공유하는 스레드를 만들어서 요청을 처리한다.
+    * 그 중에 가장 중요한 클래스 중 하나가 `HttpServlet`이며 **요청 마다** 새로운 프로세스를 만드는 것이 아닌 한 프로세스 내의 자원을 공유하는 **스레드를 만들어서 요청을 처리한다.**
 
-    * 서블릿 등장 이전에 사용하던 기술인 CGI(Common Gateway Interface)는 요청 당 프로세스를 만들어서 사용한다.
+    * 서블릿 등장 이전에 사용하던 기술인 `CGI(Common Gateway Interface)`는 요청 당 프로세스를 만들어서 사용한다.
 
 * (4) 서블릿의 장점 (CGI에 비해)
 
@@ -268,19 +268,19 @@
     
     * 서블릿의 생명주기는 다음과 같다.
 
-        * ① 서블릿 컨테이너가 서블릿 인스턴스의 `init()` 메소드를 호출하여 초기화 한다. 
+        * ① 서블릿 컨테이너가 서블릿 인스턴스의 `init()` 메소드를 호출하여 초기화를 한다. 
     
-            * (최초 요청을 받았을 때 한번 초기화 하고 나면 그 다음 요청 부터는 이 과정을 생략한다.)
+            * 최초 요청을 받았을 때, 서블릿 컨테이너가 서블릿을 한번 초기화 하게 되고 그 다음 요청 부터는 이 과정을 생략한다.
     
         * ② 서블릿이 초기화 된 다음 부터 클라이언트의 요청을 처리 할 수 있다.
     
-        * 각 요청은 별도의 쓰레드로 처리하고 이때 서블릿 인스턴스의 `service()` 메소드를 호출한다.
-    
-            * 이 안에서 HTTP 요청을 받고 클라이언트로 보낼 HTTP 응답을 만든다.
+            * 각 요청은 별도의 쓰레드로 처리하고 이때 서블릿 인스턴스의 `service()` 메소드를 호출한다.
         
-            * `service()`는 보통 HTTP Method에 따라 `doGet()`, `doPost()` 등으로 처리를 위임한다.
-        
-            * 따라서 보통 `doGet()` 또는 `doPost()`를 구현한다.
+                * 이 안에서 HTTP 요청을 받고 클라이언트로 보낼 HTTP 응답을 만든다.
+            
+                * `service()`는 보통 HTTP Method에 따라 `doGet()`, `doPost()` 등으로 처리를 위임한다.
+            
+                * 따라서 보통 `doGet()` 또는 `doPost()`를 구현한다.
             
         * ③ 서블릿 컨테이너의 판단에 따라 해당 서블릿을 메모리에서 내려야 할 시점에 `destroy()`를 호출한다.
 
@@ -317,8 +317,12 @@
         </dependency>
         ```
       
-        * provided : 어디선가 제공되는 의존성이라는 의미다. 코딩하는 시점에는 사용 할 수 있으나 War 패키징할 때는 제외된다. 
-    
+        * `<scope>` : 해당 의존성을 언제, 어떻게 클래스패스에 넣어서 사용할 것인가를 정의한다. 
+      
+            * `test` : 테스트를 실행할 때만 사용하는 의존성을 의미한다.
+            
+            * `provided` : 어디선가 제공되는 의존성이라는 것을 의미한다. 코딩하는 시점에는 사용 할 수 있으나 War 패키징할 때는 제외된다. 
+
     * ② `src/main`에 java 디렉토리를 생성한다.
     
     * ③ 다음과 같이 `Project Structure`에서 java 디렉토리를 Source 디렉토리로 지정한다.
@@ -423,13 +427,13 @@
 
     * `이벤트`는 크게 2가지로 나눌 수 있다.
     
-        * ① 서블릿 컨텍스트 수준의 이벤트
+        * ① `서블릿 컨텍스트 수준의 이벤트`
     
             * 컨텍스트 라이프사이클 이벤트
         
             * 컨텍스트 애트리뷰트 변경 이벤트
     
-        * ② 세션 수준의 이벤트
+        * ② `세션 수준의 이벤트`
     
             * 세션 라이프사이클 이벤트
     
@@ -439,7 +443,7 @@
 
     * `서블릿 필터`는 서블릿 실행 전후에 어떤 작업을 하고자 할 때, 사용한다.
 
-    * 체인 형태의 구조로 되어 있다.
+    * 체인 형태의 구조로 순차적으로 적용된다.
   
         ![image 28](images/img28.png)
         
@@ -451,20 +455,20 @@
         
         * 그리고 웹 애플리케이션이 시작되거나 종료될 때, 호출할 메서드(`contextInitialized()`, `contextDestroyed()`)를 정의한 인터페이스다.
         
-        ```java
-        public class MyListener implements ServletContextListener {
-            @Override
-            public void contextInitialized(ServletContextEvent sce) { // 웹 애플리케이션을 초기화 할 때 호출한다.
-                System.out.println("Context Initialized");
-                sce.getServletContext().setAttribute("name", "kevin");
+            ```java
+            public class MyListener implements ServletContextListener {
+                @Override
+                public void contextInitialized(ServletContextEvent sce) { // 웹 애플리케이션을 초기화 할 때 호출한다.
+                    System.out.println("Context Initialized");
+                    sce.getServletContext().setAttribute("name", "kevin");
+                }
+            
+                @Override
+                public void contextDestroyed(ServletContextEvent sce) { // 웹 애플리케이션을 종료 할 때 호출한다.
+                    System.out.println("Context Destroyed");
+                }
             }
-        
-            @Override
-            public void contextDestroyed(ServletContextEvent sce) { // 웹 애플리케이션을 종료 할 때 호출한다.
-                System.out.println("Context Destroyed");
-            }
-        }
-        ```
+            ```
       
     * ② 서블릿 컨테이너가 어떤 리스너인지 알 수 있도록 `web.xml`에 리스너(MyListener)를 등록한다.
              
@@ -561,6 +565,8 @@
         </filter-mapping>
         ```
       
+        * 필터를 서블릿 이름을 이용하여 서블릿과 매핑한다.
+      
     * ③ 애플리케이션을 실행하여 결과를 확인한다.
     
 #### 5) 스프링 IoC 컨테이너 연동
@@ -599,33 +605,33 @@
 
         * `ServletContext`는 모든 서블릿들이 사용 할 수 있는 정보를 모아 둔 저장소를 말한다.
         
-        * ContextLoaderListener
+        * `ContextLoaderListener`
 
-            * `ContextLoaderListener`는 서블릿 리스너의 구현체이며
+            * `ContextLoaderListener`는 서블릿 리스너의 구현체이며 `ServletContext`의 라이프 사이클에 맞춰서 
+            
+            * `ServletContext`에 `스프링 IoC 컨테이너(ApplicationContext)`를 자동으로 등록하고 소멸 시켜준다.
 
-            * `ServletContext`의 라이프 사이클에 맞춰서 `ServletContext`에 `스프링 IoC 컨테이너(ApplicationContext)`를 자동으로 등록하고 소멸 시켜준다.
+                * `ContextLoaderListener`가 `ApplicationContext`를 생성한 다음, `ServletContext`에 등록하려면 `ApplicationContext`의 타입과 `스프링 IoC 컨테이너 설정 파일`이 필요하다.
+                
+                * 그래서 ③번 과정에서 해당 내용을 설정한다.
+            
+    * ③ `web.xml`에서 `contextClass`에 `ApplicationContext`의 타입을 지정하고 `contextConfigLocation`에 자바 설정 파일을 지정한다.
 
-            * `ContextLoaderListener`가 `ApplicationContext`를 생성한 다음, `ServletContext`에 등록하려면 `ApplicationContext`의 타입과 `스프링 IoC 컨테이너 설정 파일`이 필요하다.
+        ```html
+          <context-param>
+            <param-name>contextClass</param-name>
+            <param-name>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-name>
+          </context-param>
+        
+          <context-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>me.kevinntech.AppConfig</param-value>
+          </context-param>
+        ```
             
-            * 그래서 ③번 과정에서 해당 내용을 설정한다.
-            
-    * ③ `web.xml`에서 `contextClass`에 ApplicationContext의 타입을 지정하고 `contextConfigLocation`에 자바 설정 파일을 지정한다.
-
-            ```html
-              <context-param>
-                <param-name>contextClass</param-name>
-                <param-name>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-name>
-              </context-param>
-            
-              <context-param>
-                <param-name>contextConfigLocation</param-name>
-                <param-value>me.kevinntech.AppConfig</param-value>
-              </context-param>
-            ```
-            
-        * `contextClass` 파라미터는 `ContextLoaderListener`가 등록 할 스프링 IoC 컨테이너의 타입을 지정할 때 사용한다.     
+        * `contextClass` 파라미터는 `ContextLoaderListener`가 등록 할 스프링 IoC 컨테이너의 타입을 지정한다.     
   
-        * `contextConfigLocation` 파라미터는 스프링 IoC 컨테이너의 설정 파일 위치를 지정할 때 사용한다.  
+        * `contextConfigLocation` 파라미터는 스프링 IoC 컨테이너의 설정 파일 위치를 지정한다.  
         
     * ④ 자바 설정 파일을 작성한다.
 
@@ -636,7 +642,7 @@
         }
         ```
 
-    * ⑤ 빈으로 등록하기 위한 HelloService 클래스를 작성
+    * ⑤ 빈으로 등록하기 위한 HelloService 클래스를 작성한다.
 
         ```java
         @Service
@@ -671,7 +677,7 @@
                 resp.getWriter().println("<html>");
                 resp.getWriter().println("<head>");
                 resp.getWriter().println("<body>");
-                resp.getWriter().println("<h1>Hello, " + helloService.getName() + "</h1>");
+                resp.getWriter().println("<h1>Hello, " + helloService.getName() + "</h1>"); // HelloService에서 이름을 가져온다.
                 resp.getWriter().println("</body>");
                 resp.getWriter().println("</head>");
                 resp.getWriter().println("</html>");
@@ -695,7 +701,7 @@
 
     ![image 15](images/img15.gif)
         
-    * 사용자의 요청 하나를 처리할 때 마다 서블릿을 만든다면 매번 `web.xml`에 Servlet를 등록하고 맵핑하는 과정이 필요하다.
+    * 사용자의 요청 하나를 처리할 때 마다 서블릿을 만든다면 매번 `web.xml`에 `Servlet`를 등록하고 맵핑하는 과정이 필요하다.
       
     * 이러한 불편한 점을 해결하기 위해 등장한 것이 바로 `FrontController` 패턴이다.
       
@@ -715,7 +721,7 @@
 
         * `Root WebApplicationContext`는 `ContextLoaderListener`에 의해 `ServletContext`에 등록 되는 ApplicationContext를 말한다.
 
-        * `Root WebApplicationContext`는 다른 Servlet에서도 사용할 수 있다.
+        * **`Root WebApplicationContext`는 다른 Servlet에서도 사용할 수 있다.**
 
         * Web과 관련된 빈들은 등록 되지 않는다. (Service와 Repository...가 등록 됨)
 
@@ -723,7 +729,7 @@
 
         * `Servlet WebApplicationContext`는 `DispatcherServlet`이 `Root WebApplicationContext`를 상속 받아 만든 ApplicationContext를 말한다.
 
-        * `Servlet WebApplicationContext`은 해당 DispatcherServlet 내부에서만 사용 가능하다. 
+        * **`Servlet WebApplicationContext`은 해당 DispatcherServlet 내부에서만 사용 가능하다.** 
         
         * Web과 관련된 빈이 등록된다. (Controller, ViewResolver, 다른 웹 관련 빈)
 
@@ -756,50 +762,50 @@
       
         * 그리고 app으로 시작하는 모든 요청을 DistpatcherServlet이 받아서 처리 하도록 한다.
       
-        ```html
-        <!DOCTYPE web-app PUBLIC
-                "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-                "http://java.sun.com/dtd/web-app_2_3.dtd" >
-        
-        <web-app>
-            <display-name>Archetype Created Web Application</display-name>
-        
-            <context-param>
-                <param-name>contextClass</param-name>
-                <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
-            </context-param>
-        
-            <context-param>
-                <param-name>contextConfigLocation</param-name>
-                <param-value>me.kevinntech.AppConfig</param-value>
-            </context-param>
+            ```html
+            <!DOCTYPE web-app PUBLIC
+                    "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+                    "http://java.sun.com/dtd/web-app_2_3.dtd" >
             
-            <listener>
-                <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-            </listener>
-        
-            <servlet>
-                <servlet-name>app</servlet-name>
-                <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-                <init-param>
+            <web-app>
+                <display-name>Archetype Created Web Application</display-name>
+            
+                <context-param>
                     <param-name>contextClass</param-name>
                     <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
-                </init-param>
-                <init-param>
+                </context-param>
+            
+                <context-param>
                     <param-name>contextConfigLocation</param-name>
-                    <param-value>me.kevinntech.WebConfig</param-value>
-                </init-param>
-            </servlet>
-        
-            <servlet-mapping>
-                <servlet-name>app</servlet-name>
-                <url-pattern>/app/*</url-pattern>
-            </servlet-mapping>
-        
-        </web-app>
-        ```
-      
-        * DispatcherServlet은 app으로 시작하는 모든 요청을 받아서 실제 요청을 처리 할 핸들러를 찾은 다음, 핸들러에게 요청을 분배한다.
+                    <param-value>me.kevinntech.AppConfig</param-value>
+                </context-param>
+                
+                <listener>
+                    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+                </listener>
+            
+                <servlet>
+                    <servlet-name>app</servlet-name>
+                    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+                    <init-param>
+                        <param-name>contextClass</param-name>
+                        <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+                    </init-param>
+                    <init-param>
+                        <param-name>contextConfigLocation</param-name>
+                        <param-value>me.kevinntech.WebConfig</param-value>
+                    </init-param>
+                </servlet>
+            
+                <servlet-mapping>
+                    <servlet-name>app</servlet-name>
+                    <url-pattern>/app/*</url-pattern>
+                </servlet-mapping>
+            
+            </web-app>
+            ```
+          
+            * DispatcherServlet은 app으로 시작하는 모든 요청을 받아서 실제 요청을 처리 할 핸들러를 찾은 다음, 핸들러에게 요청을 분배한다.
       
     * ③ AppConfig 클래스를 작성한다. 
     
@@ -807,12 +813,12 @@
       
         * 그리고 ContextLoaderListener가 만드는 ApplicationContext (`Root WebApplicationContext`)는 Service, Repository를 빈으로 등록하도록 한다.
     
-        ```java
-        @Configuration
-        @ComponentScan(excludeFilters = @ComponentScan.Filter(Controller.class)) // 컨트롤러는 빈으로 등록하지 않음
-        public class AppConfig {
-        }
-        ```
+            ```java
+            @Configuration
+            @ComponentScan(excludeFilters = @ComponentScan.Filter(Controller.class)) // 컨트롤러는 빈으로 등록하지 않음
+            public class AppConfig {
+            }
+            ```
       
     * ④ WebConfig 클래스를 수정한다.
       
@@ -820,13 +826,13 @@
       
         * DispatcherServlet이 만드는 ApplicationContext (`Servlet WebApplicationContext`)는 Controller를 빈으로 등록하도록 한다.
           
-        ```java
-        @Configuration
-        @ComponentScan(useDefaultFilters = false , includeFilters = @ComponentScan.Filter(Controller.class))
-        public class WebConfig {
-        
-        }
-        ```
+            ```java
+            @Configuration
+            @ComponentScan(useDefaultFilters = false , includeFilters = @ComponentScan.Filter(Controller.class))
+            public class WebConfig {
+            
+            }
+            ```
       
     * ⑤ 웹 브라우저에서 다음 URL로 요청한다.
 
@@ -896,10 +902,14 @@
 
     * 다음과 같은 특별한 타입의 빈들을 찾거나, 기본 전략에 해당하는 빈들을 등록한다. 
       
-        * HandlerMapping: 핸들러를 찾아주는 인터페이스 
-        * HandlerAdapter: 핸들러를 실행하는 인터페이스 
-        * HandlerExceptionResolver 
-        * ViewResolver 
+        * `HandlerMapping` : 핸들러를 찾아주는 인터페이스
+         
+        * `HandlerAdapter` : 핸들러를 실행하는 인터페이스 
+        
+        * `HandlerExceptionResolver`
+        
+        * `ViewResolver`
+        
         * ...
     
 * (2) DispatcherServlet 동작 순서
@@ -908,13 +918,15 @@
 
     * ② (핸들러 맵핑에게 위임하여) 요청을 처리할 핸들러를 찾는다.  
 
-    * ③ (등록되어 있는 핸들러 어댑터 중에) 해당 핸들러를 실행 할 수 있는 “핸들러 어댑터”를 찾는다. 
+    * ③ (등록되어 있는 핸들러 어댑터 중에) 해당 핸들러를 실행 할 수 있는 "핸들러 어댑터"를 찾는다. 
 
-    * ④ 찾아낸 “핸들러 어댑터”를 사용해서 핸들러의 응답을 처리한다. 핸들러의 리턴 값을 보고 어떻게 처리할지 판단한다.
-
-        * 뷰 이름에 해당하는 뷰를 찾아서 모델 데이터를 랜더링한다.
+    * ④ 찾아낸 "핸들러 어댑터"를 사용해서 핸들러의 응답을 처리한다. 
     
-        * @ResponseEntity가 있다면 Converter를 사용해서 응답 본문을 만든다.
+        * 핸들러의 리턴 값을 보고 어떻게 처리할지 판단한다.
+
+            * 뷰 이름에 해당하는 뷰를 찾아서 모델 데이터를 랜더링한다.
+        
+            * `@ResponseBody`가 있다면 Converter를 사용해서 응답 본문을 만든다.
 
     * ⑤ 예외가 발생 했다면, 예외 처리 핸들러에 요청 처리를 위임한다.
 
@@ -928,7 +940,7 @@
       
     * ② 다음과 같이 `DispatcherServlet` 코드에서 `doService()`, `doDispatch()`에 BreakPoint를 지정한다.
       
-    * 그리고 HelloController의 hello()에도 BreakPoint를 지정한다.
+    * 그리고 `HelloController`의 `hello()`에도 BreakPoint를 지정한다.
     
       ![image 19](images/img19.png)
       
@@ -940,79 +952,103 @@
     
       ![image 22](images/img22.png)
       
-    * ④ 그리고 웹 브라우저에서 아래 URL로 요청을 하면, DispatcherServlet이 사용되며 디버그가 걸린다.
+    * ④ 그리고 웹 브라우저에서 아래 URL로 요청을 하면, `DispatcherServlet`이 사용되며 디버그가 걸린다.
     
         * `http://localhost:8080/app/hello`
         
-      ![image 23](images/img23.png)
-      
-      ![image 25](images/img25.png)
+          ![image 23](images/img23.png)
+          
+          ![image 25](images/img25.png)
       
         * 디버그 단축키
         
-            * Step Over `[F8]` : 다음 라인으로 넘어간다. 
+            * `Step Over [F8]` : 다음 라인으로 넘어간다. 
             
-            * Step Into `[F7]` : 현재 라인이 메서드에 있다면 메서드 안으로 들어간다.
+            * `Step Into [F7]` : 현재 라인이 메서드에 있다면 메서드 안으로 들어간다.
+            
+            * `Resume Program` : 다음 Breakpoint로 이동한다.
       
 * (4) 정리하기
 
-    * 어떠한 설정을 하지 않아도 DispatcherServlet이 기본적으로 제공하는 2개의 핸들러 맵핑이 있다. 
+    * HandlerMapping
 
-        * ① `BeanNameUrlHandlerMapping`
-    
-        * ② `RequestMappingHandlerMapping`
+        * ① `BeanNameUrlHandlerMapping` : HTTP 요청 URL과 같은 빈(Bean) 이름을 갖는 핸들러를 찾는다.
+           
+        * ② `RequestMappingHandlerMapping` : 애노테이션 정보를 기반으로 작성된 핸들러를 찾는다. (★★★)
         
-            * 애노테이션 정보를 기반으로 작성된 핸들러를 찾아주는 HandlerMapping이다.
-            
-            * 즉, @Controller, @RequestMapping , @GetMapping , @PostMapping를 지정한 핸들러를 찾는다.
+            * 즉, `@Controller`, `@RequestMapping` ( + `@GetMapping` , `@PostMapping`)를 지정한 핸들러를 찾는다.
 
-            * @RequestMapping를 메타 애노테이션으로 사용하는 @GetMapping , @PostMapping가 있다.
+    * HandlerAdapter
 
-    * 강좌에서 진행한 실습에서는 3개의 HandlerAdapter가 있었다.
-
-        * ① HttpRequestHandlerAdapter
+        * ① `HttpRequestHandlerAdapter` : HttpRequestHandler 인터페이스를 구현한 클래스의 핸들러를 실행한다.
     
-        * ② SimpleControllerHandlerAdapter
+        * ② `SimpleControllerHandlerAdapter` : Controller 인터페이스를 구현한 클래스의 핸들러를 실행한다.
 
-        * ③ RequestMappingHandlerAdapter
+        * ③ `RequestMappingHandlerAdapter` : 애노테이션 정보를 기반으로 작성된 핸들러를 실행한다. (★★★)
 
-            * 실습에서 사용된 핸들러 어댑터
+    * `invokeHandlerMethod()`에서 Java의 리플렉션을 사용해서 해당 요청을 처리할 수 있는 핸들러를 실행하게 된다. 
 
-    * `invokeHandlerMethod()`에서 Java의 Reflection을 사용해서 해당 요청을 처리할 수 있는 핸들러를 실행하게 된다. 
-
-        * 여기서는 @GetMapping("/hello")가 붙어있는 메서드를 실행하게 된다.
-    
-        * 관련 애노테이션
-        
-            * `@RestController` : `@Controller`에 `@ResponseBody`가 추가된 것이다.
-            * `@RequestBody` : HTTP 요청 몸체(body)를 자바 객체로 변환한다. 
-            * `@ResponseBody` : 자바 객체를 HTTP 응답 몸체(body)로 변환한다.
-            
+        * 여기서 `@GetMapping("/hello")`가 붙어있는 메서드를 실행하게 된다.
+                
     * `ReturnValueHandler`는 핸들러에서 리턴한 값을 처리하는 핸들러다. 
       
-        * 실습에서 사용된 `ReturnValueHandler`는 Converter를 사용해서 리턴 값을 HTTP 본문에 넣어준다.  
+        * 여기서 사용된 `RequestResponseBodyMethodPrecessor`는 Converter를 사용해서 핸들러의 리턴 값을 HTTP 본문에 넣어준다.  
     
+        * `@ResponseBody`이 붙어 있는 핸들러에서 리턴한 값은 응답 본문에 바로 쓰며 `ModelAndView`는 `null`이 된다.
+    
+    * [참고]
+    
+        * `@RestController` : `@Controller`에 `@ResponseBody`가 추가된 것이다.
+        
+        * `@RequestBody` : HTTP 요청 본문(body)을 자바 객체로 변환한다. 
+        
+            * JSON으로 전달되는 데이터를 자바 객체로 변환한다. 
+        
+        * `@ResponseBody` : 자바 객체를 HTTP 응답 본문(body)로 변환한다.
+    
+        * `ResponseEntity` : HTTP 응답의 상태코드, 헤더, 본문를 직접 설정 할 수 있는 리턴 타입이다.
+        
 #### 8) DispatcherServlet 동작 원리 2부
 
-* (1) @ResponseEntity가 있는 경우(@ResponseBody 핸들러에서 리턴한 경우)
+* (1) `@ResponseBody` 핸들러에서 리턴하는 경우
 
-    * @ResponseBody이 붙어 있는 핸들러에서 리턴한 값은 응답 본문에 바로 쓰며 ModelAndView는 Null이 된다.
+    * `@ResponseBody`이 붙어 있는 핸들러에서 리턴한 값은 응답 본문에 바로 쓰며 `ModelAndView`는 Null이 된다.
     
     * 사용된 HandlerMapping, HandlerAdapter
     
-        * ① RequestMappingHandlerMapping
+        * ① `RequestMappingHandlerMapping` : 애노테이션 정보를 기반으로 작성된 핸들러를 찾는다.
         
-            * 애노테이션 정보를 기반으로 작성된 핸들러를 찾는다.
+        * ② `RequestMappingHandlerAdapter `: 애노테이션 정보를 기반으로 작성된 핸들러를 실행한다.
+
+* (2) 핸들러에서 View 이름을 리턴하는 경우
+
+    * 실습
+    
+        ```java
+        @Controller
+        public class HelloController {
+            
+            @GetMapping("/hello")
+            public String sample(){
+                return "/WEB-INF/sample.jsp";
+            }
+            
+        }
+        ```
+
+        * `ModelAndView`가 `null`이 아니며 뷰(view)에 모델 데이터를 렌더링 하여 뷰를 완성한 다음, 뷰를 응답에 담아서 보낸다.
+    
+    * 사용된 HandlerMapping, HandlerAdapter
+    
+        * ① `RequestMappingHandlerMapping` : 애노테이션 정보를 기반으로 작성된 핸들러를 찾는다.
         
-        * ② RequestMappingHandlerAdapter
-        
-            * 애노테이션 정보를 기반으로 작성된 핸들러를 실행한다.
-        
-* (2) View가 있는 경우
+        * ② `RequestMappingHandlerAdapter `: 애노테이션 정보를 기반으로 작성된 핸들러를 실행한다.
+
+* (3) 핸들러에서 ModelAndView를 리턴하는 경우
 
     * 실습
    
-        * ① SimpleController를 작성한다. /simple이라는 요청을 처리하는 핸들러를 만들며 ModelAndView 객체를 리턴한다.
+        * ① `SimpleController`를 작성한다. `/simple`이라는 요청을 처리하는 핸들러를 만들며 `ModelAndView` 객체를 리턴한다.
         
             ```java
             @org.springframework.stereotype.Controller("/simple")
@@ -1026,7 +1062,7 @@
             }
             ```
     
-        * ② webapp/WEB-INF에 simple.jsp를 작성한다.
+        * ② `webapp/WEB-INF`에 `simple.jsp`를 작성한다.
  
             ```html
             <html>
@@ -1038,25 +1074,21 @@
 
         * ③ 웹 브라우저에서 해당 URL(`http://localhost:8080/app/simple`) 로 요청한다.
         
-            * ModelAndView는 Null이 아니며 View에 모델 데이터를 렌더링 하여 뷰를 완성한 다음, 응답을 보낸다.
+            * `ModelAndView`가 `null`이 아니며 뷰(view)에 모델 데이터를 렌더링 하여 뷰를 완성한 다음, 뷰를 응답에 담아서 보낸다.
  
-            ```html
-            <html>
-            <body>
-            <h2>Hello Simple MVC!</h2>
-            </body>
-            </html>
-            ```
+                ```html
+                <html>
+                <body>
+                <h2>Hello Simple MVC!</h2>
+                </body>
+                </html>
+                ```
           
     * 사용된 HandlerMapping, HandlerAdapter
-        
-        * ① BeanNameUrlHandlerMapping
+
+        * ① `BeanNameUrlHandlerMapping` : HTTP 요청 URL과 같은 빈(Bean) 이름을 갖는 핸들러를 찾는다.
       
-            * 요청 URI와 같은 이름을 갖는 핸들러를 찾는다.
-      
-        * ② SimpleControllerHandlerAdapter           
-      
-            * Controller 인터페이스를 구현해서 만든 핸들러를 실행 할 수 있는 어댑터이다.
+        * ② `SimpleControllerHandlerAdapter` : Controller 인터페이스를 구현한 클래스의 핸들러를 실행한다.
 
 #### 9) DispatcherServlet 동작 원리 3부: 커스텀 ViewResolver 
 
@@ -1066,11 +1098,11 @@
 
         * 이를 알아 보기 위해 디스패처 서블릿(DispatcherServlet)의 내부 코드를 살펴보자. 
 
-    * `initStrategies()`에서 디스패처 서블릿이 사용하는 기본 전략들을 초기화 하고 있다.
-    
-        ![image 26](images/img26.png)
-        
-    * 동작하는 방식은 거의 다 비슷하므로 이 중에서 `initViewResolvers()`만 아래에서 살펴본다.
+            * `initStrategies()`에서 디스패처 서블릿이 사용하는 기본 전략들을 초기화 하고 있다.
+            
+                ![image 26](images/img26.png)
+                
+            * 동작하는 방식은 거의 다 비슷하므로 이 중에서 `initViewResolvers()`만 아래에서 살펴본다.
     
 * (2) initViewResolvers() 내부 살펴보기
       
@@ -1096,7 +1128,7 @@
       
         * `WebConfig`에서 직접 `ViewResolver` 빈을 등록하면서 `prefix`와 `suffix`를 지정하면 코드를 좀 더 간결하게 만들 수 있다.
       
-        * 이렇게 직접 `ViewResolver` 빈을 등록하면 `ViewResolver`에 대해서는 기본 전략을 적용 하지 않는다.
+        * 이렇게 직접 `ViewResolver` 빈을 등록하면 `ViewResolver`에 대해서는 기본 전략을 적용하지 않는다.
         
             ```java
             @Configuration
@@ -1122,7 +1154,7 @@
         
             @Override
             public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
-                return new ModelAndView("simple");
+                return new ModelAndView("simple"); // 뷰 이름만 지정하면 된다.
             }
         
         }
@@ -1151,78 +1183,87 @@
       
 #### 10) 스프링 MVC 구성 요소
 
-* 스프링 MVC 구성 요소에 대해서 살펴본다.
-      
-* 정확히는 DispatcherServlet이 사용하는 여러 가지 인터페이스에 대해서 살펴본다.
+* 스프링 MVC 구성 요소에 대해서 살펴본다. 정확히는 `DispatcherServlet`이 사용하는 여러 가지 인터페이스에 대해서 살펴본다.
 
-* (1) DispatcherSerlvet의 기본 전략
-      
-    * `DispatcherServlet.properties`에 정의되어 있다.
-
-* (2) DispatcherSerlvet이 사용하는 인터페이스
-      
-    ![image 27](images/img27.png)
+    * (1) DispatcherServlet의 기본 전략
+          
+        * `DispatcherServlet.properties`에 정의되어 있다.
     
-    * ① `MultipartResolver`
-
-        * 파일 업로드 요청 처리에 필요한 인터페이스
-    
-        * MultipartResolver 타입의 빈이 등록 되어 있어야 디스패처 서블릿이 해당 빈을 사용하여 파일 업로드 요청을 처리 할 수 있다. 
-    
-        * `HttpServletRequest`를 `MultipartHttpServletRequest`로 변환해주어 요청이 담고 있는 File을 꺼낼 수 있는 API 제공.
-
-    * ② `LocaleResolver`
-
-        * 클라이언트의 위치(Locale) 정보를 파악하는 인터페이스
-
-        * 기본 전략은 요청의 `accept-language`를 보고 판단한다.
-
-    * ③ `ThemeResolver`
-    
-        * 애플리케이션에 설정된 테마를 파악하고 변경할 수 있는 인터페이스
-
-        * [참고 URL](https://memorynotfound.com/spring-mvc-theme-switcher-example/ "참고 URL")
-
-    * ④ `HandlerMapping`
-
-        * 요청을 처리할 핸들러를 찾는 인터페이스
-
-    * ⑤ `HandlerAdapter`
-    
-        * `HandlerMapping`이 찾아낸 "핸들러"를 실행하는 인터페이스
-
-        * 스프링 MVC `확장력`의 핵심
-
-    * ⑥ `HandlerExceptionResolver`
-
-        * 요청 처리 중에 발생한 에러를 처리하는 인터페이스 
-
-    * ⑦ `RequestToViewNameTranslator `
-
-        * 핸들러에서 뷰 이름을 명시적으로 리턴하지 않은 경우, 요청을 기반으로 뷰 이름을 판단하는 인터페이스 
-
-    * ⑧ `ViewResolver`
-    
-        * 뷰 이름(string)에 해당하는 뷰를 찾아내는 인터페이스
-
-    * ⑨ `FlashMapManager`
-
-        * FlashMap 인스턴스를 가져오고 저장하는 인터페이스
-
-        * FlashMap은 주로 리다이렉션을 할 때 요청 매개변수를 사용하지 않고 데이터를 전달하고 정리할 때 사용한다.
+    * (2) DispatcherServlet이 사용하는 인터페이스
+          
+        ![image 27](images/img27.png)
         
-            * 즉, 리다이렉션을 할 때 데이터 전송을 편하게 하기 위한 방법
-                
-        * PRG(Post-Redirect-Get) 패턴
+        * ① `MultipartResolver`
+    
+            * 파일 업로드 요청 처리에 필요한 인터페이스
+        
+            * MultipartResolver 타입의 빈이 등록 되어 있어야 디스패처 서블릿이 해당 빈을 사용하여 파일 업로드 요청을 처리 할 수 있다. 
+        
+            * `HttpServletRequest`를 `MultipartHttpServletRequest`로 변환을 해주며 해당 요청이 담고 있는 File을 꺼낼 수 있는 API를 제공한다.
 
-            * Post 요청을 받은 다음에 데이터를 저장하고 Get 요청으로 리다이렉트를 한다. (`중복 Form Submission`을 방지하기 위한 요청 처리 패턴이다.)
+                ```java
+                public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
+                    MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+                    MultipartFile multipartFile = multipartRequest.getFile("image"); // 요청이 담고 있는 File을 꺼낼 수 있는 API
+                    
+                    ...
+                }
+                ```
+              
+            * 스프링 부트에서는 어떠한 설정을 하지 않아도 `MultipartResolver` 빈이 기본적으로 등록되어 있다.
+
+        * ② `LocaleResolver`
+    
+            * 클라이언트의 위치(Locale) 정보를 파악하는 인터페이스
+    
+            * 기본 전략은 요청의 `accept-language`를 보고 판단한다.
+    
+        * ③ `ThemeResolver`
+        
+            * 애플리케이션에 설정된 테마를 파악하고 변경할 수 있는 인터페이스
+    
+            * [참고 URL](https://memorynotfound.com/spring-mvc-theme-switcher-example/ "참고 URL")
+    
+        * ④ `HandlerMapping`
+    
+            * 요청을 처리할 핸들러를 찾는 인터페이스
+    
+        * ⑤ `HandlerAdapter`
+        
+            * `HandlerMapping`이 찾아낸 "핸들러"를 실행하는 인터페이스
+    
+            * 스프링 MVC `확장력`의 핵심
+    
+        * ⑥ `HandlerExceptionResolver`
+    
+            * 요청 처리 중에 발생한 예외를 처리하는 인터페이스 
+    
+        * ⑦ `RequestToViewNameTranslator`
+    
+            * 핸들러에서 뷰 이름을 명시적으로 리턴하지 않은 경우, 요청을 기반으로 뷰 이름을 판단하는 인터페이스
             
-            * 그래서 웹 브라우저를 새로고침(Refresh) 하더라도 `중복 Form Submission`이 발생하지 않도록 한다.
-            
-            * 즉, 새로고침(Refresh) 하더라도 GET 요청을 하게 되는 것이다.
-            
-        * Post 요청을 받은 다음에 데이터를 저장하고 리다이렉트를 할 때, `FlashMap`를 사용하면 `redirect:/events?id=2019` 가 아닌 `redirect:/events`로 할 수 있도록 해준다.
+                * 즉, 요청 URL(`/sample`)을 기반으로 뷰 이름을 판단한다. 
+    
+        * ⑧ `ViewResolver`
+        
+            * 뷰 이름(String)에 해당하는 뷰를 찾아내는 인터페이스
+    
+        * ⑨ `FlashMapManager`
+    
+            * `FlashMap` 인스턴스를 가져오고 저장하는 인터페이스
+    
+                * `FlashMap`은 주로 리다이렉션을 할 때 요청 매개변수를 사용하지 않고 데이터를 전달하고 정리할 때 사용한다.
                 
+                    * 즉, 리다이렉트를 할 때 데이터 전송을 편하게 하기 위한 방법
+
+            * Post 요청을 받은 다음에 데이터를 저장하고 리다이렉트를 할 때, `FlashMap`를 사용하면 `redirect:/events?id=2019` 가 아닌 `redirect:/events`로 할 수 있도록 해준다.
+
+                * `PRG(Post-Redirect-Get) 패턴`
+            
+                    * Post 요청을 받은 다음, 리다이렉트를 해서 사용자가 웹 브라우저에서 새로고침을 하더라도 GET 요청을 보내도록 하는 패턴을 말한다. 
+    
+                        * 즉, `중복 Form Submission`을 방지하기 위한 요청 처리 패턴이다.
+
 #### 11) 스프링 MVC 동작 원리 정리
 
 * (1) DispatcherServlet
@@ -1230,7 +1271,7 @@
     * `Spring MVC`는 Servlet 기반으로 동작하며 서블릿 컨테이너가 필요하다.
     
     * `DispatcherServlet`는 (굉장히 복잡한) 서블릿이다.
-    
+
 * (2) DispatcherServlet 초기화
 
     * ① 특정 타입에 해당하는 빈을 찾는다. 
@@ -1243,7 +1284,7 @@
 
         * `web.xml`에 서블릿을 등록한다.
     
-        * 또는 `WebApplicationInitializer`를 구현한 클래스에 자바 코드로 서블릿을 등록한다. (스프링 3.1+, 서블릿 3.0+)
+        * 또는 `WebApplicationInitializer`를 구현한 클래스에 자바 코드로 서블릿을 등록 할 수도 있다. (스프링 3.1+, 서블릿 3.0+)
         
             ```java
             // 이전에 만든 web.xml 파일을 삭제하자.
@@ -1264,15 +1305,15 @@
                 }
             }
             ```
-          
+  
     * ② 세부 구성 요소는 빈 설정하기 나름.
-    
+
 * (4) 스프링 부트를 사용하는 스프링 MVC
 
     * (1) 스프링 부트 애플리케이션에 내장 톰캣을 만들고 그 안에 `DispatcherServlet`을 등록한다.
 
         * 여기서 "그 안"이라는 것은 내장 톰캣을 의미 함
-    
+
         * 스프링 부트 자동 설정이 자동으로 해줌.
 
     * (2) 스프링 부트의 주관에 따라 여러 인터페이스 구현체를 빈으로 등록한다.
@@ -1280,7 +1321,7 @@
         * 스프링 부트를 기반으로 개발하는 경우, 이러한 설정을 사용 할 것이라는 주관에 따라 미리 빈을 등록 해놓는다.
 
         * 물론 `DispatcherServlet`도 기본적으로 등록하는 것이 있지만, 스프링 부트가 더 많은 것들을 기본적으로 등록 해준다.
-        
+
 ## 2. 스프링 MVC 설정
 
 #### 1) 스프링 MVC 구성 요소를 직접 빈으로 등록하기
