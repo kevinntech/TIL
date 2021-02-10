@@ -8,7 +8,7 @@
 * (1) 롬복(Lombok)
 
     * `롬복(Lombok)`은 자바로 개발할 때, 자주 사용하는 코드(Getter, Setter, 기본 생성자, toString 등)를 애노테이션으로 자동 생성 해준다.
-    
+
     * 롬복 설치 과정
     
         * ① 롬복 의존성 추가하기
@@ -37,13 +37,25 @@
     * 자주 사용하는 롬복 애노테이션
     
         * `@Getter` : getter 메서드를 자동 생성한다.
+        
         * `@Setter` : setter 메서드를 자동 생성한다.
+        
         * `@NoArgsConstructor` : 매개변수가 없는 생성자(기본 생성자)를 자동 생성한다.
-        * `@AllArgsConstructor` : 모든 필드 값을 매개변수로 받는 생성자를 자동 생성한다.
-        * `@RequiredArgsConstructor` : `final`이나 `@NonNull`인 필드 값만 매개변수로 받는 생성자를 자동 생성한다.
-        * `@ToString` : toString() 메서드를 자동 생성한다. exclude 속성을 사용하여 특정 필드를 결과에서 제외 시킬 수 있다.
+        
+        * `@AllArgsConstructor` : 모든 필드를 매개변수로 받는 생성자를 자동 생성한다.
+        
+        * `@RequiredArgsConstructor` : `final` 필드만 매개변수로 받는 생성자를 자동 생성한다.
+        
+        * `@ToString` : toString() 메서드를 자동 생성한다. 
+        
         * `@EqualsAndHashCode` : equals()와 hashCode() 메서드를 자동 생성한다.
-        * `@Data` : `@Getter`, `@Setter`, `@RequiredArgsConstructor`, `@ToString`, `@EqualsAndHashCode`를 한꺼번에 설정한다.
+
+            * of 속성을 사용하여 동등성 비교에 사용할 필드를 명시한다.
+        
+                * Ex) `@EqualsAndHashCode(of = "id")`
+
+        * `@Data` : `@Getter`, `@Setter`, `@RequiredArgsConstructor`, `@ToString`, `@EqualsAndHashCode`를 한번에 설정한다.
+        
         * `@Builder` : 빌더 패턴을 사용 할 수 있도록 한다.
 
 * (2) MVC 란?
@@ -363,7 +375,7 @@
     
 * (3) 톰캣 설치
       
-    * ① `pom.xml`에 서블릿 의존성을 추가한다.
+    * ① 톰캣 공식 홈페이지에서 zip 파일을 다운로드 받는다.
 
         ![image 8](images/img8.png)
     
@@ -397,25 +409,25 @@
 
 * (5) `web.xml`에 서블릿 등록 및 맵핑
     
-```html
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
-
-<web-app>
-  <display-name>Archetype Created Web Application</display-name>
-
-  <servlet>
-    <servlet-name>hello</servlet-name>
-    <servlet-class>me.kevinntech.HelloServlet</servlet-class>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>hello</servlet-name>
-    <url-pattern>/hello</url-pattern>
-  </servlet-mapping>
-</web-app>
-```
+    ```html
+    <!DOCTYPE web-app PUBLIC
+     "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+     "http://java.sun.com/dtd/web-app_2_3.dtd" >
+    
+    <web-app>
+      <display-name>Archetype Created Web Application</display-name>
+    
+      <servlet>
+        <servlet-name>hello</servlet-name>
+        <servlet-class>me.kevinntech.HelloServlet</servlet-class>
+      </servlet>
+    
+      <servlet-mapping>
+        <servlet-name>hello</servlet-name>
+        <url-pattern>/hello</url-pattern>
+      </servlet-mapping>
+    </web-app>
+    ```
 
 #### 4) 서블릿 리스너와 서블릿 필터
 
@@ -583,7 +595,7 @@
 
     * ① `pom.xml`에 다음과 같은 의존성을 추가한다.
     
-        * 스프링 부트를 사용하고 있는 것이 아니기 때문에 버전을 명시해야 한다. 
+        * 현재 스프링 부트를 사용하고 있는 것은 아니기 때문에 버전을 명시해야 한다. 
 
             ```html
             <dependency>
@@ -597,11 +609,11 @@
   
         * 서블릿 컨테이너는 `web.xml`에 기술된 내용으로 초기화를 진행한다.
                 
-        ```html
-          <listener>
-            <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-          </listener>
-        ```
+            ```html
+              <listener>
+                <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+              </listener>
+            ```
 
         * `ServletContext`는 모든 서블릿들이 사용 할 수 있는 정보를 모아 둔 저장소를 말한다.
         
@@ -711,7 +723,7 @@
   
     * `DispatcherServlet`는 스프링에서 Front Controller 역할을 하는 서블릿을 이미 구현 해놓은 것을 말한다.
 
-    * `DispatcherServlet`이 모든 요청을 받아서 해당 요청을 처리 할 핸들러에게 요청을 분배(Dispatch)하고 핸들러의 실행 결과를 `Http 응답(Response)`로 만든다.
+    * `DispatcherServlet`이 모든 요청을 받아서 해당 요청을 처리 할 핸들러에게 요청을 분배(Dispatch)하고 핸들러의 실행 결과를 `Http 응답(Response)`으로 만든다.
 
 * (3) Root WebApplicationContext 와 Servlet WebApplicationContext
 
@@ -1004,7 +1016,7 @@
         
             * JSON으로 전달되는 데이터를 자바 객체로 변환한다. 
         
-        * `@ResponseBody` : 자바 객체를 HTTP 응답 본문(body)로 변환한다.
+        * `@ResponseBody` : 자바 객체를 HTTP 응답 본문(body)으로 변환한다.
     
         * `ResponseEntity` : HTTP 응답의 상태코드, 헤더, 본문를 직접 설정 할 수 있는 리턴 타입이다.
         
@@ -1330,7 +1342,7 @@
 
 * 하지만 스프링 MVC 구성 요소를 직접 `@Bean`으로 등록하여 사용하는 것은 가장 Low Level로 설정하는 것이며
 
-* 스프링 부트가 나오기 전에도 이렇게 하는 경우는 거의 없었다. 그래서 등장하게 된 것이 바로 다음에 배울 `@EnableWebMVC`이다.
+* 스프링 부트가 나오기 전에도 이렇게 하는 경우는 거의 없었다. 그래서 등장하게 된 것이 바로 다음에 배울 `@EnableWebMvC`이다.
 
     ```java
     @Configuration
