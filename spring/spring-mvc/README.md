@@ -1381,16 +1381,8 @@
 
 * (1) @EnableWebMvc 란?
       
-    * `@EnableWebMvc`은 애노테이션 기반의 스프링 MVC를 사용할 때, 필요한 빈을 자동으로 등록한다.
+    * `@EnableWebMvc`은 애노테이션 기반의 스프링 MVC를 사용할 때, 필요한 빈을 자동으로 등록해준다.
     
-        ```java
-        @Configuration
-        @EnableWebMvc
-        public class WebConfig {
-            
-        }
-        ```
-
     * `@EnableWebMvc`를 사용하지 않는다면 스프링 MVC 구성 요소를 직접 빈으로 등록한 것은 빈으로 등록되며 
     
     * 빈을 등록하지 않았다면 디스패처 서블릿 기본 전략에 정의되어 있는 빈을 등록하게 된다.
@@ -1399,25 +1391,41 @@
       
     * `@EnableWebMVC` 내부를 보면 `DelegatingWebMvcConfiguration` 설정 파일을 import 하고 있다. 
     
-    * `DelegatingWebMvcConfiguration`는 `WebMvcConfigurationSupport`를 상속 받고 있다. 
-    
-    * `WebMvcConfigurationSupport`는 스프링 MVC 구성 요소를 빈으로 등록한다. (핸들러 맵핑 또는 인터셉터 등) 
+        * `DelegatingWebMvcConfiguration`는 `WebMvcConfigurationSupport`를 상속 받고 있다. 
+        
+        * `WebMvcConfigurationSupport`는 스프링 MVC 구성 요소를 빈으로 등록한다. (핸들러 맵핑 또는 인터셉터 등) 
     
 * (3) @EnableWebMvc 사용하기
       
     * ① `@Configuration`를 사용한 자바 설정 파일에 `@EnableWebMvc`를 지정한다.
     
-    * ② 아래의 코드로 DispatcherServlet이 사용하는 ApplicationContext에 ServletContext를 설정한다. 
-      
-    * `context.setServletContext(servletContext);` 
-                  
+        ```java
+        @Configuration
+        @ComponentScan
+        @EnableWebMvc
+        public class WebConfig {
+        
+            @Bean
+            public ViewResolver viewResolver(){
+                InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
+                viewResolver.setPrefix("/WEB-INF/"); // View는 WEB-INF에 있으며
+                viewResolver.setSuffix(".jsp"); // View의 확장자가 항상 JSP이다.
+                return viewResolver;
+            }
+        
+        }
+        ```
+    
+    * ② `DispatcherServlet`이 사용하는 `ApplicationContext`에 `ServletContext`를 설정해야 한다. 
+               
         ```java
         public class WebApplication implements WebApplicationInitializer {
+      
             @Override
             public void onStartup(ServletContext servletContext) throws ServletException {
                 // ApplicationContext 만들기
                 AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-                context.setServletContext(servletContext); // servletContext 설정 하기
+                context.setServletContext(servletContext); // servletContext 설정하기 ★★★
                 context.register(WebConfig.class);
                 context.refresh();
         
@@ -1426,18 +1434,19 @@
                 ServletRegistration.Dynamic app = servletContext.addServlet("app", dispatcherServlet);
                 app.addMapping("/app/*");
             }
+      
         }
         ```
       
-        * DispatcherServlet이 사용하는 ApplicationContext에 ServletContext가 설정 되어 있어야 하는 이유는 
+        * `DispatcherServlet`이 사용하는 `ApplicationContext`에 `ServletContext`가 설정 되어 있어야 하는 이유는 
         
-        * `WebMvcConfigurationSupport`에서 ServletContext를 참조하기 때문에 빈 설정이 제대로 되지 않을 수 있기 때문이다.
+        * `WebMvcConfigurationSupport`에서 종종 `ServletContext`를 참조하기 때문에 빈 설정이 제대로 되지 않을 수 있기 때문이다.
        
 * (4) 정리
 
     * `@EnableWebMVC`는 `DelegatingWebMvcConfiguration`를 import 하는데 `DelegatingWebMvcConfiguration`는 Delegation 구조로 되어 있다. 
     
-    * Delegation 구조는 어딘가에 위임을 해서 읽어오는 구조를 말하며 확장성이 좋다.
+        * Delegation 구조는 어딘가에 위임을 해서 읽어오는 구조를 말하며 확장성이 좋다.
     
     * `WebMvcConfigurationSupport`가 기본적으로 설정 해주는 빈(Bean)에 인터셉터를 추가 하거나 메시지 컨버터를 추가하는 것을 간편하게 할 수 있다
     
@@ -1502,8 +1511,8 @@
 
         ![image 32](images/img32.png)
     
-        * `ContentNegotiatingViewResolver`는 뷰 이름에 해당하는 뷰를 찾는 일을 나머지 뷰 리졸버들에게 위임한다.
-    
+        * `ContentNegotiatingViewResolver`는 HTTP 요청의 Accept 헤더 정보를 통해 미디어 타입을 파악한 다음, 적절한 뷰 리졸버를 찾아서 해당 뷰 리졸버에게 뷰 반환을 위임한다.
+
 * (3) 스프링 부트의 MVC 자동 설정은 어떻게 이루어지는가?
 
     * ① `spring-boot-autoconfigure`라는 jar 파일을 보면 `spring.factories`라는 파일에 자동 설정 대상의 빈들이 정의 되어 있다.
@@ -1538,6 +1547,12 @@
 
     * ① 스프링 부트에서는 `application.properties`를 사용해서 스프링 MVC를 커스터마이징 할 수 있다.
     
+        * 예를 들어, `WebMvcAutoConfiguration`의 내부 코드를 살펴보면 `Preperties`들이 사용되는 것을 확인 할 수 있다.
+    
+        * 그 중 `ResourceProperties`의 내부 코드를 살펴보면 prefix(`prefix = "spring.resources"`)가 있으며 
+        
+        * `application.properties`에서 설정 값들을 읽어온다. 
+    
     * ② `@Configuration` + `implements WebMvcConfigurer`
     
         * 스프링 부트의 스프링 MVC 자동 설정을 그대로 사용하면서 추가적인 설정을 한다.
@@ -1547,9 +1562,30 @@
         * 스프링 부트의 스프링 MVC 자동 설정을 사용하지 않고 직접 설정한다.
     
     * ① ~ ③ 번 순으로 적용할 것을 고려한다.
-    
-* 스프링 부트를 사용하는 경우, 포매터와 컨버터는 스프링 MVC 커스터마이징을 하지 않고 빈으로만 등록하면 된다. 
 
+* (5) 참고
+
+    * 스프링 부트를 사용하는 경우, 포매터와 컨버터는 스프링 MVC 커스터마이징을 하지 않고 빈으로만 등록하면 된다. 
+    
+        ```java
+        public class WebMvcAutoConfiguration {
+        
+            // ...
+      
+            // addBeans() 내부 코드를 살펴보면 BeanFactory에서 해당 타입의 빈을 모두 가져와서 registry에 등록한다. 
+            @Override
+            public void addFormatters(FormatterRegistry registry) {
+                ApplicationConversionService.addBeans(registry, this.beanFactory);
+            }
+              
+            // ...
+        }
+        ```
+      
+    * 타임리프의 `prefix`는 `classpath:/templates/`이며 `suffix`는 `.html`로 설정되어 있다. (`ThymeleafProperties` 클래스)
+    
+        * 이러한 이유로 컨트롤러에서 "events/list" 처럼 리턴했던 것이다.
+      
 #### 5) 스프링 부트에서 JSP 사용하기
 
 * (1) 프로젝트 만들기
