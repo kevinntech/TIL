@@ -1342,7 +1342,7 @@
 
 * 하지만 스프링 MVC 구성 요소를 직접 `@Bean`으로 등록하여 사용하는 것은 가장 Low Level로 설정하는 것이며
 
-* 스프링 부트가 나오기 전에도 이렇게 하는 경우는 거의 없었다. 그래서 등장하게 된 것이 바로 다음에 배울 `@EnableWebMvC`이다.
+* 스프링 부트가 나오기 전에도 이렇게 하는 경우는 거의 없었다. 그래서 등장하게 된 것이 바로 다음에 배울 `@EnableWebMvc`이다.
 
     ```java
     @Configuration
@@ -1375,7 +1375,7 @@
     }
     ```
    
-    * 인터셉터는 핸들러를 처리 하기 전, 후에 해야 할 작업이 있을 때 사용한다. (서블릿 필터와 유사)
+    * 인터셉터는 핸들러를 실행하기 전, 후 그리고 완료 시점에 해야할 작업이 있을 때 사용한다. (서블릿 필터와 유사)
     
 #### 2) @EnableWebMvc
 
@@ -1383,13 +1383,13 @@
       
     * `@EnableWebMvc`은 애노테이션 기반의 스프링 MVC를 사용할 때, 필요한 빈을 자동으로 등록해준다.
     
-    * `@EnableWebMvc`를 사용하지 않는다면 스프링 MVC 구성 요소를 직접 빈으로 등록한 것은 빈으로 등록되며 
+    * `@EnableWebMvc`를 사용하지 않는다면 스프링 MVC 구성 요소를 직접 빈으로 등록하면 등록된 빈이 사용되며 
     
-    * 빈을 등록하지 않았다면 디스패처 서블릿 기본 전략에 정의되어 있는 빈을 등록하게 된다.
+    * 빈을 등록하지 않았다면 디스패처 서블릿의 기본 전략을 기준으로 빈을 등록하게 된다.
       
 * (2) @EnableWebMvc 내부 살펴보기
       
-    * `@EnableWebMVC` 내부를 보면 `DelegatingWebMvcConfiguration` 설정 파일을 import 하고 있다. 
+    * `@EnableWebMvc` 내부를 보면 `DelegatingWebMvcConfiguration` 설정 파일을 import 하고 있다. 
     
         * `DelegatingWebMvcConfiguration`는 `WebMvcConfigurationSupport`를 상속 받고 있다. 
         
@@ -1444,7 +1444,7 @@
        
 * (4) 정리
 
-    * `@EnableWebMVC`는 `DelegatingWebMvcConfiguration`를 import 하는데 `DelegatingWebMvcConfiguration`는 Delegation 구조로 되어 있다. 
+    * `@EnableWebMvc`는 `DelegatingWebMvcConfiguration`를 import 하는데 `DelegatingWebMvcConfiguration`는 Delegation 구조로 되어 있다. 
     
         * Delegation 구조는 어딘가에 위임을 해서 읽어오는 구조를 말하며 확장성이 좋다.
     
@@ -1491,9 +1491,9 @@
 
 * (2) 스프링 부트의 MVC 관련 기본 설정 살펴보기
 
-    * 스프링 부트의 MVC 관련 기본 설정에 대해 살펴 보기 위해 디버그 모드로 실행한다
+    * 실습을 진행하기 위해 디버그 모드로 실행한다
 
-    * 앞서 살펴본 것 보다 스프링 부트에서 `handlerMapping`과 `handlerAdapter`가 더 많이 설정되어 있는 것을 확인 할 수 있다. 
+    * 이전에 살펴본 것 보다 스프링 부트에서 `handlerMapping`과 `handlerAdapter`가 더 많이 설정되어 있는 것을 확인 할 수 있다. 
 
         ![image 30](images/img30.png)
     
@@ -1527,31 +1527,27 @@
       
         * 해당 클래스의 애노테이션을 좀 더 자세히 살펴 보자.
 
-        * `@ConditionalOnWebApplication`
-        
-            * 애플리케이션의 타입이 웹 애플리케이션인 경우, 조건을 만족하는 애노테이션이다.
-              
-            * 참고로, 스프링 부트 애플리케이션의 타입은 총 3가지(`SERVLET`, `REACTIVE`, `NONE`)가 있다. 
-        
-        * `@ConditionalOnClass` : 해당 클래스가 클래스패스에 있는 경우에만 조건을 만족하는 애노테이션이다. 
-        
-        * `@ConditionalMissingBean` : 해당 타입의 빈이 등록되지 않은 경우에만 조건을 만족하는 애노테이션이다.
+            * `@ConditionalOnWebApplication` : 애플리케이션의 타입이 웹 애플리케이션인 경우, 조건을 만족하는 애노테이션이다.
+                  
+                * 참고로, 스프링 부트 애플리케이션의 타입은 총 3가지(`SERVLET`, `REACTIVE`, `NONE`)가 있다. 
+            
+            * `@ConditionalOnClass` : 해당 클래스가 클래스패스에 있는 경우에만 조건을 만족하는 애노테이션이다. 
+            
+            * `@ConditionalMissingBean` : 해당 타입의 빈이 등록되지 않은 경우에만 조건을 만족하는 애노테이션이다.
 
     * ④ 아래 코드의 `@ConditionalOnMissingBean(WebMvcConfigurationSupport.class)` 의미는 다음과 같다.
 
-        * `WebMvcConfigurationSupport` 빈이 등록 되어 있지 않은 경우에는 `WebMvcAutoConfiguration` 설정을 사용 한다는 의미다.
+        * `WebMvcConfigurationSupport` 빈이 등록 되어 있지 않은 경우에는 `WebMvcAutoConfiguration` 설정 파일을 사용 한다는 의미다.
     
-        ![image 35](images/img35.png)
+            ![image 35](images/img35.png)
 
-* (4) 스프링 MVC 커스터마이징
+* (4) 스프링 부트에서 스프링 MVC 커스터마이징
 
     * ① 스프링 부트에서는 `application.properties`를 사용해서 스프링 MVC를 커스터마이징 할 수 있다.
-    
+
         * 예를 들어, `WebMvcAutoConfiguration`의 내부 코드를 살펴보면 `Preperties`들이 사용되는 것을 확인 할 수 있다.
     
-        * 그 중 `ResourceProperties`의 내부 코드를 살펴보면 prefix(`prefix = "spring.resources"`)가 있으며 
-        
-        * `application.properties`에서 설정 값들을 읽어온다. 
+        * 그 중 `ResourceProperties`의 내부 코드를 살펴보면 prefix (`prefix = "spring.resources"`)가 있으며 `application.properties`에서 prefix에 해당하는 설정 값들을 읽어온다. 
     
     * ② `@Configuration` + `implements WebMvcConfigurer`
     
@@ -1572,7 +1568,7 @@
         
             // ...
       
-            // addBeans() 내부 코드를 살펴보면 BeanFactory에서 해당 타입의 빈을 모두 가져와서 registry에 등록한다. 
+            // addBeans() 내부 코드를 살펴보면 BeanFactory에서 해당 타입의 빈을 모두 가져와서 registry에 등록하도록 되어 있다.
             @Override
             public void addFormatters(FormatterRegistry registry) {
                 ApplicationConversionService.addBeans(registry, this.beanFactory);
@@ -1758,22 +1754,20 @@
 
 * (1) Formatter
 
-    * `Formatter`는 어떤 객체를 문자열로 변환 하거나 어떤 문자열을 다른 객체로 변환할 때 사용하는 인터페이스다.
+    * `Formatter`는 객체(Object)와 문자열(String) 간의 변환을 담당한다. 
     
-    * `Formatter`는 사실, 아래의 2가지 인터페이스를 하나로 합친 것이다. 
-    
-        * ① Parser : 어떤 문자열을 (Locale 정보를 참고하여) 어떻게 객체로 변환할 것인가를 지정한다.
+        * `Formatter`는 다음 2가지 인터페이스를 하나로 합친 것이다. 
         
-        * ② Printer : 해당 객체를 (Locale 정보를 참고하여) 어떻게 문자열로 출력할 것인가를 지정한다.
+            * ① `Parser` : 어떤 문자열을 (Locale 정보를 참고하여) 어떻게 객체로 변환할 것인가를 지정한다.
+            
+            * ② `Printer` : 해당 객체를 (Locale 정보를 참고하여) 어떻게 문자열로 출력할 것인가를 지정한다.
         
 * (2) 실습 준비
 
     * ① 새로운 프로젝트를 생성한다.
 
     * ② 컨트롤러를 작성한다.
-      
-        * http 응답 본문에 핸들러의 결과를 넣는다.
-        
+     
         ```java
         @RestController
         public class SampleController {
@@ -1785,6 +1779,8 @@
             
         }
         ```
+      
+        * HTTP 응답 본문에 핸들러의 결과를 넣는다.
       
     * ③ 테스트 코드를 작성한다.
               
@@ -1807,8 +1803,6 @@
       
     * ④ 컨트롤러를 다음과 같이 변경한다.
       
-        * 포매터를 이용하면 어떤 문자열을 객체로 받을 수 있다.
-    
         ```java
         @RestController
         public class SampleController {
@@ -1820,6 +1814,8 @@
         
         }
         ```
+        
+        * 포매터를 이용하면 어떤 문자열을 객체로 받을 수 있다.
       
     * ⑤ Person 클래스를 작성한다.
          
@@ -1865,7 +1861,7 @@
         
 * (3) 포매터 추가하기 (스프링 부트를 사용하지 않는 경우)
 
-    * ① Formatter를 구현한 포매터 클래스를 작성한다.
+    * ① Formatter 인터페이스를 구현한 포매터 클래스를 작성한다.
       
         ```java
         public class PersonFormatter implements Formatter<Person> {
@@ -1885,7 +1881,7 @@
         }
         ```
       
-    * ② `WebMvcConfigurer`의 addFormatters(FormatterRegistry) 메소드를 오버라이딩 한다.
+    * ② `WebMvcConfigurer`의 `addFormatters()` 메소드를 오버라이딩 한다.
       
         ```java
         @Configuration
@@ -1901,9 +1897,9 @@
     
         * 테스트가 정상적으로 통과되는 것을 확인 할 수 있다.
       
-        ![image 42](images/img42.png)
+            ![image 42](images/img42.png)
         
-    * 웹 브라우저에서 `localhost:8080/hello?name=kevin`과 같은 URL로 요쳥하면 어떻게 처리 해야 될까?
+    * 웹 브라우저에서 `localhost:8080/hello?name=kevin`과 같은 URL로 요청하는 경우에는 어떻게 처리 해야 될까?
 
         * 아래 과정을 진행하자.
 
@@ -1921,7 +1917,7 @@
         }
         ```
       
-    * ⑤ 테스트 코드도 변경한다.
+    * ⑤ 테스트 코드를 변경한 다음, 실행한다.
     
         ```java
         @RunWith(SpringRunner.class)
@@ -1941,76 +1937,72 @@
         }
         ```
       
-    * ⑥ 애플리케이션을 실행해서 웹 브라우저에서 확인하는 것도 가능하다.
+    * ⑥ 또는 애플리케이션을 실행한 다음, 웹 브라우저에서 확인하는 것도 가능하다.
     
         ![image 43](images/img43.png)
         
 * (4) 포매터 추가하기 (스프링 부트를 사용하는 경우)
 
-    * 해당 포매터를 빈으로만 등록하면 된다. (WebConfig 파일은 필요없다)
+    * 해당 포매터를 빈으로만 등록하면 된다. WebConfig 파일은 필요 없으므로 삭제한다.
     
         * 스프링 부트는 해당 포매터가 빈으로 등록되어 있으면 포매터가 동작한다.
     
-        ```java
-        @Component
-        public class PersonFormatter implements Formatter<Person> {
-        
-            @Override
-            public Person parse(String text, Locale locale) throws ParseException {
-                Person person = new Person();
-                person.setName(text);
-                return person;
-            }
-        
-            @Override
-            public String print(Person object, Locale locale) {
-                return object.toString();
-            }
-        
-        }
-        ```
-      
-    * 위와 같이 수정한 다음, 애플리케이션을 실행하여 웹 브라우저에서 확인하면 문제가 없다.
-
-    * 하지만, 테스트 코드를 실행하면 실패하게 된다. 그 이유는 `@WebMvcTest`는 슬라이스 테스트용 이기 때문에 웹과 관련된 빈만 등록하며 포매터에 대해서는 빈으로 등록하지 않기 때문이다. 
-    
-    * 해결책은 다음과 같다.
-    
-        * @`SpringBootTest`를 사용하여 통합 테스트로 변경하고 이제 `MockMvc`가 자동으로 빈으로 등록되지 않기 때문에 `@AutoConfigureMockMvc`를 사용한다.
-
             ```java
-            @RunWith(SpringRunner.class)
-            @SpringBootTest
-            @AutoConfigureMockMvc
-            public class SampleControllerTest {
+            @Component
+            public class PersonFormatter implements Formatter<Person> {
             
-                @Autowired
-                MockMvc mockMvc;
-            
-                @Test
-                public void hello() throws Exception {
-                    mockMvc.perform(get("/hello")
-                                .param("name", "kevin"))
-                            .andDo(print())
-                            .andExpect(content().string("hello kevin"));
+                @Override
+                public Person parse(String text, Locale locale) throws ParseException {
+                    Person person = new Person();
+                    person.setName(text);
+                    return person;
                 }
+            
+                @Override
+                public String print(Person object, Locale locale) {
+                    return object.toString();
+                }
+            
             }
             ```
+      
+    * 위와 같이 수정한 다음, 애플리케이션을 실행하여 웹 브라우저에서 확인하는 경우에는 문제가 없다.
+
+    * 하지만, 테스트 코드를 실행하면 실패하게 된다. 그 이유는 `@WebMvcTest`는 웹과 관련된 빈만 등록하기 때문에 포매터에 대해서는 빈으로 등록하지 않는다.
+    
+    * 이를 해결하려면 `@SpringBootTest`를 사용하여 통합 테스트로 변경하고 이제 `MockMvc`가 자동으로 빈으로 등록되지 않기 때문에 `@AutoConfigureMockMvc`를 사용한다.
+
+        ```java
+        @RunWith(SpringRunner.class)
+        @SpringBootTest
+        @AutoConfigureMockMvc
+        public class SampleControllerTest {
+        
+            @Autowired
+            MockMvc mockMvc;
+        
+            @Test
+            public void hello() throws Exception {
+                mockMvc.perform(get("/hello")
+                            .param("name", "kevin"))
+                        .andDo(print())
+                        .andExpect(content().string("hello kevin"));
+            }
+        }
+        ```
 
 #### 8) 도메인 클래스 컨버터 자동 등록 
 
-* (1) 도메인 클래스
+* (1) 준비하기
 
-    * 요청으로 이름이 들어오면 이름에 해당하는 도메인 클래스(Person) 타입의 객체로 맵핑 했는데, 보통 Person의 id에 해당하는 것으로 맵핑한다.
-
-* (2) 포매터 또는 컨버터를 직접 만들 필요가 없는 경우
+    * 요청으로 이름(name)이 들어오면 이름에 해당하는 도메인 클래스(Person) 타입의 객체로 매핑 했는데, 보통은 id로 매핑한다.
 
     * ① 다음과 같이 도메인 클래스를 변경한다.
     
         ```java
         public class Person {
         
-            private Long id; 
+            private Long id; // id 추가 
             
             private String name;
         
@@ -2033,7 +2025,7 @@
         }
         ```
    
-    * ② id에 해당하는 이름을 출력 하고자 하는 경우, 포매터 또는 컨버터를 직접 등록 할 필요가 없다. 포매터 클래스를 작성한 것이 있다면 삭제하자.
+    * ② 다음과 같이 id에 해당하는 도메인 클래스(Person) 타입의 객체로 매핑하고자 하는 경우에는 포매터 또는 컨버터를 직접 등록 할 필요가 없다. 포매터를 만들었다면 삭제하자.
     
         ```java
         @RestController
@@ -2068,13 +2060,13 @@
         }
         ```
 
-    * 테스트 코드에서 `/hello`에 GET 요청을 할 때, id에 1이라는 값을 전달하였지만 컨트롤러에서 1을 받아서 Person으로 변경 할 수 없으므로 에러가 발생한다.
-    
-    * 해당 문제는 아래에서 스프링 데이터 JPA를 이용하여 해결한다.
+        * 테스트 코드에서 `/hello`에 GET 요청을 할 때, id에 1이라는 값을 전달하였지만 컨트롤러에서 1을 받아서 `Person`으로 변경 할 수 없으므로 에러가 발생하게 된다.
+        
+        * 해당 문제는 스프링 데이터 JPA를 사용해서 해결 할 수 있다.
     
 * (3) 도메인 클래스 컨버터를 사용하는 경우
 
-    * `스프링 데이터 JPA`가 제공하는 `도메인 클래스 컨버터`는 어떠한 ID에 해당하는 엔티티로 변환해준다.
+    * `스프링 데이터 JPA`가 제공하는 `도메인 클래스 컨버터`는 Repository를 사용해서 ID에 해당하는 엔티티 객체를 찾아서 바인딩을 해준다.
     
     * ① `pom.xml`에 스프링 데이터 JPA 의존성을 추가한다.
     
@@ -2089,7 +2081,7 @@
         </dependency>
         ```
       
-    * ② 엔티티를 맵핑한다.
+    * ② 엔티티를 매핑한다.
      
         ```java
         @Entity
@@ -2118,7 +2110,7 @@
         }
         ```
       
-    * ③ 리파지토리를 추가한다.
+    * ③ 리포지토리를 만든다.
      
         ```java
         public interface PersonRepository extends JpaRepository<Person, Long> {
@@ -2141,6 +2133,7 @@
         
             @Test
             public void hello() throws Exception {
+                // 엔티티 생성 및 리포지토리에 저장
                 Person person = new Person();
                 person.setName("kevin");
                 Person savedPerson = personRepository.save(person);
@@ -2158,7 +2151,11 @@
 
 * (1) HandlerInterceptor 
 
-    * `HandlerInterceptor`는 핸들러를 실행하기 전, 후(아직 랜더링 전) 그리고 완료(랜더링까지 끝난 이후) 시점에 부가 작업을 하고 싶은 경우에 사용한다.
+    * `HandlerInterceptor`는 핸들러를 실행하기 전, 후(아직 랜더링 전) 그리고 완료(랜더링까지 끝난 이후) 시점에 어떤 작업을 하고 싶은 경우에 사용한다.
+    
+        * 핸들러 매핑(HandlerMapping)에 설정 할 수 있다.
+        
+        * 핸들러 매핑에 설정하게 되면 핸들러 매핑이 자신이 찾은 핸들러에 인터셉터를 적용해준다.
     
     * 여러 핸들러에서 반복적으로 사용하는 코드를 줄이고 싶을 때 사용할 수 있다. 
     
@@ -2168,15 +2165,15 @@
 
     * `preHandle()`는 핸들러를 실행 하기 전에 호출된다. 
 
-    * "핸들러"에 대한 정보를 사용할 수 있기 때문에 서블릿 필터에 비해 보다 세밀한 로직을 구현할 수 있다. 
+    * **handler**라는 파라미터가 제공되기 때문에 서블릿 필터에 비해 보다 세밀한 로직을 구현할 수 있다. 
     
-    * 다음 인터셉터 또는 핸들러로 요청, 응답을 전달한다면 `true`를 리턴하고 이곳에서 끝났다면 `false`를 리턴한다.
+    * 다음 인터셉터 또는 핸들러로 요청, 응답을 전달하려면 `true`를 리턴하고 이곳에서 끝났다면 `false`를 리턴한다.
      
 * (3) void postHandle(request, response, **modelAndView**)
 
     * `postHandle()`는 핸들러 실행이 끝나고 아직 뷰를 랜더링 하기 전에 호출된다.
 
-    * "뷰"에 전달할 추가적이거나 여러 핸들러에 공통적인 모델 정보를 담는데 사용할 수도 있다. 
+    * "뷰"에 전달할 추가적이거나 여러 핸들러에 공통적인 모델 정보를 담는데 사용 할 수도 있다. 
 
     * 이 메소드는 인터셉터 역순으로 호출된다. 
 
@@ -2190,7 +2187,7 @@
     
     * 이 메소드는 인터셉터 역순으로 호출된다.
 
-    * 비동기적인 요청 처리 시에는 afterCompletion()가 호출되지 않는다.
+    * 비동기적인 요청 처리 시에는 호출되지 않는다.
     
 * (5) 동작 순서
 
@@ -2198,7 +2195,7 @@
 
     * ② preHandle 2
 
-    * ③ 요청 처리 핸들러가 실행됨 
+    * ③ 요청 처리 (핸들러가 실행됨) 
 
     * ④ postHandle 2
 
@@ -2218,13 +2215,13 @@
       
         * Ex) XSS Filter
     
-    * Spring MVC에 특화 되어 있는 정보를 참고 해야 한다면 핸들러 인터셉터를 구현하는 것이 좋다.
+    * Spring MVC에 특화 되어 있는 정보를 참고 해야 한다면 핸들러 인터셉터로 구현하는 것이 좋다.
     
 #### 10) 핸들러 인터셉터 2부 : 만들고 등록하기
 
 * (1) 인터셉터 구현하기
 
-    * `HandlerInterceptor` 인터페이스를 구현한 클래스를 작성한다.
+    * `HandlerInterceptor` 인터페이스를 구현한 클래스를 작성한다. `preHandle()`, `postHandle()`, `afterCompletion()`를 오버라이딩 한다.
     
         ```java
         // 첫 번째 인터셉터
@@ -2290,7 +2287,7 @@
         }
         ```
       
-    * 특정 패턴에 해당하는 요청에만 핸들러 인터셉터를 적용할 수도 있다. 그리고 핸들러 인터셉터의 순서를 지정할 수 있다.
+    * 특정 패턴에 해당하는 요청에만 핸들러 인터셉터를 적용 할 수도 있다. 그리고 핸들러 인터셉터의 순서를 지정하는 것도 가능하다.
     
         ```java
         @Configuration
@@ -2312,11 +2309,11 @@
 
 * (1) 리소스 핸들러란?
 
-    * `리소스 핸들러`는 HTML, CSS, 자바스크립트 그리고 이미지와 같은 정적(static) 리소스를 처리하는 핸들러다.
+    * `리소스 핸들러`는 HTML, CSS, 자바스크립트, 이미지와 같은 정적(static)인 리소스를 처리하는 핸들러다.
 
 * (2) 디폴트 서블릿 (DefaultServlet) 
 
-    * `디폴트 서블릿`은 서블릿 컨테이너가 기본으로 제공하며 정적 리소스를 처리할 때 사용하는 서블릿이다.
+    * `디폴트 서블릿`은 서블릿 컨테이너가 기본적으로 제공하며 정적 리소스를 처리할 때 사용하는 서블릿이다.
         
     * 스프링은 등록되어 있는 디폴트 서블릿에 요청을 위임해서 정적 리소스를 처리한다.
 
@@ -2328,7 +2325,7 @@
 
     * 스프링 부트에서는 어떠한 설정 없이 기본적으로 정적 리소스 핸들러와 캐싱을 제공한다.
 
-    * `resources/static` 디렉토리에 정적 파일이 있고 클라이언트에서 해당 파일을 요청하면 애플리케이션에서 제공한다.
+        * `resources/static` 디렉토리에 정적 파일이 있고 클라이언트에서 해당 파일을 요청하면 애플리케이션에서는 제공한다.
 
     * 실습하기
     
@@ -2362,9 +2359,9 @@
             }
             ```
           
-* (4) 리소스 핸들러 설정하기
+* (4) 커스텀 리소스 핸들러 등록하기
 
-    * `WebConfig`에서 `addResourceHandlers()`를 오버라이딩하여 리소스 핸들러를 등록한다.
+    * ① `WebConfig`에서 `addResourceHandlers()`를 오버라이딩하여 리소스 핸들러를 등록한다.
 
         ```java
         @Configuration
@@ -2382,31 +2379,27 @@
         }
         ```
             
-        * ① `addResourceHandler()` : 어떤 요청 패턴을 지원할 것인지 지정 
+        * `addResourceHandler()` : 처리할 요청 URL 패턴을 지정한다. 
         
-        * ② `addResourceLocations()` : 리소스를 찾는 위치를 지정
+        * `addResourceLocations()` : 리소스를 찾는 위치를 지정한다.
         
-            * `classpath:` → 클래스패스를 기준으로 경로를 지정
+            * `classpath:` → 클래스패스를 기준으로 경로를 지정한다.
         
-            * `file:` → 파일 시스템을 기준으로 경로를 지정
+            * `file:` → 파일 시스템을 기준으로 경로를 지정한다.
         
-            * 위와 같은 접두어를 지정하지 않으면 `src/main/webapp` 라는 디렉토리에서 찾기 때문에, 우리가 생성한 프로젝트가 War가 아니면 `classpath:` 또는 `file:`을 주로 사용 하게 될 것이다. 
+                * 위와 같은 접두어를 지정하지 않으면 `src/main/webapp` 라는 디렉토리에서 찾기 때문에, 우리가 생성한 프로젝트가 War가 아니면 `classpath:` 또는 `file:`을 주로 사용 하게 될 것이다. 
         
-        * ③ `setCacheControl()` : 캐싱 설정
+        * `setCacheControl()` : 캐싱 설정
         
-        * ④ `ResourceResolver`
-        
-            * 요청에 해당하는 리소스를 찾는 전략
+        * `ResourceResolver` : 요청에 해당하는 리소스를 찾는 전략
             
             * 캐싱, 인코딩(gzip, brotli), WebJar, ...
         
-        * ⑤ `ResourceTransformer`
-        
-            * 응답으로 보낼 리소스를 수정하는 전략 
+        * `ResourceTransformer` : 응답으로 보낼 리소스를 수정하는 전략 
             
             * 캐싱, CSS 링크, HTML5 AppCache, ...
           
-    * `src/resources/mobile` 디렉토리에 `index.html`을 작성한다.
+    * ② `src/resources/mobile` 디렉토리에 `index.html`을 작성한다.
     
         ![image 45](images/img45.png)
         
@@ -2423,7 +2416,7 @@
         </html>
         ```
         
-    * 테스트 코드를 작성한다.
+    * ③ 테스트 코드를 작성한다.
       
         ```java
         @Test
@@ -2443,25 +2436,35 @@
 
     * `HTTP 메시지 컨버터`는 요청 본문에서 메시지를 읽어들이거나(`@RequestBody`), 응답 본문에 메시지를 작성할 때(`@ResponseBody`) 적용된다.
     
-        * `@RequestBody`는 HTTP 요청 본문(body)에 있는 메시지를 `HTTP 메시지 컨버터`를 이용하여 객체로 변환한다.
+        * `@RequestBody`는 HTTP 요청 본문(body)에 있는 메시지를 `HTTP 메시지 컨버터`를 사용해서 객체로 변환한다.
         
         * `@ResponseBody`는 HTTP 응답 본문(body)에 메시지를 작성할 때 사용한다.
-    
-        * `@RestController`을 사용 하는 경우, `@ResponseBody`를 생략 할 수 있다.
-    
-        ```java
-        @Controller
-        public class SampleController {
-        
-            ...
-        
-            @GetMapping("/message")
-            public @ResponseBody String message(@RequestBody Person person){
-                return "hello person";
+
+            ```java
+            @Controller
+            public class SampleController {
+            
+                @GetMapping("/message")
+                public @ResponseBody String message(@RequestBody Person person){
+                    return "hello person";
+                }
+            
             }
-        
-        }
-        ```
+            ```
+
+        * `@RestController`을 사용 하는 경우, `@ResponseBody`를 생략 할 수 있다.
+
+            ```java
+            @RestController
+            public class SampleController {
+            
+                @GetMapping("/message")
+                public String message(@RequestBody Person person){
+                    return "hello person";
+                }
+            
+            }
+            ```
       
 * (2) HTTP 메시지 컨버터 실습
       
@@ -2469,22 +2472,22 @@
     
         * HTTP 요청 본문에 작성된 데이터를 그대로 리턴 하도록 한다.
     
-        ```java
-        @RestController
-        public class SampleController {
-        
-            @GetMapping("/hello")
-            public String hello(@RequestParam("id") Person person) {
-                return "hello " + person.getName();
+            ```java
+            @RestController
+            public class SampleController {
+            
+                @GetMapping("/hello")
+                public String hello(@RequestParam("id") Person person) {
+                    return "hello " + person.getName();
+                }
+            
+                @GetMapping("/message")
+                public @ResponseBody String message(@RequestBody String body){
+                    return body;
+                }
+            
             }
-        
-            @GetMapping("/message")
-            public @ResponseBody String message(@RequestBody String body){
-                return body;
-            }
-        
-        }
-        ```
+            ```
       
     * ② 테스트 코드 작성하기
     
@@ -2514,19 +2517,28 @@
       
     * 기본 HTTP 메시지 컨버터
     
-        * ① 바이트 배열 컨버터 
+        * ① 바이트 배열 컨버터
+        
         * ② 문자열 컨버터 
+        
         * ③ Resource 컨버터 
+        
         * ④ Form 컨버터 (폼 데이터 to/from MultiValueMap<String, String>) 
     
     * 해당 의존성이 있는 경우에만 사용 가능한 HTTP 메시지 컨버터
     
-        * ① JAXB2 컨버터 
+        * ① JAXB2 컨버터
+        
         * ② Jackson2 컨버터 
+        
         * ③ Jackson 컨버터 
+        
         * ④ Gson 컨버터 
+        
         * ⑤ Atom 컨버터
+        
         * ⑥ RSS 컨버터
+        
         * ...
         
 * (4) HTTP 메시지 컨버터 설정하기
@@ -2541,10 +2553,10 @@
 
     * ③ **의존성 추가로 컨버터를 등록하기 [추천]**
      
-        * **메이븐 또는 그래들 설정에 의존성을 추가하면 그에 따른 컨버터가 자동으로 등록 된다.**
+        * **메이븐 또는 그래들 설정에 의존성을 추가하면 그에 따른 컨버터가 자동으로 등록된다.**
     
-        * `WebMvcConfigurationSupport` 클래스에서 의존성 존재 여부에 따라 자동 등록되는 것을 확인 할 수 있다.
-
+            * 클래스패스에 해당 라이브러리가 존재한다면 메시지 컨버터를 자동으로 등록해준다. (`WebMvcConfigurationSupport`에서 확인 가능함)
+    
             * 이 기능 자체는 스프링 프레임워크의 기능이며 스프링 부트만의 기능은 아니다.
         
 #### 13) HTTP 메시지 컨버터 2부: JSON
@@ -2563,73 +2575,84 @@
 
     * 스프링 부트를 사용하면 기본적으로 `JacksonJSON 2` 의존성이 추가된다.
 
-        * 즉, JSON용 HTTP 메시지 컨버터가 기본으로 등록된다.
+        * `spring-boot-starter-web`를 추가하면 이 안에서 `starter-json`을 추가해주며 여기서 `JacksonJSON 2`를 가져오도록 되어 있다.
 
-    * ① SampleController를 변경한다.
-    
-        ```java
-        @RestController
-        public class SampleController {
+        * 즉, JSON용 HTTP 메시지 컨버터가 기본적으로 등록된다.
+
+    * 실습하기
+
+        * ① `SampleController`를 변경한다.
         
-            @GetMapping("/jsonMessage")
-            public Person jsonMessage(@RequestBody Person person){ // HTTP 요청 본문으로 들어오는 JSON 문자열을 Person 객체로 변환
-                return person; // 그리고 그대로 리턴함
+            ```java
+            @RestController
+            public class SampleController {
+            
+                @GetMapping("/jsonMessage")
+                public Person jsonMessage(@RequestBody Person person){ // HTTP 요청 본문으로 들어오는 JSON 문자열을 Person 객체로 변환
+                    return person; // 그리고 그대로 리턴함
+                }
+            
             }
-        
-        }
-        ```
-      
-    * ② 테스트 코드를 작성한다.
-      
-        * `"{\"id\":0,\"name\""`과 같이 JSON 문자열을 직접 작성하는 것은 번거롭다.
-
-        * 그래서 `Jackson`이 제공하는 `ObjectMapper`를 사용해서 JSON 문자열을 만든다.
+            ```
           
-        ```java
-        @RunWith(SpringRunner.class)
-        @SpringBootTest
-        @AutoConfigureMockMvc
-        public class SampleControllerTest {
-        
-            @Autowired
-            MockMvc mockMvc;
-        
-            @Autowired
-            ObjectMapper objectMapper;
-        
-            @Test
-            public void jsonMessage() throws Exception {
-                Person person = new Person();
-                person.setId(2019L);
-                person.setName("kevin");
-        
-                String jsonString = objectMapper.writeValueAsString(person);
-        
-                this.mockMvc.perform(get("/jsonMessage")
-                            .contentType(MediaType.APPLICATION_JSON_UTF8) // HTTP 요청 본문으로 JSON을 보내며
-                            .accept(MediaType.APPLICATION_JSON_UTF8) // JSON으로 응답이 오길 바란다.
-                            .content(jsonString))
-                        .andDo(print())
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.id").value(2019))
-                        .andExpect(jsonPath("$.name").value("kevin"));
-            }
-        
-        
-        }
-        ```
-      
-    * JSON 테스트에 `Postman`이라는 애플리케이션을 사용 할 수 있다.
+        * ② 테스트 코드를 작성한다.
+          
+            * `"{\"id\":0,\"name\""`과 같이 JSON 문자열을 직접 작성하는 것은 번거롭다.
     
-        * `Postman`은 `REST API` 또는 `HTTP API`를 테스트 할 때 편리한 애플리케이션이다.
-
-        ![image 57](images/img57.png)
+            * 그래서 `Jackson`이 제공하는 `ObjectMapper`를 사용해서 JSON 문자열을 만든다.
+              
+                ```java
+                @RunWith(SpringRunner.class)
+                @SpringBootTest
+                @AutoConfigureMockMvc
+                public class SampleControllerTest {
+                
+                    @Autowired
+                    MockMvc mockMvc;
+                
+                    @Autowired
+                    ObjectMapper objectMapper; // 스프링 부트는 ObjectMapper가 이미 빈으로 등록되어 있다.
+                
+                    @Test
+                    public void jsonMessage() throws Exception {
+                        // (1) 객체 생성
+                        Person person = new Person();
+                        person.setId(2019L);
+                        person.setName("kevin");
+                
+                        // (2) ObjectMapper를 이용하여 객체를 JSON 문자열로 변경한다.
+                        String jsonString = objectMapper.writeValueAsString(person);
+                
+                        this.mockMvc.perform(get("/jsonMessage")
+                                    .contentType(MediaType.APPLICATION_JSON_UTF8) // HTTP 요청 본문으로 JSON을 보내며
+                                    .accept(MediaType.APPLICATION_JSON_UTF8) // JSON으로 응답이 오길 바란다.
+                                    .content(jsonString))
+                                .andDo(print())
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id").value(2019))
+                                .andExpect(jsonPath("$.name").value("kevin"));
+                    }
+                
+                
+                }
+                ```
+              
+                * `contentType()` : HTTP 요청 본문에 보내는 데이터 타입을 지정한다.
+                
+                * `accept()` : HTTP 응답 본문으로 전달받고 싶은 데이터 타입을 지정한다.
+          
+        * JSON 테스트에 `Postman`이라는 애플리케이션을 사용 할 수 있다.
+        
+            * `Postman`은 `REST API` 또는 `HTTP API`를 테스트 할 때 편리한 애플리케이션이다.
+    
+                ![image 57](images/img57.png)
     
 * (3) JSON path 문법
 
     * HTTP 응답 본문의 JSON 데이터를 확인할 때는 JSON path를 이용 할 수 있다. 자세한 내용은 아래 링크를 참조하자.
     
         * [JsonPath Syntax](https://github.com/json-path/JsonPath "JsonPath")
+        
         * [JSONPath Online Evaluator](http://jsonpath.com/ "JsonPath")
   
 #### 14) HTTP 메시지 컨버터 3부: XML
@@ -2805,13 +2828,13 @@
 
 #### 16) 스프링 MVC 설정 마무리
 
-* (1) 스프링 MVC 설정은 `DispatcherServlet`이 사용 할 여러 빈들을 설정하는 것이다. 
+* (1) 스프링 MVC 설정은 `DispatcherServlet`이 사용할 여러 빈들을 설정하는 것이다. 
 
-    * `DispatcherServlet`이 사용하는 스프링 MVC 구성 요소를 직접 빈(Bean)으로 등록하면 (등록하지 않는다면 DispatcherServlet 기본 전략를 이용)
+    * `DispatcherServlet`이 사용하는 스프링 MVC 구성 요소를 직접 빈(Bean)으로 등록하면 (등록하지 않는다면 DispatcherServlet의 기본 전략을 이용)
     
     * `DispatcherServlet`은 `ApplicationContext`에 등록되어 있는 빈 중에서 스프링 MVC 구성 요소에 해당하는 빈을 찾아서 사용한다. 
    
-        * ① HandlerMapper
+        * ① HandlerMapping
                
         * ② HandlerAdapter
              
@@ -2825,7 +2848,7 @@
     
         * 일일히 직접 빈으로 등록하려니 너무 많고, 해당 빈들이 참조하는 또 다른 객체들까지 설정하려면 설정해야 되는 것이 너무 많다.
       
-* (2) @EnableWebMvc
+* (2) `@EnableWebMvc`
 
     * 애노테이션 기반의 스프링 MVC 설정을 간편하게 만든다.
            
