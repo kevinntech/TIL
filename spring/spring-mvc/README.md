@@ -5461,7 +5461,9 @@
       
         * `ignore-default-model-on-redirect` 프로퍼티가 `true`이면 리다이렉트를 할 때, Model에 들어있는 primitive type 데이터는 URI 쿼리 매개변수에 추가되지 않음.
 
-* (3) `RedirectAttributes` : 리다이렉트를 할 때, URI 쿼리 매개변수에 추가해서 전달하고자 하는 데이터를 지정한다.
+* (3) `RedirectAttributes` : 리다이렉트를 할 때, URI 쿼리 매개변수에 추가해서 데이터를 전달한다.
+
+    * URI 쿼리 매개변수에 추가되기 때문에 문자열(String)로 변경 가능한 값만 가능하다. 
               
 * (4) 실습 - RedirectAttributes 사용하기
     
@@ -5603,7 +5605,7 @@
                                         
         * HTTP 세션을 통해서 전달되기 때문에 데이터가 URI에 노출되지 않는다.
     
-        * 임의의 객체를 저장할 수 있다.
+        * 임의의 **객체**를 저장할 수 있다.
                                             
     * 리다이렉트를 하기 전에 HTTP 세션에 데이터를 저장하고 리다이렉트 요청이 처리된 다음, 그 즉시 세션에서 데이터가 제거된다
 
@@ -5636,7 +5638,7 @@
          }
          ```
       
-      * `Flash Attributes`로 전달한 값은 `@ModelAttribute`로 받을 수도 있지만, 사실 `Model`에 바로 들어오기 때문에 `Model`에 있는 것을 사용하면 된다.
+      * `Flash Attributes`로 전달한 값은 `Model`를 메소드 아규먼트로 선언만 하면 `Model`에 자동으로 저장된다.
   
            ```java
            @Controller
@@ -5699,23 +5701,23 @@
 
     * 디스패처 서블릿은 서블릿이므로 초기화 과정이 존재한다. 
     
-    * 초기화를 할 때, 디스패처 서블릿이 사용 할 여러 가지 빈을 `ApplicationContext`에서 가져와서 설정한다.
+    * 초기화를 할 때, 디스패처 서블릿이 사용 할 여러가지 빈을 `ApplicationContext`에서 가져와서 설정한다.
     
-    * 빈이 없는 경우에는 사용하지 않거나 기본 전략을 사용한다.
+    * 빈이 없는 경우에는 아예 사용하지 않거나 기본 전략을 사용한다.
 
 * (2) MultipartFile
 
     * `MultipartFile`는 파일 업로드 시 사용하는 메소드 아규먼트(Argument)이다.
+        
+        * `MultipartResolver` 빈이 등록 되어 있어야 사용 할 수 있다.
     
+            * 스프링 부트의 자동 설정은 `MultipartResolver` 빈을 등록한다.
+    
+            * 따라서 스프링 부트 기반으로 웹 프로젝트를 만들었다면 아무런 설정을 하지 않아도 파일 업로드를 처리 할 수 있다.
+
         * `POST multipart/form-data` 요청에 들어있는 파일을 참조 할 수 있다.
 
         * `List<MultipartFile>` 아규먼트로 여러 파일을 참조 할 수도 있다.
-        
-    * `MultipartResolver` 빈이 등록 되어 있어야 사용 할 수 있다.
-
-        * 스프링 부트의 자동 설정은 `MultipartResolver` 빈을 등록한다.
-
-        * 따라서 스프링 부트 기반으로 웹 프로젝트를 만들었다면 아무런 설정을 하지 않아도 파일 업로드를 처리 할 수 있다.
 
 * (3) 실습 - 파일 업로드
 
@@ -5743,7 +5745,7 @@
 
           /*
            * "/file" 주소로 POST 요청을 하면 해당 핸들러가 처리하게 된다.
-           * @RequestParam를 사용하여 MultipartFile 타입으로 클라이언트가 전달한 파일을 받아온다.
+           * @RequestParam를 사용해서 MultipartFile 타입으로 클라이언트가 전달한 파일을 받아온다.
            * HTML form의 name 속성과 핸들러의 매개변수명이 동일해야 한다. (다르다면 이름을 직접 명시해야 된다.)
            * */
            @PostMapping("/file")
@@ -5807,17 +5809,17 @@
 
 * (2) 파일 다운로드 응답 헤더에 설정할 내용
 
-    * Content-Disposition: 사용자가 해당 파일을 받을 때 사용할 파일 이름
+    * `Content-Disposition` : 사용자가 해당 파일을 받을 때 사용할 파일 이름
 
-    * Content-Type: 어떤 파일인가
+    * `Content-Type` : 어떤 파일인가
 
-    * Content-Length: 얼마나 큰 파일인가
+    * `Content-Length` : 얼마나 큰 파일인가
 
 * (3) 파일의 종류(미디어 타입) 알아내는 방법
 
     * http://tika.apache.org/
 
-    * Mvn Repository에서 `tika`로 검색하여 찾은 의존성을 `pom.xml`에 추가한다.
+    * Maven Repository에서 `tika`로 검색하여 찾은 의존성을 `pom.xml`에 추가한다.
     
         ```html
         <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
@@ -5830,11 +5832,11 @@
       
 * (4) ResponseEntity
 
-    * `ResponseEntity`는 응답 상태 코드, 응답 헤더, 응답 본문을 설정 할 수 있는 리턴 타입이다.
-    
+    * `ResponseEntity`는 HTTP 응답 헤더, 본문, 상태 코드를 직접 지정해서 응답을 만들 때, 사용하는 리턴 타입이다.
+
 * (5) 실습
 
-    * resources에 파일 하나를 가져온다.
+    * resources에 파일 1개를 추가한다. 
 
         ![image 56](images/img56.png)
    
@@ -5848,11 +5850,11 @@
             @Autowired
             private ResourceLoader resourceLoader; 
         
-            ...
+            //...
         
             @GetMapping("/file/{filename}")
             public ResponseEntity<Resource> fileDownload(@PathVariable String filename) throws IOException {
-                // resources 디렉토리 밑은 클래스패스이므로 클래스패스를 기준으로 파일을 읽어온다. 
+                // resources 디렉토리는 클래스패스이므로 클래스패스를 기준으로 파일을 읽어온다. 
                 Resource resource = resourceLoader.getResource("classpath:" + filename);
                 // Resource에서 파일을 꺼낸다. 
                 File file = resource.getFile();
@@ -5861,7 +5863,7 @@
                 * 응답 상태 코드를 200 OK으로 한다. 
                 * 헤더에 CONTENT_DISPOSITION, CONTENT_TYPE, CONTENT_LENGTH를 지정한다.
                 * */
-                return ResponseEntity.ok()
+                return ResponseEntity.ok() // 상태코드 지정
                         .header(HttpHeaders.CONTENT_DISPOSITION,
                                 "attachement; filename=\"" +
                                         resource.getFilename() + "\"")
@@ -5883,7 +5885,7 @@
          
         * `CONTENT_LENGTH`는 요청 또는 응답 메시지의 본문 크기를 알려주는 헤더이다.
     
-    * 다음과 같이 tika를 이용하여 파일 종류 알아낸 다음, CONTENT_TYPE 헤더에 설정한다. 
+    * 다음과 같이 `tika`를 이용하여 파일 종류 알아낸 다음, `CONTENT_TYPE` 헤더에 설정한다. 
     
         ```java
         @Controller
@@ -5903,7 +5905,8 @@
                 Resource resource = resourceLoader.getResource("classpath:" + filename);
                 File file = resource.getFile();
         
-                Tika tika = new Tika(); // Tika를 빈으로 등록해서 재사용 할 수도 있다.
+                // Tika를 이용해서 파일의 종류(미디어 타입)를 알아낸다.
+                Tika tika = new Tika(); 
                 String type = tika.detect(file); // detect()를 사용하면 미디어 타입을 알 수 있다.
         
                 return ResponseEntity.ok()
@@ -5917,6 +5920,8 @@
         
         }
         ```
+
+        * Tika는 재사용 할 수 있으므로 빈으로 등록해서 사용 할 수도 있다.
       
 #### 23) 핸들러 메소드 15부: @RequestBody & HttpEntity
 
@@ -5929,6 +5934,8 @@
     * BindingResult 아규먼트를 사용해서 바인딩 또는 검증 에러를 확인할 수 있다.
 
 * (2) HttpMessageConverter
+
+    * `HandlerAdapter`가 `Message Converter`를 사용해서 요청 본문에 들어있는 데이터를 메소드 아규먼트에 맞게 타입 변환을 한다.
 
     * 스프링 MVC 설정 (WebMvcConfigurer)에서 `HttpMessageConverter`를 설정할 수 있다.
 
@@ -5991,6 +5998,10 @@
             }
         }
         ```
+      
+        * 스프링 부트에서 Web 의존성을 추가하면 `ObjectMapper`를 빈으로 등록 해준다.
+      
+        * `ObjectMapper`를 사용하면 객체를 JSON 문자열로 변경 할 수 있으며 그 반대도 가능하다.
             
 * (4) HttpEntity
 
@@ -6012,11 +6023,9 @@
         }
         ```
 
-* (5) 실습 - `@Valid` 또는 `@Validated`과 `BindingResult` 아규먼트 사용하기 
-
-    * `@Valid` 또는 `@Validated`를 사용해서 값을 검증 할 수 있다. 
-    
-    * 그리고 `BindingResult`를 사용해서 바인딩 또는 검증 에러를 확인할 수 있다.
+* (5) 실습 - `@Valid` 또는 `@Validated`과 `BindingResult` 아규먼트를 사용해서 검증하기 
+ 
+    * 바인딩 받은 메소드 아규먼트를 검증한다.
        
         ```java
         @RestController
@@ -6077,9 +6086,9 @@
 
 * (1) @ResponseBody
 
-    * `@ResponseBody`는 핸들러가 리턴하는 값을 `HttpMessageConverter`를 사용해 응답 본문 메시지로 보낼 때 사용한다.
+    * `@ResponseBody`는 핸들러가 리턴하는 값을 `HttpMessageConverter`를 사용해 응답 본문에 담아서 보낼 때 사용한다.
     
-    * `@RestController` 사용 시 자동으로 모든 핸들러 메소드에 `@ResponseBody`이 적용된다.
+    * `@RestController` 사용하면 자동으로 모든 핸들러 메소드에 `@ResponseBody`이 적용된다.
 
 * (2) ResponseEntity
 
@@ -6099,7 +6108,8 @@
                                               BindingResult bindingResult){
                 // save event
                 if(bindingResult.hasErrors()){
-                    return ResponseEntity.badRequest().build();
+                    // 에러가 있는 경우에는 bad request를 반환한다.
+                    return ResponseEntity.badRequest().build(); 
                 }
         
                 return ResponseEntity.ok().body(event);
@@ -6107,6 +6117,8 @@
         
         }
         ```
+      
+        * ResponseEntity의 생성자를 이용해서 응답을 만들 수도 있다.
       
     * 테스트 코드를 작성한다.
     
@@ -6144,9 +6156,9 @@
 
 * (1) 다루지 못한 내용
 
-    * @JsonView : https://www.youtube.com/watch?v=5QyXswB_Usg&t=188s
+    * `@JsonView` : https://www.youtube.com/watch?v=5QyXswB_Usg&t=188s
               
-    * PushBuilder : HTTP/2, 스프링 5
+    * `PushBuilder` : HTTP / 2, 스프링 5
         
 * (2) 과제
       
@@ -6162,17 +6174,17 @@
 
 * (1) `Model`과 `ModelMap`
 
-    * `Model`이나 `ModelMap`이라는 메소드 아규먼트를 사용해서 모델 정보를 담을 수 있다.
+    * `Model` 또는 `ModelMap`이라는 메소드 아규먼트를 사용해서 모델 정보를 담을 수 있다.
     
     * 그리고 그 모델 정보를 뷰에서 참조해서 렌더링 하게 되는 것이다.
 
-* (2) @ModelAttribute의 사용방법
+* (2) `@ModelAttribute`의 사용방법
 
-    * `@RequestMapping`을 사용한 핸들러 메소드의 아규먼트에 사용하기 `[이전에 공부했던 내용]`
+    * ① `@RequestMapping`을 사용한 핸들러 메소드의 아규먼트에 사용하기 `[이전에 공부했던 내용]`
     
-    * `@Controller` 또는 `@ControllerAdvice`를 사용한 클래스에서 공통적으로 사용하는 모델 정보를 정의 할 때 사용한다.
+    * ② `@Controller` 또는 `@ControllerAdvice`를 사용한 클래스에서 공통적으로 사용하는 모델 정보를 초기화 할 때 사용한다.
 
-    * `@RequestMapping`과 같이 사용하면 해당 메소드에서 리턴하는 객체를 모델에 넣어준다. `자주 사용되는 기능 X`  
+    * ③ `@RequestMapping`과 같이 사용하면 해당 메소드에서 리턴하는 객체를 모델에 넣어준다. `[자주 사용되는 기능 X]`  
       
         * `RequestToViewNameTranslator`가 요청의 이름과 일치하는 뷰 이름을 리턴한다.
         
@@ -6184,7 +6196,7 @@
             }
             ```
 
-* (3) @ModelAttribute의 또 다른 사용법 - 공통적으로 사용하는 모델 정보를 초기화
+* (3) `@ModelAttribute`의 또 다른 사용법 - 공통적으로 사용하는 모델 정보를 초기화
 
     * 컨트롤러를 변경한다.
     
@@ -6199,7 +6211,11 @@
                 model.addAttribute("categories", List.of("study", "seminar", "hobby", "social"));
             }
         
-        	...
+            // 위의 코드 대신 다음과 같이 작성 할 수도 있다. 
+            //@ModelAttribute("categories")
+            //public List<String> categories() {
+            //    return List.of("study", "seminar", "hobby", "social");
+            //}
         
         }
         ```
@@ -6241,20 +6257,20 @@
 
 * (2) 실습 - @InitBinder 사용하기 
 
-    * `@InitBinder`를 사용한다.
+    * ① `@InitBinder`를 사용한다.
     
         * 메서드 리턴 타입은 `void`여야 하며 메서드명은 임의로 정해도 된다.
         
-        * 그리고 WebDataBinder라는 파라미터를 사용해야 한다.
+        * 그리고 `WebDataBinder`라는 파라미터를 사용해야 한다.
     
-        ```java
-        @InitBinder
-        public void initEventBinder(WebDataBinder webDataBinder){
-            webDataBinder.setDisallowedFields("id"); // 바인딩을 하고 싶지 않은 필드를 지정한다.
-        }
-        ```
+            ```java
+            @InitBinder
+            public void initEventBinder(WebDataBinder webDataBinder){
+                webDataBinder.setDisallowedFields("id"); // 바인딩을 하고 싶지 않은 필드를 지정한다.
+            }
+            ```
       
-    * `form-name.html`를 수정한다.
+    * ② `form-name.html`에서 id를 입력 할 수 있도록 수정한다.
        
         ```html
         <!DOCTYPE html>
@@ -6274,7 +6290,7 @@
         </html>
         ```
 
-    * 폼에서 id 값을 입력하더라도 id가 바인딩 되지 않는 것을 확인 할 수 있다. 
+    * ③ 애플리케이션을 실행한 다음, 폼에서 id 값을 입력하더라도 id가 바인딩 되지 않는 것을 확인 할 수 있다. 
       
 * (3) 바인딩 설정
     
@@ -6282,24 +6298,65 @@
 
     * `webDataBinder.setAllowedFields() `: 바인딩을 하고 싶은 필드를 지정한다.
         
-* (4) 포매터 설정
-    
-    * `webDataBinder.addCustomFormatter();`
-        
-* (5) Validator 설정
-    
-    * `webDataBinder.addValidators();`
+* (4) 포매터 설정 : `webDataBinder.addCustomFormatter();`
 
-    * 실습
+    * ① 날짜 포매팅을 적용한다.
     
-        * EventValidator를 만든다.
+        ```java
+        public class Event {
+        
+            private Integer id;
+        
+            @NotBlank
+            private String name;
+        
+            @Min(0)
+            private Integer limit;
+        
+            // 날짜 포매팅을 한다. 아래의 애노테이션이 적용 될 수 있는 이유는 다음과 같다. 
+            // 해당 애노테이션 @DateTimeFormat을 이해 할 수 있는 포매터가 이미 등록되어 있기 때문이다. 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            private LocalDate startDate;
+      
+            // Getter, Setter
+        
+        }
+        ```
+
+    * ② `form-name.html`에서 날짜(StartDate)를 입력 할 수 있도록 수정한다.
+       
+        ```html
+        <!DOCTYPE html>
+        <html lang="en" xmlns:th="http://www.thymeleaf.org">
+        <head>
+            <meta charset="UTF-8">
+            <title>Create New Title</title>
+        </head>
+        <body>
+        <form action="#" th:action="@{/events/form/name}" method="post" th:object="${event}">
+            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Incorrect date</p>
+            StartDate : <input type="text" title="startDate" th:field="*{startDate}"/>
+            Name : <input type="text" title="name" th:field="*{name}"/>
+            <input type="submit" value="Create"/>
+        </form>
+        </body>
+        </html>
+        ```
+      
+    * ③ 애플리케이션을 실행한 다음, 폼에서 날짜를 입력할 때 문자열로 입력 했지만 해당 문자열이 LocalDate 타입으로 변환된 것을 확인 할 수 있다. 
+
+* (5) Validator 설정 : `webDataBinder.addValidators();`
+
+    * 커스텀 Validator 적용하기
+    
+        * ① EventValidator를 만든다.
            
             ```java
             public class EventValidator implements Validator {
             
                 @Override
-                public boolean supports(Class<?> clazz) {
-                    return Event.class.isAssignableFrom(clazz);
+                public boolean supports(Class<?> clazz) { 
+                    return Event.class.isAssignableFrom(clazz); // Event를 Validation 할 때 사용한다는 의미
                 }
             
                 @Override
@@ -6315,13 +6372,13 @@
             }
             ```
           
-        * webDataBinder에 Validator를 등록한다.
+        * ② webDataBinder에 Validator를 등록한다.
           
             ```java
             @InitBinder
             public void initEventBinder(WebDataBinder webDataBinder){
                 webDataBinder.setDisallowedFields("id"); // 바인딩을 하고 싶지 않은 필드를 지정한다.
-                webDataBinder.addValidators(new EventValidator());
+                webDataBinder.addValidators(new EventValidator()); // Event로 바인딩할 때 사용 할 Validator를 등록
             }
             ```
       
@@ -6329,8 +6386,6 @@
     
     * `@InitBinder("event")` : 지정된 이름에 해당하는 모델 애트리뷰트를 바인딩 할 때, 어떠한 설정을 적용 할 수 있다.
     
-        * 특정 필드는 바인딩 되지 않도록 하거나 Validator를 설정 할 수 있다. 
-          
 #### 28) 예외 처리 핸들러: @ExceptionHandler
 
 * (1) `@ExceptionHandler`는 특정 예외를 처리하는 핸들러를 정의한다.
@@ -6340,19 +6395,33 @@
     * 지원하는 리턴 값
     
     * `REST API`의 경우 응답 본문에 에러에 대한 정보를 담아주고, 상태 코드를 설정하려면 `ResponseEntity`를 주로 사용한다.
-    
+
+        ```java
+        @RestController
+        @RequestMapping("/api/events")
+        public class EventApi {
+        
+            @ExceptionHandler
+            public ResponseEntity<String> errorHandler(){
+                return ResponseEntity.badRequest().body("can't create event as ...");
+            }
+        
+            // ...
+        }
+        ```
+
 * (2) 실습
 
-    * 커스텀한 예외 클래스를 정의한다.
+    * ① 커스텀한 예외 클래스를 정의한다.
     
         ```java
         public class EventException extends RuntimeException{
         }
         ```
       
-    * 예외 처리 핸들러를 정의한 다음, 예외를 발생 시키는 코드를 작성한다.
+    * ② 예외 처리 핸들러를 정의한 다음, 예외를 발생 시키는 코드를 작성한다.
     
-        * 예외가 발생하면 @ExceptionHandler에서 예외를 처리하는데 이때, error 뷰를 보여준다. 
+        * 예외가 발생하면 `@ExceptionHandler`로 정의한 핸들러에서 예외를 처리하는데 이때, 에러 페이지(error)를 보여준다. 
     
             ```java
             @Controller
@@ -6366,19 +6435,19 @@
                     return "error"; // 에러 페이지를 보여준다. 
                 }
             
-                ...
+                // ...
             
                 @GetMapping("/events/form/name")
                 public String eventsFormName(Model model){ 
                     throw new EventException(); // 예외를 발생시킨다. 
                 }
             
-                ...
+                // ...
             
             }
             ```
       
-    * 에러 페이지(`error.html`)를 작성한다.
+    * ③ 에러 페이지(`error.html`)를 작성한다.
     
         ```html
         <!DOCTYPE html>
@@ -6399,13 +6468,13 @@
 
 #### 29) 전역 컨트롤러: @(Rest)ControllerAdvice
 
-* (1) `@(Rest)ControllerAdvice`는 예외 처리, 바인딩 설정, 모델 객체 정보 설정을 모든 컨트롤러에 적용하고 싶은 경우에 사용한다.
+* (1) `@(Rest)ControllerAdvice`는 예외 처리, 바인딩 설정, 모델 객체를 모든 컨트롤러에 적용하고 싶을 때 사용한다.
     
-    * @ExceptionHandler
+    * `@ExceptionHandler`
 
-    * @InitBinder
+    * `@InitBinder`
 
-    * @ModelAttribute
+    * `@ModelAttribute`
       
 * (2) 적용 범위를 지정 할 수도 있다.
     
@@ -6430,6 +6499,7 @@
 * (3) 실습
 
     ```java
+    // 모든 컨트롤러에 적용되는 전역 컨트롤러가 된다.
     @ControllerAdvice
     public class BaseController {
     
@@ -6453,5 +6523,9 @@
         
     }
     ```
+  
+    * `@RestControllerAdvice`를 사용한다면 핸들러 메소드의 리턴 값이 응답 본문에 작성된다.
+    
+        * 위의 예제에서는 에러 페이지를 보여주고자 하기 때문에 `@ControllerAdvice`를 사용하였다.
 
     
