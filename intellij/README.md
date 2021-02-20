@@ -7,8 +7,10 @@
 
     * `sout` : System.out.println();를 자동으로 생성한다.
 
-    * `iter` : for문을 자동으로 생성한다.
-
+    * `itar` : 기본적인 for문을 자동으로 생성한다.
+    
+    * `iter` : for each문을 자동으로 생성한다.
+    
 * `Command + N`
 
     * 프로젝트(Project) 탭에서는 디렉토리, 패키지, 클래스 등 생성 목록 보기
