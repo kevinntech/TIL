@@ -42,12 +42,12 @@
     * `src\main\resources`
     
         * 자바 코드를 제외한 모든 파일이 저장된다. 
-        
-        * 즉, `resources`가 클래스패스 루트이다.
-        
+                
     * `src∖test∖java` : 테스트 코드가 저장된다.
     
     * `src∖test∖resources` : 테스트 코드용 리소스가 저장된다.
+
+* `src\main\java`, `src\main\resources`는 클래스패스 루트이다. 
 
 * 메인 애플리케이션의 위치는 다음과 같이 지정해야 한다.
 
