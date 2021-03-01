@@ -207,13 +207,13 @@
     
     * `assertTimeout(duration, executable)` : 특정 시간 안에 실행이 완료되는지 확인한다.
     
-        * 첫 번째 매개변수 : 얼마 만에 끝나야 하는지를 지정한다.
+        * 첫 번째 매개변수(`duration`) : 얼마 만에 끝나야 하는지를 지정한다.
         
-        * 두 번째 매개변수 : 실행 할 문장을 람다식으로 지정한다.
+        * 두 번째 매개변수(`executable`) : 실행 할 문장을 람다식으로 지정한다.
            
 * (2) 실습하기
 
-    * 실습 1 - Study를 처음 만들면 상태가 DRAFT 인지 확인하는 테스트 코드를 작성한다.
+    * 실습 1 - Study를 처음 만들었을 때, 상태가 DRAFT 인지 확인하는 테스트 코드를 작성한다.
     
         * ① 테스트 코드를 작성한다.
         
@@ -224,9 +224,10 @@
                 @Test
                 @DisplayName("스터디 만들기")
                 void create_new_study(){
+                    // 스터디를 처음 만들었을 때, 상태가 DRAFT인지 확인한다.
                     Study study = new Study();
                     assertNotNull(study);
-                    assertEquals(StudyStatus.DRAFT, study.getStatus());
+                    assertEquals(StudyStatus.DRAFT, study.getStatus()); // 테스트에 실패하게 됨
                 }
                 
             }
@@ -253,17 +254,19 @@
             }
             ```
           
-        * ④ 테스트를 실행하면 기대한 값과 실제 값이 다르며 처음 상태가 null인 것을 알 수 있다.
+        * ④ 테스트를 실행하면 기대한 값과 실제 값이 다르며 처음 상태가 `null`인 것을 알 수 있다.
         
-        * ⑤ 테스트 실패 시, 메시지(message)를 출력 하도록 할 수 있다.
+        * ⑤ 테스트 실패 시, 메시지(message)를 출력 하도록 할 수도 있다.
 
-            * `assertEquals(StudyStatus.DRAFT, study.getStatus(), "스터디를 처음 만들면 상태 값이 DRAFT여야 한다.");`
-            
-            * 추가적인 내용
-            
-                * 복잡한 메시지를 생성해야 하는 경우, 다음과 같이 람다식을 사용하면 테스트를 실패한 경우에만 해당 메시지를 만들게 할 수 있다. (성능 향상)
-                 
-                * `assertEquals(StudyStatus.DRAFT ,  study.getStatus(), () -> "스터디를 처음 만들면 " + StudyStatus.DRAFT + "상태여야 한다." );`
+            ```java
+            assertEquals(StudyStatus.DRAFT, study.getStatus(), "스터디를 처음 만들면 상태 값이 DRAFT여야 한다.");
+            ```
+         
+            * 문자열 연산을 해서 복잡한 메시지를 생성해야 하는 경우, 다음과 같이 람다식을 사용하면 테스트를 실패 했을 때만 해당 메시지를 만들도록 할 수 있다. (성능 향상)
+
+                ```java
+                assertEquals(StudyStatus.DRAFT, study.getStatus(), () -> "스터디를 처음 만들면 " + StudyStatus.DRAFT + "상태여야 한다." );
+                ```
             
         * ⑥ 테스트가 정상적으로 통과 되도록 하려면 기본 값(DRAFT)을 설정하면 된다.
         
@@ -280,4 +283,356 @@
           
     * 실습 2 
     
-        * ① 테스트 코드를 작성한다.
+        * ① Study 클래스에 limit 필드를 추가한 다음, 생성자와 getter를 만든다.
+
+            ```java
+            public class Study {
+            
+                private StudyStatus status;
+            
+                private int limit;
+            
+                public Study(int limit) {
+                    this.limit = limit;
+                }
+            
+                public StudyStatus getStatus() {
+                    return this.status;
+                }
+            
+                public int getLimit() {
+                    return limit;
+                }
+            }
+            ```
+
+        * ② 테스트 메서드 내에 다음과 같이 assertTrue()를 호출한다.
+
+            ```java
+            @Test
+            @DisplayName("스터디 만들기")
+            void create_new_study(){
+                Study study = new Study(-10);
+                assertNotNull(study);
+                assertEquals(StudyStatus.DRAFT, study.getStatus(),
+                () -> "스터디를 처음 만들면 " + StudyStatus.DRAFT + "상태여야 한다."); // 여기에서 테스트가 실패한다.
+            
+                assertTrue(study.getLimit() > 0 , "스터디 최대 참석 가능 인원은 0보다 커야 한다.");
+            }
+            ```
+
+        * ③ 테스트를 실행하면 `assertEquals()`에서 테스트가 실패하기 때문에 `assertTrue()`는 실행 되지 않는다.
+
+        * ④ Study 클래스의 status를 변경한 다음, 테스트를 실행해야 `assertTrue()`에서도 테스트가 실패한다는 것을 그제서야 알 수 있다. 
+
+            * `private StudyStatus status = StudyStatus.DRAFT;`
+
+        * ⑤ 모든 검증을 실행해서 결과를 한 번에 알고 싶다면 `assertAll()`를 사용하면 된다.
+
+            ```java
+            @Test
+            @DisplayName("스터디 만들기")
+            void create_new_study(){
+                Study study = new Study(-10);
+                assertAll(
+                    () -> assertNotNull(study),
+                    () -> assertEquals(StudyStatus.DRAFT, study.getStatus(),
+                          () -> "스터디를 처음 만들면 " + StudyStatus.DRAFT + "상태여야 한다."),
+                    () -> assertTrue(study.getLimit() > 0 , "스터디 최대 참석 가능 인원은 0보다 커야 한다.")
+                );
+            }
+            ```
+
+    * 실습 3
+    
+        * ① 다음과 같이 Study 클래스의 생성자를 변경한다.
+
+            ```java
+            public class Study {
+            
+                private StudyStatus status;
+            
+                private int limit;
+            
+                public Study(int limit) {
+                    if(limit < 0){
+                        throw new IllegalArgumentException("limit은 0 보다 커야 한다.");
+                    }
+          
+                    this.limit = limit;
+                }
+            
+                public StudyStatus getStatus() {
+                    return this.status;
+                }
+            
+                public int getLimit() {
+                    return limit;
+                }
+            }
+            ```
+
+        * ② 테스트 메서드를 다음과 같이 변경한다.
+        
+            * `assertThrows()`를 호출하는데 executable을 실행한 결과로 지정한 타입의 예외가 발생하는지 확인한다.
+            
+                ```java
+                @Test
+                @DisplayName("스터디 만들기")
+                void create_new_study(){
+                    // 두 번째 파라미터의 코드를 실행 했을 때, 해당 예외가 발생하는지 확인한다.
+                    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new Study(-10) );
+                    String message = exception.getMessage(); // 발생한 예외 메시지를 String 타입의 변수에 저장
+                    assertEquals("limit은 0 보다 커야 한다.", message); // 기대했던 메시지와 같은지 확인한다.
+                }
+                ```
+              
+    * 실습 4
+    
+        * 테스트 코드를 다음과 같이 작성한다.
+
+            ```java
+            @Test
+            @DisplayName("스터디 만들기")
+            void create_new_study(){
+              assertTimeout(Duration.ofSeconds(1), () -> {
+                  new Study(10);
+                  Thread.sleep(2000);
+              }); // 1초 안에 끝나야 한다. Study를 만드는 것은
+                  // Thread.sleep(2000)으로 일부러 테스트를 실패 하도록 만든다.
+            }
+            ```
+          
+            * `assertTimeout()`는 지정한 timeout를 넘어서도 테스트가 끝날 때까지 기다려야 된다는 단점이 있다. 
+              
+            * `assertTimeoutPreemptively()`는 지정한 timeout을 지나면 더 이상 기다리지 않고 테스트를 종료 시킨다.
+              
+                * 단, 해당 메서드는 executable에 ThreadLocal를 사용하는 코드가 있다면 예상치 못한 결과가 발생 할 수 있으므로 주의 해야 한다.
+
+* (3) `AssertJ`, `Hamcrest`, `Truth` 등의 라이브러리를 사용할 수도 있다.
+
+    ```java
+    @Test
+    @DisplayName("스터디 만들기")
+    void create_new_study(){
+      Study actual = new Study(10);
+      assertThat(actual.getLimit()).isGreaterThan(0); // [AssertJ] 0 보다 큰지 확인
+    }
+    ```
+  
+#### 5) 조건에 따라 테스트 실행 하기
+
+* (1) 개요
+
+    * 특정한 조건을 만족하는 경우에 테스트를 실행하는 방법에 대해서 알아본다.
+    
+    * 즉, 어떤 테스트 코드를 특정 OS, 자바 버전, 환경 변수에 따라 실행 여부를 결정 해야 할 때 사용 할 수 있다.
+
+* (2) org.junit.jupiter.api.Assumptions.*
+
+    * ① `assumeTrue(조건)` : 조건이 true이면 이후 테스트를 진행하고 그렇지 않으면 테스트를 생략한다.
+    
+        ```java
+        @Test
+        @DisplayName("스터디 만들기")
+        void create_new_study(){
+          String test_env = System.getenv("TEST_ENV"); // TEST_ENV의 환경 변수 값을 가져온다.
+          System.out.println(test_env);
+          assumeTrue("LOCAL".equalsIgnoreCase(test_env));
+        
+          Study actual = new Study(10);
+          assertThat(actual.getLimit()).isGreaterThan(0); // 0보다 큰지 확인
+        }
+        ```
+      
+    * ② `assumingThat(조건, 테스트)` : 조건이 true이면 두 번째 인자로 받은 테스트를 수행한다.
+      
+        ```java
+        @Test
+        @DisplayName("스터디 만들기")
+        void create_new_study(){
+            String test_env = System.getenv("TEST_ENV"); // TEST_ENV의 환경 변수 값을 가져온다.
+        
+            assumingThat("LOCAL".equalsIgnoreCase(test_env), () -> {
+                System.out.println("local");
+                Study actual = new Study(100);
+                assertThat(actual.getLimit()).isGreaterThan(0); // 0보다 큰지 확인
+            });
+        
+            assumingThat("keesun".equalsIgnoreCase(test_env), () -> {
+                System.out.println("keesun");
+                Study actual = new Study(10);
+                assertThat(actual.getLimit()).isGreaterThan(0); // 0보다 큰지 확인
+            });
+        }
+        ```
+      
+* (3) @Enabled___ 와 @Disabled___
+
+    * 종류
+    
+        * ① OnOS
+        
+        * ② OnJre
+        
+        * ③ IfSystemProperty
+        
+        * ④ IfEnvironmentVariable
+        
+        * ⑤ If
+
+    * 예시
+
+        * ① 운영체제
+        
+            ```java
+            @Test
+            @DisplayName("스터디 만들기")
+            @EnabledOnOs({OS.MAC, OS.LINUX}) // 운영체제(OS)가 MAC, LINUX일 때 테스트 코드를 활성화
+            void create_new_study(){
+                String test_env = System.getenv("TEST_ENV");
+                System.out.println("local");
+                Study actual = new Study(10);
+                assertThat(actual.getLimit()).isGreaterThan(0);
+            }
+            
+            @Test
+            @Disabled
+            @DisabledOnOs(OS.MAC) // 운영체제(OS)가 MAC일 때 테스트 코드를 비활성화
+            void create_new_study_again(){
+                System.out.println("create1");
+            }
+            ```
+          
+        * ② 자바 버전
+        
+            ```java
+            @Test
+            @DisplayName("스터디 만들기")
+            @EnabledOnOs({OS.MAC, OS.LINUX}) // 운영체제(OS)가 MAC, LINUX일 때 테스트 코드를 활성화
+            void create_new_study(){
+                String test_env = System.getenv("TEST_ENV");
+                System.out.println("local");
+                Study actual = new Study(10);
+                assertThat(actual.getLimit()).isGreaterThan(0);
+            }
+            
+            @Test
+            @Disabled
+            @DisabledOnOs(OS.MAC) // 운영체제(OS)가 MAC일 때 테스트 코드를 비활성화
+            void create_new_study_again(){
+                System.out.println("create1");
+            }
+            ```
+          
+        * ③ 환경변수
+        
+            * TEST_ENV라는 환경 변수의 값이 LOCAL과 일치 한다면 테스트 코드를 실행한다.
+        
+                ```java
+                @Test
+                @DisplayName("스터디 만들기")
+                @EnabledIfEnvironmentVariable(named = "TEST_ENV", matches = "LOCAL")
+                void create_new_study(){
+                    Study actual = new Study(10);
+                    assertThat(actual.getLimit()).isGreaterThan(0);
+                }
+                ```
+              
+#### 6) 태깅과 필터링
+
+* (1) 개요
+
+    * 테스트 그룹을 만들고 원하는 테스트 그룹만 테스트를 실행할 수 있는 기능
+
+* (2) @Tag
+
+    * `@Tag`는 테스트 메소드에 태그를 추가 할 수 있다.
+
+    * 하나의 테스트 메소드에 여러 태그를 사용 할 수 있다.
+    
+* (3) Intellij에서 특정 태그로 테스트를 필터링 하는 방법
+
+    * ① @Tag 애노테이션을 이용하여 테스트 코드를 변경한다.
+    
+        ```java
+        class StudyTest {
+        
+            @Test
+            @DisplayName("스터디 만들기 fast")
+            @Tag("fast")
+            void create_new_study(){
+                Study actual = new Study(10);
+                assertThat(actual.getLimit()).isGreaterThan(0);
+            }
+        
+            @Test
+            @DisplayName("스터디 만들기 slow")
+            @Tag("slow")
+            void create_new_study_again(){
+                System.out.println("create1");
+            }
+        
+        }
+        ```
+      
+    * ② 인텔리제이 우측 상단 메뉴에서 `[Edit Configurations...]`를 클릭한다.
+
+    * ③ `Test kind`를 "Tags"로, `Tag expression`을 "fast"로 변경한다.
+    
+    * ④ `[apply]` - `[OK]` 버튼을 클릭한다.
+    
+        * 그러면 fast라는 `@Tag("fast")`가 붙어 있는 테스트 메소드만 실행 된다.
+           
+* (4) 메이븐에서 테스트를 필터링 하는 방법
+
+    ```html
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>fast | slow</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    ```
+        
+#### 7) 커스텀 태그
+
+* (1) 개요
+
+    * JUnit 5 애노테이션을 조합하여 커스텀 태그를 만들 수 있다.
+
+* (2) 실습
+
+    * ① 다음과 같이 FastTest 애노테이션을 작성한다.
+
+    * ② 테스트 코드를 다음과 같이 변경 할 수 있다.
+    
+        ```java
+        class StudyTest {
+        
+            @FastTest
+            @DisplayName("스터디 만들기 fast")
+            void create_new_study(){
+                Study actual = new Study(10);
+                assertThat(actual.getLimit()).isGreaterThan(0);
+            }
+        
+            @SlowTest
+            @DisplayName("스터디 만들기 slow")
+            void create_new_study_again(){
+                System.out.println("create1");
+            }
+        
+        }
+        ```
+      
+        * 즉, @Test, @Tag("fast")를 제거하고 @FastTest 애노테이션을 적용한다.
