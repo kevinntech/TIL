@@ -1368,6 +1368,757 @@ int[][] arr = {
 
 ## 8. java.lang 패키지와 유용한 클래스
 
+#### 1) java.lang 패키지
+
+* (1) Object 클래스
+
+    * Object 클래스는 모든 클래스의 최고 조상이다.
+    
+    * 그래서 모든 클래스에서 Object 클래스의 멤버들을 바로 사용 할 수 있다.
+    
+        * `clone()`
+        
+        * `equals()`
+        
+        * `getClass()`
+        
+        * `hashCode()`
+        
+        * `toString()`
+        
+        * `notify(),` `notifyAll()`
+        
+        * `wait()`
+        
+* (2) equals(Object obj)
+
+    * `equals()`는 객체 자신과 주어진 객체(obj)를 비교한다. 같으면 true, 다르면 false
+
+        * Object 클래스에 정의된 `equals()`는 객체의 주소를 비교한다.
+    
+        * `equals()`를 오버라이딩해서 인스턴스 변수의 값을 비교하도록 변경한다.
+        
+    * 실습
+
+        ```java
+        class Person{
+            long id;
+        
+            public boolean equals(Object obj){
+                if(obj != null && obj instanceof Person){
+                    return id == ((Person)obj).id;
+                }else{
+                    return false;
+                }
+            }
+        
+            Person(long id){
+                this.id = id;
+            }
+        
+        }
+        
+        public class EqualsEx2 {
+            public static void main(String[] args) {
+                Person p1 = new Person(8011081111222L);
+                Person p2 = new Person(8011081111222L);
+        
+                if(p1 == p2){
+                    System.out.println("p1과 p2는 같은 사람입니다.");
+                }else{
+                    System.out.println("p1과 p2는 다른 사람입니다.");
+                }
+        
+                if(p1.equals(p2)){
+                    System.out.println("p1과 p2는 같은 사람입니다.");
+                }else{
+                    System.out.println("p1과 p2는 다른 사람입니다.");
+                }
+            }
+        }
+        ```
+      
+        * `equals()`를 인스턴스 주소 값이 아닌 멤버 변수 id의 값을 비교 하도록 오버라이딩 했다.
+        
+        * String 클래스 뿐만 아니라 Date, File, 래퍼 클래스(Integer, Double 등)의 `equals()`도 주소 값이 아닌 내용을 비교 하도록 오버라이딩 되어 있다.
+        
+        * 그러나 StringBuffer 클래스를 `equals()`가 오버라이딩 되어 있지 않다.
+        
+* (3) hashCode()
+
+    * `hashCode()`는 객체 자신의 해시 코드를 반환한다.
+    
+        * 다량의 데이터를 저장, 검색하는 해싱 기법에 사용된다.
+        
+        * Object 클래스의 `hashCode()`는 객체의 주소를 int로 변환해서 반환한다.  
+        
+        * `equals()`를 오버라이딩하면 `hashCode()`도 같이 오버라이딩 해야한다.
+        
+            * `equals()`의 결과가 true인 두 객체의 해시코드는 같아야 하기 때문이다.
+
+                ```java
+                String str1 = new String("abc");
+                String str2 = new String("abc");
+                
+                System.out.println(str1.equals(str2));
+                System.out.println(str1.hashCode());
+                System.out.println(str2.hashCode());
+                ```
+              
+        * `System.identityHashCode(Object obj)`는 객체의 주소를 int로 변환해서 반환한다.
+
+            ```java
+            System.out.println(System.identityHashCode(str1));
+            System.out.println(System.identityHashCode(str2));
+            ```
+                
+            * 객체 마다 다른 해시코드를 반환하도록 한다. 
+
+* (4) toString()
+
+    * `toString()`는 객체 자신의 정보를 문자열로 변환해서 반환한다.
+    
+        * 객체의 정보를 문자열로 변환한다는 것은 인스턴스 변수의 값을 문자열로 변환한다는 것과 같다.
+        
+        * Object 클래스의 `toString()`는 `클래스 이름 + @ + 16 진수의 해시코드`를 반환한다.
+
+    * 실습
+    
+        ```java
+        class Card{
+            String kind;
+            int number;
+        
+            Card() {
+                this("SPADE", 1);
+            }
+        
+            Card(String kind, int number){
+                this.kind = kind;
+                this.number = number;
+            }
+        
+            public boolean equals(Object obj){ // 오버라이딩
+                if(!(obj instanceof Card))
+                    return false;
+        
+                Card c = (Card) obj;
+        
+                return this.kind.equals(c.kind) && this.number == c.number;
+            }
+        
+            // Object 클래스의 equals()를 오버라이딩하면 hashCode()도 같이 오버라이딩 해야한다.
+            public int hashCode(){ // 오버라이딩
+                return Objects.hash(kind, number);
+            }
+        
+            public String toString(){ // 오버라이딩
+                return "kind : " + kind + ", number : " + number;
+            }
+        
+        }
+        
+        public class CardToString2 {
+            public static void main(String[] args) {
+                Card c1 = new Card();
+                Card c2 = new Card();
+        
+                System.out.println(c1.equals(c2));
+                System.out.println(c1.hashCode());
+                System.out.println(c2.hashCode());
+        
+                System.out.println(c1.toString());
+                System.out.println(c2.toString());
+            }
+        }
+
+        ```
+      
+        * Card 인스턴스의 `toString()`를 호출하면 인스턴스가 갖고 있는 인스턴스 변수 kind와 number의 값을 문자열로 변환해서 반환하도록 오버라이딩 했다.
+
+* (5) clone()
+
+    * `clone()`는 객체 자신의 복사본을 반환한다.
+    
+        * Cloneable 인터페이스를 구현한 클래스의 인스턴스만 복사 할 수 있다.
+        
+        * Object 클래스에 정의된 clone()는 인스턴스 변수의 값만 복사한다.
+        
+            * 인스턴스 변수가 참조형일 때, 참조하는 객체도 복사 되도록 오버라이딩 해야한다. 
+            
+    * 실습
+    
+        ```java
+        class Point implements Cloneable{
+            int x, y;
+        
+            Point(int x, int y){
+                this.x = x;
+                this.y = y;
+            }
+        
+            public String toString(){
+                return "x=" + x + ", y=" + y;
+            }
+        
+            public Object clone(){
+                Object obj = null;
+        
+                try{
+                    obj = super.clone();
+                }catch (CloneNotSupportedException e){}
+        
+                return obj;
+            }
+        }
+        
+        public class CloneEx1 {
+            public static void main(String[] args) {
+                Point original = new Point(3, 5);
+                Point copy = (Point) original.clone();
+                
+                System.out.println(original);
+                System.out.println(copy);
+            }
+        }
+        ```
+
+        * ① 먼저 복사할 클래스가 `Cloneable` 인터페이스를 구현하도록 한다.
+        
+        * ② `clone()`를 오버라이딩 하면서 접근 제어자를 protected에서 public으로 변경한다.
+        
+        * ③ try-catch 내에서 조상 클래스의 `clone()`를 호출한다.
+
+* (6) 공변 반환 타입(Covariant Return Type)
+
+    * 공변 반환 타입은 메소드 오버라이딩을 할 때, 조상 메소드의 반환 타입을 자손 클래스 타입으로 변경 할 수 있는 것이다.
+
+        ```java
+        public Point clone(){     // 반환 타입을 Object에서 Point로 변경한다.
+            Object obj = null;
+    
+            try{
+                obj = super.clone();
+            }catch (CloneNotSupportedException e){}
+    
+            return (Point) obj; // Point 타입으로 형 변환한다.
+        }
+        ```
+      
+        * 공변 반환 타입을 사용하면 조상의 타입이 아닌, 실제로 반환되는 자손 객체의 타입으로 반환 할 수 있어서 번거로운 형 변환이 줄어든다.
+    
+* (7) 얕은 복사와 깊은 복사
+
+    * 얕은 복사와 깊은 복사의 차이점
+    
+        * `얕은 복사(shallow copy)`는 객체 저장된 값을 그대로 복사할 뿐, 원본이 참조하고 있는 객체까지 복사하지는 않는다.
+        
+        * `깊은 복사(deep copy)`는 원본이 참조하고 있는 객체까지 복사하는 것이다. 
+
+    * 실습
+    
+        ```java
+        class Circle implements Cloneable{
+            Point p; // 원점
+            double r; // 반지름
+        
+            Circle(Point p, double r){
+                this.p = p;
+                this.r = r;
+            }
+        
+            public Circle shallowCopy(){ // 얕은 복사
+                Object obj = null;
+        
+                try{
+                    // Object 클래스의 clone()는 원본 객체가 가지고 있는 값을 그대로 복사한다. (얕은 복사)
+                    obj = super.clone(); 
+                }catch (CloneNotSupportedException e){}
+        
+                return (Circle) obj;
+            }
+        
+            public Circle deepCopy(){ // 깊은 복사
+                Object obj = null;
+        
+                try{
+                    obj = super.clone();
+                }catch (CloneNotSupportedException e){}
+        
+                // deepCopy()에서는 복사된 객체가 새로운 Point 인스턴스를 참조하도록 했다.
+                Circle c = (Circle) obj;
+                c.p = new Point(this.p.x, this.p.y);
+        
+                return c;
+            }
+        
+            public String toString(){
+                return "[p=" + p + ", r=" + r + "]";
+            }
+        
+        }
+        
+        class Point{
+            int x, y;
+        
+            Point(int x, int y){
+                this.x = x;
+                this.y = y;
+            }
+        
+            public String toString(){
+                return "(" + x + ", " + y + ")";
+            }
+        
+        }
+        
+        public class ShallowDeepCopy {
+            public static void main(String[] args) {
+                Circle c1 = new Circle(new Point(1, 1), 2.0);
+                Circle c2 = c1.shallowCopy();
+                Circle c3 = c1.deepCopy();
+        
+                System.out.println("c1 =" + c1);
+                System.out.println("c2 =" + c2);
+                System.out.println("c3 =" + c3);
+        
+                c1.p.x = 9;
+                c1.p.y = 9;
+        
+                System.out.println("= c1의 변경 후 = ");
+                System.out.println("c1 = " + c1);
+                System.out.println("c2 = " + c2);
+                System.out.println("c3 = " + c3);
+            }
+        }
+        ```
+      
+        * 위의 코드는 인스턴스 c1을 생성한 후에 얕은 복사로 c2를 생성하고 깊은 복사로 c3를 생성하였다.
+        
+        * 그 다음에 c1이 가리키고 있는 Point 인스턴스의 x와 y의 값을 9로 변경한다.
+        
+        * c1을 변경했을 뿐인데, c2도 영향을 받는다. 그러나 c3는 전혀 영향을 받지 않는다.
+
+* (8) Class 객체를 얻는 방법
+
+    * `getClass()`는 객체 자신의 클래스 정보를 담고 있는 Class 인스턴스를 반환한다.
+    
+        * Class 인스턴스는 클래스의 모든 정보를 담고 있으며, 클래스 당 1개만 존재한다.
+        
+        * 그리고 클래스 파일이 클래스 로더(Class Loader)에 의해서 메모리에 올라갈 때, 자동으로 생성된다. 
+
+    * Class 객체를 얻는 방법은 다음과 같다.
+    
+        ```java
+        // 생성된 객체로 부터 얻는 방법
+        Class cObj1 = new Card().getClass();
+        
+        // 클래스 리터럴로 부터 얻는 방법 
+        Class cObj2 = Card.class;
+      
+        // 클래스 이름으로 부터 얻는 방법
+        Class cObj3 = Class.forName("Card");
+        ```
+      
+        * 동적으로 객체를 생성하고 메서드를 호출하는 방법에 대해 더 알고 싶다면 reflection API로 검색해보자.
+
+* (9) String 클래스
+
+    * String 클래스
+
+        * `String`는 문자열을 저장하고 이를 다루는데 필요한 메소드를 함께 제공한다.
+        
+        * String 인스턴스의 내용은 변경 할 수 없다. (`Immutable` : 변경 불가능한)
+            
+            * 예를 들어, 다음 코드와 같이, + 연산자를 사용해서 문자열을 결합하는 경우, 인스턴스 내의 문자열이 변경되는 것이 아니
+            
+            * 새로운 문자열("ab")이 담긴 String 인스턴스가 생성되는 것이다.
+            
+                ![image 15](images/img15.png)
+                
+            * 문자열 연산이 많은 경우에는 StringBuffer 클래스를 사용하는 것이 좋다.
+            
+    * 문자열의 비교
+
+        * 문자열을 만드는 방식은 두 가지가 있다.
+        
+            * 문자열 리터럴을 사용해서 만드는 방법
+            
+                ```java
+                String str1 = "abc";
+                String str2 = "abc";
+                ```
+              
+            * String 클래스의 생성자를 사용해서 만드는 방법
+
+                ```java
+                String str3 = new String("abc");
+                String str4 = new String("abc");
+                ```
+        
+        * String 클래스의 생성자를 사용해서 문자열을 만드는 방법은 항상 새로운 String 인스턴스가 생성된다.
+        
+        * 그러나 문자열 리터럴을 사용해서 문자열을 만드는 방법은 이미 존재하는 것을 재 사용하는 것이다.
+        
+            ![image 16](images/img16.png)
+
+    * 문자열 리터럴
+    
+        * 자바 소스 파일에 포함된 모든 문자열 리터럴은 컴파일 시에 클래스 파일에 저장된다.
+        
+        * 이때 같은 내용의 문자열 리터럴은 한번만 저장된다.
+        
+            ```java
+            public class StringEx2 {
+                public static void main(String[] args) {
+                    String s1 = "AAA";
+                    String s2 = "AAA";
+                    String s3 = "AAA";
+                    String s4 = "BBB";
+                }
+            }
+            ```
+          
+            * 위의 예제를 실행하면 "AAA"라는 문자열을 담고 있는 String 인스턴스가 하나 생성된 후
+            
+            * 참조변수 s1, s2, s3는 모두 해당 String 인스턴스를 참조하게 된다.
+
+    * 빈 문자열(Empty String)
+    
+        * `빈 문자열`은 내용이 없는 문자열이다.
+        
+            * 크기가 0인 char형 배열을 저장하는 문자열
+
+                ```java
+                char[] chArr = new char[0];
+                int[] iArr = {};
+                ```
+
+        * 크기가 0인 배열을 생성하는 것은 어느 타입이나 가능하다.
+        
+        * `String str = "";`는 가능해도 `char c = '';`는 불가능하다.
+        
+            * char형 변수에는 반드시 하나의 문자를 지정해야 한다. 
+
+    * String 클래스의 생성자와 메서드
+    
+        * 자세한 내용은 자바의 정석 p468~p471을 참고하자.
+
+    * join()과 StringJoiner
+    
+        * `join()`은 여러 문자열 사이에 구분자를 넣어서 결합한다.
+
+            ```java
+            String animals = "dog,cat,bear";
+            String[] arr = animals.split(",");
+            String str = String.join("-", arr);
+          
+            System.out.println(str);
+            ```
+
+        * `StringJoiner` 클래스를 사용해서 문자열을 결합 할 수 있다.
+
+            ```java
+            StringJoiner sj = new StringJoiner(",", "[", "]");
+            String[] strArr = {"aaa", "bbb", "ccc"};
+            
+            for(String s : strArr)
+                sj.add(s.toUpperCase());
+            
+            System.out.println(sj.toString());
+            ```
+
+    * 문자 인코딩 변환 
+    
+        * `getBytes(String charsetName)` : 문자열의 문자 인코딩을 다른 인코딩으로 변경한다.
+
+        * 자바가 UTF-16을 사용하지만 문자열 리터럴에 포함되는 문자들은 OS의 인코딩을 사용한다.
+        
+        * 한글 윈도우즈의 경우, CP949를 사용하며, UTF-8로 변경하려면 다음과 같이 한다. 
+
+            ```java
+            byte[] utf8ByteArr = "가".getBytes("UTF-8");       // 문자열을 UTF-8로 변환
+            String str = new String(utf8ByteArr, "UTF-8");    // byte 배열을 문자열로 변환
+            ```
+          
+        * 서로 다른 문자 인코딩을 사용하는 컴퓨터 간에 데이터를 주고 받을 때는 적절한 문자 인코딩이 필요하다.
+
+    * `String.format()` : 형식화된 문자열을 만든다.
+    
+        ```java
+        String str = String.format("%d 더하기 %d는 %d 입니다.", 3, 5, 3 + 5);
+        System.out.println(str); // [결과] : 3 더하기 5는 8 입니다.
+        ```
+      
+    * 기본형 값을 String으로 변환
+
+        * ① 숫자에 빈 문자열(`""`)을 더한다.
+        
+        * ② valueOf()를 사용한다.
+    
+            ```java
+            // 숫자 100을 문자열 100으로 변경한다. 
+            int i = 100;
+            
+            String str1 = i + "";
+            String str2 = String.valueOf(i);
+            ```
+
+    * String을 기본형 값으로 변환
+    
+        * ① parseInt()를 사용한다.
+        
+        * ② valueOf()를 사용한다.
+    
+            ```java
+            // 문자열 100을 숫자 100으로 변환한다.
+            int i = Integer.parseInt("100");
+            int i2 = Integer.valueOf("100");
+            ```
+          
+            ```java
+            public class StringEx6 {
+                public static void main(String[] args) {
+                    int iVal = 100;
+                    String strVal = String.valueOf(iVal);	// int를 String으로 변환한다.
+            
+                    double dVal = 200.0;
+                    String strVal2 = dVal + "";	// int를 String으로 변환하는 또 다른 방법
+            
+                    double sum  = Integer.parseInt("+" + strVal) + Double.parseDouble(strVal2);
+                    double sum2 = Integer.valueOf(strVal) + Double.valueOf(strVal2);
+            
+                    System.out.println(String.join("",strVal, "+", strVal2, "=") + sum);
+                    System.out.println(strVal + "+" + strVal2 + "=" + sum2);
+                }
+            }
+            ```
+          
+            * `parseInt()`나 `parseFloat()`과 같은 메소드는 문자열에 공백 또는 문자가 포함되어 있는 경우
+            
+            * 변환 시 예외(`NumberFormatException`)가 발생 할 수 있으므로 주의해야 한다.  
+
+            * 그래서 문자열의 양 끝의 공백을 제거해주는 `trim()`를 습관적으로 같이 사용하기도 한다.
+            
+                * `int val = Integer.parseInt(" 123 ".trim());`
+                
+            * 그러나 부호를 의미하는 `+`나 소수점을 의미하는 `.`와 float형 값을 의미하는 `f`와 같은 자료형 접미사는 허용된다.
+
+* (10) StringBuffer 와 StringBuilder 클래스 
+
+    * StringBuffer 클래스
+
+        * `String`처럼 문자형 배열(`char[]`)을 내부적으로 가지고 있다. 
+
+        * `StringBuffer`는 문자열의 내용을 변경 할 수 있다. (Mutable)
+
+            ```java
+            StringBuffer sb = new StringBuffer("abc");  // StringBuffer를 생성한다.
+            sb.append("123"); // sb에 문자열 "123"을 추가하면
+                              // append()는 반환 타입이 StringBuffer인데 자신의 주소를 반환한다.
+            
+            StringBuffer sb2 = sb.append("ZZ"); // sb의 내용 뒤에 "ZZ"를 추가한다.
+            System.out.println(sb);             // abc123ZZ
+            System.out.println(sb2);            // abc123ZZ
+            ```
+          
+            * 하나의 StringBuffer 인스턴스에 대해 다음과 같이 연속적으로 `append()`를 호출하는 것이 가능하다.
+          
+                ```java
+                StringBuffer sb = new StringBuffer("abc");
+                sb.append("123").append("ZZ");
+                ```
+              
+    * StringBuffer의 비교
+    
+        * `StringBuffer` 클래스는 `equals()`를 오버라이딩하지 않았다.
+        
+            * `equals()`를 사용하더라도 `==`로 비교한 것과 같은 결과를 얻는다.
+
+        * 반면에 `toString()`는 오버라이딩 되어 있다.
+        
+        * 그래서 StringBuffer 인스턴스의 문자열을 비교하려면 toString()를 호출하여 String 인스턴스를 얻은 다음, 여기에 equals()를 사용해서 비교한다.
+        
+            ```java
+            StringBuffer sb = new StringBuffer("abc");
+            StringBuffer sb2 = new StringBuffer("abc");
+            
+            String s = sb.toString();
+            String s2 = sb2.toString();
+            
+            System.out.println(s.equals(s2));
+            ```
+          
+    * StringBuffer 클래스의 생성자와 메서드 
+    
+        * 자세한 내용은 자바의 정석 p480~p481을 참고하자.
+
+    * StringBuilder란?
+    
+        * `StringBuffer`는 멀티 쓰레드에 안전(thread safe) 하도록 동기화 되어 있다.
+        
+            * 멀티 쓰레드로 작성된 프로그램이 아닌 경우, StringBuffer의 동기화는 불필요하게 성능만 떨어지게 한다.
+        
+        * `StringBuilder`는 `StringBuffer`에서 쓰레드의 동기화만 제거한 클래스이다. 
+
+* (11) Math 클래스  
+
+    * Math 클래스란?
+    
+        * `Math` 클래스는 수학 계산에 유용한 메소드로 구성되어 있다.
+        
+            * 모두 static 메서드이며 다음과 같이 2개의 상수만 정의 해놓았다.
+    
+                ```java
+                public static final double E = 2.7182818284590452354;     // 자연 로그의 밑
+                public static final double PI = 3.14159265358979323846;   // 원주율 
+                ```
+              
+    * 올림, 버림, 반올림
+    
+        * `round()` : 항상 소수점 첫째 자리에서 반올림을 해서 정수 값을 결과로 반환한다. 
+        
+            * 90.7552라는 값을 소수점 셋째 자리에서 반올림한 후, 소수점 두 자리까지의 값만 얻고자 한다.
+
+                * ① 원래 값에 `100`을 곱한다. (9075.52)
+                
+                    * 90.7552 * 100
+                
+                * ② 그 결과에 `Math.round()`를 사용한다. (9076)
+                
+                    * Math.round(9075.52)
+                
+                * ③ 그 결과에 다시 `100.0`으로 나눈다. (90.76)
+                
+                    * 9076 / 100.0
+                    
+    * 예외를 발생시키는 메서드
+    
+        * Exact가 포함된 메소드들이 JDK 1.8 부터 추가되었다.
+        
+        * 이들은 정수형 간의 연산에서 발생 할 수 있는 오버플로우를 감지하기 위해서 사용한다.
+
+            ```java
+            int addExact(int x, int y);       // x + y
+            int subtractExact(int x, int y);  // x - y
+            int multiplyExact(int x, int y);  // x * y
+            int intcrementExact(int a);       // a++
+            int decrementExact(int a);        // a--
+            int negateExact(int a);           // -a
+            int toIntExact(long value);       // (int) value - int로의 형변환
+            ```
+
+        * 아래 메서드들은 오버 플로우가 발생하면 예외(`ArithmeticException`)을 발생시킨다.
+
+    * StrictMath 클래스
+    
+        * `Math` 클래스는 최대한의 성능을 얻기 위해 JVM이 설치된 OS의 메소드를 호출해서 사용한다.
+        
+            * 즉, OS에 의존적인 계산을 한다.
+            
+        * `StrictMath` 클래스는 어떤 OS에서 실행되더라도 항상 같은 결과를 얻도록 Math 클래스를 새로 작성한 것이다. 
+        
+    * Math 클래스의 메서드
+    
+        * 자세한 내용은 자바의 정석 p489~p490를 참고하자.
+
+* (12) 래퍼(Wrapper) 클래스   
+
+    * 래퍼 클래스란?
+    
+        * `래퍼 클래스`는 기본 자료형의 값을 객체로 변환할 때, 사용한다.
+        
+            * 내부적으로 기본형(primitive type) 변수를 가지고 있다.
+            
+            * 아래의 코드는 int형 래퍼 클래스인 Integer 클래스의 실제 코드이다.
+
+                ```java
+                public final class Integer extends Number implements Comparable<Integer> {
+                      ...
+              
+                      private final int value;
+              
+                      ...
+                }
+                ```
+              
+            * 래퍼 클래스들은 `equals()`가 오버라이딩 되어 있어서 주소 값이 아닌 객체가 가지고 있는 값으로 비교한다. 
+
+            * 비교 연산자를 사용 할 수 없다. 대신 `compareTo()`를 제공한다.
+            
+                * `compareTo()`는 같으면 0, 왼쪽 값이 크면 양수, 왼쪽 값이 작으면 음수를 반환한다. 이는 정렬에 사용된다.
+                
+            * `toString()`도 오버라이딩 되어 있어서 객체가 가지고 있는 값을 문자열로 변환해서 반환한다.
+            
+            * 래퍼 클래스들은 `MAX_VALUE`, `MIN_VALUE`, `SIZE`, `BYTES`, `TYPE` 등의 static 상수를 가지고 있다.
+
+    * Number 클래스 
+    
+        * `Number`는 추상 클래스이며 내부적으로 숫자를 멤버 변수로 갖는 래퍼 클래스들의 조상이다.
+        
+        * `Number` 클래스의 자손으로 래퍼 클래스, `BigInteger`와 `BigDecimal` 등이 있다.
+        
+            * `BigInteger` : long으로도 다룰 수 없는 큰 범위의 정수를 처리하기 위한 것이다.
+            
+            * `BigDecimal` : double로도 다룰 수 없는 큰 범위의 부동 소수점 수를 처리하기 위한 것이다.
+
+    * 문자열을 숫자로 변환하기
+    
+        * 다음 표는 래퍼 클래스의 `타입.parse타입(String s)` 형식의 메서드와 `타입.valueOf()` 메서드를 정리한 것이다.
+        
+        * 전자는 반환 값이 기본형(`primitive type`)이고 후자는 반환 값이 래퍼 클래스 타입이다.
+            
+            * 문자열 -> 기본형
+            
+                ```java
+                byte b = Byte.parseByte("100");
+                short s = Short.parseShort("100");
+                int i = Integer.parseInt("100");
+                long l = Long.parseLong("100");
+                float f = Float.parseFloat("3.14");
+                double d = Double.parseDouble("3.14");
+                ```
+              
+            * 문자열 -> 래퍼 클래스
+            
+                ```java
+                byte b = Byte.valueOf("100");
+                short s = Short.valueOf("100");
+                int i = Integer.valueOf("100");
+                long l = Long.valueOf("100");
+                float f = Float.valueOf("3.14");
+                double d = Double.valueOf("3.14");
+                ```
+              
+        * 문자열이 10 진수가 아닌 다른 진법(radix)의 숫자일 때도 변환이 가능하도록 다음과 같은 메서드가 제공된다.
+        
+            ```java
+            static int parseInt(String s, int radix);
+            static Integer valueOf(String s, int radix);
+            ```
+          
+            ```java
+            Integer.parseInt("100", 2);   // 100(2) -> 4
+            Integer.parseInt("100", 8);   // 100(8) -> 64
+            Integer.parseInt("100", 16);  // 100(16) -> 256
+            ```
+
+    * 오토박싱 & 언박싱 (autoboxing & unboxing)
+    
+        * JDK 1.5 이전에는 기본형과 참조형 간의 연산은 불가능 했기 때문에 래퍼 클래스로 기본형을 객체로 만들어서 연산해야 했다.
+
+        * 그러나 이제는 기본형과 참조형 간의 연산이 가능하다. 그 이유는 오토박싱 & 언박싱 때문이다.
+        
+            * `오토 박싱(autoboxing)` : 기본 자료형의 값을 래퍼 클래스 객체로 자동 변환하는 것을 말한다.
+            
+            * `언박싱(unboxing)` : 래퍼 클래스 객체를 기본 자료형의 값으로 자동 변환하는 것을 말한다. 
+            
+                ```java
+                ArrayList<Integer> list = new ArrayList<>();
+                list.add(10);               // [오토박싱] 10 -> new Integer(10)
+                int value = list.get(0);    // [언박싱] new Integer(10) -> 10
+                ```
+
 ## 9. 날짜와 시간 & 형식화
 
 #### 1) java.time 패키지란?
