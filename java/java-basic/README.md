@@ -2466,6 +2466,1473 @@ int[][] arr = {
 
 ## 10. 컬렉션 프레임워크
 
+#### 1) 컬렉션 프레임워크(Collections Framework)
+
+* (1) 컬렉션 프레임워크란? 
+
+    * `컬렉션(Collection)` : 여러 객체(데이터)를 모아 놓은 것을 의미한다.
+    
+    * `프레임워크(Framework)` : 표준화된 프로그래밍 방식을 의미한다.
+    
+    * `컬렉션 프레임워크(Collections Framework)`
+    
+        * 컬렉션(여러 객체)을 다루기 위한 표준화된 프로그래밍 방식을 말한다.
+    
+        * 컬렉션을 쉽고 편리하게 다룰 수 있는 다양한 클래스를 제공한다.
+        
+        * java.util 패키지에 포함되어 있다. (JDK 1.2 부터 제공)
+        
+    * `컬렉션 클래스(Collection class)`
+    
+        * 여러 객체를 저장 할 수 있는 클래스를 말한다.
+        
+            * Ex) Vector, ArrayList, HashSet ...
+            
+        * 컬렉션 클래스들은 저장 공간이 부족하면 스스로 공간을 늘린다.
+        
+* (2) 컬렉션 프레임워크의 핵심 인터페이스 
+
+    * `List` : 순서가 있고 중복을 허용한다.
+    
+        * 구현 클래스 : `ArrayList`, `LinkedList`, `Stack`, `Vector` 등
+    
+    * `Set` : 순서를 유지하지 않고 중복도 허용하지 않는다.
+    
+        * 구현 클래스 : `HashSet` `TreeSet` 등
+    
+    * `Map` : 순서를 유지하지 않고 키는 중복을 허용하지 않으며 값은 중복을 허용한다.
+            
+        * 구현 클래스 : `HashMap`, `TreeMap` 등
+
+* (3) Collection 인터페이스의 메서드  
+
+    * `boolean add(Object o)` : 지정된 객체(o)를 Collection에 추가한다.
+    
+    * `boolean addAll(Collection c)` : 지정된 Collection(c)의 객체들을 Collection에 추가한다.
+     
+    * `boolean contains(Object o)` : 지정된 객체(o)가 Collection에 포함되어 있는지 확인한다.
+    
+    * `boolean containsAll(Collection c)` : 지정된 Collection(c)의 객체들이 Collection에 포함되어 있는지 확인한다.
+    
+    * `boolean remove(Object o)` : 지정된 객체를 삭제한다.
+    
+    * `boolean removeAll(Collection c)` : 지정된 Collection에 포함된 객체들을 삭제한다.
+    
+    * `void clear()` : Collection의 모든 객체를 삭제한다.
+    
+    * `boolean isEmpty()` : Collection이 비어 있는지 확인한다.
+    
+    * `int size()` : Collection에 저장된 객체의 개수를 반환한다. 
+    
+* (4) List 인터페이스  
+
+    * `List`는 저장 순서가 유지되고 중복을 허용하는 컬렉션을 구현하는데 사용된다.
+    
+    * List 인터페이스에 정의된 메서드는 다음과 같다.
+    
+        * `void add(int index, Object element)` : 지정된 위치(index)에 객체(element)를 추가한다.
+        
+        * `boolean addAll(int index, Collection c)` : 지정된 위치(index)에 컬렉션에 포함된 객체들을 추가한다.
+        
+        * `Object get(int index)` : 지정된 위치에 있는 객체를 반환한다.
+        
+        * `int indexOf(Object o)` : 지정된 객체의 위치(index)를 반환한다. 
+        
+            * List의 첫 번째 요소 부터 순방향으로 찾는다. 
+
+        * `int lastIndexOf(Object o)` : 지정된 객체의 위치(index)를 반환한다. 
+        
+            * List의 마지막 요소 부터 역방향으로 찾는다. 
+        
+        * `Object remove(int index)` : 지정된 위치에 있는 객체를 삭제하고 삭제된 객체를 반환한다.
+        
+        * `Object set(int index, Object element)` : 지정된 위치(index)에 객체(element)를 저장한다.
+        
+        * `void sort(Comparator c)` : 지정된 Comparator로 List를 정렬한다. 
+        
+        * `List subList(int fromIndex, int toIndex)` : 지정된 범위에 있는 객체를 반환한다.
+        
+            * 일부만 뽑아내서 새로운 List로 만든다.    
+
+* (4) Set 인터페이스  
+
+    * `Set`는 저장 순서가 유지되지 않고 중복을 허용하지 않는 컬렉션을 구현하는데 사용된다.
+    
+    * Set 인터페이스에 정의된 메서드 
+    
+        * 대부분 Collection 인터페이스와 동일하다.
+        
+        * 집합과 관련된 메서드는 다음과 같다.
+        
+            * `boolean addAll(Collection c)` : 지정된 Collection(c)의 객체들을 Collection에 추가한다. (합집합)
+                         
+            * `boolean containsAll(Collection c)` : 지정된 Collection(c)의 객체들이 Collection에 포함되어 있는지 확인한다. (부분집합)
+
+            * `boolean removeAll(Collection c)` : 지정된 Collection에 포함된 객체들을 삭제한다. (차집합)
+
+            * `boolean retainAll(Collection c)` : 지정된 Collection(c)에 포함된 객체만을 남기고 나머지는 Collection에서 삭제한다. (교집합)
+
+* (5) Map 인터페이스  
+
+    * `Map`는 저장 순서가 유지되지 않고 키는 중복을 허용하지 않고 값은 중복을 허용하는 컬렉션을 구현하는데 사용된다.
+    
+    * Map 인터페이스에 정의된 메서드 
+
+        * `Object put(Object key, Object value)` : key 객체에 value 객체를 연결하여 Map에 저장한다. 
+        
+        * `void putAll(Map t)` : 지정된 Map의 모든 key-value 쌍을 추가한다.
+        
+        * `boolean containsKey(Object key)` : 지정된 key 객체와 일치하는 Map의 key 객체가 있는지 확인한다.
+        
+        * `boolean containsValue(Object value)` : 지정된 value 객체와 일치하는 Map의 value 객체가 있는지 확인한다.
+        
+        * `Object get(Object key)` : 지정된 key 객체와 일치하는 value 객체를 찾아서 반환한다.
+        
+        * `Object remove(Object key)` : 지정된 key 객체와 일치하는 key-value 객체를 삭제한다.
+        
+        * `Set entrySet()` : Map에 저장되어 있는 key-value 쌍을 Map.Entry 타입의 객체로 저장한 Set으로 반환한다.
+        
+        * `Set keySet()` : Map에 저장된 모든 key 객체를 반환한다.
+        
+        * `Collection values()` : Map에 저장된 모든 value 객체를 반환한다.
+        
+            * `Entry` : 키와 값의 한 쌍을 의미한다.
+            
+                * Map에서 값(value)은 중복을 허용하기 때문에 반환 타입이 Collection이며 키(key)는 중복을 허용하지 않기 때문에 반환 타입이 Set이다.  
+
+#### 2) List
+
+* (1) ArrayList
+
+    * `ArrayList`는 내부적으로 배열을 이용해서 요소를 저장하는 컬렉션 클래스이다.
+
+        ```java
+        public class ArrayList<E> extends AbstractList<E>
+                implements List<E>, RandomAccess, Cloneable, java.io.Serializable{
+          // ...
+      
+          transient Object[] elementData;
+      
+          // ...
+        }
+        ```
+
+        * 데이터의 삽입, 삭제 시 해당 데이터 이후 모든 데이터가 복사되므로 삽입, 삭제가 빈번한 데이터에는 부적합하다.
+        
+        * 동기화 처리가 되어 있지 않다.
+        
+    * 실습하기 - ArrayList의 기본적인 사용법
+    
+        ```java
+        class ArrayListEx1{
+        	public static void main(String[] args) {
+            
+        		// 기본 길이(용량, capacity)가 10인 ArrayList를 생성
+        		ArrayList list1 = new ArrayList(10);
+                
+        		// 원래 ArrayList에는 객체만 저장 가능
+        		// 컴파일러가 auto boxing에 의해 기본형을 참조형으로 자동 변환
+        		// list1.add(5) ---> list1.add(new Integer(5))
+        		list1.add(new Integer(5));
+        		list1.add(new Integer(4));
+        		list1.add(new Integer(2));
+        		list1.add(new Integer(0));
+        		list1.add(new Integer(1));
+        		list1.add(new Integer(3));
+        
+        		// 아래 코드는 ArrayList(Collection c)를 사용
+        		ArrayList list2 = new ArrayList(list1.subList(1,4)); 
+        		print(list1, list2);
+        
+        		// Collection은 인터페이스, Collections는 클래스
+        		Collections.sort(list1);	// list1과 list2를 오름차순으로 정렬한다.
+        		Collections.sort(list2);	// Collections.sort(List l)
+        		print(list1, list2);
+        
+        		System.out.println("list1.containsAll(list2):" + list1.containsAll(list2));
+        
+        		list2.add("B");
+        		list2.add("C");
+        		list2.add(3, "A");
+        		print(list1, list2);
+        
+        		list2.set(3, "AA");
+        		print(list1, list2);
+        		
+        		// list1에서 list2와 겹치는 부분만 남기고 나머지는 삭제한다.
+        		System.out.println("list1.retainAll(list2):" + list1.retainAll(list2));	
+        		print(list1, list2);
+        		
+        		//  list2에서 list1에 포함된 객체들을 삭제한다.
+        		/*
+        		    아래 코드를 자세히 설명하자면
+        		    1) get(i)로 list2에서 하나씩 꺼낸다.
+        		    2) contains()로 꺼낸 객체가 list1에 있는지 확인
+        		    3) remove(i)로 해당 객체를 list2에서 삭제
+        		*/
+        		for(int i= list2.size()-1; i >= 0; i--) {
+        			if(list1.contains(list2.get(i)))
+        				list2.remove(i); // 인덱스가 i인 객체를 삭제한다.
+                        // list2.remove(new Integer(1)); // 내용이 1인 것을 삭제 (삭제할 때 조심하자!)
+        		}
+        		print(list1, list2);
+                
+        	} // main의 끝
+        
+        	static void print(ArrayList list1, ArrayList list2) {
+        		System.out.println("list1:"+list1);
+        		System.out.println("list2:"+list2);
+        		System.out.println();		
+        	}
+        } // class
+        ```
+      
+    * ArrayList에 저장된 객체의 삭제 과정
+    
+        * ArrayList에 저장된 세 번째 데이터(data[2])를 삭제하는 과정
+            
+            ![image 21](images/img21.png)
+            
+            * ① 삭제할 데이터 아래의 데이터를 한 칸씩 위로 복사해서 삭제할 데이터를 덮어쓴다.
+            
+                ```java
+                System.arraycopy(data, 3, data, 2, 2)
+                ```
+              
+            * ② 데이터가 모두 한 칸씩 이동 했으므로 마지막 데이터는 null로 변경한다.
+            
+                ```java
+                data[size-1] = null;
+                ```
+              
+            * ③ 데이터가 삭제 되어 데이터의 개수가 줄었으므로 size의 값을 감소시킨다.
+            
+                ```java
+                size--;
+                ```
+              
+                * 마지막 데이터를 삭제하는 경우, ①의 과정(배열의 복사)은 필요없다.
+                
+        * ArrayList에 저장된 첫 번째 객체 부터 삭제하는 경우 - 배열 복사 발생
+            
+            ```java
+            for(int i = 0; i < list.size(); i++)
+            	list.remove(i);
+            ```
+            
+            ![image 22](images/img22.png)
+            
+        * ArrayList에 저장된 마지막 객체 부터 삭제하는 경우 - 배열 복사 발생 안함
+            
+            ```java
+            for(int i = list.size() - 1; i >= 0; i--)
+            	list.remove(i);
+            ```
+            
+            ![image 23](images/img23.png)
+    
+* (2) LinkedList
+
+    * `LinkedList`는 내부적으로 연결 리스트를 이용해서 요소를 저장하는 컬렉션 클래스이다.
+  
+        * 연결 리스트(Linked List)는 불연속적으로 존재하는 데이터를 서로 연결(link)한 형태로 구성되어 있다.
+  
+        * 데이터의 삽입, 삭제 시 해당 노드의 주소만 바꾸면 되므로 삽입, 삭제가 빈번한 데이터에 적합하다.
+        
+        * 데이터의 검색 시 처음부터 노드를 순회하므로 검색에는 부적합하다.
+        
+    * LinkedList의 장, 단점
+    
+        * 장점
+        
+            * LinkedList의 데이터의 삭제 : 단 한 번의 참조 변경만으로 가능
+            
+                ![image 24](images/img24.png)
+            
+            * LinkedList의 데이터의 추가 : 한 번의 Node 객체 생성과 두 번의 참조 변경만으로 가능
+
+                ![image 25](images/img25.png)
+                
+        * 단점
+        
+            * LinkedList는 데이터의 접근성이 나쁘다.
+               
+            * 연결 리스트에 5개의 노드가 있다고 가정하면 세 번째 노드에 접근하려면 첫 번째 노드 부터 차례대로 찾아가야 한다. 배열처럼 한 번에 갈 수 없다.
+
+    * LinkedList의 종류
+    
+        * `단일 연결 리스트(Singly Linked List)` : 이동 방향이 단방향이기 때문에 다음 요소에 대한 접근은 쉽지만 이전 요소에 대한 접근은 어렵다.
+    
+            ![image 26](images/img26.png)
+        
+        * `이중 연결 리스트(Doubly Linked List)` : 참조 변수를 하나 더 추가하여 다음 요소에 대한 참조 뿐만 아니라 이전 요소에 대한 참조가 가능하도록 하였다.
+        
+            ![image 27](images/img27.png)
+        
+        * `이중 원형 연결 리스트(Doubly Circular Linked List)` : 이중 연결 리스트에서 첫 번째 요소와 마지막 요소를 서로 연결 시킨 것이다.
+        
+            ![image 28](images/img28.png)
+            
+    * LinkedList의 메서드
+    
+        * 자바의 정석 p598~p599를 참고하자.
+
+* (3) Stack
+
+    * 스택(Stack)은 LIFO 구조다. 마지막에 저장한 것을 제일 먼저 꺼내게 된다.
+
+        ![image 29](images/img29.png)
+    
+    * Stack의 용도
+    
+        * 수식 계산, 수식 괄호 검사, 실행 취소 / 다시 실행 (undo / redo), 뒤로 / 앞으로 (웹 브라우저)
+
+    * Stack의 메서드
+    
+        * `boolean isEmpty()` : Stack이 비어 있는지 알려준다.
+        
+        * `Object peek()` : Stack의 맨 위에 저장된 객체를 반환한다. 
+        
+        * `Object pop()` : Stack의 맨 위에 저장된 객체를 꺼낸다.
+        
+        * `Object push(Object item)` : Stack에 객체(item)를 저장한다.
+        
+        * `int search(Object o)` : Stack에서 주어진 객체(o)를 찾아서 그 위치를 반환한다. 못 찾으면 -1을 반환
+        
+            * 위치가 1 부터 시작한다. 
+    
+* (4) 큐(Queue)
+
+    * `큐(Queue)`는 FIFO 구조다. 먼저 저장한 것을 제일 먼저 꺼내게 된다.
+    
+        ![image 30](images/img30.png)
+    
+    * Queue의 용도
+    
+        * 최근 사용 문서, 인쇄 작업 대기 목록, 버퍼(buffer)
+        
+    * Queue의 메소드
+    
+        * `boolean add(Object o)` : 주어진 객체를 Queue에 추가한다.
+        
+            * 성공하면 true를 반환. 저장 공간이 부족하면 예외(IllegalStateException) 발생
+            
+        * `Object remove()` : Queue에서 객체를 꺼내 반환한다.
+        
+            * 비어 있으면 예외(NoSuchElementException) 발생
+
+        * `Object element()` : 삭제 없이 요소를 읽어온다.
+        
+            * peek와 달리 Queue가 비었을 때 예외(NoSuchElementException) 발생
+        
+        * `boolean offer(Object o)` : 주어진 객체를 Queue에 추가한다. (예외 발생 X)
+        
+            * 성공하면 true. 실패하면 false를 반환
+            
+        * `Object poll()` : Queue에서 객체를 꺼내서 반환한다.
+        
+            * 비어 있으면 null을 반환 (예외 발생 X)
+
+        * `Object peek()` : 삭제 없이 요소를 읽어 온다.
+        
+            * Queue가 비어 있으며 null을 반환 (예외 발생 X)
+            
+    * Queue는 인터페이스이다. 그래서 Queue를 구현한 클래스를 사용해야 한다.
+    
+        * Ex) `LinkedList`, `ArrayDeque`, `PriorityQueue` ...    
+
+    * 실습하기 
+        
+        ```java
+        class StackQueueEx {
+        	public static void main(String[] args) {
+        		Stack st = new Stack();
+        		Queue q = new LinkedList();	 // Queue인터페이스의 구현체인 LinkedList를 사용
+        		
+        		st.push("0");
+        		st.push("1");
+        		st.push("2");
+        
+        		q.offer("0");
+        		q.offer("1");
+        		q.offer("2");
+        
+        		System.out.println("= Stack =");
+        		while(!st.empty()) {
+        			System.out.println(st.pop());
+        		}
+        
+        		System.out.println("= Queue =");
+        		while(!q.isEmpty()) {
+        			System.out.println(q.poll());
+        		}
+        	}
+        }
+        ```
+
+* (5) 덱(Deque)
+
+    * 덱(Deque)은 양쪽 끝에서 저장(offer)과 삭제(poll)가 가능하다.
+
+        ![image 31](images/img31.png)
+
+    * `Deque`은 인터페이스이며 구현체로는 `ArrayDeque`, `LinkedList`가 있다.
+
+* (6) 우선 순위 큐(Priority Queue)
+
+    * 우선 순위 큐?
+
+        * 우선 순위 큐는 저장 순서에 관계 없이 우선 순위가 높은 것부터 꺼낸다. 
+        
+            * 제일 작은 값 부터 꺼낸다.
+    
+        * null은 저장 할 수 없다.
+        
+            * 우선 순위를 판단할 수 없기 때문이다. 
+    
+        * 우선 순위 큐는 저장 공간으로 배열을 사용하며, 각 요소를 힙(Heap)이라는 자료구조의 형태로 저장한다.
+    
+            * 예를 들어, 입력 [3, 1, 5, 2, 4] → 출력 [1, 2, 3, 4, 5]
+            
+    * 실습하기
+    
+        ```java
+        public class PriorityQueueEx {
+            public static void main(String[] args) {
+                Queue priorityQueue = new PriorityQueue();
+        
+                priorityQueue.offer(3);
+                priorityQueue.offer(1);
+                priorityQueue.offer(5);
+                priorityQueue.offer(2);
+                priorityQueue.offer(4);
+                
+                System.out.println(priorityQueue);
+        
+                while(!priorityQueue.isEmpty()){
+                    System.out.println(priorityQueue.poll());
+                }
+            }
+        }
+        ```
+
+#### 3) Iterator, ListIterator, Enumeration
+
+* (1) Iterator, ListIterator, Enumeration
+      
+    * 컬렉션에 저장된 요소를 접근 하는데 사용되는 인터페이스다.
+
+* (2) Enumeration
+
+    * Enumeration?
+    
+        * `Enumeration`은 Iterator의 구버전이다.
+        
+            * 이전 버전으로 작성된 소스와의 호환을 위해서 남겨 두고 있을 뿐이므로 가능하면 `Enumeration` 대신 `Iterator`를 사용하자.
+
+    * Enumeration의 메소드
+    
+        * `boolean hasMoreElements()` : 읽어 올 요소가 남아 있는지 확인한다. 
+        
+            * 있으면 true, 없으면 false를 반환한다.
+            
+            * Iterator의 hasNext()와 같다.
+
+        * `boolean hasMoreElements()` : 읽어 올 요소가 남아 있는지 확인한다. 
+        
+            * 있으면 true, 없으면 false를 반환한다.
+            
+            * Iterator의 hasNext()와 같다.
+
+* (3) Iterator
+
+    * Iterator?
+    
+        * `Iterator`는 컬렉션에 저장된 요소들을 읽어오는 방법을 표준화한 것이다.
+      
+            * 컬렉션에 `iterator()`를 호출해서 `Iterator`를 구현한 객체를 얻어서 사용한다. 
+              
+            * `Iterator`는 1 회용이므로 사용을 완료 했다면 다시 얻어 와야 한다.
+
+    * Iterator의 메소드
+    
+        * `boolean hasNext()` : 읽어 올 요소가 남아 있는지 확인한다. 
+    
+            * 있으면 true, 없으면 false를 반환한다.
+            
+        * `Object next()` : 다음 요소를 읽어 온다.
+    
+            * next()를 호출하기 전에 hasNext()를 호출해서 읽어 올 요소가 있는지 확인하는 것이 안전하다.
+
+        * `void remove()` : next()로 읽어 온 요소를 삭제한다. 
+    
+            * next()를 호출한 다음에 remove()를 호출 해야 한다 (선택적 기능)
+            
+        * `void forEachRemaining(Consumer<? super E> action)` : 컬렉션에 남아있는 요소들에 대해 지정된 작업(action)을 수행한다.
+    
+            * 람다식을 사용하는 디폴트 메서드 (JDK 1.8 부터 추가)
+
+    * 실습하기
+
+        ```java
+        class IteratorEx1 {
+        	public static void main(String[] args) {
+        		ArrayList list = new ArrayList();
+        		list.add("1");
+        		list.add("2");
+        		list.add("3");
+        		list.add("4");
+        		list.add("5");
+        
+        		Iterator it = list.iterator();
+        		while(it.hasNext()) {
+        			Object obj = it.next();
+        			System.out.println(obj);
+        		}
+        	} // main
+        }
+        ```
+
+* (4) ListIterator
+
+    * `ListIterator`는 `Iterator`의 접근성을 향상시킨 것이다. (단방향 → 양방향)
+      
+    * `listIterator()`를 통해서 얻을 수 있다. (List를 구현한 컬렉션 클래스에 존재)
+      
+* (5) Map과 Iterator
+
+    * `Map`은 `Collection`의 자손이 아니므로 `Iterator()`가 없다.
+
+    * 그래서 `Map`은 `keySet()`, `entrySet()`, `values()`를 호출한 다음, `Iterator()`를 호출해야 한다.
+
+        ```java
+        Map map = new HashMap();
+        
+        Iterator it = map.entrySet().iterator();
+        ```
+
+#### 4) Arrays 클래스
+
+* Arrays 클래스는 배열을 다루는데 유용한 메서드를 제공한다. 
+      
+    * (1) 일차원 배열의 비교와 출력 - equals(), toString()
+    
+        * `toString()`은 배열의 모든 요소를 문자열로 출력한다. [일차원 배열에만 사용 가능]
+    
+        * `equals()`는 두 배열에 저장된 모든 요소를 비교해서 같으면 true, 다르면 false를 반환한다. [일차원 배열에만 사용 가능]
+
+    * (2) 다차원 배열의 비교와 출력 – deepEquals(), deepToString()
+    
+        * `deepToString()`은 배열의 모든 요소를 문자열로 출력한다. [다차원 배열에 사용 가능]
+          
+        * `deepEquals()`는 두 배열에 저장된 모든 요소를 비교해서 같으면 true, 다르면 false를 반환한다. [다차원 배열에 사용 가능]
+
+            ```java
+            int[] arr = {0, 1, 2, 3, 4};
+            int[][] arr2D = { {11, 12}, {21, 22} };
+            
+            System.out.println(Arrays.toString(arr));
+            System.out.println(Arrays.deepToString(arr2D));
+            ```
+          
+            ```java
+            String[][] str2D = new String[][]{ {"aaa", "bbb"}, {"AAA", "BBB"} };
+            String[][] str2D2 = new String[][]{ {"aaa", "bbb"}, {"AAA", "BBB"} };
+            
+            System.out.println(Arrays.equals(str2D, str2D2)); // false
+            System.out.println(Arrays.deepEquals(str2D, str2D2)); // true
+            ```
+
+    * (3) 배열의 복사 – copyOf(), copyOfRange()
+    
+        * `copyOf()`는 배열 전체를 복사해서 새로운 배열을 만들어 반환한다.
+          
+        * `copyOfRange()`는 배열의 일부를 복사해서 새로운 배열을 만들어 반환한다. (지정된 범위 끝은 포함되지 않음)
+
+            ```java
+            int[] arr  =  {0,1,2,3,4};
+            int[] arr2 = Arrays.copyOf(arr, arr.length); // arr2=[0,1,2,3,4]
+            int[] arr3 = Arrays.copyOf(arr, 3); // arr3=[0,1,2]          
+            int[] arr4 = Arrays.copyOf(arr, 7); // arr4=[0,1,2,3,4,0,0]         
+            int[] arr5 = Arrays.copyOfRange(arr, 2, 4); // arr5=[2,3]
+            int[] arr6 = Arrays.copyOfRange(arr, 0, 7); // arr6=[0,1,2,3,4,0,0]
+            ```
+
+    * (4) 배열 채우기 – fill(), setAll()
+    
+        * `fill()`는 배열의 모든 요소를 지정된 값으로 채운다.
+          
+        * `setAll()`는 배열을 채우는데 사용할 함수형 인터페이스를 매개변수로 받는다.
+
+            ```java
+            int[] arr =  new int[5];
+            Arrays.fill(arr, 9);  // arr=[9,9,9,9,9]
+            
+            // 람다식은 1~5의 범위에 속한 임의의 정수를 반환한다.
+            Arrays.setAll(arr, (i) -> (int) (Math.random() * 5) + 1); 
+            System.out.println("arr="+Arrays.toString(arr));
+            ```
+          
+            * `setAll()`를 호출할 때는 함수형 인터페이스를 구현한 객체를 매개변수로 지정하던가 아니면 람다식을 지정해야 한다.
+
+    * (5) 배열을 List로 변환 – asList(Object... a)
+    
+        * `asList()`는 배열을 List에 담아서 반환한다.
+          
+        * `asList()`가 반환한 List의 크기는 변경할 수 없다. 즉, 추가 또는 삭제가 불가능하다. (저장된 내용은 변경 가능)
+
+            ```java
+            List list = Arrays.asList(new Integer[]{1, 2, 3, 4, 5}); // list = [1, 2, 3, 4, 5]
+            List list = Arrays.asList(1, 2, 3, 4, 5); // list = [1, 2, 3, 4, 5]
+            list.add(6); // UnsupportedOperationException 예외 발생
+            ```
+
+        * 만약 크기를 변경할 수 있는 List가 필요하다면 다음과 같이 하면 된다.
+        
+            ```java
+            List list = new ArrayList(Arrays.asList(1, 2, 3, 4, 5));
+            ```
+          
+    * (6) 배열의 정렬과 검색 – sort(), binarySearch()
+    
+        * `sort()`는 배열을 정렬할 때 사용하고 `binarySearch()`는 배열에 저장된 요소를 검색할 때 사용한다.
+
+        * `binarySearch()`는 배열에서 지정된 값이 저장된 위치(index)를 찾아서 반환하는데, 반드시 배열이 정렬된 상태이어야 올바른 결과를 얻는다.
+
+        * 그리고 만일 검색한 값과 일치하는 요소들이 여러 개 있다면, 이 중에서 어떤 것의 위치가 반환될지는 알 수 없다.
+
+            ```java
+            int[] arr = {3, 2, 0, 1, 4};
+            int idx = Arrays.binarySearch(arr, 2); // idx = -5 ← 잘못된 결과
+            
+            Arrays.sort(arr); // 1) 배열 arr을 정렬한다.
+            System.out.println(Arrays.toString(arr)); // [0, 1, 2, 3, 4]
+            idx = Arrays.binarySearch(arr, 2); // 2) binarySearch() 호출 
+                                                  // idx = 2 ← 올바른 결과
+            ```
+          
+    * (7) 람다와 스트림 관련 - parallelXXX(), spliterator(), stream()
+    
+        * 자세한 내용은 자바의 정석 14장에서 살펴보자. 
+
+#### 5) Comparator와 Comparable
+
+* 정렬(sort)는 두 대상을 비교하여 자리 바꿈을 반복 하는 것이다.
+
+    * 정렬 방법은 변경 되지 않으며 정렬 기준만 달라지기 때문에 정렬 기준만 전달하면 된다.
+
+* Comaprator와 Comaprable
+
+    * `Comparator`, `Comparable`은 객체를 정렬 하는데 필요한 메서드를 정의한 인터페이스다. (정렬 기준을 제공)
+    
+        ```java
+        Comparable - 기본 정렬 기준을 구현하는데 사용.
+        Comparator - 기본 정렬 기준 외에 다른 기준으로 정렬하고자 할 때 사용.
+        ```
+    
+        ```java
+        public interface Comparator {
+          int compare(Object o1, Object o2); // 두 객체(o1, o2)를 비교 
+          boolean equals(Object obj);
+        }
+        
+        public interface Comparable {
+          public int compareTo(Object o); // 주어진 객체(o)를 자신(this)과 비교
+        }
+        ```
+      
+    * `compare()`와 `compareTo()`는 두 객체의 비교 결과를 반환 하도록 구현해야 한다.
+    
+        * 비교하는 왼쪽이 작으면 음수, 같으면 0, 왼쪽이 크면 양수를 반환한다. 
+    
+            ```java
+            public final class Integer extends Number implements Comparable {
+              //...
+          
+              public int compareTo(Integer anotherInteger) {
+                int v1 = this.value;
+                int v2 = anotherInteger.value;
+                
+                // 비교하는 왼쪽이 작으면 음수, 두 객체가 같으면 0, 왼쪽이 크면 양수를 반환한다. 
+                return (v1 < v2 ? -1 : (v1==v2 ? 0 : 1));
+              }
+          
+              //...  
+            }
+            ```
+
+* 실습하기
+
+    * 예시 1 - 일반적인 정렬
+
+        ```java
+        class ComparatorEx {
+            public static void main(String[] args) {
+                String[] strArr = {"cat", "Dog", "lion", "tiger"};
+        
+                Arrays.sort(strArr); // String의 Comparable 구현에 의한 정렬
+                System.out.println("strArr=" + Arrays.toString(strArr));
+        
+                // strArr : 정렬 대상 , String.CASE_INSENSITIVE_ORDER) : 정렬 기준
+                Arrays.sort(strArr, String.CASE_INSENSITIVE_ORDER); // 대소문자 구분 안함
+                System.out.println("strArr=" + Arrays.toString(strArr));
+        
+                Arrays.sort(strArr, new Descending()); // 역순 정렬
+                System.out.println("strArr=" + Arrays.toString(strArr));
+            }
+        }
+        
+        // Comparator 인터페이스를 구현한 클래스를 작성한다.
+        class Descending implements Comparator { 
+            public int compare(Object o1, Object o2){
+                if( o1 instanceof Comparable && o2 instanceof Comparable) {
+                    Comparable c1 = (Comparable)o1;
+                    Comparable c2 = (Comparable)o2;
+                    
+                    // -1을 곱해서 String 클래스가 가지고 있는 기본 정렬 기준을 역으로 변경한다.
+                    // 또는 c2.compareTo(c1)와 같이 순서를 바꿔도 된다.
+                    return c1.compareTo(c2) * -1 ;                              
+                }
+                return -1; // 비교하는 두 객체가 Comparable이 아니면 -1을 반환
+            } 
+        }
+        ```
+      
+        * `Arrays.sort()`는 배열을 정렬할 때 Comparator를 지정하지 않으면 객체 배열에 저장된 객체가 구현한 `Comparable`에 의해 정렬된다.
+
+            ```java
+            static void sort(Object[] a) // 객체 배열에 저장된 객체가 구현한 Comparable에 의한 정렬
+            static void sort(Object[] a, Comparator c) // sort(정렬 대상, 정렬 기준) 지정한 Comparator에 의한 정렬
+            ```
+
+        * String의 Comparable 구현은 문자열이 사전 순으로 정렬 되도록 작성되어 있다.
+        
+            * String의 오름차순 정렬(사전 순서)은 공백, 숫자, 대문자, 소문자의 순으로 정렬되는 것을 의미
+
+        * String은 대소문자를 구분하지 않고 비교하는 Comparator를 상수 형태로 제공한다.
+
+            ```java
+            public static final Comparator CASE_INSENSITIVE_ORDER
+            ```
+          
+            * 이 Comparator를 이용하면 문자열을 대소문자 구분 없이 정렬 할 수 있다.
+
+    * 예시 2 - 다중 정렬 
+
+        ```java
+        // 다중 조건 정렬 예시
+        // 정렬 대상인 품목(Item) 클래스를 정의한다.
+        class Item {
+            int weight; // 무게
+            String name; // 이름
+            String prodDt; // 생산일자
+        
+            Item(int weight, String name, String prodDt) {
+                this.weight = weight;
+                this.name = name;
+                this.prodDt = prodDt;
+            }
+        }
+        
+        /*
+        
+         Comparator<Item>를 구현하는 ItemCompare 클래스를 작성한다.
+         compare()는 오름차순(알파벳은 ABC, 한글은 가나다, 숫자는 123)이면 음수 값을, 같다면 0, 내림차순은 양수 값을 리턴한다.
+         여기서 우선 순위는 품목 (오름차순), 이름 (오름차순), 생산일자 (내림차순) 순이다.
+        
+        */
+        
+        class ItemCompare implements Comparator<Item> {
+            int result = 0;
+        
+            @Override
+            public int compare(Item s1, Item s2) {
+                if(s1.weight < s2.weight) {
+                    result = -1;
+                }else if(s1.weight == s2.weight) {
+                    if(s1.name.compareTo(s2.name) < 0) {
+                        result = -1;
+                    }else if(s1.name.compareTo(s2.name) == 0) {
+                        if(s1.prodDt.compareTo(s2.prodDt) < 0) { // 내림차순
+                            result = 1;
+                        }else if(s1.prodDt.compareTo(s2.prodDt) == 0) {
+                            result = 0;
+                        }else{
+                            result = -1;
+                        }
+                    }else{
+                        result = 1;
+                    }
+                }else{
+                    result = 1;
+                }
+        
+                return result;
+            }
+        }
+        
+        public class MultipleConditionSortEx {
+            public static void main(String[] args) {
+                List<Item> list = new ArrayList<>();
+                Item s1 = new Item(10, "볼트", "20201003"); // 우선 순위 : 2번
+                Item s2 = new Item(10, "볼트", "20201002"); // 우선 순위 : 3번
+                Item s3 = new Item(5, "너트", "20200920"); // 우선 순위 : 1번
+        
+                list.add(s1);
+                list.add(s2);
+                list.add(s3);
+        
+                Collections.sort(list, new ItemCompare());
+        
+                for(Item item : list){
+                    System.out.println(item.weight + " " + item.name + " " + item.prodDt);
+                }
+            }
+        }
+        ```
+
+#### 6) HashSet과 TreeSet
+
+* (1) HashSet
+
+    * HashSet ?
+
+        * `HashSet`은 해싱을 이용해서 데이터를 저장한다.
+        
+            * Set 인터페이스를 구현 했기 때문에 저장 순서를 유지하지 않고 중복도 허용하지 않는다.
+        
+        * 내부적으로 HashMap을 이용해서 만들어졌다.
+        
+            * 해시 알고리즘(hash algorithm)을 사용하기 때문에 검색 속도가 매우 빠르다.
+            
+    * HashSet의 생성자, 메서드
+ 
+        * 생성자
+        
+            * `HashSet()` : HashSet 객체를 생성한다.
+            
+            * `HashSet(Collection c)` : 주어진 컬렉션이 저장된 HashSet 객체를 생성한다.
+            
+            * `HashSet(int initialCapacity)` : 주어진 값을 초기 용량으로 하는 HashSet 객체를 생성한다.
+            
+            * `HashSet(int initialCapacity, float loadFactor)` : 지정된 초기 용량과 load factor를 가지는 HashSet 객체를 생성한다.
+        
+        * 추가
+        
+            * `boolean add(Object o)` : 새로운 객체를 추가한다.
+            
+            * `boolean addAll(Collection c)` : 주어진 컬렉션의 모든 객체들을 추가한다. (합집합)
+        
+        * 삭제
+        
+            * `boolean remove(Object o)` : 지정된 객체를 HashSet에서 삭제한다.
+            
+                * 성공하면 true, 실패하면 false
+                
+            * `boolean removeAll(Collection c)` : 주어진 컬렉션에 저장된 객체들과 동일한 것들을 HashSet에서 모두 삭제한다. (차집합)
+            
+            * `boolean retainAll(Collection c)` : 주어진 컬렉션에 저장된 객체와 동일한 것만 남기고 삭제한다. (교집합)
+            
+            * `void clear()` : 저장된 모든 객체를 삭제한다.
+    
+        * 검색
+        
+            * `boolean contains(Object o)` : 지정된 객체를 포함하고 있는지 알려준다.
+            
+            * `boolean containsAll(Collection c)` : 주어진 컬렉션에 저장된 모든 객체들을 포함하고 있는지 알려준다.
+    
+        * 기타 
+        
+            * `Iterator iterator()` : iterator를 반환한다.
+            
+            * `boolean isEmpty()` : HashSet이 비어있는지 알려준다.
+            
+            * `int size()` : 저장된 객체의 개수를 반환한다.
+            
+            * `Object[] toArray()` : 저장된 객체들을 객체 배열의 형태로 반환한다.
+            
+            * `Object[] toArray(Object[] a)` : 저장된 객체들을 주어진 객체 배열(a)에 담는다.
+
+    * 실습하기
+
+        ```java
+        class HashSetEx1 {
+        	public static void main(String[] args) {
+        		Object[] objArr = {"1",new Integer(1),"2","2","3","3","4","4","4"};
+        		Set set = new HashSet();
+        
+        		for(int i=0; i < objArr.length; i++) {
+        			set.add(objArr[i]);	// HashSet에 objArr의 요소들을 저장한다.
+        		}
+                
+        		// set은 순서 X, 중복 X (물론, 순서가 유지되는 것처럼 보일 때도 있다. 그러나 이것을 보장 할 수는 없음)
+        		// HashSet에 저장된 요소들을 출력한다.
+        		System.out.println(set);
+                
+        		// HashSet에 저장된 요소들을 출력한다. (Iterator 이용)
+        		Iterator it = set.iterator();
+                
+        		while(it.hasNext()){ // 읽어올 요소가 있는지 확인
+        			System.out.println(it.next()); // 요소를 하나 꺼내오기
+        		}
+        	}
+        }
+        ```
+
+    * HashSet의 add()
+ 
+        * `HashSet`의 `add()`는 새로운 객체를 추가 하기 전에 기존에 저장된 객체와 같은 것인지를 확인하기 위해 저장할 객체의 `equals()`와 `hashCode()`를 호출한다.
+
+            * 그래서 `equals()`와 `hashCode()`가 오버라이딩 되어 있어야 함
+
+                * ① `equals()`는 인스턴스 변수(iv)를 비교 하도록 오버라이딩 한다.
+
+                * ② `hashCode()`는 `Objects` 클래스의 `hash()`를 이용해서 오버라이딩 한다.
+
+        * 예시
+
+            ```java
+            class HashSetEx4 {
+            	public static void main(String[] args) {
+            		HashSet set = new HashSet();
+            
+            		set.add(new String("abc"));
+            		set.add(new String("abc"));
+            		set.add(new Person2("David",10));
+            		set.add(new Person2("David",10));
+            
+            		System.out.println(set);
+            	}
+            }
+            
+            class Person2 {
+            	String name; // iv
+            	int age; // iv
+            
+            	Person2(String name, int age) {
+            		this.name = name;
+            		this.age = age;
+            	}
+            
+            	public boolean equals(Object obj) {
+            		if(obj instanceof Person2) { // obj가 Person2 인스턴스이면
+            			Person2 tmp = (Person2)obj;
+            			return name.equals(tmp.name) && age==tmp.age; // iv 값을 비교 하도록 오버라이딩 (이름과 나이가 같은지 비교)
+            		}
+            
+            		return false;
+            	}
+            
+            	public int hashCode() {
+            		//return (name+age).hashCode(); // String 클래스의 hashcode()를 호출하도록 오버라이딩 [예전 방식]
+            		return Objects.hash(name, age); // JDK 1.8 부터
+            	}
+            
+            	public String toString() {
+            		return name +":"+ age; 
+            	}
+            }
+            ```
+            
+* (2) TreeSet
+
+    * TreeSet ?
+
+        * 데이터가 정렬된 상태로 저장되는 이진 탐색 트리(binary search tree)의 구조로 데이터를 저장한다.
+       
+            * 레드-블랙 트리(Red-Black tree)로 구현되어 있다.
+        
+        * 내부적으로 TreeMap을 이용해서 만들어졌으며 범위 검색과 정렬에 유리하다.
+        
+        * 각 요소(node)가  나무(tree)형태로 연결되어 있다. (LinkedList의 변형)
+        
+            ![image 32](images/img32.png)
+            
+            ```java
+            class TreeNode{
+                TreeNode left;  // 왼쪽 자식 노드
+                Object element; // 저장할 객체
+                TreeNode right; // 오른쪽 자식 노드
+            }
+            ```
+        
+        * `Comparator`를 구현해서 정렬 방법을 지정 할 수 있다.
+        
+    * 이진 탐색 트리(binary search tree)
+
+        * `이진 탐색 트리`는 모든 노드가 최대 두 개의 자식 노드를 갖는다.
+
+            * 부모 보다 작은 값은 왼쪽, 큰 값은 오른쪽에 저장한다.
+    
+            * 중복된 값을 저장하지 못한다.
+        
+            * 범위 검색과 정렬에 유리하다.
+
+            * 데이터가 많아질 수록 데이터 추가, 삭제에 시간이 더 걸린다. 
+            
+                * 부모 보다 큰지 작은지를 비교하는 횟수가 증가하기 때문이다.
+    
+                    ![image 33](images/img33.png)
+
+    * TreeSet의 add()
+
+        * `TreeSet`은 `compare()`를 호출해서 기존에 같은 객체가 있는지 확인한다. (중복을 허용하지 않음)
+
+            * `HashSet`은 `equals()`, `hashCode()`로 비교해서 기존에 같은 객체가 있는지를 확인한다. 
+            
+            * `TreeSet`은 `compare()` 또는 `compareTo()`로 비교해서 기존에 같은 객체가 있는지를 확인한다.
+            
+                * 같은 객체로 판단되면 해당 객체는 저장되지 않는다.
+                
+    * TreeSet의 생성자, 메서드
+
+        * `TreeSet()` : 기본 생성자
+        
+        * `TreeSet(Collection c)` : 주어진 컬렉션을 저장하는 TreeSet을 생성
+        
+        * `TreeSet(Comparator comp)` : 주어진 정렬 기준으로 정렬하는 TreeSet을 생성
+        
+        * `Object first()` : 정렬된 순서에서 첫 번째 객체를 반환한다.
+        
+            * 오름차순 기준으로 최소 값을 반환
+            
+        * `Object last()` : 정렬된 순서에서 마지막 객체를 반환한다.
+        
+            * 오름차순 기준으로 최대 값을 반환
+            
+        * `Object ceiling(Object o)` : 지정된 객체와 같거나 큰 값을 가진 객체 중 제일 가까운 값의 객체를 반환. 없으면 null
+        
+        * `Object floor(Object o)` : 지정된 객체와 같거나 작은 값을 가진 객체 중 제일 가까운 값의 객체를 반환. 없으면 null
+        
+        * `Object higher(Object o)` : 지정된 객체보다 큰 값을 가진 객체 중 제일 가까운 값의 객체를 반환. 없으면 null
+        
+        * `Object lower(Object o)` : 지정된 객체보다 작은 값을 가진 객체 중 제일 가까운 값의 객체를 반환. 없으면 null
+        
+        * `SortedSet subSet(Object fromElement, Object toElement)` : 범위 검색(fromElement 와 toElement 사이)의 결과를 반환한다. 
+         
+            * 끝 범위인 toElement는 범위에 포함되지 않음
+            
+        * `SortedSet headSet(Object toElement)` : 지정된 객체 보다 작은 값의 객체들을 반환한다. 
+        
+        * `SortedSet tailSet(Object fromElement)` : 지정된 객체 보다 크거나 같은 값의 객체들을 반환한다. 
+
+    * 실습하기
+    
+        * 일반적인 TreeSet 사용
+        
+            ```java
+            public class TreeSetEx1 {
+                public static void main(String[] args) {
+                    TreeSet set = new TreeSet();
+            
+                    String from = "b";
+                    String to = "d";
+            
+                    set.add("abc");         set.add("alien");       set.add("bat");
+                    set.add("car");         set.add("Car");         set.add("disc");
+                    set.add("dance");       set.add("dZZZZ");       set.add("dzzzz");
+                    set.add("elephant");    set.add("elevator");    set.add("fan");
+                    set.add("flower");
+            
+                    System.out.println(set);
+                    System.out.println("range search : from " + from  +" to "+ to);
+                    System.out.println("result1 : " + set.subSet(from, to));
+                    System.out.println("result2 : " + set.subSet(from, to + "zzz"));
+                }
+            }
+            ```
+            
+            * 위의 예제에서 result1에는 c로 시작하는 단어까지만 검색 결과에 포함 되어 있다.
+        
+            * 만일 끝 범위인 d로 시작하는 단어까지 포함 시키고자 한다면, 위와 같이 끝 범위에 'zzz'와 같은 문자열을 붙이면 된다.
+
+        * TreeSet의 범위 검색
+        
+            ```java
+            class TreeSetEx2 {
+            	public static void main(String[] args) {
+            		TreeSet set = new TreeSet();
+            		int[] score = {80, 95, 50, 35, 45, 65, 10, 100};
+            
+            		for(int i=0; i < score.length; i++)
+            			set.add(new Integer(score[i]));
+            
+            		System.out.println("50 보다 작은 값 :"	+ set.headSet(new Integer(50)));
+            		System.out.println("50 보다 큰 값 :"	+ set.tailSet(new Integer(50)));
+            	}
+            }
+            ```
+            
+            <br>
+            
+            ![image 34](images/img34.png)
+            
+    * 트리 순회(전위, 중위, 후위)
+
+        * 이진 트리의 모든 노드를 한번씩 읽는 것을 트리 순회라고 한다.
+           
+        * 전위, 중위, 후위 순회법이 있으며, 중위 순회하면 오름차순으로 정렬된다.
+
+#### 7) HashMap과 TreeMap
+
+* (1) HashMap
+
+    * HashMap ?
+    
+        * `HashMap`은 해싱을 이용해서 데이터를 키와 값의 쌍(Entry)으로 저장한다.
+          
+            * key와 value에 null을 허용한다.
+            
+            * 동기화 처리가 되어 있지 않다. (비동기 처리)
+            
+        * HashMap은 Entry라는 내부 클래스를 정의하고 다시 Entry 타입의 배열을 선언하고 있다.
+
+            ```java
+            public class HashMap extends AbstractMap implements Map, Cloneable, Serializable
+            {
+                transient Entry[] table;
+                
+                	. . .
+                    
+                static class Entry implements Map.Entry{
+                	final Object key;
+                    Object value;
+                    . . .
+                }
+            }
+            ```
+          
+        * 저장 순서를 유지하려면, `LinkedHashMap`를 사용하면 된다.
+        
+    * HashMap의 생성자, 메서드
+    
+        * 생성자
+    
+            * `HashMap()` : HashMap 객체를 생성
+            
+            * `HashMap(int initialCapacity)` : 지정된 값을 초기 용량으로 하는 HashMap 객체를 생성
+            
+            * `HashMap(int initialCapacity, float loadFactor)` : 지정된 초기 용량과 load factor의 HashMap 객체를 생성
+            
+            * `HashMap(Map m)` : 지정된 Map의 모든 요소를 포함하는 HashMap을 생성
+            
+        * 추가
+        
+            * `Object put(Object key, Object value)` : 지정된 키와 값을 HashMap에 저장
+            
+            * `void putAll(Map m)` : Map에 저장된 모든 요소를 HashMap에 저장
+
+        * 삭제
+        
+            * `Object remove(Object key)` : HashMap에서 지정된 키와 일치하는 key-value 객체(entry)를 제거
+
+        * 변경
+        
+            * `Object replace(Object key, Object value)` : 지정된 키의 값을 새로운 값(value)으로 변경
+        
+        * 검색
+        
+            * `boolean containsKey(Object key)` : HashMap에 지정된 키(key)가 포함되어 있는지 알려준다.
+            
+                * 포함되어 있으면 true
+            
+            * `boolean containsValue(Object value)` : HashMap에 지정된 값(value)가 포함되어 있는지 알려준다.
+            
+            * `Object get(Object key)` : 지정된 키(key)와 일치하는 값(객체)을 반환. 못찾으면 null 반환
+            
+            * `Object getOrDefault(Object key, Object dafaultValue)` : 지정된 키(key)와 일치하는 값(객체)을 반환.
+            
+                * 못 찾으면 기본 값(defaultValue)로 지정된 객체를 반환
+        
+        * 조회
+        
+            * `Set entrySet()` : HashMap에 저장된 키와 값을 엔트리(키와 값의 결합)의 형태로 Set에 저장해서 반환
+            
+            * `Set keySet()` : HashMap에 저장된 모든 키가 저장된 Set을 반환
+            
+            * `Collection values()` : HashMap에 저장된 모든 값을 컬렉션의 형태로 반환
+        
+        * 기타
+        
+            * `void clear()` : HashMap에 저장된 모든 객체를 제거
+            
+            * `boolean isEmpty()` : HashMap이 비어 있는지 알려준다.
+            
+            * `int size()` : HashMap에 저장된 요소의 개수를 반환        
+
+    * 실습하기
+
+        ```java
+        public class HashMapEx {
+            public static void main(String[] args) {
+                String[] data = {"A", "K", "A", "K", "D", "K", "A", "K", "K", "K", "Z", "D"};
+        
+                HashMap map = new HashMap();
+        
+                for(int i=0; i < data.length; i++){
+                    if(map.containsKey(data[i])){
+                        int value = (int) map.get(data[i]);
+                        map.put(data[i], value + 1);
+                    }else{
+                        map.put(data[i], 1);
+                    }
+                }
+        
+                Iterator it = map.entrySet().iterator();
+        
+                while(it.hasNext()){
+                    Map.Entry entry = (Map.Entry) it.next();
+                    int value = (int) entry.getValue();
+                    System.out.println(entry.getKey() + " : "
+                                        + printBar('#', value) + " " + value);
+                }
+            }
+        
+            public static String printBar(char ch, int value) {
+                char[] bar = new char[value];
+        
+                for(int i=0; i < bar.length; i++) {
+                    bar[i] = ch;
+                }
+        
+                return new String(bar);
+            }
+        }
+        ```
+
+    * 해싱(Hashing)?
+    
+        * 해싱(Hashing)은 해시 함수(hash function)를 이용해서 해시 테이블(hash table)에 데이터를 저장하거나 검색하는 기법
+    
+        * 해시 함수(hash function)는 키를 전달하면 데이터가 저장된 위치(index)를 알려준다.
+        
+        * 해시 테이블에 저장된 데이터를 가져오는 과정
+        
+            ![image 35](images/img35.png)
+            
+            * ① 키(key)로 해시 함수를 호출해서 해시코드를 얻는다.
+            
+                * 해시 코드(hash code) = 배열의 인덱스(index)
+
+            * ② 배열에서 해시코드(해시 함수의 반환 값)와 일치하는 연결리스트(Linked List)를 찾는다.
+
+            * ③ 연결리스트(Linked List)에서 키와 일치하는 데이터를 찾는다.
+
+* (2) TreeMap
+
+    * TreeMap ? 
+    
+        * `TreeMap`는 이진 탐색 트리(binary search tree)의 구조로 데이터를 키와 값의 쌍으로 저장한다.
+                        
+            * 내부적으로 레드-블랙 트리(Red-Black tree)로 저장된다.
+            
+            * key를 기준으로 데이터를 정렬해서 저장하기 때문에 저장 시간이 길다.
+            
+            * 키 값에 대한 `Comparator`를 구현해서 정렬 방법을 지정 할 수 있다.
+            
+            * Map이 필요할 때는 주로 HashMap을 사용하고, 범위 검색이나 정렬이 필요한 경우에 TreeMap을 사용한다.
+
+    * 실습하기
+
+        ```java
+        class TreeMapEx1 {
+        	public static void main(String[] args) {
+        		String[] data = { "A","K","A","K","D","K","A","K","K","K","Z","D" };
+        
+        		TreeMap map = new TreeMap();
+        
+        		for(int i=0; i < data.length; i++) {
+        			if(map.containsKey(data[i])) { // 키가 이미 존재하는 경우
+        				Integer value = (Integer)map.get(data[i]);
+        				map.put(data[i], new Integer(value.intValue() + 1)); // 해당 키의 값을 꺼내서 1을 더한 다음 다시 저장
+        			} else { // 키가 존재하지 않는 경우
+        				map.put(data[i], new Integer(1)); 		
+        			}
+        		}
+        
+        		Iterator it = map.entrySet().iterator();
+        
+        		System.out.println("= 기본정렬 =");
+        		while(it.hasNext()) {
+        			Map.Entry entry = (Map.Entry)it.next();
+        			int value = ((Integer)entry.getValue()).intValue();
+        			System.out.println(entry.getKey() + " : " + printBar('#', value) + " " + value );
+        		}
+        		System.out.println();
+        
+        		// Map에서 entrySet을 얻은 다음
+                // set을 ArrayList에 담아서 Collectons.sort()로 정렬한다.
+        		Set set = map.entrySet();
+        		List list = new ArrayList(set);	// ArrayList(Collection c) 
+        		
+        		// static void sort(List list, Comparator c)  
+        		Collections.sort(list, new ValueComparator());
+        
+        		it = list.iterator();
+        
+        		System.out.println("= 값의 크기가 큰 순서로 정렬 =");		
+        		while(it.hasNext()) {
+        			Map.Entry entry = (Map.Entry)it.next();
+        			int value = ((Integer)entry.getValue()).intValue();
+        			System.out.println(entry.getKey() + " : " + printBar('#', value) + " " + value );
+        		}
+        
+        	} // 	public static void main(String[] args) 
+        
+        	// 값을 기준으로 내림차순 정렬해서 저장할 수 있도록 ValueComparator 작성
+        	static class ValueComparator implements Comparator {
+        		public int compare(Object o1, Object o2) {
+        			if(o1 instanceof Map.Entry && o2 instanceof Map.Entry) {
+        				Map.Entry e1 = (Map.Entry)o1;
+        				Map.Entry e2 = (Map.Entry)o2;
+        
+        				int v1 = ((Integer)e1.getValue()).intValue();
+        				int v2 = ((Integer)e2.getValue()).intValue();
+        
+        				return  v2 - v1;
+        			} 
+        			return -1;
+        		}
+        	}	// 	static class ValueComparator implements Comparator {
+        
+        	// #을 출력하는 메서드
+        	public static String printBar(char ch, int value) { 
+        		char[] bar = new char[value]; 
+        
+        		for(int i=0; i < bar.length; i++) { 
+        			bar[i] = ch; 
+        		} 
+        
+        		return new String(bar); 
+        	} 
+        }
+        ```
+
+#### 8) Collections
+
+* Collections 클래스는 컬렉션를 위한 유용한 static 메서드를 제공한다.
+
+    * (1) 컬렉션 채우기, 복사, 정렬, 검색 – fill(), copy(), sort(), binarySearch() 등
+    
+        * Arrays에서 이미 배웠으므로 설명을 생략한다.
+
+    * (2) 컬렉션의 동기화 – synchronizedXXX()
+    
+        * `synchronizedXXX()`는 컬렉션의 동기화 처리에 사용된다.
+        
+            ```java
+            static Collection synchronizedCollection(Collection c)
+            static List synchronizedList(List l)
+            static Set synchronizedSet(Set s)
+            static Map synchronizedMap(Map m)
+            static SortedSet synchronizedSortedSet(SortedSet s)
+            static SotredMap synchronizedSortedMap(SotredMap m)
+            ```
+          
+    * (3) 변경 불가(readOnly) 컬렉션 만들기 – unmodifiableXXX() 
+    
+        * `unmodifiableXXX()`는 저장된 데이터를 변경 할 수 없는 컬렉션을 만든다.
+        
+            ```java
+            static Collection unmodifiableCollection(Collection c)
+            static List unmodifiableList(List list)
+            static Set unmodifiableSet(Set s)
+            static Map unmodifiableMap(Map m)
+            static NavigableSet unmodifiableNavigableSet(NavigableSet s)
+            static SortedSet unmodifiableSortedSet(SortedSet s)
+            static NavigableMap unmodifiableNavigableMap(NavigableMap m)
+            static SotredMap unmodifiableSortedMap(SotredMap m)
+            ```
+
+    * (4) 싱글톤 컬렉션 만들기 – singletonXXX()
+    
+        * `singletonXXX()`는 단 하나의 객체만을 저장하는 컬렉션을 만든다.
+        
+            ```java
+            static List singletonList(Object o) // 매개변수로 저장할 객체를 지정
+            static Set singleton(Object o) // singletonSet()가 아님
+            static Map singletonMap(Object key, Object value)
+            ```
+          
+    * (5) 한 종류의 객체만 저장하는 컬렉션 만들기 –  checkedXXX() 
+    
+        * `checkedXXX()`는 한 종류의 객체만 저장하는 컬렉션을 만든다.
+           
+        * 컬렉션에 저장할 요소의 타입을 제한하는 것은 제네릭으로 간단히 처리할 수 있지만 이러한 메서드들을 제공하는 이유는 호환성 때문이다.
+         
+            ```java
+            static Collection checkedCollection (Collection c, Class type)
+            static List checkedList(List list, Class type)
+            static Set checkedSet(Set s, Class type)
+            static Map checkedMap(Map m, Class keyType, Class valueType)
+            static Queue checkedQueue(Queue queue, Class type)
+            //...
+            ```
+          
+            ```java
+            List list = new ArrayList();
+            List checkedList = checkedList(list, String.class); // String만 저장 가능
+            checkedList.add("abc"); // OK.
+            checkedList.add(new Integer(3)); // 에러. ClassCastException 발생
+            ```
+
+* 실습하기
+    
+    ```java
+    public class CollectionsEx1 {
+        public static void main(String[] args) {
+            List list = new ArrayList();
+            System.out.println(list);
+    
+            addAll(list, 1,2,3,4,5);
+            System.out.println(list);
+    
+            rotate(list, 2); // 반 시게 방향으로 2번 회전
+            System.out.println(list);
+    
+            swap(list, 0, 2); // 인덱스가 0인 요소와 2인 요소를 교환(swap)
+            System.out.println(list);
+    
+            shuffle(list); // 저장된 요소의 위치를 임의로 변경한다.
+            System.out.println(list);
+    
+            sort(list, reverseOrder()); // 역순 정렬
+            System.out.println(list);
+    
+            sort(list); // 오름차순 정렬
+            System.out.println(list);
+    
+            int idx = binarySearch(list, 3);  // 3이 저장된 위치(index)를 반환
+            System.out.println("index of 3 = " + idx);
+    
+            System.out.println("max="+max(list));
+            System.out.println("min="+min(list));
+            System.out.println("min="+max(list, reverseOrder()));
+    
+            fill(list, 9); // list를 9로 채운다.
+            System.out.println("list="+list);
+    
+            // list와 같은 크기의 새로운 list를 생성하고 2로 채운다. 단, 결과는 변경불가
+            List newList = nCopies(list.size(), 2);
+            System.out.println("newList="+newList);
+    
+            System.out.println(disjoint(list, newList)); // disjoint()는 공통 요소가 있는지 확인한다. 공통요소가 없으면 true
+    
+            copy(list, newList); // newList의 내용을 list로 복사한다.
+            System.out.println("newList="+newList);
+            System.out.println("list="+list);
+    
+            replaceAll(list, 2, 1); // 2를 모두 1로 변경한다.
+            System.out.println("list="+list);
+    
+            Enumeration e = enumeration(list);
+            ArrayList list2 = list(e);
+    
+            System.out.println("list2="+list2);
+        }
+    }
+    ```
+
 ## 11. 제네릭스, 열거형, 애노테이션
 
 ## 12. 스레드(Thread)
