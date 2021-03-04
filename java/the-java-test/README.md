@@ -467,7 +467,7 @@
         }
         ```
       
-* (3) @Enabled___ 와 @Disabled___
+* (3) `@Enabled___` 와 `@Disabled___`
 
     * 종류
     
@@ -547,13 +547,13 @@
 
 * (2) @Tag
 
-    * `@Tag`는 테스트 메소드에 태그를 추가 할 수 있다.
+    * `@Tag`는 테스트 메소드에 태그를 추가한다.
 
     * 하나의 테스트 메소드에 여러 태그를 사용 할 수 있다.
     
 * (3) Intellij에서 특정 태그로 테스트를 필터링 하는 방법
 
-    * ① @Tag 애노테이션을 이용하여 테스트 코드를 변경한다.
+    * ① `@Tag`를 이용하여 테스트 코드를 변경한다.
     
         ```java
         class StudyTest {
@@ -582,7 +582,7 @@
     
     * ④ `[apply]` - `[OK]` 버튼을 클릭한다.
     
-        * 그러면 fast라는 `@Tag("fast")`가 붙어 있는 테스트 메소드만 실행 된다.
+        * 그러면 `fast`라는 `@Tag("fast")`이 붙어 있는 테스트 메소드만 실행된다.
            
 * (4) 메이븐에서 테스트를 필터링 하는 방법
 
@@ -612,7 +612,18 @@
 
 * (2) 실습
 
-    * ① 다음과 같이 FastTest 애노테이션을 작성한다.
+    * ① 다음과 같이 `FastTest` 애노테이션을 만든다.
+
+        ```java
+        @Target(ElementType.METHOD) // 해당 애노테이션을 메서드에 적용 할 수 있다.
+        @Retention(RetentionPolicy.RUNTIME)
+        @Test         // 테스트 용도로 사용한다.
+        @Tag("fast") // 해당 애노테이션을 사용하면 fast라는 태그를 붙인다.
+        public @interface FastTest {
+        }
+        ```
+      
+        * 동일한 방식으로 `SlowTest` 애노테이션도 만든다.
 
     * ② 테스트 코드를 다음과 같이 변경 할 수 있다.
     
@@ -635,4 +646,440 @@
         }
         ```
       
-        * 즉, @Test, @Tag("fast")를 제거하고 @FastTest 애노테이션을 적용한다.
+        * 즉, `@Test`, `@Tag("fast")`를 제거하고 `@FastTest`을 적용한다.
+        
+#### 8) 테스트 반복하기 1부
+
+* (1) @RepeatedTest
+
+    * `@RepeatedTest`는 하나의 테스트 메소드를 반복할 때 사용한다.
+
+        * `value` : 반복 횟수 지정한다.
+    
+        * `name` : 반복 테스트 이름을 지정한다. 
+        
+            * `{displayName} ` :  `@DisplayName`으로 지정한 테스트 명 표시
+            
+            * `{currentRepetition}` : 현재 반복 횟수
+            
+            * `{totalRepetitions} `: 총 반복 횟수
+
+    * 실습
+    
+        * ① 해당 테스트를 10번 반복한다.
+    
+            ```java
+            @RepeatedTest(10)
+            void repeatTest(){
+                System.out.println("test ");
+            }
+            ```
+
+        * ② 테스트 메소드에 RepetitionInfo 타입의 파라미터를 지정 할 수 있다.
+    
+            ```java
+            @RepeatedTest(10)
+            void repeatTest(RepetitionInfo repetitionInfo){
+                System.out.println("test " + repetitionInfo.getCurrentRepetition() + "/" + repetitionInfo.getTotalRepetitions());
+            }
+            ```
+          
+            * RepetitionInfo 타입의 파라미터로 현재 반복 횟수와 총 반복 횟수를 알아 낼 수 있다.
+          
+        * ③ 반복 테스트 이름을 지정 할 수도 있다.
+    
+            ```java
+            @DisplayName("스터디 만들기")
+            @RepeatedTest(value = 10, name = "{displayName}, {currentRepetition}/{totalRepetitions}")
+            void repeatTest(RepetitionInfo repetitionInfo){
+                System.out.println("test " + repetitionInfo.getCurrentRepetition() + "/" + repetitionInfo.getTotalRepetitions());
+            }
+            ```
+          
+* (2) @ParameterizedTest
+    
+    * `@ParameterizedTest`는 테스트 메소드의 파라미터에 여러 개의 인자를 대입해가며 반복적으로 실행한다.
+
+        * `name` : 반복 테스트 이름을 지정한다. 
+        
+            * `{displayName}`  : `@DisplayName`으로 지정한 테스트 명을 표시한다.
+            
+            * `{index}` : 몇 번째 테스트인지 표시한다.
+            
+            * `{0}`, `{1}`, ... : 파라미터에 전달된 인자를 인덱스로 참조한다.
+      
+    * 실습
+    
+        ```java
+        @DisplayName("스터디 만들기")
+        @ParameterizedTest(name = "{index} {displayName} message={0}")
+        @ValueSource(strings = {"날씨가", "많이", "추워지고", "있네요."}) // 지정한 배열의 값이 하나씩 테스트 메소드의 인자로 전달된다.
+        void parameterizedTest(String message){
+            System.out.println(message);
+        }
+        ```
+      
+        * `@ValueSource` : 테스트 메소드의 파라미터 하나에 대입 할 여러 개의 인자를 배열로 지정한다. 
+      
+#### 9) 테스트 반복하기 2부
+
+* (1) 인자 값들의 소스
+
+    * `@ValueSource` : 테스트 메소드의 파라미터 하나에 대입 할 여러 개의 인자를 배열로 지정한다. 
+    
+        * 테스트 메소드의 파라미터가 1개일 때만 사용할 수 있다. 
+
+    * `@EmptySource` : 테스트 메소드의 파라미터에 비어 있는 값을 인자로 전달한다.
+
+    * `@NullSource` : 테스트 메소드의 파라미터에 Null 값을 인자로 전달한다.
+
+    * `@NullAndEmptySource` : 테스트 메소드의 파라미터에 Null 값과 비어 있는 값을 인자로 전달한다.
+
+        * `@EmptySource,` `@NullSource`를 합친 것과 같다.
+        
+            ```java
+            @DisplayName("스터디 만들기")
+            @ParameterizedTest(name = "{index} {displayName} message={0}")
+            @ValueSource(strings = {"날씨가", "많이", "추워지고", "있네요."})
+            @NullAndEmptySource
+            void parameterizedTest(String message , int ms){
+                System.out.println(message);
+            }
+            ```
+          
+            ```java
+            @DisplayName("스터디 만들기")
+            @ParameterizedTest(name = "{index} {displayName} message={0}")
+            @ValueSource(ints = {10, 20, 40})
+            void parameterizedTest(Integer limit){
+                System.out.println(limit);
+            }
+            ```
+          
+    * `@CsvSource` : 테스트 메소드의 여러 파라미터에 대입 할 여러 개의 인자를 배열로 지정한다. 
+    
+    * 추가적인 애노테이션
+    
+        * `@EnumSource`
+    
+        * `@MethodSource`
+    
+        * `@CsvFileSource`
+        
+        * `@ArgumentSource`
+
+* (2) 인자 값 타입 변환 
+
+    * 암묵적인 타입 변환
+    
+        * https://junit.org/junit5/docs/current/user-guide/#writing-tests-parameterized-tests-argument-conversion-implicit
+        
+    * 명시적인 타입 변환
+    
+        * ① `SimpleArgumentConverter`를 상속 받은 클래스를 작성한다.
+
+            ```java
+            static class StudyConverter extends SimpleArgumentConverter{
+            
+                @Override
+                protected Object convert(Object source, Class<?> targetType) throws ArgumentConversionException {
+                    // targetType(변환 하려는 타입)이 Study 여야 한다.
+                    assertEquals(Study.class, targetType, "Can only convert to Study");
+                    return new Study(Integer.parseInt(source.toString()));
+                }
+            
+            }
+            ```
+
+        * ② 테스트 메소드의 파라미터에 `@ConvertWith`를 지정하면서 앞서 작성한 클래스를 전달한다.
+
+            ```java
+            @DisplayName("스터디 만들기")
+            @ParameterizedTest(name = "{index} {displayName} message={0}")
+            @ValueSource(ints = {10, 20, 40})  // 숫자를 Study 타입으로 변환하고자 함
+            void parameterizedTest(@ConvertWith(StudyConverter.class) Study study){
+                System.out.println(study.getLimit());
+            }
+            ```
+
+* (3) 테스트 메소드의 여러 개의 파라미터로 인자를 전달 받기
+
+    * 다음과 같이 Study 클래스를 변경한다.
+
+        ```java
+        public class Study {
+        
+            private StudyStatus status;
+        
+            private int limit;
+        
+            private String name; // 추가
+        
+            public Study(int limit, String name) { // 추가
+                this.limit = limit;
+                this.name = name;
+            }
+        
+            public Study(int limit) {
+                if(limit < 0){
+                    throw new IllegalArgumentException("limit은 0 보다 커야 한다.");
+                }
+                this.limit = limit;
+            }
+        
+            public StudyStatus getStatus() {
+                return this.status;
+            }
+        
+            public int getLimit() {
+                return limit;
+            }
+        
+            public String getName() { // 추가
+                return name;
+            }
+        
+            @Override
+            public String toString() { // 추가
+                return "Study{" +
+                        "status=" + status +
+                        ", limit=" + limit +
+                        ", name='" + name + '\'' +
+                        '}';
+            }
+        }
+        ```
+
+        * name 필드를 추가하고 생성자, getter를 추가한 다음, toString()를 오버라이딩 한다. 
+        
+    * 다음과 같이 `@CsvSource`를 사용한 다음, 메서드의 매개변수를 변경한다.
+    
+        ```java
+        @DisplayName("스터디 만들기")
+        @ParameterizedTest(name = "{index} {displayName} message={0}")
+        @CsvSource({"10, '자바 스터디'", "20, 스프링"})
+        void parameterizedTest(Integer limit, String name){
+            Study study = new Study(limit, name);
+            System.out.println(study);
+        }
+        ```
+      
+        * 아래 코드의 경우, `10`이 `limit`에 대입되고 `'자바 스터디'`는 `name`에 대입된다.
+
+* (4) 인자 값 조합 
+
+    * 2개 이상의 인자 값을 조합해서 하나의 인자로 받는 방법은 2 가지가 있다.
+    
+        * 테스트 메소드의 파라미터에 `ArgumentsAccessor`를 사용한다.
+          
+            ```java
+            @DisplayName("스터디 만들기")
+            @ParameterizedTest(name = "{index} {displayName} message={0}")
+            @CsvSource({"10, '자바 스터디'", "20, 스프링"})
+            void parameterizedTest(ArgumentsAccessor argumentsAccessor){
+                Study study = new Study(argumentsAccessor.getInteger(0), argumentsAccessor.getString(1));
+                System.out.println(study);
+            }
+            ```
+          
+            * `argumentsAccessor.getInteger(0)` : 첫 번째 인자 값을 가져온다.
+    
+            * `argumentsAccessor.getString(1)` : 두 번째 인자 값을 가져온다.
+
+        * Custom Aggregators를 만든다.
+        
+            * ① `ArgumentsAggregator` 인터페이스를 구현한 클래스를 작성한다.
+          
+                ```java
+                static class StudyAggregator implements ArgumentsAggregator {
+                    @Override
+                    public Object aggregateArguments(ArgumentsAccessor accessor, ParameterContext context) throws ArgumentsAggregationException {
+                        return new Study(accessor.getInteger(0), accessor.getString(1));
+                    }
+                }
+                ```
+
+            * ② 전달 받고자 하는 파라미터(Study)를 작성한 다음, `@AggregateWith`를 지정하면서 사용 할 Aggregator를 명시한다. 
+          
+                ```java
+                @DisplayName("스터디 만들기")
+                @ParameterizedTest(name = "{index} {displayName} message={0}")
+                @CsvSource({"10, '자바 스터디'", "20, 스프링"})
+                void parameterizedTest(@AggregateWith(StudyAggregator.class) Study study){
+                    System.out.println(study);
+                }
+                ```
+              
+                * `Aggregator`는 static 내부 클래스 이거나 public class 여야 한다는 제약사항이 있다.
+
+#### 10) 테스트 인스턴스
+
+* (1) 개요
+
+    * `JUnit`은 테스트 메소드 마다 테스트 인스턴스를 새로 만든다. `[기본 전략]` 
+
+        * 아래 코드를 실행할 때, value의 값이 출력되는 것을 보면 항상 1이라는 것을 알 수 있다.
+        
+            ```java
+            class StudyTest {
+            
+                int value = 1;
+            
+                @FastTest
+                @DisplayName("스터디 만들기 fast")
+                void create_new_study(){
+                    /* this를 출력하면 테스트 마다 StudyTest의 해시 코드 값이 다르다는 것을 알 수 있다.
+                       즉, 테스트 마다 현재 객체가 다르다는 것을 알 수 있다. */
+                    System.out.println(this);
+                    System.out.println(value++);
+                    Study actual = new Study(1);
+                    assertThat(actual.getLimit()).isGreaterThan(0);
+                }
+            
+                @SlowTest
+                @DisplayName("스터디 만들기 slow")
+                void create_new_study_again(){
+                    System.out.println(this);
+                    System.out.println("create1 " + value++);
+                }
+            
+            }
+            ```
+      
+        * 그 이유는 테스트 메소드를 독립적으로 실행해서 예상치 못한 부작용을 방지하기 위해서다.
+    
+            * 어떤 테스트가 먼저 실행되어 서로 공유하는 값이 바뀌게 되면 테스트의 순서에 따라 테스트가 불안정해질 수 있다.
+
+    * JUnit 5에서는 이 기본 전략을 변경할 수 있다.
+
+* (2) @TestInstance(Lifecycle.PER_CLASS)
+
+    * `@TestInstance(Lifecycle.PER_CLASS)` : 테스트 클래스 마다 인스턴스를 하나만 만들어 사용한다.
+
+        * 즉, 해당 테스트 클래스 안에 있는 모든 테스트 메서드가 하나의 테스트 인스턴스를 공유하게 된다.
+
+        * 경우에 따라, 테스트 간에 공유하는 모든 상태를 `@BeforeEach` 또는 `@AfterEach`에서 초기화 할 필요가 있다.
+
+        * `@BeforeAll`과 `@AfterAll`을 인스턴스 메소드 또는 인터페이스에 정의한 default 메소드로 정의할 수도 있다.
+
+    * 실습
+   
+        ```java
+        @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+        @TestInstance(TestInstance.Lifecycle.PER_CLASS) // 테스트 클래스 마다 인스턴스를 하나만 만들어 사용한다.
+        class StudyTest {
+        
+            // ...
+            
+            @BeforeAll
+            void beforeAll(){ // @TestInstance를 사용하면 static이 아니어도 됨
+                System.out.println("before all");
+            }
+        
+            @AfterAll
+            void afterAll(){ // @TestInstance를 사용하면 static이 아니어도 됨
+                System.out.println("after all");
+            }
+        
+        }
+        ```
+      
+#### 11) 테스트 순서
+
+* (1) 테스트 순서
+
+    * 테스트 메소드가 특정한 순서에 의해 실행 되긴 하지만 어떻게 그 순서를 정하는지는 확실하지 않다.
+
+        * 테스트 인스턴스를 테스트 마다 새로 만드는 것과 같은 이유이다.
+
+    * 하지만 경우에 따라, 특정 순서대로 테스트를 실행하고 싶을 때도 있다.
+
+        * Ex) 시나리오 테스트 (회원 가입 → 로그인 → 개인 페이지로 이동 → 닉네임 변경 ...)
+
+    * 그러한 경우에는 테스트 메소드를 원하는 순서에 따라 실행 하도록 `@TestInstance(Lifecycle.PER_CLASS)`과 `@TestMethodOrder`를 함께 사용하면 된다.
+
+        * `@TestMethodOrder`에는 `MethodOrderer`의 구현체를 설정한다.
+    
+            * 기본 구현체는 다음과 같다.
+        
+                * ① `Alphanumeric` 
+            
+                * ② `OrderAnnoation` : `@OrderAnnoation`로 순서를 정한다. 낮은 값 일 수록 더 높은 우선 순위를 가진다.
+            
+                * ③ `Random`
+        
+* (2) 실습
+
+    * 테스트 메소드가 특정한 순서에 의해 실행 되긴 하지만 어떻게 그 순서를 정하는지는 분명히 하지 않다.
+    
+        ```java
+        @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+        @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+        @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+        class StudyTest {
+        
+            int value = 1;
+        
+            @Order(2) // JUnit에서 제공하는 @Order를 사용해야 한다.
+            @FastTest
+            @DisplayName("스터디 만들기 fast")
+            void create_new_study(){
+                System.out.println(this);
+                System.out.println(value++);
+                Study actual = new Study(1);
+                assertThat(actual.getLimit()).isGreaterThan(0);
+            }
+        
+            @Order(1)
+            @SlowTest
+            @DisplayName("스터디 만들기 slow")
+            void create_new_study_again(){
+                System.out.println(this);
+                System.out.println("create1 " + value++);
+            }
+        
+            @Order(3)
+            @DisplayName("스터디 만들기")
+            @RepeatedTest(value = 10, name = "{displayName}, {currentRepetition}/{totalRepetitions}")
+            void repeatTest(RepetitionInfo repetitionInfo){
+                System.out.println("test " + repetitionInfo.getCurrentRepetition() + "/" + repetitionInfo.getTotalRepetitions());
+            }
+        
+            @Order(4)
+            @DisplayName("스터디 만들기")
+            @ParameterizedTest(name = "{index} {displayName} message={0}")
+            @CsvSource({"10, '자바 스터디'", "20, 스프링"})
+            void parameterizedTest(@AggregateWith(StudyAggregator.class) Study study){
+                System.out.println(study);
+            }
+        
+            static class StudyAggregator implements ArgumentsAggregator {
+                @Override
+                public Object aggregateArguments(ArgumentsAccessor accessor, ParameterContext context) throws ArgumentsAggregationException {
+                    return new Study(accessor.getInteger(0), accessor.getString(1));
+                }
+            }
+        
+            @BeforeAll
+            void beforeAll(){
+                System.out.println("before all");
+            }
+        
+            @AfterAll
+            void afterAll(){
+                System.out.println("after all");
+            }
+        
+            @BeforeEach
+            void beforeEach(){
+                System.out.println("Before each");
+            }
+        
+            @AfterEach
+            void afterEach(){
+                System.out.println("After each");
+            }
+        
+        }
+        ```
+      
