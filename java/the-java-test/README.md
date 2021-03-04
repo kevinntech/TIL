@@ -13,13 +13,13 @@
     
         * 대체재: TestNG, Spock ...
 
-* (2) JUnit5
+* (2) JUnit 5
 
-    * `JUnit5`는 3개의 모듈로 구성되어 있다.
+    * `JUnit 5`는 3개의 모듈로 구성되어 있다.
     
         ![image 1](images/img1.png)
     
-        * ① `JUnit Platform` : JUnit으로 작성한 테스트를 실행 해주는 런처를 제공한다. 그리고 TestEngine API를 제공한다.
+        * ① `JUnit Platform` : JUnit으로 작성한 테스트를 실행하는 런처와 TestEngine API를 제공한다.
     
             * IDE가 JUnit Platform을 사용해서 `@Test`이 붙어있는 메서드를 실행해준다.
     
@@ -1082,4 +1082,242 @@
         
         }
         ```
+      
+#### 12) junit-platform.properties
+
+* (1) `junit-platform.properties` : JUnit 설정 파일이다. 
+
+    * 클래스패스 루트(`src/test/resources/`)에 넣어두면 적용된다.
+
+* (2) 실습 
+
+    * ① `src/test` 아래에 `resources`라는 디렉토리를 만든다.
+    
+    * ② `src/test/resources`에 `junit-platform.properties` 파일을 만든다.
+    
+    * ③ 해당 디렉토리를 test의 클래스패스로 사용 하도록 인텔리제이의 설정을 변경해야 한다.
+    
+    * ④ `[file]` - `[Project Structure...]` - `[Modules]`를 클릭한 다음, `resources`를 선택하고 `Test Resources`를 클릭한 다음, `[Apply]` - `[OK]` 버튼을 클릭한다.
+
+    * ⑤ `resources`의 아이콘이 변경 되었음을 확인 할 수 있다.
+    
+* (3) junit-platform.properties 설정 사항
+
+    * 테스트 인스턴스 라이프 사이클 설정
+    
+        * `junit.jupiter.testinstance.lifecycle.default = per_class`
+
+    * 확장팩 자동 감지 기능
+    
+        * `junit.jupiter.extensions.autodetection.enabled = true`
+
+    * `@Disabled`를 무시하고 실행하기
+    
+        * `junit.jupiter.conditions.deactivate = org.junit.*DisabledCondition`
+        
+            * `org.junit`으로 시작하는 모든 패키지 중 `DisabledCondition`를 사용하지 않겠다.라는 의미다.
+
+    * 테스트 이름 표기 전략을 설정하기
+    
+        ```
+        junit.jupiter.displayname.generator.default = \
+        org.junit.jupiter.api.DisplayNameGenerator$ReplaceUnderscores
+        ```
+      
+        * 위에서 사용된 역슬래쉬(`\`)는 줄 바꿈을 의미한다.
+
+#### 13) 확장 모델
+
+* (1) 확장 모델
+
+    * JUnit 4의 확장 모델은 `@RunWith(Runner)`, `TestRule`, `MethodRule`
+      
+    * JUnit 5의 확장 모델은 단 하나, `Extension`이 있다. 
+
+* (2) 확장팩 만들기
+
+    * 실행 시간이 오래 걸리는 테스트를 찾아내서 `@SlowTest`를 붙이도록 권장하는 Extension 클래스를 작성한다.
+
+        ```java
+        public class FindSlowTestExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
+        
+            private static final long THRESHOLD = 1000L;
+        
+            @Override
+            public void beforeTestExecution(ExtensionContext context) throws Exception {
+                ExtensionContext.Store store = getStore(context);
+                store.put("START_TIME", System.currentTimeMillis()); // 시작 시간(START_TIME)으로 현재 시간을 지정한다.
+            }
+        
+            @Override
+            public void afterTestExecution(ExtensionContext context) throws Exception {
+                Method requiredTestMethod = context.getRequiredTestMethod(); // 리플렉션(reflection) API 사용하기
+                SlowTest annotation = requiredTestMethod.getAnnotation(SlowTest.class);
+        
+                String testMethodName = context.getRequiredTestMethod().getName();
+                ExtensionContext.Store store = getStore(context);
+                long start_time = store.remove("START_TIME", long.class); // store에서 시작 시간(START_TIME)을 가져오면서 삭제한다.
+                long duration = System.currentTimeMillis() - start_time; // duration을 계산한다.
+        
+                if (duration > THRESHOLD && annotation == null) {  // 1초를 넘고 SlowTest 애노테이션이 없는 경우, 메시지를 출력한다.
+                    // 해당 테스트 메소드에 @SlowTest를 붙이세요 라는 메시지를 콘솔에 출력한다.
+                    System.out.printf("Please consider mark method [%s] with @SlowTest. \n", testMethodName); 
+                }
+            }
+        
+            private ExtensionContext.Store getStore(ExtensionContext context) {
+                String testClassName = context.getRequiredTestClass().getName();   // 테스트 클래스명
+                String testMethodName = context.getRequiredTestMethod().getName(); // 테스트 메소드명
+      
+                // 테스트 클래스명과 메소드명을 조합해서 Store를 만들어서 받아온다.
+                return context.getStore(ExtensionContext.Namespace.create(testClassName, testMethodName));
+            }
+        
+        }
+        ```
+
+* (3) 확장팩 등록하기
+
+    * 확장팩을 등록하는 방법은 3 가지가 존재한다.
+
+        * ① `@ExtendWith` : 해당 Extension 클래스를 선언한다. `[선언적인 등록 방법]`
+
+            ```java
+            @ExtendWith(FindSlowTestExtension.class)
+            @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+            class StudyTest {
+            
+                // ...
+            
+                @Order(1)
+                @Test // 메시지가 나타나도록 @SlowTest를 @Test로 변경
+                @DisplayName("스터디 만들기 slow")
+                @Disabled
+                void create_new_study_again() throws InterruptedException {
+                    Thread.sleep(1005L); // 그리고 1초 보다 약간 더 걸리게 함
+                    System.out.println(this);
+                    System.out.println("create1 " + value++);
+                }
+            
+                // ...
+            }
+            ```
+
+        * ② `@RegisterExtension` 사용하기 `[프로그래밍으로 등록하는 방법]`
+        
+            * FindSlowTestExtension의 THRESHOLD 값을 테스트 마다 다르게 지정하고 싶다면 다음과 같이 변경한다.
+
+                ```java
+                public class FindSlowTestExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
+                
+                    private long THRESHOLD;
+                    
+                    public FindSlowTestExtension(long THRESHOLD){
+                        this.THRESHOLD = THRESHOLD;
+                    }
+                    
+                    // ...
+                
+                }
+                ```
+
+            * `@RegisterExtension`를 사용해서 프로그래밍으로 확장팩을 등록한다. 이때, THRESHOLD 값을 지정한다.
+            
+                ```java
+                @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+                class StudyTest {
+                
+                    int value = 1;
+                
+                    @RegisterExtension
+                    static FindSlowTestExtension findSlowTestExtension = new FindSlowTestExtension(1000L);
+                            
+                    // ...
+                            
+                 }
+                ```
+
+        * ③ 자바 ServiceLoader 이용하기 `[자동으로 등록하는 방법]`
+        
+            * JUnit 설정 파일에 `junit.jupiter.extensions.autodetection.enabled = true`를 추가한다.
+    
+            * 그리고 아래 링크의 내용을 참고하여 진행한다. (흔히 사용하는 방법은 아니므로 설명을 생략 하였음)
+            
+                * https://junit.org/junit5/docs/current/user-guide/#extensions-registration-automatic
+            
+#### 14) JUnit 4 마이그레이션
+
+* (1) JUnit 4 마이그레이션 실습
+
+    * ① 스프링 부트로 프로젝트를 만들면 `pom.xml`에서 vintage engine 의존성이 제외된 상태이다.
+        
+        ```html
+        <exclusions>
+            <exclusion>
+                <groupId>org.junit.vintage</groupId>
+                <artifactId>junit-vintage-engine</artifactId>
+            </exclusion>
+        </exclusions>
+        ```
+         
+        * Maven의 경우, 위와 같은 `<exclusions></exclusions>`를 제거하면 `junit-vintage-engine` 의존성이 추가된다.
+        
+        * 그리고 JUnit 5의 junit-platform으로 JUnit 3과 4로 작성된 테스트를 실행할 수 있다.
+       
+    * ② StudyJUnit4Test라는 클래스를 작성한다.
+        
+        ```java
+        import org.junit.Before;
+        import org.junit.Test;
+        
+        public class StudyJUnit4Test {
+        
+            @Before
+            public void before(){
+                System.out.println("before");
+            }
+        
+            @Test
+            public void createTest(){
+                System.out.println("test");
+            }
+        
+            @Test
+            public void createTest2(){
+                System.out.println("test2");
+            }
+            
+        }
+        ```
+      
+        * JUnit 4에서 `@Test`는 `jupiter`가 아닌 `junit` 밑에 있는 애노테이션을 사용해야 한다.
+          
+        * 그리고 메소드는 `public void` 여야 한다.
+        
+    * ③ JUnit 5의 `JUnit Platform`으로 JUnit 3과 4로 작성된 테스트를 실행할 수 있다.
+    
+        * 이것을 확인하고 싶다면 패키지를 선택해서 테스트를 실행 하면 된다.
+        
+    * ④ 결과를 보면 실행 하는 엔진에 따라 분리 되어 표시된다. (JUnit Vintage, JUnit Jupiter)
+
+* (2) @Rule
+
+    * JUnit 4의 `@Rule`은 기본적으로 지원하지 않지만, `junit-jupiter-migrationsupport` 모듈이 제공하는 `@EnableRuleMigrationSupport`를 사용하면 다음 타입의 Rule을 지원한다.
+
+        * ① `ExternalResource`
+    
+        * ② `Verifier`
+    
+        * ③ `ExpectedException`
+
+    * JUnit 4로 작성한 테스트가 JUnit 5에서 완벽하게 동작하지는 않는다. 그러므로 아래 표를 참고하여 코드 자체를 마이그레이션 하는 것도 고려해보자.
+
+* (3) JUnit 4 vs JUnit 5
+
+    |                       JUnit 4                      |                         JUnit 5                        |
+    |:--------------------------------------------------:|:------------------------------------------------------:|
+    | `@Category(Class)`                                 | `@Tag(String)`                                         |
+    | `@Runwith`, `@Rule` , `@ClassRule`                 | `@ExtendWith` , `@RegisterExtension`                   |
+    | `@Ignore`                                          | `@Disabled`                                            |
+    | `@Before`, `@After`, `@BeforeClass`, `@AfterClass` | `@BeforeEach`, `@AfterEach`, `@BeforeAll`, `@AfterAll` |
       
