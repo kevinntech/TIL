@@ -1955,11 +1955,11 @@ int[][] arr = {
 
     * StringBuilder란?
     
-        * `StringBuffer`는 멀티 쓰레드에 안전(thread safe) 하도록 동기화 되어 있다.
+        * `StringBuffer`는 멀티 스레드에 안전(thread safe) 하도록 동기화 되어 있다.
         
-            * 멀티 쓰레드로 작성된 프로그램이 아닌 경우, StringBuffer의 동기화는 불필요하게 성능만 떨어지게 한다.
+            * 멀티 스레드로 작성된 프로그램이 아닌 경우, StringBuffer의 동기화는 불필요하게 성능만 떨어지게 한다.
         
-        * `StringBuilder`는 `StringBuffer`에서 쓰레드의 동기화만 제거한 클래스이다. 
+        * `StringBuilder`는 `StringBuffer`에서 스레드의 동기화만 제거한 클래스이다. 
 
 * (11) Math 클래스  
 
@@ -3937,85 +3937,93 @@ int[][] arr = {
 
 ## 12. 스레드(Thread)
 
-#### 1) 프로세스와 쓰레드(process & thread)
+#### 1) 프로세스와 스레드(process & thread)
 
-* 프로세스와 쓰레드
+* 프로세스와 스레드
 
-    * `프로세스` : 실행 중인 프로그램, 자원(메모리, CPU ...)과 쓰레드로 구성
+    * `프로세스` : 실행 중인 프로그램
     
-    * `쓰레드`
+        * 자원(메모리, CPU ...)과 스레드로 구성되어 있다. 
     
-        * 프로세스 내에서 실제 작업을 수행한다.
+    * `스레드` : 프로세스 내에서 실제 작업을 수행한다.
+    
+        * 모든 프로세스는 최소한 하나의 스레드를 가지고 있다.
         
-        * 모든 프로세스는 최소한 하나의 쓰레드를 가지고 있다.
+            * `프로세스`는 공장, `스레드`는 일꾼에 비유 할 수 있다.
         
-        * 싱글 스레드, 멀티 스레드
+            * Ex) 싱글 스레드 프로세스, 멀티 스레드 프로세스
         
     * 하나의 새로운 프로세스를 생성하는 것 보다 하나의 새로운 스레드를 생성하는 것이 더 적은 비용이 든다.
     
-        * `2 프로세스 1 쓰레드` vs `1 프로세스 2 쓰레드`
+        * `2 프로세스 1 스레드` vs `1 프로세스 2 스레드`
         
-            * 둘 다 결국 2개의 쓰레드를 생성하지만 `1 프로세스 2 쓰레드`가 더 적은 비용이 든다. 
+            * 싱글 스레드 프로세스가 2개 vs 멀티 스레드 프로세스가 1개이며 대신 쓰레드가 2개 
         
-        * `CGI` 방식은 클라이언트의 요청이 있을 때 마다 프로세스를 만드는 방식 이었으며 `Java Servlet`은 멀티 쓰레드를 지원하므로 하나의 프로세스에 요청이 있을 때 마다 쓰레드를 만드는 방식이다.
+            * 둘 다 실제 작업을 수행하는 스레드는 2개이며 `1 프로세스 2 스레드`가 더 적은 비용이 든다. 
+        
+        * `CGI` 방식은 클라이언트의 요청이 있을 때 마다 프로세스를 만드는 방식 이었으며 `Java Servlet`은 하나의 프로세스에 클라이언트의 요청이 있을 때 마다 스레드를 만드는 방식이다.
 
-#### 2) 멀티 쓰레드의 장단점
+            * 자바는 멀티 스레드를 지원한다. 
 
-* 대부분의 프로그램이 멀티쓰레드로 작성 되어 있다. 그러나 멀티 쓰레드 프로그래밍이 장점만 있는 것은 아니다.
+#### 2) 멀티 스레드의 장단점
 
-* 장점
+* 대부분의 프로그램이 멀티 스레드로 작성 되어 있다. 그러나 멀티 스레드 프로그래밍이 장점만 있는 것은 아니다.
 
-    * 시스템 자원을 보다 **효율적**으로 사용 할 수 있다.
+* 멀티 스레드의 장단점
 
-    * 사용자에 대한 **응답성**이 향상된다.
+    * 장점
     
-        * 메신저 프로그램에서 파일을 전송하면서 대화를 할 수 있다. (싱글 스레드에서는 한 번에 한 가지 일만 할 수 있음)
+        * 시스템 자원을 보다 **효율적**으로 사용 할 수 있다.
+    
+        * 사용자에 대한 **응답성**이 향상된다.
+        
+            * 메신저 프로그램에서 파일을 전송하면서 대화를 할 수 있다. (싱글 스레드에서는 한 번에 한 가지 일만 할 수 있음)
+    
+        * 작업이 분리되어 **코드가 간결**해 진다.
+        
+        * 즉, "여러 모로 좋다."
+        
+    * 단점
+    
+        * `동기화(Synchronization)`에 주의해야 한다.
+        
+        * `교착 상태(dead-lock)`가 발생하지 않도록 주의해야 한다.
+        
+        * 각 스레드가 효율적으로 고르게 실행될 수 있게 해야 한다.
+        
+        * 즉, "프로그래밍을 할 때, 고려해야 할 사항들이 많다."
+    
+#### 3) 스레드의 구현과 실행
 
-    * 작업이 분리되어 **코드가 간결**해 진다.
-    
-    * 즉, "여러 모로 좋다."
-    
-* 단점
+* (1) 스레드를 구현하는 방법은 다음 두 가지가 존재한다.
 
-    * `동기화(Synchronization)`에 주의해야 한다.
-    
-    * `교착 상태(dead-lock)`가 발생하지 않도록 주의해야 한다.
-    
-    * 각 쓰레드가 효율적으로 고르게 실행될 수 있게 해야 한다.
-    
-    * 즉, "프로그래밍 할 때, 고려해야 할 사항들이 많다."
-    
-#### 3) 쓰레드의 구현과 실행
-
-* (1) 쓰레드를 구현하는 방법은 다음 두 가지가 존재한다.
-
-    * ① `Thread` 클래스를 상속해서 쓰레드를 구현하는 것
+    * ① **`Thread` 클래스를 상속**해서 스레드를 구현하는 것
     
         ```java
         class MyThread extends Thread{
           public void run(){ // Thread 클래스의 run()을 오버라이딩
-              /* 쓰레드가 수행할 작업을 작성한다. */
+              /* 스레드가 수행할 작업을 작성한다. */
           }
         }
         ```
       
         * Thread 클래스를 상속 받으면 다른 클래스를 상속 받을 수 없으므로 인터페이스를 구현하는 것이 좋다. 
     
-    * ② `Runnable` 인터페이스를 구현해서 쓰레드를 구현하는 것
+    * ② **`Runnable` 인터페이스를 구현**해서 스레드를 구현하는 것
     
         ```java
         class MyThread implements Runnable{
           public void run(){ // Runnable 인터페이스의 추상 메서드 run()을 구현 
-              /* 쓰레드가 수행할 작업을 작성한다. */
+              /* 스레드가 수행할 작업을 작성한다. */
           }
         }
         ```
 
-* (2) 쓰레드 생성 및 실행
+* (2) 스레드 생성 및 실행
 
     * ① `Thread` 클래스를 상속하는 경우
     
-        * Thread의 자손 클래스의 인스턴스를 생성한 다음, 해당 쓰레드를 실행한다.
+        * Thread의 자손 클래스의 인스턴스를 생성한 다음, 해당 스레드를 실행한다.
     
             ```java
             MyThread t1 = new MyThread();
@@ -4026,7 +4034,7 @@ int[][] arr = {
 
         * Runnable 인터페이스를 구현한 클래스의 인스턴스를 생성한 다음, 이 인스턴스를 Thread 클래스의 생성자의 매개변수로 제공한다. 
         
-        * 그리고 해당 쓰레드를 실행한다.
+        * 그리고 해당 스레드를 실행한다.
            
             ```java
             Runnable r = new MyThread2();
@@ -4035,7 +4043,7 @@ int[][] arr = {
             t2.start();
             ```
 
-* (3) 실습 - 쓰레드 생성 및 실행
+* (3) 실습 - 스레드 생성 및 실행
 
     ```java
     public class Ex13_1 {
@@ -4050,60 +4058,62 @@ int[][] arr = {
         }
     }
     
-    class ThreadEx1_1 extends Thread{ // Thread 클래스를 상속해서 쓰레드를 구현하는 것
-        public void run(){ // 쓰레드가 수행 할 작업을 작성한다.
+    class ThreadEx1_1 extends Thread{ // Thread 클래스를 상속해서 스레드를 구현하는 것
+        public void run(){ // 스레드가 수행 할 작업을 작성한다.
             for(int i = 0; i < 5; i++){
-                // getName() : 쓰레드의 이름을 반환한다.
+                // getName() : 스레드의 이름을 반환한다.
                 System.out.println(getName()); // 조상인 Thread의 getName()를 호출한다.
             }
         }
     }
     
-    class ThreadEx1_2 implements Runnable{ // Runnable 인터페이스를 구현해서 쓰레드를 구현하는 것
-        public void run(){ // 쓰레드가 수행 할 작업을 작성한다.
+    class ThreadEx1_2 implements Runnable{ // Runnable 인터페이스를 구현해서 스레드를 구현하는 것
+        public void run(){ // 스레드가 수행 할 작업을 작성한다.
             for(int i = 0; i < 5; i++){
-                // Thread.currentThread() : 현재 실행중인 쓰레드를 반환한다.
+                // Thread.currentThread() : 현재 실행중인 스레드를 반환한다.
                 System.out.println(Thread.currentThread().getName());
             }
         }
     }
     ```
 
-* (4) 쓰레드 실행 - start()
+* (4) 스레드 실행 - start()
 
-    * 쓰레드를 생성한 후에 start()를 호출해야 쓰레드가 작업을 시작한다.
+    * 스레드를 생성한 후에 `start()`를 호출해야 스레드가 작업을 시작한다.
     
         ```java
-        ThreadEx1_1 t1 = new ThreadEx1_1(); // 쓰레드 t1를 생성한다.
-        ThreadEx1_1 t2 = new ThreadEx1_1(); // 쓰레드 t2를 생성한다.
+        ThreadEx1_1 t1 = new ThreadEx1_1(); // 스레드 t1를 생성한다.
+        ThreadEx1_1 t2 = new ThreadEx1_1(); // 스레드 t2를 생성한다.
       
-        t1.start();   // 쓰레드 t1를 실행시킨다.
-        t2.start();  // 쓰레드 t2를 실행시킨다.
+        t1.start();   // 스레드 t1를 실행시킨다.
+        t2.start();  // 스레드 t2를 실행시킨다.
         ```
 
-        * 쓰레드에 start()를 호출하면 실행 대기 상태가 되며 자신의 차례가 되면 실행된다.
+        * 스레드를 생성한 후에 `start()`를 호출한 것은 실행 가능한 상태가 된 것일 뿐, 즉시 실행되는 것이 아니다. 
         
-        * 쓰레드 t1를 먼저 start() 했다고 해서 반드시 먼저 실행되는 것은 아니다.
-       
-            * 쓰레드의 실행 순서는 운영체제(OS)의 스케줄러가 결정한다.
+        * 스레드 t1를 먼저 `start()` 했다고 해서 반드시 먼저 실행되는 것은 아니다.
+        
+            * 스레드의 실행 순서는 운영체제(OS)의 스케줄러가 결정한다.
 
 * (5) start()와 run()
 
-    * 자바의 정석 3판 p728~729를 참고하자.
+    * 자세한 내용은 자바의 정석 3판 p728 ~ p729를 참고하자.
 
-#### 4) 싱글 쓰레드와 멀티 쓰레드, 쓰레드의 I/O 블락킹
-
-* (1) main 쓰레드
-
-    * `main 쓰레드`는 main 메서드의 코드를 수행하는 쓰레드
-    
-    * 쓰레드는 `사용자 쓰레드`와 `데몬 쓰레드` 두 종류가 있다.
-    
-        * main 쓰레드는 사용자 쓰레드다.
+        * `start()`는 새로운 호출 스택(call stack)을 생성한다.
         
-    * 실행 중인 사용자 쓰레드가 하나도 없을 때, 프로그램은 종료된다.
+        * 그리고 `run()`를 호출해서 생성된 호출 스택에 `run()`가 첫 번째로 올라가게 한다. 
+
+#### 4) 싱글 스레드와 멀티 스레드, 스레드의 I/O 블락킹
+
+* (1) main 스레드
+
+    * `main 스레드`는 main 메서드의 코드를 수행하는 스레드
     
-    * 실습
+    * 스레드는 `사용자 스레드(일반 스레드)`와 `데몬 스레드` 두 종류가 있다.
+    
+        * main 스레드는 사용자 스레드다.
+        
+    * 실행 중인 사용자 스레드가 하나도 없을 때, 프로그램은 종료된다.
     
         ```java
         class Ex13_11 {
@@ -4117,8 +4127,8 @@ int[][] arr = {
                 startTime = System.currentTimeMillis();
         
                 try {
-                    th1.join();	// main 쓰레드가 th1의 작업이 끝날 때까지 기다린다.
-                    th2.join();	// main 쓰레드가 th2의 작업이 끝날 때까지 기다린다.
+                    th1.join();	// main 스레드가 th1의 작업이 끝날 때까지 기다린다.
+                    th2.join();	// main 스레드가 th2의 작업이 끝날 때까지 기다린다.
                 } catch(InterruptedException e) {}
         
                 System.out.print("소요시간:" + (System.currentTimeMillis() - Ex13_11.startTime));
@@ -4140,13 +4150,15 @@ int[][] arr = {
                 }
             }
         }
-        ```   
+        ```
+      
+        * 멀티 스레드이므로 main 스레드 하나가 종료 되었다고 프로그램 전체가 종료되지는 않는다. 
 
-* (2) 싱글 쓰레드와 멀티 쓰레드
+* (2) 싱글 스레드와 멀티 스레드
     
-    * 싱글 쓰레드
+    * 싱글 스레드
     
-        * `-`를 출력하는 작업과 `|`를 출력하는 작업을 하나의 쓰레드가 연속적으로 처리하는 시간을 측정하는 예제다.
+        * `-`를 출력하는 작업과 `|`를 출력하는 작업을 하나의 스레드가 연속적으로 처리하는 시간을 측정하는 예제다.
     
             ```java
             class Ex13_2 {
@@ -4166,9 +4178,11 @@ int[][] arr = {
             }
             ```
           
-    * 멀티 쓰레드
+            * 싱글 스레드는 작업 A를 먼저 끝낸 다음, 작업 B를 실행한다. 
+          
+    * 멀티 스레드
     
-        * 새로운 쓰레드를 하나 생성해서 두 개의 쓰레드가 작업을 하나씩 나누어서 수행한 후 실행 결과를 비교하는 코드를 작성한다.
+        * 새로운 스레드를 하나 생성해서 두 개의 스레드가 작업을 하나씩 나누어서 수행한 후 실행 결과를 비교하는 코드를 작성한다.
     
             ```java
             class Ex13_3 {
@@ -4196,23 +4210,25 @@ int[][] arr = {
             }
             ```
           
-        * 두 개의 쓰레드로 작업하는데도 더 많은 시간이 걸린 이유는 두 가지다.
-        
-            * 하나는 두 쓰레드가 번갈아가면서 작업을 처리하기 때문에 쓰레드 간의 작업 전환 시간이 소요되기 때문이다.
-            
-                * `컨텍스트 스위칭(context switching)` : 프로세스 또는 쓰레드 간의 작업 전환을 말한다.
-        
-            * 나머지 하나는 한 쓰레드가 화면에 출력하고 있는 동안 다른 쓰레드는 출력이 끝나기를 기다려야하는데, 이때 발생하는 대기시간 때문이다.
+            * 멀티 스레드는 작업 A를 별도의 쓰레드, 작업 B도 별도의 쓰레드로 번갈아 가면서 실행한다.
           
-        * 시간이 더 걸리는 멀티쓰레드를 사용하는 이유는 무엇일까? 시간은 조금 더 걸리더라도 2가지 작업을 동시에 할 수 있다는 것이 장점이다.
+        * 두 개의 스레드로 작업하는데도 더 많은 시간이 걸린 이유는 두 가지다.
+        
+            * 하나는 두 개의 스레드가 번갈아가면서 작업을 처리하기 때문에 스레드 간의 작업 전환 시간이 소요되기 때문이다.
+            
+                * `컨텍스트 스위칭(context switching)` : 프로세스 또는 스레드 간의 작업 전환을 말한다.
+        
+            * 나머지 하나는 한 스레드가 화면에 출력하고 있는 동안 다른 스레드는 출력이 끝나기를 기다려야하는데, 이때 발생하는 대기시간 때문이다.
+          
+        * 시간이 더 걸리는 멀티 스레드를 사용하는 이유는 무엇일까? 시간은 조금 더 걸리더라도 2가지 작업을 동시에 할 수 있다는 것이 장점이다.
           
     * 더 자세한 내용은 자바의 정석 3판 p732~735를 참고하자.
 
-* (3) 쓰레드의 I/O 블락킹(blocking)
+* (3) 스레드의 I/O 블락킹(blocking)
     
-    * `쓰레드의 I/O 블락킹(blocking)` : 입출력 시 작업이 중단되는 것을 말한다.
+    * `I/O 블락킹(blocking)` : 입출력 시 작업이 중단되는 것을 말한다.
 
-        * 싱글 쓰레드
+        * 싱글 스레드
         
             ```java
             class Ex13_4 {
@@ -4234,7 +4250,7 @@ int[][] arr = {
           
             * 사용자로 부터 입력을 기다리는 구간에는 아무 일도 하지 않는다. 
             
-        * 멀티 쓰레드
+        * 멀티 스레드
         
             ```java
             class Ex13_5 {
@@ -4263,15 +4279,13 @@ int[][] arr = {
           
             * 사용자로 부터 입력을 기다리는 구간에는 B 작업이 수행된다.
 
-#### 5) 쓰레드의 우선순위(priority of thread), 쓰레드 그룹(thread group)
+#### 5) 스레드의 우선순위(priority of thread), 스레드 그룹(thread group)
 
-* (1) 쓰레드의 우선순위
-
-    * **쓰레드가 수행하는 작업의 중요도에 따라 쓰레드의 우선순위를 서로 다르게 지정하여 특정 쓰레드가 더 많은 작업시간을 갖도록 할 수 있다.**
+* (1) `스레드의 우선순위` : 스레드의 우선순위를 서로 다르게 지정해서 특정 스레드가 더 많은 작업시간을 갖도록 할 수 있다.
     
-    * `void setPriority(int newPriority)` : 쓰레드의 우선순위를 지정한 값으로 변경한다.
+    * `void setPriority(int newPriority)` : 스레드의 우선순위를 지정한 값으로 변경한다.
     
-    * `int getPriority()` : 쓰레드의 우선순위를 반환한다.
+    * `int getPriority()` : 스레드의 우선순위를 반환한다.
 
         ```java
         public static final int MAX_PRIORITY = 10 // 최대 우선 순위
@@ -4279,17 +4293,17 @@ int[][] arr = {
         public static final int NORM_PRIORITY = 5 // 보통 우선 순위
         ```
       
-        * 쓰레드가 가질 수 있는 우선순위의 범위는 1~10이며 숫자가 높을수록 우선순위가 높다.
+        * 스레드가 가질 수 있는 우선순위의 범위는 1 ~ 10이며 숫자가 높을수록 우선순위가 높다.
         
-            * 사실, 쓰레드의 우선순위는 해당 쓰레드가 수행하는 작업이 중요하므로 더 우선적으로 수행 되었으면 좋겠다는 희망사항을 OS의 스케줄러에 전달하는 것일뿐이다.
+            * 사실, 스레드의 우선순위는 해당 스레드가 수행하는 작업이 중요하므로 더 우선적으로 수행 되었으면 좋겠다는 희망사항을 OS의 스케줄러에 전달하는 것일뿐이다.
             
-            * 쓰레드에 높은 우선순위를 준다고 해서 무조건 더 많은 실행시간을 갖게 될 것이라고 기대 할 수는 없다.
+            * 스레드에 높은 우선순위를 준다고 해서 무조건 더 많은 실행시 간을 갖게 될 것이라고 기대 할 수는 없다.
             
-                * 쓰레드에 높은 우선순위를 주면 더 많은 실행시간을 갖게 되어 빨리 끝날 확률이 더 높아지긴 함
+                * 스레드에 높은 우선순위를 주면 더 많은 실행 시간을 갖게 되어 빨리 끝날 확률이 더 높아지긴 함
         
-        * 쓰레드의 우선순위는 쓰레드를 생성한 쓰레드로 부터 상속 받는다.
+        * 스레드의 우선순위는 스레드를 생성한 스레드로 부터 상속 받는다.
         
-* (2) 실습 - 쓰레드의 우선순위
+* (2) 실습 - 스레드의 우선순위
 
     ```java
     class Ex13_6 {
@@ -4325,79 +4339,118 @@ int[][] arr = {
     }
     ```
 
-* (3) 쓰레드 그룹(thread group)
+* (3) 스레드 그룹(thread group)
 
-    * `쓰레드 그룹`은 서로 관련된 쓰레드를 그룹으로 묶어서 다루기 위한 것이다.
+    * `스레드 그룹`은 서로 관련된 스레드를 그룹으로 묶어서 다루기 위한 것이다.
     
-    * 모든 쓰레드는 반드시 하나의 쓰레드 그룹에 포함되어 있어야 한다.
-    
-    * 쓰레드 그룹을 지정하지 않고 생성한 쓰레드는 `main 쓰레드 그룹`에 속한다.
-    
-        * `main 쓰레드`는 `main 쓰레드 그룹`에 속한다.
+        * 모든 스레드는 반드시 하나의 스레드 그룹에 포함되어 있어야 한다.
         
-        * 우리가 만드는 쓰레드는 `main 쓰레드`에서 만들기 때문에 `main 쓰레드 그룹`에 속하게 된다.
+        * 스레드 그룹을 지정하지 않고 생성한 스레드는 자동으로 main 스레드 그룹에 속한다.  
         
-    * 자신을 생성한 쓰레드(부모 쓰레드)의 그룹과 우선순위를 상속받는다.
+            * 즉, 자신을 생성한 스레드(부모 스레드)의 그룹과 우선순위를 상속받는다. 
+            
+                * `main 스레드`는 `main 스레드 그룹`에 속한다.
+                
+                * 그리고 우리가 만드는 스레드는 `main 스레드` 내에서 만들기 때문에 `main 스레드 그룹`에 속하게 된다.
+            
+        * 스레드를 스레드 그룹에 포함시키려면 `Thread`의 생성자를 이용한다.
+    
+            ```java
+            Thread(ThreadGroup group, String name)
+            Thread(ThreadGroup group, Runnable target)
+            Thread(ThreadGroup group, Runnable target, String name)
+            Thread(ThreadGroup group, Runnable target, String name, long stackSize)
+            ```
+    
+        * Thread의 스레드 그룹과 관련된 메서드는 다음과 같다.
+        
+            * `ThreadGroup getThreadGroup()` : 스레드 자신이 속한 스레드 그룹을 반환한다.
+            
+            * `void uncaughtException(Thread t, Throwable e)`
+            
+                * 처리되지 않은 예외에 의해 스레드 그룹의 스레드가 실행이 종료되었을 때, JVM에 의해 이 메서드가 자동적으로 호출된다.
 
-    * 쓰레드를 쓰레드 그룹에 포함시키려면 Thread의 생성자를 이용한다.
+        * 스레드 그룹 관련 생성자, 메소드
+        
+            * 자바의 정석 p741
 
+    * 실습하기
+    
         ```java
-        Thread(ThreadGroup group, String name)
-        Thread(ThreadGroup group, Runnable target)
-        Thread(ThreadGroup group, Runnable target, String name)
-        Thread(ThreadGroup group, Runnable target, String name, long stackSize)
-        ```
-
-    * Thread의 쓰레드 그룹과 관련된 메서드는 다음과 같다.
-    
-        * `ThreadGroup getThreadGroup()`
+        public class ThreadEx9 {
+            public static void main(String args[]) throws Exception {
+                ThreadGroup main = Thread.currentThread().getThreadGroup();
+                ThreadGroup grp1 = new ThreadGroup("Group1");
+                ThreadGroup grp2 = new ThreadGroup("Group2");
         
-            * 쓰레드 자신이 속한 쓰레드 그룹을 반환한다.
+                // ThreadGroup(ThreadGroup parent, String name)
+                ThreadGroup subGrp1 = new ThreadGroup(grp1,"SubGroup1");
         
-        * `void uncaughtException(Thread t, Throwable e)`
+                grp1.setMaxPriority(3);	// 쓰레드 그룹 grp1의 최대 우선 순위를 3으로 변경한다.
         
-            * 처리되지 않은 예외에 의해 쓰레드 그룹의 쓰레드가 실행이 종료되었을 때, JVM에 의해 이 메서드가 자동적으로 호출된다.
-
-#### 6) 데몬 쓰레드, 쓰레드의 상태
-
-* (1) 데몬 쓰레드(daemon thread)
-
-    * `데몬 쓰레드`는 일반 쓰레드(non-daemon thread)의 작업을 돕는 보조적인 역할을 수행한다.
-    
-    * **일반 쓰레드가 모두 종료되면 자동적으로 종료된다.**
-    
-    * 가비지 컬렉터, 자동 저장, 화면 자동 갱신 등에 사용된다.
-    
-    * `데몬 쓰레드`는 무한 루프와 조건을 이용해서 실행 후 대기하고 있다가 특정 조건이 만족되면 작업을 수행하고 다시 대기하도록 작성한다.
-
-    * 데몬 쓰레드 관련 메서드 
-    
-        * `boolean isDaemon()`
+                Runnable r = new Runnable() {
+                    public void run() {
+                        try {
+                            Thread.sleep(1000); // 쓰레드를 1초 간 멈추게 한다.
+                        } catch(InterruptedException e) {}
+                    }
+                };
         
-            * 쓰레드가 데몬 쓰레드인지 확인한다. 
+                // Thread(ThreadGroup tg, Runnable r, String name)
+                Thread th1 = new Thread(grp1,     r, "th1");
+                Thread th2 = new Thread(subGrp1,  r, "th2");
+                Thread th3 = new Thread(grp2,     r, "th3");
+        
+                th1.start();
+                th2.start();
+                th3.start();
+        
+                System.out.println(">>List of ThreadGroup : " + main.getName()
+                        + ", Active ThreadGroup: " + main.activeGroupCount()
+                        + ", Active Thread: "      + main.activeCount());
+                main.list(); // main 스레드 그룹의 정보를 출력한다.
+            }
+        }
+        ``` 
+
+#### 6) 데몬 스레드, 스레드의 상태
+
+* (1) 데몬 스레드(daemon thread)
+
+    * `데몬 스레드`는 일반 스레드(non-daemon thread)의 작업을 돕는 보조적인 역할을 수행한다.
+    
+        * **일반 스레드가 모두 종료되면 데몬 스레드는 자동적으로 종료된다.**
+        
+        * 데몬 스레드의 사용 예시는 가비지 컬렉터, 자동 저장, 화면 자동 갱신 등이 있다.
+        
+        * 무한 루프와 조건문을 이용해서 실행 후 대기하고 있다가 특정 조건이 만족되면 작업을 수행하고 다시 대기하도록 작성한다.
+
+    * 데몬 스레드 관련 메서드 
+    
+        * `boolean isDaemon()` : 스레드가 데몬 스레드인지 확인한다. 
             
-            * 데몬 쓰레드이면 true를 반환한다.
+            * 데몬 스레드이면 true를 반환한다.
         
-        * `void setDaemon(boolean on)`
-        
-            * 쓰레드를 데몬 쓰레드로 또는 사용자 쓰레드로 변경한다.
+        * `void setDaemon(boolean on)` : 스레드를 데몬 스레드 또는 사용자 스레드로 변경한다.
             
-            * 매개변수 on을 true로 지정하면 데몬 쓰레드가 된다.
+            * 매개변수 on을 true로 지정하면 데몬 스레드가 된다.
             
-            * `setDaemon()`은 반드시 `start()`를 호출하기 전에 실행 되어야 한다. 그렇지 않으면 `IllegalThreadStateException`이 발생한다. 
+            * `setDaemon()`은 반드시 `start()`를 호출하기 전에 실행 되어야 한다. 그렇지 않으면 예외(`IllegalThreadStateException`)가 발생한다. 
 
-    * 실습 - 데몬 쓰레드
+    * 실습하기
     
         ```java
         class Ex13_7 implements Runnable  {
         	static boolean autoSave = false;
         
+        	// main 스레드(일반 스레드) 
         	public static void main(String[] args) {
         		Thread t = new Thread(new Ex13_7());
-        		t.setDaemon(true); // 이 부분이 없으면 종료되지 않는다. (데몬 쓰레드로 만들어서 일반 쓰레드가 종료되면 데몬 쓰레드도 같이 종료된다.)
+        		t.setDaemon(true); // 해당 스레드를 데몬 스레드로 만든다.
+        		// 이 부분이 없으면 종료되지 않는다. (데몬 스레드로 만들어서 일반 스레드가 종료되면 데몬 스레드도 같이 종료된다.)
         		t.start();
         
-        		for(int i=1; i <= 10; i++) {
+        		for(int i = 1; i <= 10; i++) {
         			try{
         				Thread.sleep(1000);
         			} catch(InterruptedException e) {}
@@ -4409,7 +4462,8 @@ int[][] arr = {
         		System.out.println("프로그램을 종료합니다.");
         	}
         
-        	/* 3초 마다 변수 autoSave의 값을 확인해서 그 값이 true이면 autoSave()를 호출하는 일을 무한히 반복하도록 쓰레드를 작성 */
+        	// 데몬 스레드
+        	/* 3초 마다 변수 autoSave의 값을 확인해서 그 값이 true이면 autoSave()를 호출하는 일을 무한히 반복하도록 스레드를 작성 */
         	public void run() {
         		while(true) {
         			try { 
@@ -4426,46 +4480,70 @@ int[][] arr = {
         	}
         }
         ```
+      
+        * 3 초 마다 변수 `autoSave`의 값을 확인해서 그 값이 `true`이면 `autoSave()`를 호출하는 일을 무한히 반복하도록 쓰레드를 작성하였다.
 
-* (2) 쓰레드의 상태
-
-    * ① 생성(`NEW`) : 쓰레드가 생성되고 아직 start()가 호출되지 않은 상태
+* (2) 스레드의 상태
     
-    * ② 실행 대기(`RUNNABLE`) : 실행 중 또는 실행 가능한 상태
+    * 스레드의 상태 
     
-    * ③ 일시 정지
-    
-        * `BLOCKED` : 동기화 블럭에 의해서 일시 정지된 상태(lock이 풀릴 때까지 기다리는 상태)
-    
-        * `WAITING`, `TIMED_WAITING`
-    
-            * 쓰레드의 작업이 종료되지는 않았지만 실행 가능 하지 않은 일시 정지 상태
-         
-            * `TIMED_WAITING`은 일시 정지 시간이 지정된 경우를 의미한다.
+        * 생성(`NEW`) : 스레드가 생성되고 아직 `start()`가 호출되지 않은 상태
         
-    * ④ 소멸(`TERMINATED`) : 쓰레드의 작업이 종료된 상태
-    
-    * 더 자세한 내용은 자바의 정석 3판 p749를 참고하자.
+        * 실행 대기(`RUNNABLE`) : 실행 중 또는 실행 가능한 상태
+        
+        * 일시 정지
+        
+            * `BLOCKED` : 동기화 블럭에 의해서 일시 정지된 상태 (lock이 풀릴 때까지 기다리는 상태)
+        
+            * `WAITING`, `TIMED_WAITING`
+        
+                * 스레드의 작업이 종료되지는 않았지만 실행 가능 하지 않은 일시 정지 상태
+             
+                * `TIMED_WAITING`은 일시 정지 시간이 지정된 경우를 의미한다.
+            
+        * 소멸(`TERMINATED`) : 스레드의 작업이 종료된 상태
+        
+            * 더 자세한 내용은 자바의 정석 3판 p749를 참고하자.
+            
+    * 스레드의 상태 변화 과정 
 
-* (3) 쓰레드의 실행 제어 
+        ![image 36](images/img36.png)
+        
+        * ① 쓰레드를 생성하고 `start()`를 호출하면 실행 대기 상태가 된다.  
+        
+        * ② 실행 대기 상태에 있다가 자신의 차례가 되면 실행 상태가 된다. 
 
-    * 쓰레드의 실행을 제어할 수 있는 메서드가 제공된다.
+        * ③ 주어진 실행 시간이 다 되거나 `yield()`를 만나면 다시 실행 대기 상태가 되고 다음 차례의 스레드가 실행 상태가 된다.  
+         
+        * ④ 실행 중에 `sleep()`, `wait()`, `join()`, `I/O block`에 의해 일시 정지 상태가 될 수 있다.
+        
+            * `I/O block` : 입출력 작업에서 발생하는 지연 상태를 말한다.
+            
+                * 사용자의 입력을 기다리는 경우를 예로 들 수 있는데, 일시 정지 상태에 있다가 사용자가 입력을 마치면 다시 실행 대기 상태가 된다.
+        
+        * ⑤ 지정된 일시 정지 시간이 다 되거나 (`time-out`), `notify()`, `interrupt()`가 호출되면 실행 대기 상태가 되어 자신의 차례를 기다리게 된다. 
+        
+        * ⑥ 실행을 모두 마치거나 `stop()`가 호출되면 스레드는 소멸된다. 
+        
+            * 번호 순서대로 스레드가 수행되는 것은 아니다.
 
-        * `sleep()`
+* (3) 스레드의 실행 제어 
 
-            * 지정된 시간(1000분의 1초 단위) 동안 쓰레드를 일시 정지 시킨다.
+    * 스레드의 실행을 제어할 수 있는 메서드가 제공된다.
+
+        * `sleep()` : 현재 스레드를 지정된 시간(1000분의 1초 단위) 동안 일시 정지 시킨다. (★★★)
+            
             * 지정한 시간이 지나고 나면, 자동적으로 다시 실행 대기 상태가 된다.
                 
                 ```java
+                // 스레드 자기 자신에게만 호출 가능하다.
                 static void sleep(long millis)
                 static void sleep(long millis, int nanos)
                 ```
         
-        * `join()` 
-
-            * 다른 쓰레드가 끝날 때까지 기다린다.
+        * `join()` : 다른 스레드가 끝날 때까지 기다린다. (★★★)
             
-            * 지정된 시간이 지나거나 작업이 종료되면 join()을 호출한 쓰레드로 다시 돌아와 실행을 계속한다.
+            * 지정된 시간이 지나거나 작업이 종료되면 join()을 호출한 스레드로 다시 돌아와 실행을 계속한다.
                           
                 ```java
                 void join() 
@@ -4473,47 +4551,52 @@ int[][] arr = {
                 void join(long millis)
                 ```
               
-        * `void interrupt()`
-                       
-            * sleep()이나 join()에 의해 일시 정지 상태인 쓰레드를 깨워서 실행 대기 상태로 만든다.
-            * 해당 쓰레드에서는 Interrupted Exception이 발생함으로써 일시정지 상태를 벗어나게 만든다.
+        * `interrupt()` : `sleep()`이나 `join()`에 의해 일시 정지 상태인 스레드를 깨워서 실행 대기 상태로 만든다. (★★★)
+            
+            * 해당 스레드에서는 `Interrupted Exception`이 발생함으로써 일시정지 상태를 벗어나게 만든다.
 
-        * `void stop()` : 쓰레드를 즉시 종료시킨다.
+        * `stop()` : 스레드를 즉시 종료시킨다.
                
-        * `void suspend()` : 쓰레드를 일시 정지 시킨다. resume()을 호출하면 다시 실행 대기 상태가 된다.
+        * `suspend()` : 스레드를 일시 정지 시킨다. 
         
-        * `void resume()` : suspend()에 의해 일시 정지 상태에 있는 쓰레드를 실행 대기 상태로 만든다.
+            * `resume()`을 호출하면 다시 실행 대기 상태가 된다.
         
-        * `static void yield()` : 실행 중에 자신에게 주어진 실행 시간을 다른 쓰레드에게 양보(yield)하고 자신은 실행 대기 상태가 된다.
+        * `resume()` : suspend()에 의해 일시 정지 상태에 있는 스레드를 실행 대기 상태로 만든다.
+        
+        * `yield()` : 실행 중에 자신에게 주어진 실행 시간을 다른 스레드에게 양보(yield)하고 자신은 실행 대기 상태가 된다.
 
-    * Thread의 실행제어 메서드 중 static 메서드는 쓰레드 자기 자신에게만 동작한다.
+            * `static void yield()`
+            
+    * Thread의 실행 제어 메서드 중 static 메서드는 스레드 자기 자신에게만 동작한다.
 
 #### 7) sleep(), interrupt()
 
 * (1) sleep()
 
-    * `sleep()`는 현재 쓰레드를 지정된 시간 동안 멈추게 한다. (잠들게 한다.)
+    * `sleep()`는 현재 스레드를 지정된 시간 동안 멈추게 한다.
     
         ```java
         static void sleep(long millis) // 천분의 일초 단위
         static void sleep(long millis, int nanos) // 천분의 일초 + 나노초
         ```
       
-    * `sleep()`에 의해 일시 정지 상태가 된 쓰레드는 지정된 시간이 다 되거나 interrupt()가 호출되면 (`InterruptedException`이 발생함) 잠에서 깨어나 실행 대기 상태가 된다.
-    
-    * `sleep()`을 호출할 때는 예외 처리를 해야 한다.
+    * `sleep()`을 호출할 때는 예외 처리를 해야 한다. (`InterruptedException`이 발생하면 깨어난다.)
 
         ```java
         try{
-          Thread.sleep(1, 500000); // 쓰레드를 0.0015초 동안 멈추게 한다. (밀리초 , 나노초)
-        }catch(InterruptedException e){}
+          Thread.sleep(1, 500000); // 스레드를 0.0015초 동안 멈추게 한다. (밀리초 , 나노초)
+        }catch(InterruptedException e){} // Exception의 자손이며 예외 처리가 필수이다. 
         ```
       
-    * 특정 쓰레드를 지정해서 멈추게 하는 것은 불가능하다.
+        * `interrupt()`가 `InterruptedException`를 발생시킨다. 
+
+    * `sleep()`에 의해 일시 정지 상태가 된 스레드는 지정된 시간이 다 되거나 `interrupt()`가 호출되면 잠에서 깨어나 실행 대기 상태가 된다.
+    
+    * 특정 스레드를 지정해서 멈추게 하는 것은 불가능하다.
     
         * `th1.sleep(2000);`가 아닌 `Thread.sleep(2000);`으로 작성해야 한다. (에러가 발생하지는 않지만 오해 할 수 있음)
 
-    * 실습
+    * 실습하기
     
         ```java
         class Ex13_8 {
@@ -4524,7 +4607,7 @@ int[][] arr = {
         		th2.start();
         
         		try {
-        			th1.sleep(2000); // Thread.sleep(2000)으로 작성 해야 한다. (main 쓰레드를 잠재우는 것)
+        			th1.sleep(2000); // 오해 할 수 있기 때문에 Thread.sleep(2000)으로 작성 해야 한다. (main 스레드를 잠재우는 코드다.)
         		} catch(InterruptedException e) {}
         
         		System.out.print("<<main 종료>>");
@@ -4548,127 +4631,139 @@ int[][] arr = {
     
 * (2) interrupt()
 
-    * `interrupt()`는 일시 정지 상태(WAITING)인 쓰레드를 실행 대기 상태(RUNNABLE)로 만든다. (다른 쓰레드를 깨운다.)
+    * `interrupt()`는 일시 정지 상태(WAITING)인 특정 스레드를 실행 대기 상태(RUNNABLE)로 만든다. (다른 스레드를 깨운다.)
 
-        * `void interrupt()` : 쓰레드의 interrupted 상태를 false에서 true로 변경한다.
+        * `void interrupt()` : 특정 스레드의 interrupted 상태를 false에서 true로 변경한다.
+        
+            * interrupted의 기본 값은 false이다.
 
-        * `boolean isInterrupted()` : 쓰레드의 interrupted 상태를 반환한다.
+        * `boolean isInterrupted()` : 특정 스레드의 interrupted 상태를 반환한다.
 
-        * `static boolean interrupted()` : 현재 쓰레드의 interrupted 상태를 알려주고, false로 초기화 한다.
+        * `static boolean interrupted()` : 현재 스레드의 interrupted 상태를 반환하고, false로 초기화 한다.
 
-    * 실습
+    * 실습하기
     
         ```java
-        class Ex13_9 {
-        	public static void main(String[] args) throws Exception {
-        		ThreadEx9_1 th1 = new ThreadEx9_1();
-        		th1.start();
+        public class Ex13_9 {
+            public static void main(String[] args) throws Exception {
+                ThreadEx9_1 th1 = new ThreadEx9_1();
+                th1.start();
         
-        		String input = JOptionPane.showInputDialog("아무 값이나 입력하세요."); 
-        		System.out.println("입력하신 값은 " + input + "입니다.");
-        		th1.interrupt();  // interrupt()를 호출하면, interrupted 상태가 true가 된다.
-        		System.out.println("isInterrupted():"+ th1.isInterrupted()); // true
-        	}
+                String input = JOptionPane.showInputDialog("아무 값이나 입력하세요.");
+                System.out.println("입력하신 값은 " + input + "입니다.");
+                th1.interrupt();  // interrupt()를 호출하면, interrupted 상태가 true가 된다.
+                System.out.println("isInterrupted():"+ th1.isInterrupted()); // true
+        
+                // main 스레드가 interrupt 되었는지 확인
+                //System.out.println("interrupted(): " + Thread.interrupted());
+            }
         }
         
         class ThreadEx9_1 extends Thread {
-        	public void run() {
-        		int i = 10;
+            public void run() {
+                int i = 10;
         
-        		while(i!=0 && !isInterrupted()) {
-        			System.out.println(i--);
-        			for(long x=0;x<2500000000L;x++); // 시간 지연
-        		}
-      
-        		System.out.println("카운트가 종료되었습니다.");
-        	} 
+                // i가 0이 아니고 Interrupt 된 적이 없는 동안에는 반복한다.
+                while(i != 0 && !isInterrupted()) {
+                    System.out.println(i--);
+                    for(long x = 0; x < 2500000000L; x++); // 시간 지연
+                }
+        
+                System.out.println("카운트가 종료되었습니다.");
+            }
         }
         ```
 
-    * `sleep()`에 의해 쓰레드가 잠시 멈춰있을 때, `interrupt()`를 호출하면 `InterruptedException`이 발생되고 쓰레드의 interrupted 상태는 false로 자동 초기화 된다. 
+    * `sleep()`에 의해 스레드가 잠시 멈춰있을 때, `interrupt()`를 호출하면 `InterruptedException`이 발생되고 스레드의 interrupted 상태는 false로 자동 초기화 된다. 
 
 #### 8) suspend(), resume(), stop()
 
 * suspend(), resume(), stop()
 
-    * `suspend()`는 쓰레드를 일시 정지 시킨다.
+    * `suspend()`는 특정 스레드를 일시 정지 시킨다.
     
-    * `resume()`는 일시 정지된 쓰레드를 실행 대기 상태로 만든다.
+    * `resume()`는 일시 정지된 특정 스레드를 실행 대기 상태로 만든다.
     
-    * `stop()`는 쓰레드를 즉시 종료 시킨다.
+    * `stop()`는 특정 스레드를 즉시 종료 시킨다.
     
-    * suspend(), resume(), stop()는 교착 상태(deadlock)에 빠지기 쉬워서 deprecated 되었다.
-    
-        * 그래서 다음과 같이 직접 정의해서 사용하면 된다.
-       
-            ```java
-             class ThreadEx17 {
-                public static void main(String args[]) {
-                    ThreadEx17_1 th1 = new ThreadEx17_1("*");
-                    ThreadEx17_1 th2 = new ThreadEx17_1("**");
-                    ThreadEx17_1 th3 = new ThreadEx17_1("***");
-                    th1.start();
-                    th2.start();
-                    th3.start();
-            
-                    try {
-                        Thread.sleep(2000); // main 쓰레드를 2초 동안 멈추게 한다.
-                        th1.suspend();		// th1 쓰레드를 일시 정지 시킨다.
-                        Thread.sleep(2000);
-                        th2.suspend();
-                        Thread.sleep(3000);
-                        th1.resume();       // th1 쓰레드가 다시 동작 하도록 한다.
-                        Thread.sleep(3000);
-                        th1.stop();   // th1 쓰레드를 강제 종료 시킨다.
-                        th2.stop();
-                        Thread.sleep(2000);
-                        th3.stop();
-                    } catch (InterruptedException e) {}
-                }
+* `suspend()`, `resume()`, `stop()`는 교착 상태(Deadlock)를 발생하기 쉽게 작성되어 있으므로 Deprecated 되었다.
+
+    * 그래서 다음과 같이 동일한 기능을 직접 정의해서 사용하면 된다.
+   
+        ```java
+         class ThreadEx17 {
+            public static void main(String args[]) {
+                ThreadEx17_1 th1 = new ThreadEx17_1("*");
+                ThreadEx17_1 th2 = new ThreadEx17_1("**");
+                ThreadEx17_1 th3 = new ThreadEx17_1("***");
+                th1.start();
+                th2.start();
+                th3.start();
+        
+                try {
+                    Thread.sleep(2000); // main 스레드를 2초 동안 멈추게 한다.
+                    th1.suspend();		// th1 스레드를 일시 정지 시킨다.
+                    Thread.sleep(2000);
+                    th2.suspend();
+                    Thread.sleep(3000);
+                    th1.resume();       // th1 스레드가 다시 동작 하도록 한다.
+                    Thread.sleep(3000);
+                    th1.stop();   // th1 스레드를 강제 종료 시킨다.
+                    th2.stop();
+                    Thread.sleep(2000);
+                    th3.stop();
+                } catch (InterruptedException e) {}
             }
-            
-            class ThreadEx17_1 implements Runnable {
-                /* volatile는 코어의 캐시가 아닌 메모리에서 읽어 오도록 함 (캐시와 메모리 간의 불일치를 해결) */
-                volatile boolean suspended = false; // 일시정지 여부
-                volatile boolean stopped   = false; // 정지 여부
-            
-                Thread th;
-            
-                /* 생성자에서 매개변수로 전달 받은 이름으로 쓰레드를 생성한다. */
-                ThreadEx17_1(String name) {
-                    // Runnable을 구현한 것은 ThreadEx17_1 자신 이므로 this로 지정한다.
-                    th = new Thread(this, name); // Thread(Runnable r, String name)
-                }
-            
-                public void run() {
-                    while(!stopped) {
-                        if(!suspended) {
-                            /* 쓰레드가 수행할 코드를 작성한다. */
-                            System.out.println(Thread.currentThread().getName()); // 쓰레드의 이름을 1초 마다 출력
-                            try {
-                                Thread.sleep(1000);
-                            } catch(InterruptedException e) {}			
-                        }
+        }
+        
+        class ThreadEx17_1 implements Runnable {
+            /* 멀티 코어 프로세서에서는 코어 마다 별도의 캐시를 가지고 있다.
+               코어는 메모리에서 읽어온 값을 캐시에 저장하고 값을 읽어올 때는 먼저 캐시에 있는지 확인하고 있다면 값을 읽어온다. 
+               없다면 메모리에서 값을 읽어온다.
+               그러다보니 메모리에 저장된 변수의 값이 변경되더라도 캐시에 저장된 값이 갱신되지 않아서 캐시와 메모리 간의 불일치가 발생한다.  
+      
+               volatile는 코어가 변수의 값을 읽어올 때, 캐시가 아닌 메모리에서 읽어 오도록 한다. (캐시와 메모리 간의 불일치를 해결) */
+      
+            volatile boolean suspended = false; // 일시정지 여부
+            volatile boolean stopped   = false; // 정지 여부
+        
+            Thread th;
+        
+            /* 생성자에서 매개변수로 전달 받은 이름으로 스레드를 생성한다. */
+            ThreadEx17_1(String name) {
+                // Runnable을 구현한 것은 ThreadEx17_1 자신 이므로 this로 지정한다.
+                th = new Thread(this, name); // Thread(Runnable r, String name)
+            }
+        
+            public void run() {
+                while(!stopped) {
+                    if(!suspended) {
+                        /* 스레드가 수행할 코드를 작성한다. */
+                        System.out.println(Thread.currentThread().getName()); // 스레드의 이름을 1초 마다 출력
+                        try {
+                            Thread.sleep(1000);
+                        } catch(InterruptedException e) {}			
                     }
-                    System.out.println(Thread.currentThread().getName() + " - stopped");
                 }
-            
-                public void suspend() { suspended = true;  }
-                public void resume()  { suspended = false; }
-                public void stop()    { stopped   = true;  }
-                public void start()   { th.start();        } // 내부적으로 선언된 쓰레드를 시작한다.
+                System.out.println(Thread.currentThread().getName() + " - stopped");
             }
-            ```
-            
-            * 쓰레드의 실행을 제어하는 메소드가 변수(suspended, stopped) 값을 변경한다.
+        
+            public void suspend() { suspended = true;  }
+            public void resume()  { suspended = false; }
+            public void stop()    { stopped   = true;  }
+            public void start()   { th.start();        } // 내부적으로 선언된 스레드를 시작한다.
+        }
+        ```
+        
+        * 스레드의 실행을 제어하는 메소드가 변수(suspended, stopped)의 값을 변경한다.
 
 #### 9) join(), yield()
 
 * (1) join()
 
-    * `join()`는 특정 쓰레드가 끝날 때까지 기다린다.
+    * `join()`는 특정 스레드가 끝날 때까지 기다린다.
     
-    * 다른 쓰레드의 작업이 먼저 수행 되어야 할 때, join()를 사용한다.
+    * 다른 스레드의 작업이 먼저 수행 되어야 할 때, `join()`를 사용한다.
         
         ```java
          void join() : 작업이 모두 끝날 때까지 기다린다.
@@ -4676,51 +4771,87 @@ int[][] arr = {
          void join(long millis, int nanos) : 1000분의 1초 + 나노 초 동안 기다린다. 
         ```
 
-    * `join()`도 `sleep()`처럼 `interrupt()`에 의해 일시 정지 상태에서 벗어날 수 있으며 join()를 호출하는 부분을 예외 처리 해야 한다.
+    * `join()`는 `interrupt()`에 의해 일시 정지 상태에서 벗어날 수 있으며 `join()`를 호출하는 부분을 예외 처리 해야 한다.
 
         ```java
-         class Ex13_11 {
-            static long startTime = 0;
-         
+        public class ThreadEx20 {
             public static void main(String args[]) {
-                ThreadEx11_1 th1 = new ThreadEx11_1();
-                ThreadEx11_2 th2 = new ThreadEx11_2();
-                th1.start();
-                th2.start();
-      
-                startTime = System.currentTimeMillis();
-         
-                try {
-                    th1.join();	// main 쓰레드가 th1의 작업이 끝날 때까지 기다린다.
-                    th2.join();	// main 쓰레드가 th2의 작업이 끝날 때까지 기다린다.
-                } catch(InterruptedException e) {}
-         
-                System.out.print("소요시간:" + (System.currentTimeMillis() - startTime));
-            } // main
-         }
-         
-         class ThreadEx11_1 extends Thread {
-            public void run() {
-                for(int i=0; i < 300; i++) {
-                    System.out.print(new String("-"));
+                ThreadEx20_1 gc = new ThreadEx20_1();
+                gc.setDaemon(true);
+                gc.start();
+        
+                int requiredMemory = 0;
+        
+                for(int i = 0; i < 20; i++) {
+                    requiredMemory = (int) (Math.random() * 10) * 20;
+        
+                    /*
+                    * 사용 할 수 있는 메모리(freeMemory)가 필요한 메모리 보다 작거나
+                    * 남은 메모리가 전체 메모리의 40% 미만인 경우, GC를 깨운다.
+                    * */
+                    if(gc.freeMemory() < requiredMemory || gc.freeMemory() < gc.totalMemory() * 0.4) {
+                        gc.interrupt();	// 메모리가 부족하므로 잠자고 있는 쓰레드 t1을 깨운다.
+        
+                        try {
+                            gc.join(100); // join()를 사용해서 쓰레드 gc가 사용하지 않는 객체를 제거할 시간(0.1초)을 준다. 그래야 메모리가 확보된다.
+                        } catch (InterruptedException e) {}
+                    }
+        
+                    gc.usedMemory += requiredMemory; // 필요한 메모리를 사용한다.
+                    System.out.println("usedMemory:" + gc.usedMemory);
                 }
-            } // run()
-         }
-         
-         class ThreadEx11_2 extends Thread {
+            }
+        }
+        
+        // Garbage Collector를 흉내 내어 작성한 코드
+        class ThreadEx20_1 extends Thread {
+            final static int MAX_MEMORY = 1000;
+            int usedMemory = 0;
+        
             public void run() {
-                for(int i=0; i < 300; i++) {
-                    System.out.print(new String("|"));
+                while(true) {
+                    /*
+                    * 10초 마다 한 번씩 가비지 컬렉션을 수행한다.
+                    * */
+                    try {
+                        Thread.sleep(10 * 1000); // 10초를 기다린다.
+                    } catch(InterruptedException e) {
+                        System.out.println("Awaken by interrupt().");
+                    }
+        
+                    /*
+                    * garbage collection을 수행한다.
+                    * garbage collection : 사용하지 않는 객체를 제거한다.
+                    * */
+                    gc();
+        
+                    System.out.println("Garbage Collected. Free Memory :" + freeMemory());
                 }
-            } // run()
-         }
+            }
+        
+            public void gc() {
+                usedMemory -= 300;
+        
+                if(usedMemory < 0)
+                    usedMemory = 0;
+            }
+        
+            public int totalMemory() {
+                return MAX_MEMORY;
+            }
+        
+            public int freeMemory() {
+                return MAX_MEMORY - usedMemory;
+            }
+        
+        }
         ```    
 
 * (2) yield()
 
-    * `yield()`는 남은 시간을 다음 쓰레드에게 양보하고, 자신(현재 쓰레드)은 실행 대기 상태가 된다.
+    * `yield()`는 남은 시간을 다음 스레드에게 양보하고, 자신(현재 스레드)은 실행 대기 상태가 된다.
     
-        * `yield()`도 OS 스케줄러의 판단 하에 동작하게 됨
+        * OS 스케줄러의 판단 하에 동작하게 된다.
     
     * `yield()`와 `interrupt()`를 적절히 사용하면 응답성과 효율을 높일 수 있다.
 
@@ -4739,14 +4870,14 @@ int[][] arr = {
          		String name =th.getName();
          
          		while(!stopped) {
-         			if(!suspended) { // 일시 정지 상태가 아니면
+         			if(!suspended) { // 일시 정지 상태가 아니면 작업을 처리한다.
          				System.out.println(name);
          				try {
          					Thread.sleep(1000);
          				} catch(InterruptedException e) {
          					System.out.println(name + " - interrupted");
          				}			
-         			} else { // 일시 정지 상태이면 다른 쓰레드에게 양보한다.
+         			} else { // 일시 정지 상태이면 주어진 실행 시간을 그저 while 문을 돌며 낭비하게 되므로 다른 스레드에게 양보한다.
          				Thread.yield();
          			}
          		}
@@ -4755,7 +4886,7 @@ int[][] arr = {
          
          	public void suspend() {
          		suspended = true;
-         		th.interrupt();
+         		th.interrupt(); // 해당 스레드가 잠자고 있을 수도 있으므로 interrupt 코드를 추가 
          		System.out.println(th.getName() + " - interrupt() by suspend()");
          	}
          
@@ -4765,7 +4896,7 @@ int[][] arr = {
          
          	public void stop() {
          		stopped = true;
-         		th.interrupt();
+         		th.interrupt(); // 해당 스레드가 잠자고 있을 수도 있으므로 interrupt 코드를 추가  
          		System.out.println(th.getName() + " - interrupt() by stop()");
          	}
          
@@ -4775,25 +4906,25 @@ int[][] arr = {
          }
         ```  
 
-#### 10) 쓰레드의 동기화
+#### 10) 스레드의 동기화
 
-* (1) 쓰레드의 동기화(synchronization)
+* (1) 스레드의 동기화(synchronization)
 
-    * 멀티 쓰레드 프로세스에서는 다른 쓰레드의 작업에 영향을 미칠 수 있다.
+    * 멀티 스레드 프로세스에서는 다른 스레드의 작업에 영향을 미칠 수 있다.
     
-    * 진행 중인 작업이 다른 쓰레드에게 간섭받지 않게 하려면 `동기화(synchronization)`가 필요하다.
+    * 진행 중인 작업이 다른 스레드에게 간섭받지 않게 하려면 `동기화(synchronization)`가 필요하다.
     
-    * 즉, `쓰레드의 동기화`는 한 쓰레드가 진행중인 작업을 다른 쓰레드가 간섭하지 못하게 막는 것을 말한다.
+    * 즉, `스레드의 동기화`는 한 스레드가 진행중인 작업을 다른 스레드가 간섭하지 못하게 막는 것을 말한다.
     
     * 동기화를 하려면 간섭 받지 않아야 하는 문장들을 `임계 영역`으로 설정한다.
     
-    * `임계 영역`은 `락(lock)`을 얻은 **단 하나의 쓰레드만 출입 가능**하다. 
+    * `임계 영역`은 `락(lock)`을 얻은 **단 하나의 스레드만 출입 가능**하다. 
     
         * 객체 1개 마다 락(lock) 1개를 가진다.
         
-        * `임계 영역`은 한 번에 하나의 쓰레드만 사용 할 수 있기 때문에 영역을 최소화 해야한다.
+        * `임계 영역`은 한 번에 하나의 스레드만 사용 할 수 있기 때문에 영역을 최소화 해야한다.
         
-        * 멀티 쓰레드의 장점은 동시에 여러 쓰레드가 동작하는 것인데 `임계 영역`이 많아지면 성능은 떨어진다. 
+        * 멀티 스레드의 장점은 동시에 여러 스레드가 동작하는 것인데 `임계 영역`이 많아지면 성능은 떨어진다. 
         
 * (2) synchronized를 이용한 동기화
 
@@ -4895,11 +5026,11 @@ int[][] arr = {
     
     * Object 클래스에 정의되어 있으며, 동기화 블록 내에서만 사용 할 수 있다.
     
-        * `wait()` : 해당 객체의 lock을 반납하고 쓰레드를 해당 객체의 대기실(waiting pool)에 넣는다.
+        * `wait()` : 해당 객체의 lock을 반납하고 스레드를 해당 객체의 대기실(waiting pool)에 넣는다.
 
-        * `notify()` : 해당 객체의 대기실(waiting pool)에서 대기중인 쓰레드 중의 하나를 깨운다.
+        * `notify()` : 해당 객체의 대기실(waiting pool)에서 대기중인 스레드 중의 하나를 깨운다.
         
-        * `notifyAll()` : 해당 객체의 대기실(waiting pool)에서 대기중인 모든 쓰레드를 깨운다.
+        * `notifyAll()` : 해당 객체의 대기실(waiting pool)에서 대기중인 모든 스레드를 깨운다.
         
     * 예시
     
@@ -4920,7 +5051,7 @@ int[][] arr = {
         
             public synchronized void deposit(int money){ // 입금
                 balance += money;
-                notify(); // 통지 - 대기 중인 쓰레드 중 하나에게 알린다.
+                notify(); // 통지 - 대기 중인 스레드 중 하나에게 알린다.
             }
         
         }
@@ -4932,7 +5063,7 @@ int[][] arr = {
         
         * 요리사와 손님이 같은 객체(Table)을 공유하므로 동기화가 필요하다.
         
-            * 즉, 요리사와 손님 쓰레드가 같은 Table 객체를 공유하므로 동기화가 필요하다.
+            * 즉, 요리사와 손님 스레드가 같은 Table 객체를 공유하므로 동기화가 필요하다.
         
                 ```java
                 /*
@@ -5037,7 +5168,7 @@ int[][] arr = {
                 * */
                 class Ex13_14 {
                 	public static void main(String[] args) throws Exception {
-                		Table table = new Table(); // 여러 쓰레드가 공유하는 객체
+                		Table table = new Table(); // 여러 스레드가 공유하는 객체
                 
                         // 요리사 1명, 손님 2명 생성
                 		new Thread(new Cook(table), "COOK").start();
@@ -5052,7 +5183,7 @@ int[][] arr = {
               
                 * 위의 코드에서 동기화 코드 없이 실행하면 예외가 발생 할 수 있다.
                                     
-                    * [문제점] Table을 여러 쓰레드가 공유하기 때문에 작업 중에 끼어들기가 발생
+                    * [문제점] Table을 여러 스레드가 공유하기 때문에 작업 중에 끼어들기가 발생
                     
                     * [해결책] Table의 add()와 remove()를 synchronized로 동기화 해야 한다.
                            
@@ -5083,7 +5214,7 @@ int[][] arr = {
                 				String name = Thread.currentThread().getName();
                 				System.out.println(name+" is waiting.");
                 				try {
-                					wait(); // 요리사(COOK 쓰레드)를 기다리게 한다.
+                					wait(); // 요리사(COOK 스레드)를 기다리게 한다.
                 					Thread.sleep(500);
                 				} catch(InterruptedException e) {}	
                 		}
@@ -5100,7 +5231,7 @@ int[][] arr = {
                 			while(dishes.size()==0) { // 테이블의 음식 개수가 0이면
                 					System.out.println(name+" is waiting.");
                 					try {
-                						wait(); // 손님(CUST 쓰레드)이 lock을 반납하고 기다리게 한다.
+                						wait(); // 손님(CUST 스레드)이 lock을 반납하고 기다리게 한다.
                 						Thread.sleep(500);
                 					} catch(InterruptedException e) {}	
                 			}
@@ -5118,7 +5249,7 @@ int[][] arr = {
                                 // 테이블에 원하는 음식이 없는 경우
                 				try {
                 					System.out.println(name+" is waiting.");
-                					wait(); // 원하는 음식이 없는 CUST 쓰레드를 기다리게 한다.
+                					wait(); // 원하는 음식이 없는 CUST 스레드를 기다리게 한다.
                 					Thread.sleep(500);
                 				} catch(InterruptedException e) {}	
                 			} // while(true)
@@ -5128,7 +5259,7 @@ int[][] arr = {
                 }
                 ```
               
-                * wait()과 notify()를 사용하면 하나의 쓰레드가 lock을 오래 쥐고 있는 일이 없어지게 되어 효율적으로 바뀐다.
+                * wait()과 notify()를 사용하면 하나의 스레드가 lock을 오래 쥐고 있는 일이 없어지게 되어 효율적으로 바뀐다.
               
                 * 요리사는 테이블이 가득 차면 대기(`wait()`)하고 음식을 추가하고 나면 손님에게 통보(`notify()`)한다.
                 
