@@ -3955,9 +3955,9 @@ int[][] arr = {
         
     * 하나의 새로운 프로세스를 생성하는 것 보다 하나의 새로운 스레드를 생성하는 것이 더 적은 비용이 든다.
     
-        * `2 프로세스 1 스레드` vs `1 프로세스 2 스레드`
+        * `2 프로세스 드1 스레드` vs `1 프로세스 2 스레드`
         
-            * 싱글 스레드 프로세스가 2개 vs 멀티 스레드 프로세스가 1개이며 대신 쓰레드가 2개 
+            * 싱글 스레드 프로세스가 2개 vs 멀티 스레드 프로세스가 1개이며 대신 스레드가 2개 
         
             * 둘 다 실제 작업을 수행하는 스레드는 2개이며 `1 프로세스 2 스레드`가 더 적은 비용이 든다. 
         
@@ -4076,6 +4076,10 @@ int[][] arr = {
         }
     }
     ```
+  
+    * `currentThread()` : 현재 실행중인 스레드의 참조를 반환한다.
+    
+    * `getName()` : 스레드의 이름을 반환한다. 
 
 * (4) 스레드 실행 - start()
 
@@ -4210,7 +4214,7 @@ int[][] arr = {
             }
             ```
           
-            * 멀티 스레드는 작업 A를 별도의 쓰레드, 작업 B도 별도의 쓰레드로 번갈아 가면서 실행한다.
+            * 멀티 스레드는 작업 A를 별도의 스레드, 작업 B도 별도의 스레드로 번갈아 가면서 실행한다.
           
         * 두 개의 스레드로 작업하는데도 더 많은 시간이 걸린 이유는 두 가지다.
         
@@ -4386,12 +4390,12 @@ int[][] arr = {
                 // ThreadGroup(ThreadGroup parent, String name)
                 ThreadGroup subGrp1 = new ThreadGroup(grp1,"SubGroup1");
         
-                grp1.setMaxPriority(3);	// 쓰레드 그룹 grp1의 최대 우선 순위를 3으로 변경한다.
+                grp1.setMaxPriority(3);	// 스레드 그룹 grp1의 최대 우선 순위를 3으로 변경한다.
         
                 Runnable r = new Runnable() {
                     public void run() {
                         try {
-                            Thread.sleep(1000); // 쓰레드를 1초 간 멈추게 한다.
+                            Thread.sleep(1000); // 스레드를 1초 간 멈추게 한다.
                         } catch(InterruptedException e) {}
                     }
                 };
@@ -4481,7 +4485,7 @@ int[][] arr = {
         }
         ```
       
-        * 3 초 마다 변수 `autoSave`의 값을 확인해서 그 값이 `true`이면 `autoSave()`를 호출하는 일을 무한히 반복하도록 쓰레드를 작성하였다.
+        * 3 초 마다 변수 `autoSave`의 값을 확인해서 그 값이 `true`이면 `autoSave()`를 호출하는 일을 무한히 반복하도록 스레드를 작성하였다.
 
 * (2) 스레드의 상태
     
@@ -4489,18 +4493,18 @@ int[][] arr = {
     
         * 생성(`NEW`) : 스레드가 생성되고 아직 `start()`가 호출되지 않은 상태
         
-        * 실행 대기(`RUNNABLE`) : 실행 중 또는 실행 가능한 상태
+        * 실행 대기(`RUNNABLE`) : 실행 가능한 상태
         
         * 일시 정지
         
-            * `BLOCKED` : 동기화 블럭에 의해서 일시 정지된 상태 (lock이 풀릴 때까지 기다리는 상태)
-        
-            * `WAITING`, `TIMED_WAITING`
-        
-                * 스레드의 작업이 종료되지는 않았지만 실행 가능 하지 않은 일시 정지 상태
-             
-                * `TIMED_WAITING`은 일시 정지 시간이 지정된 경우를 의미한다.
+            * `BLOCKED` : 동기화 블럭에 의해서 일시 정지된 상태
             
+                * 사용하고자 하는 객체의 lock이 풀릴 때까지 기다리는 상태
+        
+            * `WAITING` : 다른 스레드가 통지할 때까지 기다리는 상태 
+            
+            * `TIMED_WAITING` : 주어진 시간 동안 기다리는 상태 
+        
         * 소멸(`TERMINATED`) : 스레드의 작업이 종료된 상태
         
             * 더 자세한 내용은 자바의 정석 3판 p749를 참고하자.
@@ -4509,7 +4513,7 @@ int[][] arr = {
 
         ![image 36](images/img36.png)
         
-        * ① 쓰레드를 생성하고 `start()`를 호출하면 실행 대기 상태가 된다.  
+        * ① 스레드를 생성하고 `start()`를 호출하면 실행 대기 상태가 된다.  
         
         * ② 실행 대기 상태에 있다가 자신의 차례가 되면 실행 상태가 된다. 
 
@@ -4790,10 +4794,10 @@ int[][] arr = {
                     * 남은 메모리가 전체 메모리의 40% 미만인 경우, GC를 깨운다.
                     * */
                     if(gc.freeMemory() < requiredMemory || gc.freeMemory() < gc.totalMemory() * 0.4) {
-                        gc.interrupt();	// 메모리가 부족하므로 잠자고 있는 쓰레드 t1을 깨운다.
+                        gc.interrupt();	// 메모리가 부족하므로 잠자고 있는 스레드 t1을 깨운다.
         
                         try {
-                            gc.join(100); // join()를 사용해서 쓰레드 gc가 사용하지 않는 객체를 제거할 시간(0.1초)을 준다. 그래야 메모리가 확보된다.
+                            gc.join(100); // join()를 사용해서 스레드 gc가 사용하지 않는 객체를 제거할 시간(0.1초)을 준다. 그래야 메모리가 확보된다.
                         } catch (InterruptedException e) {}
                     }
         
@@ -5373,7 +5377,7 @@ int[][] arr = {
 
     * `함수형 인터페이스`는 하나의 추상 메서드만 선언된 인터페이스이다.
 
-* (2) 함수형 인터페이스 - 예시
+* (2) 예시 - 함수형 인터페이스
 
     * ① 예를 들어, 아래와 같이 `max()`라는 메서드가 정의된 `MyFunction` 인터페이스(함수형 인터페이스)를 정의한다.
     
@@ -5415,13 +5419,13 @@ int[][] arr = {
 
     * 함수형 인터페이스 타입의 매개변수
     
-        * 함수형 인터페이스 MyFunction가 정의되어 있다.
+        * 함수형 인터페이스 MyFunction이 다음과 같이 정의되어 있다.
     
             ```java
-            // 람다식(익명 객체)을 다루기 위한 참조변수의 타입은 "함수형 인터페이스"로 한다.
-            MyFunction f = (int a, int b) -> a > b ? a : b;  // 익명 객체를 람다식으로 대체
-            
-            int big = f.max(5,3); // 익명 객체의 메서드를 호출
+            @FunctionalInterface
+            interface MyFunction {
+                void myMethod(); // 추상 메서드
+            }
             ```
     
         * ① 메서드 호출 시, 람다식을 가리키는 참조변수를 매개변수로 지정하는 경우
@@ -5433,14 +5437,14 @@ int[][] arr = {
             
             //...
             
-            MyFunction f = ()-> System.out.println("myMethod()");
+            MyFunction f = () -> System.out.println("myMethod()");
             
             aMethod(f);
             ```
       
-          * 위와 같이 메서드(aMethod)를 호출할 때, 
+          * 위와 같이 메서드(aMethod)를 호출한다
               
-          * "메서드의 매개변수 타입이 함수형 인터페이스(MyFunction)이면 해당 함수형 인터페이스의 추상 메서드와 동등한 람다식을 가리키는 참조변수 또는 직접 람다식을 매개변수로 지정해야 한다"는 뜻이다.
+          * "메서드의 매개변수 타입이 함수형 인터페이스(MyFunction)이면 해당 함수형 인터페이스의 추상 메서드와 동등한 람다식을 매개변수로 전달해야 한다"는 뜻이다.
           
         * ② 메서드 호출 시, 직접 람다식을 매개변수로 지정하는 경우 
     
@@ -5450,7 +5454,7 @@ int[][] arr = {
 
     * 함수형 인터페이스 타입의 반환 타입
      
-      * "메서드의 반환 타입이 함수형 인터페이스이면 해당 함수형 인터페이스의 추상 메서드와 동등한 람다식을 가리키는 참조변수를 반환하거나 직접 람다식을 반환해야 한다"는 뜻이다.     
+      * "메서드의 반환 타입이 함수형 인터페이스이면 해당 함수형 인터페이스의 추상 메서드와 동등한 람다식을 반환해야 한다"는 뜻이다.     
  
         ![image 8](images/img8.png)
 
@@ -5479,39 +5483,33 @@ int[][] arr = {
             thread.start();
             ```           
         
-    * ② `Consumer` : **매개변수만 있고 반환 값이 없는 추상** 메서드를 가지고 있다. 
+    * ② `Consumer` : **매개변수만 있고 반환 값이 없는** 추상 메서드를 가지고 있다. 
     
         * `void accept(T t)`
         
-    * ③ `Supplier` : **매개변수는 없고 반환 값만 있는 추상** 메서드를 가지고 있다.
+    * ③ `Supplier` : **매개변수는 없고 반환 값만 있는** 추상 메서드를 가지고 있다.
     
         * `T get()`
         
-    * ④ `Function`
+    * ④ `Function` : **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다. 
     
-        * **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다. 
-    
-            * `R apply(T t)`
+        * `R apply(T t)`
         
-        * 주로 **매개변수의 값을 반환 타입으로 매핑(형 변환)** 할 경우에 사용한다.
+            * 주로 **매개변수의 값을 반환 타입으로 매핑(형 변환)** 할 경우에 사용한다.
         
-    * ⑤ `Operator`
-      
-        * **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다.
+    * ⑤ `Operator` : **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다.
         
-            * `T apply(T t)`
-            
-            * `T apply(T t, T t)`
+        * `T apply(T t)`
         
-        * 주로 **매개변수의 값을 연산한 다음, 그 결과를 반환** 할 경우에 사용한다.
+        * `T apply(T t, T t)`
         
-    * ⑥ `Predicate`
-      
-        * **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다.
+            * 주로 **매개변수의 값을 연산한 다음, 동일한 타입으로 그 결과를 반환** 할 경우에 사용한다.
         
-            * `boolean test(T t)`
+    * ⑥ `Predicate` : **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다.
         
-        * **매개변수의 값을 검사하여 boolean 값을 반환** 할 때 사용한다.
+        * `boolean test(T t)`
+        
+            * **매개변수의 값을 검사해서 boolean 값을 반환** 할 때 사용한다.
 
 * (3) 매개변수가 2개인 함수형 인터페이스
 
@@ -5538,7 +5536,7 @@ int[][] arr = {
       
 * (5) 매개변수의 타입과 반환타입이 일치하는 함수형 인터페이스
 
-    * `UnaryOperator<T>` 
+    * `UnaryOperator<T>` : T 객체를 매개변수로 받아서 연산한 후 T 객체를 반환한다.
     
         * `Function`의 자손 
         
@@ -5546,57 +5544,119 @@ int[][] arr = {
         
             * `T apply(T t)`
     
-    * `BinaryOperator<T>`
+    * `BinaryOperator<T>` : T 객체 2개를 매개변수로 받아서 연산한 다음, T 객체를 반환한다.
     
         * `BiFunction`의 자손
         
         * `BiFunction`과 달리, 매개변수와 반환 타입이 같다.
         
             * `T apply(T t, T t)`
-            
-* (6) 실습
+
+* (6) 함수형 인터페이스 의미 파악하기
+
+    * Consumer
+
+        * `Consumer<T>` : T 객체를 매개변수로  받아서 소비한다.
+        
+        * `BiConsumer<T, U>` : T 와 U 객체를 매개변수로 받아서 소비한다.
+ 
+        * `IntConsumer` : int 값을 매개변수로  받아서 소비한다.
+        
+        * `ObjIntConsumer<T>` : T 객체와 int 값을 매개변수로 받아서 소비한다.
+        
+    * Supplier
+
+        * `Supplier<T>` : T 객체를 반환한다.
+        
+        * `IntSupplier` : int 값을 반환한다. 
+        
+    * Function
+
+        * `Function<T, R>` : T 객체를 매개변수로 받아서 R 객체로 반환한다.
+        
+        * `BiFunction<T, U, R>` : T와 U 객체를 매개변수로 받아서 R 객체로 반환한다.
+        
+        * `IntFunction<R>` : int 값을 매개변수로 받아서 R 객체로 반환한다.
+        
+        * `IntToDoubleFunction` : int 값을 매개변수로 받아서 double 값으로 반환한다.
+        
+        * `ToDoubleBiFunction<T, U>` : T와 U 객체를 매개변수로 받아서 double 값으로 반환한다.
+        
+        * `ToDoubleFunction<T>` : T 객체를 매개변수로 받아서 double 값으로 반환한다.
+
+    * Operator
+
+        * `BinaryOperator<T>` : T 객체 2개를 매개변수로 받아서 연산한 후 T 객체를 반환한다.
+        
+        * `UnaryOperator<T> `: T 객체를 매개변수로 받아서 연산한 후 T 객체를 반환한다.
+
+        * `IntBinaryOperator` : int 값 2개를 매개변수로 받아서 연산한 후 int 값으로 반환한다.
+        
+        * `IntUnaryOperator` : int 값 1개를 매개변수로 받아서 연산한 후 int 값으로 반환한다.
+
+    * Predicate
+    
+        * `Predicate<T>` : T 객체를 매개변수로 받아서 boolean 값으로 반환한다
+
+        * `BiPredicate<T, U>`	: T와 U 객체를 매개변수로 받아서 boolean 값으로 반환한다
+
+        * `IntPredicate `: int 값을 매개변수로 받아서 boolean 값으로 반환한다
+
+    * `[참고]`
+
+        * `Bi` : "매개변수가 2개 인 것"을 의미한다.
+        
+        * `Binary` : "매개변수가 2개인 것"을 의미한다.
+        
+        * `Unary` : "매개변수가 1개인 것"을 의미한다.
+
+* (7) 실습
 
     ```java
-    class Ex14_2 {
-    	public static void main(String[] args) {
-    		Supplier<Integer>  s = ()-> (int)(Math.random() * 100) + 1; // 1 ~ 100 까지 난수 발생
-    		Consumer<Integer>  c = i -> System.out.print(i + ", "); 
-    		Predicate<Integer> p = i -> i % 2 == 0; // 짝수인지 검사한다.
-    		Function<Integer, Integer> f = i -> i / 10 * 10; // i의 일의 자리를 제거한다. (일의 자리를 0으로 만듦)
-    		
-    		List<Integer> list = new ArrayList<>();	
-    		makeRandomList(s, list); // list를 랜덤 값으로 채운다.
-    		System.out.println(list);
-    		printEvenNum(p, c, list); // 짝수를 출력한다.
-  
-    		List<Integer> newList = doSomething(f, list);
-    		System.out.println(newList);
-    	}
+    public class Ex14_2 {
+        public static void main(String[] args) {
+            Supplier<Integer> s = () -> (int)(Math.random() * 100) + 1; // 1 ~ 100 까지 난수 발생
+            Consumer<Integer> c = i -> System.out.print(i + ", ");
+            Predicate<Integer> p = i -> i % 2 == 0; // 짝수인지 검사한다.
+            // i의 일의 자리를 제거한다. 즉, 일의 자리를 0으로 만든다. Ex) 59 -> 50
+            Function<Integer, Integer> f = i -> i / 10 * 10; 
     
-    	static <T> List<T> doSomething(Function<T, T> f, List<T> list) {
-    		List<T> newList = new ArrayList<T>(list.size()); // list의 사이즈와 같은 새로운 List를 만든다.
+            List<Integer> list = new ArrayList<>();
+            makeRandomList(s, list); // list를 랜덤 값으로 채운다.
+            System.out.println(list);
+            printEvenNum(p, c, list); // 짝수를 출력한다.
     
-    		for(T i : list) {
-    			newList.add(f.apply(i)); // 일의 자리를 제거한 값을 새로운 리스트에 저장한다.
-    		}	
+            List<Integer> newList = doSomething(f, list);
+            System.out.println(newList);
+        }
     
-    		return newList; // 새로운 리스트를 반환한다.
-    	}
+        static <T> List<T> doSomething(Function<T, T> f, List<T> list) {
+            List<T> newList = new ArrayList<>(list.size()); // list의 사이즈와 같은 새로운 List를 만든다.
     
-    	static <T> void printEvenNum(Predicate<T> p, Consumer<T> c, List<T> list) {
-    		System.out.print("[");
-    		for(T i : list) {
-    			if(p.test(i)) // 짝수인지 검사하여 콘솔에 i를 출력한다.
-    				c.accept(i);
-    		}	
-    		System.out.println("]");
-    	}
+            for(T i : list) {
+                newList.add(f.apply(i)); // 일의 자리를 제거한 값을 새로운 리스트에 저장한다.
+            }
     
-    	static <T> void makeRandomList(Supplier<T> s, List<T> list) {
-    		for(int i=0;i<10;i++) {
-    			list.add(s.get());
-    		}
-    	}
+            return newList; // 새로운 리스트를 반환한다.
+        }
+    
+        static <T> void printEvenNum(Predicate<T> p, Consumer<T> c, List<T> list) {
+            System.out.print("[");
+    
+            for(T i : list) {
+                if(p.test(i)) // 짝수인지 검사하여 콘솔에 i를 출력한다.
+                    c.accept(i);
+            }
+    
+            System.out.println("]");
+        }
+    
+        static <T> void makeRandomList(Supplier<T> s, List<T> list) {
+            for(int i = 0; i < 10; i++) {
+                list.add(s.get());
+            }
+        }
+        
     }
     ```
 
@@ -5618,11 +5678,11 @@ int[][] arr = {
 
     * `and()`, `or()`, `negate()`로 두 Predicate를 하나로 결합 할 수 있다. (default 메서드)
 
-        * ① and() : 두 Predicate가 모두 true를 반환 하면 true를 반환
+        * ① `and()` : 두 Predicate가 모두 true를 반환 하면 true를 반환
         
-        * ② or() : 두 Predicate 중 하나만 true를 반환 하면 true를 반환
+        * ② `or()` : 두 Predicate 중 하나만 true를 반환 하면 true를 반환
         
-        * ③ negate() : Predicate의 결과가 true이면 false, false이면 true를 반환
+        * ③ `negate()` : Predicate의 결과가 true이면 false, false이면 true를 반환
 
     * 등가 비교를 위한 Predicate의 작성에는 `isEqual()`를 사용한다. (static 메서드)
     
@@ -5706,6 +5766,12 @@ int[][] arr = {
     	}
     }
     ```
+  
+    * `f.andThen(g)`는 다음과 같이 동작한다. (`f.compose(g)`는 반대로 생각하기)
+    
+        * 먼저 실행한 함수형 인터페이스의 결과를 다음 함수형 인터페이스의 매개변수로 전달하고, 최종 처리 결과를 반환한다.
+        
+            ![image 37](images/img37.png)
 
 * (5) 컬렉션 프레임워크와 함수형 인터페이스
 
@@ -5731,7 +5797,7 @@ int[][] arr = {
             
             * `V computeIfAbsent(K key, Function<K, V> f)` : 지정된 키(key)가 없으면, 작업(f)을 수행 후 추가
             
-            * `V computeIfPresent(K key, BiFunction<K, V, V> f)` : 지정된 키가 있을 때, 작업(f을) 수행
+            * `V computeIfPresent(K key, BiFunction<K, V, V> f)` : 지정된 키가 있을 때, 작업(f)을 수행
             
             * `V merge(K key, BiFunction<V, V, V> f)` : 모든 요소에 병합 작업(f)을 수행
             
@@ -5741,27 +5807,6 @@ int[][] arr = {
             
     * 예시
     
-        ```java
-        ArrayList<Integer> list = new ArrayList<>();
-        for(int i = 0; i < 10; i++)
-            list.add(i);
-
-        list.forEach(i -> System.out.print(i+","));     // list의 모든 요소를 출력
-        list.removeIf(x -> x % 2 == 0 || x % 3 == 0);   // list에서 2 또는 3의 배수를 제거
-        list.replaceAll(i -> i * 10);                   // list의 모든 요소에 10을 곱한다.
-
-        Map<String, String> map = new HashMap<>();
-        map.put("1", "1");
-        map.put("2", "2");
-        map.put("3", "3");
-        map.put("4", "4");
-
-        // map의 모든 요소를 {k,v}의 형식으로 출력한다.
-        map.forEach((k,v)-> System.out.print("{" + k + "," + v + "},"));
-        ```
-
-* (6) 실습 - 컬렉션 프레임워크와 함수형 인터페이스
-
         ```java
         class Ex14_4 {
             public static void main(String[] args) 	{
@@ -5799,7 +5844,9 @@ int[][] arr = {
 
     * 하나의 메서드만 호출하는 람다식은 `메서드 참조`로 더 간단히 할 수 있다.
     
-    * `클래스명::메서드명`으로 바꿀 수 있다.
+        * `클래스명::메서드명`
+    
+    * 예시
     
         * ① static 메서드 참조
         
@@ -5821,7 +5868,7 @@ int[][] arr = {
 
                 * 이미 생성된 객체의 메서드를 람다식에서 사용한 경우에는 클래스 이름 대신 그 객체의 참조변수를 적어줘야 한다.
 
-* (2) 실습 - 메서드 참조
+* (2) 실습 - 기본적인 메서드 참조
 
     ```java
     public class MethodReferenceEx {
