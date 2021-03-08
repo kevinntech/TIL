@@ -5941,7 +5941,7 @@ int[][] arr = {
 
 * (1) 스트림(Stream)
 
-    * `스트림(Stream)`은 다양한 데이터 소스를 표준화된 방법으로 다루기 위한 것
+    * `스트림(Stream)`은 다양한 데이터 소스를 표준화된 방법으로 다루기 위한 것이다.
     
         * 데이터 소스 : 컬렉션 또는 배열처럼 여러 데이터를 저장하고 있는 것을 말함
         
@@ -5999,7 +5999,7 @@ int[][] arr = {
         int numOfStr = (int) strStream.count();
         ```
       
-    * 최종 연산이 수행되기 전까지는 중간 연산이 수행되지 않는다. - 지연된 연산
+    * 최종 연산이 수행되기 전까지는 중간 연산이 수행되지 않는다. - 지연된 연산을 수행
     
         ```java
         /*
@@ -6013,20 +6013,22 @@ int[][] arr = {
       
     * 스트림은 작업을 내부 반복으로 처리한다.
     
-        * 내부 반복이라는 것은 반복문을 메서드의 내부에 숨긴 것을 말한다.
+        * `내부 반복` : 메서드의 내부에 반복문을 숨긴 것을 말한다.
         
             ```java
-            for (String str : strList) {
-                System.out.println(str);
+            void forEach(Consumer<? super T> action){
+                Objects.requireNonNull(action);
+                
+                for(T t : stc)
+                    action.accept(T);
             }
             ```
           
-        * forEach()는 매개변수에 대입된 람다식을 데이터 소스의 모든 요소에 적용한다. (코드가 간결해 짐)
+        * `forEach()`는 매개변수에 대입된 람다식을 스트림의 모든 요소에 적용한다. (코드가 간결해 짐)
         
             ```java
             stream().forEach(System.out::println);
-            ```
-          
+            ```          
     * 스트림의 작업을 병렬로 처리 할 수 있다. - 병렬 스트림
     
         * 병렬 스트림은 내부적으로 `fork&join 프레임워크`를 이용해서 자동적으로 연산을 병렬로 수행한다.
@@ -6042,9 +6044,9 @@ int[][] arr = {
     
         * 즉, 데이터 소스의 요소를 기본형으로 다루는 스트림을 제공한다.
     
-        * 오토박싱, 언박싱으로 인한 비효율이 제거된다. (`Stream<Integer>` 대신 `IntStream`을 사용한다.)
+        * 기본형 스트림을 사용하면 오토박싱, 언박싱으로 인한 비효율이 제거된다. (`Stream<Integer>` 대신 `IntStream`을 사용한다.)
         
-            * `Stream<Integer> `: Stream의 요소가 Integer다. (기본형은 불가능)
+            * `Stream<Integer>` : "Stream의 요소가 Integer"라는 것을 의미한다. (기본형은 불가능)
         
         * 숫자와 관련된 유용한 메서드를 `Stream<T>` 보다 더 많이 제공한다.
 
@@ -6052,7 +6054,7 @@ int[][] arr = {
  
 * (1) 스트림 만들기 - 컬렉션으로 부터 스트림 만들기
 
-    * `Collection` 인터페이스의 `stream()`로 컬렉션을 스트림으로 변환한다.
+    * `Collection` 인터페이스의 `stream()`로 컬렉션으로 부터 스트림을 생성한다.
     
         * `Stream<E> stream()` 
     
@@ -6060,7 +6062,7 @@ int[][] arr = {
     
         ```java
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        Stream<Integer> intStream = list.stream(); // list로 부터 스트림을 생성
+        Stream<Integer> intStream = list.stream(); // list로 부터 새로운 스트림을 생성한다.
 
         /*
         * 스트림의 모든 요소를 출력, forEach()는 최종 연산이므로 스트림이 닫힌다.
@@ -6128,7 +6130,7 @@ int[][] arr = {
 
     * 난수를 요소로 갖는 스트림 생성하기
     
-        * Random 클래스의 `ints()`, `longs()`, `doubles()`는 해당 타입의 난수들로 이루어진 스트림을 반환한다.
+        * `Random` 클래스의 `ints()`, `longs()`, `doubles()`는 해당 타입의 난수들로 이루어진 스트림을 반환한다.
 
             ```
             Integer.MIN_VALUE <= ints() <= Integer.MAX_VALUE
@@ -6136,31 +6138,33 @@ int[][] arr = {
             0.0 <= doubles() < 1.0
             ```
                
-        * 이 메서드들이 반환하는 스트림은 크기가 정해지지 않은 무한 스트림이므로 limit()으로 스트림의 크기를 제한 해주어야 한다.
+        * 이 메서드들이 반환하는 스트림은 크기가 정해지지 않은 무한 스트림이므로 `limit()`으로 스트림의 크기를 제한 해주어야 한다.
                 
-        * `limit()`는 스트림의 요소 개수를 제한하는데 사용된다.
-
-            ```java
-            IntStream intStream = new Random().ints(); // 무한 스트림
-            intStream.limit(5).forEach(System.out::println); // 5개의 요소만 출력한다.
+            * `limit()`는 스트림의 요소 개수를 제한하는데 사용된다.
     
-            IntStream intStream2 = new Random().ints(5); // 크기가 5인 난수 스트림을 반환한다.
-            ```
-          
-        * 지정된 범위의 난수를 요소로 갖는 스트림을 생성하는 메서드(Random 클래스)
-
-            ```
-            // begin은 범위에 포함되며 end는 범위에 포함되지 않는다.
-            // 무한 스트림 
-            IntStream ints(int begin, int end)
-            LongStream longs(long begin, long end)
-            DoubleStream doubles(double begin, double end)
-            
-            // 유한 스트림
-            IntStream ints(long streamSize, int begin, int end)
-            LongStream longs(long streamSize, long begin, long end)
-            DoubleStream doubles(long streamSize, double begin, double end)
-            ```
+                ```java
+                IntStream intStream = new Random().ints(); // 무한 스트림
+                intStream.limit(5).forEach(System.out::println); // 5개의 요소만 출력한다.
+        
+                IntStream intStream2 = new Random().ints(5); // 크기가 5인 난수 스트림을 반환한다.
+                ```
+              
+            * 지정된 범위의 난수를 요소로 갖는 스트림을 생성하는 메서드(`Random` 클래스)
+    
+                ```
+                // begin은 범위에 포함되며 end는 범위에 포함되지 않는다.
+                // 무한 스트림 
+                IntStream ints(int begin, int end)
+                LongStream longs(long begin, long end)
+                DoubleStream doubles(double begin, double end)
+                
+                // 유한 스트림
+                IntStream ints(long streamSize, int begin, int end)
+                LongStream longs(long streamSize, long begin, long end)
+                DoubleStream doubles(long streamSize, double begin, double end)
+                ```
+              
+                * `streamSize`를 지정하면 유한 스트림이 된다.
         
 * (4) 스트림 만들기 - 특정 범위의 정수
 
@@ -6187,6 +6191,8 @@ int[][] arr = {
     * 람다식을 소스로 하는 스트림 생성하기 (무한 스트림)
     
         * `static <T> Stream<T> iterate(T seed, UnaryOperator<T> f)` : 이전 요소에 종속적
+        
+            * `seed` : 초기 값
     
         * `static <T> Stream<T> generate(Supplier<T> s)` : 이전 요소에 독립적
     
@@ -6221,13 +6227,13 @@ int[][] arr = {
         
             * `Path`는 파일 또는 디렉토리
 
-    * 아래 메서드들은 파일의 한 행(line)을 요소로 하는 스트림을 생성한다. 
-
-        ```java
-        Stream<String> Files.lines(Path path)
-        Stream<String> Files.lines(Path path, Charset cs)
-        Stream<String> lines() // BufferedReader 클래스의 메서드
-        ```
+        * 아래 메서드들은 파일의 한 행(line)을 요소로 하는 스트림을 생성한다. 
+    
+            ```java
+            Stream<String> Files.lines(Path path)
+            Stream<String> Files.lines(Path path, Charset cs)
+            Stream<String> lines() // BufferedReader 클래스의 메서드
+            ```
       
     * 비어있는 스트림 생성하기
     
@@ -6238,24 +6244,28 @@ int[][] arr = {
         
 #### 8) 스트림의 중간 연산
  
-* (1) 스트림 자르기 - skip(), limit()
+* (1) 스트림의 요소 자르기 - skip(), limit()
 
-    * `Stream<T> skip(long n)` : 앞에서 부터 n개 건너뛰기
+    * 문법
     
-    * `Stream<T> limit(long maxSize)` : maxSize 이후의 요소는 잘라낸다.
+        * `Stream<T> skip(long n)` : 앞에서 부터 n개를 건너뛴다. 
+        
+        * `Stream<T> limit(long maxSize)` : maxSize 개수만큼 잘라낸다.
 
     * 예시
     
         ```java
-        IntStream intStream = IntStream.rangeClosed(1, 10); // 12345678910
+        IntStream intStream = IntStream.rangeClosed(1, 10); // 1 부터 10까지의 int 값을 요소로 갖는 Stream을 생성한다. 12345678910
         intStream.skip(3).limit(5).forEach(System.out::print); // 45678
         ```
       
-* (2) 스트림 요소 걸러내기 - filter(), distinct()
+* (2) 스트림의 요소 걸러내기 - filter(), distinct()
 
-    * `Stream<T> filter(Predicate<? super T> predicate)` : 조건(predicate)에 맞는 요소만 걸러낸다.
+    * 문법
     
-    * `Stream<T> distinct()` : 중복을 제거한다.
+        * `Stream<T> filter(Predicate<? super T> predicate)` : 조건(predicate)에 맞는 요소만 걸러낸다.
+        
+        * `Stream<T> distinct()` : 중복을 제거한다.
     
     * 예시
     
@@ -6273,125 +6283,137 @@ int[][] arr = {
         //intStream3.filter(i -> i%2 != 0).filter(i -> i%3 != 0).forEach(System.out::print);
         ```
     
-* (3) 스트림 정렬하기 - sorted()
+* (3) 스트림의 요소 정렬하기 - sorted()
 
-    * `Stream<T> sorted()` : 스트림 요소의 기본 정렬 기준(Comparable)으로 정렬한다.
+    * `sorted()`는 스트림의 요소를 정렬할 때 사용한다.
     
-    * `Stream<T> sorted(Comparator<? super T> comparator)` : 지정된 `Comparator`로 정렬한다.
+        * 문법
+        
+            * `Stream<T> sorted()` : 스트림의 요소를 기본 정렬 기준(Comparable)으로 정렬한다.
+            
+            * `Stream<T> sorted(Comparator<? super T> comparator)` : 스트림의 요소를 지정된 `Comparator`로 정렬한다.
     
-    * 예시 - 문자열 스트림 정렬 방법
-    
-        ```java
-        Stream<String> strStream1 = Stream.of("CC", "aaa", "b", "cc", "dd");
-        strStream1.sorted().forEach(System.out::print);  // 기본 정렬
-        //strStream1.sorted(Comparator.naturalOrder()).forEach(System.out::print); // 기본 정렬
-        //strStream1.sorted((s1, s2) -> s1.compareTo(s2)).forEach(System.out::print); // 람다식도 가능
-        //strStream1.sorted(String::compareTo).forEach(System.out::print); // 위 문장과 동일
-        System.out.println();
-
-        Stream<String> strStream2 = Stream.of("dd", "aaa", "CC", "cc", "b");
-        strStream2.sorted(Comparator.reverseOrder()).forEach(System.out::print); // 기본 정렬 역순
-        //strStream2.sorted(Comparator.<String>naturalOrder().reversed()).forEach(System.out::print);
-        System.out.println();
-
-        Stream<String> strStream3 = Stream.of("dd", "aaa", "CC", "cc", "b");
-        strStream3.sorted(String.CASE_INSENSITIVE_ORDER).forEach(System.out::print); // 대소문자 구분 안함
-        System.out.println();
-
-        Stream<String> strStream4 = Stream.of("dd", "aaa", "CC", "cc", "b");
-        strStream4.sorted(String.CASE_INSENSITIVE_ORDER.reversed()).forEach(System.out::print);
-        System.out.println();
-
-        Stream<String> strStream5 = Stream.of("dd", "aaa", "CC", "cc", "b");
-        strStream5.sorted(Comparator.comparing(String::length)).forEach(System.out::print); // 문자열 길이 순으로 정렬한다.
-        //strStream5.sorted(Comparator.comparingInt(String::length)).forEach(System.out::print); // no 오토박싱
-        System.out.println();
-
-        Stream<String> strStream6 = Stream.of("dd", "aaa", "CC", "cc", "b");
-        strStream6.sorted(Comparator.comparing(String::length).reversed()).forEach(System.out::print);
-        ```
-
-* (4) Comparator의 `comparing()`으로 정렬 기준을 제공한다.
-
-    * `comparing(Function<T, U> keyExtractor)`
-    
-    * `comparing(Function<T, U> keyExtractor, Comparator<U> keyComparator)`
-    
-    * 예시
-    
-        * 학생 스트림(studentStream)을 반(ban)별로 정렬하여 출력하려면 다음과 같이 한다.
+        * 예시 - 문자열 스트림 정렬 방법
         
             ```java
-            studentStream.sorted(Comparator.comparing(Student::getBan)) // 반 별로 정렬
-                      .forEach(System.out::println);
+            Stream<String> strStream1 = Stream.of("CC", "aaa", "b", "cc", "dd");
+            strStream1.sorted().forEach(System.out::print);  // 기본 정렬
+            //strStream1.sorted(Comparator.naturalOrder()).forEach(System.out::print); // 기본 정렬
+            //strStream1.sorted((s1, s2) -> s1.compareTo(s2)).forEach(System.out::print); // 람다식도 가능
+            //strStream1.sorted(String::compareTo).forEach(System.out::print); // 위 문장과 동일
+            System.out.println();
+    
+            Stream<String> strStream2 = Stream.of("dd", "aaa", "CC", "cc", "b");
+            strStream2.sorted(Comparator.reverseOrder()).forEach(System.out::print); // 기본 정렬 역순
+            //strStream2.sorted(Comparator.<String>naturalOrder().reversed()).forEach(System.out::print);
+            System.out.println();
+    
+            Stream<String> strStream3 = Stream.of("dd", "aaa", "CC", "cc", "b");
+            strStream3.sorted(String.CASE_INSENSITIVE_ORDER).forEach(System.out::print); // 대소문자 구분 안함
+            System.out.println();
+    
+            Stream<String> strStream4 = Stream.of("dd", "aaa", "CC", "cc", "b");
+            strStream4.sorted(String.CASE_INSENSITIVE_ORDER.reversed()).forEach(System.out::print);
+            System.out.println();
+    
+            Stream<String> strStream5 = Stream.of("dd", "aaa", "CC", "cc", "b");
+            strStream5.sorted(Comparator.comparing(String::length)).forEach(System.out::print); // 문자열 길이 순으로 정렬한다.
+            //strStream5.sorted(Comparator.comparingInt(String::length)).forEach(System.out::print); // no 오토박싱
+            System.out.println();
+    
+            Stream<String> strStream6 = Stream.of("dd", "aaa", "CC", "cc", "b");
+            strStream6.sorted(Comparator.comparing(String::length).reversed()).forEach(System.out::print);
             ```
+
+    * `Comparator`의 `comparing()`으로 정렬 기준을 제공한다.
+
+        * 문법
+    
+            * `comparing(Function<T, U> keyExtractor)`
+            
+            * `comparing(Function<T, U> keyExtractor, Comparator<U> keyComparator)`
+        
+        * 예시
+        
+            * 학생 스트림(studentStream)을 반(ban)별로 정렬하여 출력하려면 다음과 같이 한다.
+            
+                ```java
+                studentStream.sorted(Comparator.comparing(Student::getBan)) // 반 별로 정렬
+                          .forEach(System.out::println);
+                ```
           
-* (5) Comparator의 `thenComparing()`으로 추가 정렬 기준을 제공한다. (정렬 기준이 여러 개인 경우에 사용)
-
-    * `thenComparing(Comparator<T> other)`
+    * `Comparator`의 `thenComparing()`으로 추가 정렬 기준을 제공한다. (정렬 기준이 여러 개인 경우에 사용)
     
-    * `thenComparing(Function<T, U> keyExtractor)`
-    
-    * `thenComparing(Function<T, U> keyExtractor, Comparator<U> keyComp)`
-
-    * 예시
-    
-        * 학생 스트림(studentStream)을 반(ban)별로 정렬한 다음에, 총점별 내림차순으로 정렬하여 출력한다.
+        * 문법
         
-            ```java
-            class Ex14_5 {
-                public static void main(String[] args) {
-                    Stream<Student> studentStream = Stream.of(
-                            new Student("이자바", 3, 300),
-                            new Student("김자바", 1, 200),
-                            new Student("안자바", 2, 100),
-                            new Student("박자바", 2, 150),
-                            new Student("소자바", 1, 200),
-                            new Student("나자바", 3, 290),
-                            new Student("감자바", 3, 180)
-                    );
+            * `thenComparing(Comparator<T> other)`
             
-                    studentStream.sorted(Comparator.comparing(Student::getBan) // 반별 정렬
-                            .thenComparing(Comparator.naturalOrder()))     	// 기본 정렬
-                            .forEach(System.out::println);
+            * `thenComparing(Function<T, U> keyExtractor)`
             
-            //        studentStream.sorted(Comparator.comparing(Student::getBan)  // 반 별로 정렬
-            //                .thenComparing(Student::getTotalScore, Comparator.reverseOrder()))  // 총점 별로 정렬
-            //                .forEach(System.out::println);
-                }
-            }
-            
-            class Student implements Comparable<Student> {
-                String name;
-                int ban;
-                int totalScore;
-                
-                Student(String name, int ban, int totalScore) {
-                    this.name =name;
-                    this.ban =ban;
-                    this.totalScore =totalScore;
-                }
-            
-                public String toString() {
-                    return String.format("[%s, %d, %d]", name, ban, totalScore);
-                }
-            
-                String getName()     { return name;}
-                int getBan()         { return ban;}
-                int getTotalScore()  { return totalScore;}
-            
-                // 총점 내림차순을 기본 정렬로 한다.
-                public int compareTo(Student s) {
-                    return s.totalScore - this.totalScore;
-                }
-            }
-            ```
+            * `thenComparing(Function<T, U> keyExtractor, Comparator<U> keyComp)`
     
-* (6) map()
+        * 예시
+        
+            * 학생 스트림(studentStream)의 요소를 반(ban)별로 정렬한 다음에, 총점별 내림차순으로 정렬하여 출력한다.
+            
+                ```java
+                class Ex14_5 {
+                    public static void main(String[] args) {
+                        Stream<Student> studentStream = Stream.of(
+                                new Student("이자바", 3, 300),
+                                new Student("김자바", 1, 200),
+                                new Student("안자바", 2, 100),
+                                new Student("박자바", 2, 150),
+                                new Student("소자바", 1, 200),
+                                new Student("나자바", 3, 290),
+                                new Student("감자바", 3, 180)
+                        );
+                
+                        studentStream.sorted(Comparator.comparing(Student::getBan) // 반별 정렬
+                                .thenComparing(Comparator.naturalOrder()))     	// 기본 정렬
+                                .forEach(System.out::println);
+                
+                //        studentStream.sorted(Comparator.comparing(Student::getBan)  // 반 별로 정렬
+                //                .thenComparing(Student::getTotalScore, Comparator.reverseOrder()))  // 총점 별로 정렬
+                //                .forEach(System.out::println);
+                    }
+                }
+                
+                class Student implements Comparable<Student> {
+                    String name;
+                    int ban;
+                    int totalScore;
+                    
+                    Student(String name, int ban, int totalScore) {
+                        this.name = name;
+                        this.ban = ban;
+                        this.totalScore = totalScore;
+                    }
+                
+                    public String toString() {
+                        return String.format("[%s, %d, %d]", name, ban, totalScore);
+                    }
+                
+                    String getName()     { return name;}
+                    int getBan()         { return ban;}
+                    int getTotalScore()  { return totalScore;}
+                
+                    // 총점 내림차순을 기본 정렬로 한다.
+                    public int compareTo(Student s) {
+                        return s.totalScore - this.totalScore;
+                    }
+                }
+                ```
+    
+* (4) map()
 
-    * `Stream<R> map(Function<? super T, ? extends R> mapper)` : 스트림의 요소를 다른 요소로 변환한 새로운 스트림을 반환한다.
-                                                                      
-        * 즉, T Stream을 R Stream으로 변경한다. (Stream<T> -> Stream<R>)
+    * 문법
+
+        * `Stream<R> map(Function<? super T, ? extends R> mapper)` : 스트림 내의 요소를 다른 요소로 변환한 새로운 스트림을 반환한다.
+                                                                          
+            * 즉, T Stream을 R Stream으로 변경한다.
+            
+                * `Stream<T>` -> `Stream<R>`
         
     * 예시
     
@@ -6410,32 +6432,35 @@ int[][] arr = {
         
                 fileStream = Stream.of(fileArr);  // 스트림을 다시 생성한다.
         
+                /* 파일 스트림(Stream<File>)에서 파일 확장자(대문자)를 중복없이 뽑아내기 */
                 fileStream.map(File::getName)                       // Stream<File> → Stream<String>
-                        .filter(s -> s.indexOf('.') != -1)          // 확장자가 있는 것만 남긴다. (확장자가 없는 것은 제외)
-                        .map(s -> s.substring(s.indexOf('.') + 1)) // 확장자로 변환한다.
+                        .filter(s -> s.indexOf('.') != -1)          // 확장자가 있는 것만 남긴다. (.이 있는 것만 남긴다.)
+                        .map(s -> s.substring(s.indexOf('.') + 1)) // 확장자 문자열로 변환한다.
                         .map(String::toUpperCase)                  // 모두 대문자로 변환한다.
                         .distinct()                                //  중복 제거
-                        .forEach(System.out::println);               // JAVA BAK TXT
+                        .forEach(System.out::println);             // JAVA BAK TXT
         
                 System.out.println();
             }
         }
         ```
 
-* (7) flatMap()
+* (5) flatMap()
 
-    * `flatMap()`
+    * 문법
     
-        * 스트림의 요소가 배열(Array)일 때, 모든 요소를 단일 요소 스트림으로 반환한다.
+        * `flatMap()` : 중첩된 구조를 한 단계 제거하고 단일 요소 스트림으로 반환한다. 
     
-        * 그리고 스트림을 요소로 하는 스트림을 하나의 스트림으로 합칠 때도 사용 할 수 있다.
+            * 그리고 스트림을 요소로 하는 스트림을 하나의 스트림으로 합칠 때도 사용 할 수 있다.
+            
+            * 스트림의 스트림을 스트림으로 만들 때 사용한다. 
 
     * 예시
     
         ```java
         public class Ex14_7 {
             public static void main(String[] args) {
-                // Stream의 요소 하나 하나가 String 배열이다.
+                // Stream 내의 각 요소가 String 배열이다.
                 Stream<String[]> strArrStrm = Stream.of(
                         new String[]{"abc", "def", "jkl"},
                         new String[]{"ABC", "GHI", "JKL"}
@@ -6450,13 +6475,14 @@ int[][] arr = {
                         .forEach(System.out::println);
                 System.out.println();
         
+                // 각 문자열의 단어 하나 하나가 Stream의 요소인 것으로 만들고자 한다.
                 String[] lineArr = {
                         "Believe or not It is true",
                         "Do or do not There is no try",
                 };
         
                 Stream<String> lineStream = Arrays.stream(lineArr);
-                lineStream.flatMap(line -> Stream.of(line.split(" +")))
+                lineStream.flatMap(line -> Stream.of(line.split(" +"))) // " +" : 하나 이상의 공백 (정규식)
                         .map(String::toLowerCase)
                         .distinct()
                         .sorted()
@@ -6466,26 +6492,136 @@ int[][] arr = {
         }
         ```
 
-* (8) 스트림의 요소를 소비하지 않고 엿보기 - peek()
+* (6) 스트림의 요소를 소비하지 않고 엿보기 - peek()
 
-    * `Stream<T> peek(Consumer<? super T> action)`
+    * 문법
     
-        * 중간 연산에서 요소 전체를 반복할 때 사용한다. (스트림을 소비 X)
-    
-        * 중간 작업 결과를 확인할 때 사용한다.
-    
-    * `void forEach(Consumer<? super T> action)`
-    
-        * 최종 연산에서 요소 전체를 반복할 때 사용한다. (스트림을 소비 O)
+        * `Stream<T> peek(Consumer<? super T> action)` : 중간 연산에서 요소 전체를 반복할 때 사용한다. (스트림을 소비 X)
+        
+            * 중간 작업 결과를 확인할 때 사용한다.
+        
+        * `void forEach(Consumer<? super T> action)` : 최종 연산에서 요소 전체를 반복할 때 사용한다. (스트림을 소비 O)
 
     * 예시
     
-        * `.peek(s -> System.out.printf("filename=%s%n", s))`
+         ```java
+         .peek(s -> System.out.printf("filename=%s%n", s))
+         .peek(s -> System.out.printf("extension=%s%n", s))
+         ```
+
+#### 9) Optional
+ 
+* (1) Optional<T> 란?
+
+    * `Optional<T>`는 T 타입의 객체를 감싸는 래퍼 클래스이다.
+    
+        * 값이 있을 수도 있고 없을 수도 있는 객체를 감싸고 있는 래퍼 클래스다. 
+
+    * Optional를 사용하는 이유
+    
+        * `NPE`를 발생 시킬 수 있는 `null`을 직접 다루지 않아도 된다.
         
-        * `.peek(s -> System.out.printf("extension=%s%n", s))`
+        * `null` 체크를 직접 하지 않아도 된다. `Optional`에 정의된 메소드를 사용하면 된다. 
+        
+        * 해당 변수가 `null` 일 수도 있다는 것을 명시적으로 표현할 수 있다.
 
+* (2) Optional 객체 생성하기
 
-                                              
+    * ① `Optional.of(value)` : null이 아닌 객체를 담고 있는 Optional 객체를 생성한다. 
+      
+        * value가 null인 경우, NullPointerException이 발생한다.
+
+            ```java
+            String str = "abc";
+            Optional<String> optVal = Optional.of(str);
+            Optional<String> optVal = Optional.of("abc");
+            OPtional<String> optVal = Optional.of(new String("abc");
+            ```
+          
+    * ② `Optional.ofNullable(value)` : null이 될 가능성이 있는 객체를 담고 있는 Optional 객체를 생성한다.
+      
+        * value가 null인 경우, 비어있는 Optional 객체를 반환한다.
+      
+            ```java
+            Optional<String> optVal = Optional.of(null); // NPE 발생
+            Optional<String> optVal = Optional.ofNullable(null); // OK
+            ```
+          
+    * ③ `Optional.empty()` : 비어 있는 Optional 객체를 생성한다. 
+
+        ```java
+        Optional<String> optVal = Optional.empty(); // 빈 객체로 초기화
+        ```
+
+* (3) Optional 객체의 값 가져오기
+
+    * ① `get()` : Optional 객체에 저장된 값을 가져온다.
+
+        * Optional 객체에 저장된 값이 null이면 예외(NoSuchElementException)가 발생한다.
+
+    * ② `orElse()` : Optional 객체에 저장된 값을 가져온다.
+
+        * Optional 객체에 저장된 값이 null이면 인자로 전달된 값을 반환한다.
+
+            ```java
+            Optional<String> optVal1 = Optional.of("abc");
+            Optional<String> optVal2 = Optional.ofNullable(null);
+            
+            String str1 = optVal1.get();      // optVal에 저장된 값을 반환. null이면 예외 발생
+            String str2 = optVal2.orElse(""); // optVal에 저장된 값이 null이면 ""를 반환
+            ```
+          
+    * ③ `orElseGet()` : Optional 객체에 저장된 값을 가져온다.
+      
+        * 값이 null이면 인자로 전달된 람다식의 결과 값을 반환한다.
+
+    * ④ `orElseThrow()` : Optional 객체에 저장된 값을 가져온다.
+      
+        * 값이 null이면 인자로 전달된 예외를 발생시킨다.
+        
+            ```java
+            String str3 = optVal2.orElseGet(String::new); // () -> new String()와 동일
+            String str4 = optVal2.orElseThrow(NullPointerException::new); // 널이면 예외 발생
+            ```
+          
+    * ⑤ `isPresent()` : Optional 객체의 값이 null이 아니면 true, null이면 false를 반환한다.
+              
+        ```java
+        if(Optional.ofNullable(str).isPresent()){
+            System.out.println(str);
+        }
+        ```
+      
+    * ⑥ `ifPresent(Consumer<T> block)` : Optional 객체의 값이 null이 아니면 (있다면) 주어진 람다식을 실행하고 null이면 아무 일도 하지 않는다.
+              
+        ```java
+        Optional.ofNullable(str).ifPresent(System.out::println);
+        ```
+
+* (4) OptionalInt, OptionalLong, OptionalDouble
+
+    * `OptionalInt`, `OptionalLong`, `OptionalDouble`는 기본형 값을 감싸는 래퍼 클래스이다.
+
+* (5) 기본형 Optional에 저장된 값 가져오기
+
+    * 기본형 Optional에 저장된 값을 꺼낼 때 사용하는 메서드는 다음과 같다.
+
+        | 기본형 Optional 클래스 | 값을 반환하는 메서드 |
+        |:----------------------:|:--------------------:|
+        | OptionalInt            | int getAsInt()       |
+        | OptionalLong           | long getAsLong()     |
+        | OptionalDouble         | double getAsDouble() |
+        
+    * 예시
+    
+        ```java
+        OptionalInt opt  = OptionalInt.of(0);   // 0을 저장, isPresent : true
+        OptionalInt opt2 = OptionalInt.empty(); // 0을 저장, isPresent : false
+        
+        System.out.println(opt.getAsInt());  // 0
+        System.out.println(opt2.getAsInt()); // NoSuchElementException 예외 발생
+        ```
+
 ## 14. 입출력(I/O)
 
     
