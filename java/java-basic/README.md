@@ -6702,11 +6702,11 @@ int[][] arr = {
 
     * 그러나 기본형 스트림이 아닌 경우에는 다음과 같은 3개의 메서드만 제공한다.
 
-        * long count()
+        * `long count()`
 
-        * Optional<T> max(Comparator<? super T> comparator)
+        * `Optional<T> max(Comparator<? super T> comparator)`
 
-        * Optional<T> min(Comparator<? super T> comparator)
+        * `Optional<T> min(Comparator<? super T> comparator)`
     
     * 예시 
     
@@ -6740,17 +6740,17 @@ int[][] arr = {
 
 * (4) 리듀싱 - reduce()
 
-    * `reduce()` : 스트림의 요소를 하나씩 줄여가며 누적 연산을 한다.
+    * `reduce()` : 스트림의 요소를 하나씩 줄여가며 연산을 한 다음, 최종 결과를 반환한다.
 
         * `Optional<T> reduce (BinaryOperator<T> accumulator)`
         
-            * 스트림 내의 처음 두 요소를 가지고 연산한 결과와 그 다음 요소를 누적 연산한다.
+            * 스트림 내의 처음 두 요소를 가지고 연산한 결과와 그 다음 요소를 연산하는 방식으로 스트림의 모든 요소를 소모하게 되면 최종 결과를 반환한다.
         
-                * 스트림의 요소가 하나도 없을 때는 결과가 null 일 수 있으므로 반환 타입이 Optional<T> 이다. 
+                * 스트림의 요소가 하나도 없을 때는 결과가 `null` 일 수 있으므로 반환 타입이 `Optional<T>` 이다. 
 
         * `T reduce(T identity, BinaryOperator<T> accumulator)`
         
-            * 초기 값에 스트림의 요소를 하나씩 꺼내 누적 연산을 한다.
+            * 초기 값에 스트림의 모든 요소를 하나씩 꺼내 연산을 한다.
         
         * `U reduce(U identity, BiFunction<U, T, U> accumulator, BinaryOperator<U> combiner)`
 
@@ -6785,8 +6785,6 @@ int[][] arr = {
  
 * (1) collect()
 
-    * collect()는 전체 집계와 그룹별 집계가 가능하다. 
-
     * `collect()`는 스트림의 요소를 수집한다. 매개변수로 `Collector`가 필요하다.
 
         * `R collect(Collector <T, A, R> collector)` : T 요소를 A에 누적한 다음, 결과를 R로 변환해서 반환한다.
@@ -6810,7 +6808,7 @@ int[][] arr = {
       
         * `supplier()` : 요소들이 수집될 공간을 제공한다.
         
-        * `accumulator()` : 스트림의 요소를 어떻게 `supplier()`가 제공한 공간에 누적할 것인지를 정의한다. 
+        * `accumulator()` : `supplier()`가 제공한 공간에 스트림의 요소를 어떻게 누적할 것인지를 정의한다. 
 
         * `combiner()` : 두 저장 공간을 병합할 방법을 제공한다. 
         
@@ -6864,14 +6862,14 @@ int[][] arr = {
 
     * 스트림의 통계
 
-        * `counting()` : 스트림에 있는 요소의 총 개수를 반환한다. 
+        * `counting()` : 요소의 총 개수를 계산한다.
 
             ```java
             long count = stuStream.count();
             long count = stuStream.collect(counting()); // Collectors.counting() [static import 사용]
             ```
           
-        * `summingInt()` : 스트림에 있는 모든 요소에 대한 합계를 반환한다. 
+        * `summingInt()` : Int 타입의 합계를 계산한다. 
 
             ```java
             // 학생의 총점을 모두 더한다. 
@@ -6879,19 +6877,19 @@ int[][] arr = {
             long totalScore = stuStream.collect(summingInt(Student::getTotalScore));
             ```
 
-        * `maxBy()` : 스트림에 있는 요소 중에서 가장 큰 값을 가지는 요소를 Optional로 반환한다.
+        * `maxBy()` : Comparator를 이용해서 최대 값을 계산한다. 
 
             ```java
             OptionalInt topScore = stuStream.mapToInt(Student::getTotalScore).max();
             Optional<Student> topStudent = stuStream
                                 .max(Comparator.comparingInt(Student::getTotalScore));
             Optional<Student> topStudent = stuStream
-                                .collect(maxBy(Comparator.comparingInt(Student::getTotalScore)));
+                                .collect(maxBy(Comparator.comparingInt(Student::getTotalScore))); // 결과는 Optional로 반환된다.
             ```
           
             * `Comparator.comparingInt(Student::getTotalScore)` : 비교 기준 
 
-        * `summarizingInt()` : 다양한 연산 결과(개수, 합계, 평균 ...)를 한 번에 IntSummaryStatistics 객체로 반환한다.
+        * `summarizingInt()` : 다양한 연산 결과(개수, 합계, 평균 ...)를 한 번에 `IntSummaryStatistics` 객체로 반환한다.
 
             ```java
             IntSummaryStatistics stat = stuStream
@@ -6902,7 +6900,7 @@ int[][] arr = {
 
     * 스트림의 리듀싱
 
-        * `reducing()` : 그룹별 집계를 한다.
+        * `reducing()` : 스트림의 요소를 하나씩 줄여가며 연산을 한 다음, 최종 결과를 반환한다. (`전체 집계` 또는 `그룹별 집계`)
         
             * 문법
             
@@ -6927,7 +6925,7 @@ int[][] arr = {
                 Optional<Integer> max = intStream.boxed().collect(reducing(Integer::max)); // 그룹별 리듀싱 가능
                 ```
               
-                * `boxed()` : 기본형 스트림을 객체가 저장된 스트림으로 변환한다. 
+                * `boxed()` : 기본형 스트림을 스트림으로 변환한다. 
                 
                     * Ex) `IntStream` -> `Stream<Integer>`
                     
@@ -6941,13 +6939,13 @@ int[][] arr = {
                 int grandTotal = stuStream.collect(reducing(0, Student::getTotalScore, Integer::sum));
                 ```
                 
-            * `reducing()`과 `reduce()`의 차이점 
+            * `reduce()`과 `reducing()`의 차이점 
 
-                * `reducing()` : 전체 집계, 그룹별 집계 모두 가능하다.
-                
                 * `reduce()` : 전체 집계를 한다.
-
-    * `joining()` : 문자열 스트림의 요소를 모두 연결한다. 
+                
+                * `reducing()` : 전체 집계 또는 그룹별 집계를 한다.
+                
+    * `joining()` : 문자열 스트림의 모든 요소를 구분자로 연결한다.
 
         * 예시
         
@@ -7151,115 +7149,267 @@ int[][] arr = {
             Collector groupingBy(Function classifier, Supplier mapFactory, Collector downstream)
             ```
 
-            * 즉, n개의 그룹으로 분할한다.
+            * 스트림을 n개의 그룹으로 분할해서 Map에 저장한 다음, 반환한다.
             
-            * 그리고 분할의 결과는 Map에 담겨 반환된다.
-
                 * `groupingBy(Function<T, K> classifier)`
         
                     * K를 키(key)로 하고 T를 담고 있는 list를 값(value)으로 한 Map 객체를 만들어 반환한다.
         
                 * `groupingBy(Function<T, K> classifier, Collector<T, A, D> downstream)`
         
-                    * K를 키(key)로 하고 T를 누적한 D 객체를 값(value)으로 한 Map 객체를 만들어 반환한다.
+                    * K를 키(key)로 하고 T를 담고 있는 D 객체를 값(value)으로 한 Map 객체를 만들어 반환한다.
         
                 * `groupingBy(Function<T, K> classifier, Supplier<Map<K,D>> mapFactory ,Collector<T, A, D> downstream)` 
         
-                    * Supplier가 제공하는 Map에서 K를 키(key)로 하고 T를 누적한 D 객체를 값(value)으로 한 Map 객체를 만들어 반환한다.
+                    * K를 키(key)로 하고 T를 담고있는 D 객체를 값(value)으로 한 Supplir가 제공하는 Map 객체에 담아서 반환한다.
+
+                        * `classifier` : `groupBy()`의 기준 값으로 사용 할 값을 반환하는 람다식을 지정한다. 
+                                                
+                        * `mapFactory` : `groupBy()`의 결과로 만들어지는 Map을 생성하는 람다식을 지정한다.
+                                                
+                        * `downstream` : `groupBy()`의 결과로 얻게되는 Collector를 지정한다.
 
         * 예시
+        
+            * 학생을 반별로 그룹화해서 Map에 저장한다. 
 
-            ```java
-            Map<Integer, List<Student>> stuByBan = stuStream          // 학생을 반별로 그룹화
-                    .collect(groupingBy(Student::getBan, toList()));  // toList() 생략 가능
-            ```
+                ```java
+                Map<Integer, List<Student>> stuByBan = stuStream          // 학생을 반별로 그룹화
+                        .collect(groupingBy(Student::getBan, toList()));  // toList() 생략 가능
+                ```
+              
+                * 키(Key)가 반이고 값(Value)이 학생을 그룹별로 담고 있는 List인 Map 객체를 생성해서 반환한다. 
 
-            ```java
-            Map<Integer, Map<Integer, List<Student>>> stuByHakAndBan = stuStream  // 다중 그룹화 
-                            .collect(groupingBy(Student::getHak,                  // 1. 학년별 그룹화 
-                                    groupingBy(Student::getBan)                   // 2. 반별 그룹화
-                            ));
-            ```
-
-            ```java
-            Map<String, Set<Student.Level>> stuByScoreGroup = stuStream
-                    .collect(groupingBy(s-> s.getHak() + "-" + s.getBan(),                // 다중 그룹화(학년별, 반별)
-                            mapping(s-> {
-                                if(s.getScore() >= 200) return Student.Level.HIGH;
-                                else if(s.getScore() >= 100) return Student.Level.MID;
-                                else                    return Student.Level.LOW;
-                            } , toSet())
-                    ));
-            ```
-
-    * groupingBy의 예시
-    
-        * (1) 학생의 성별을 키(Key)로 해서 남학생 List와 여학생 List가 저장된 Map을 반환
-
-            ```java
-            /*  .collect(Collectors.groupingBy(Student::getGender));
-                → 성별을 키(Key)로 하고 Student를 담고 있는 List를 값(Value)으로 하는 Map 객체를 생성하여 반환  */
+            * 학생을 학년별로 그룹화해서 Map에 저장한 다음, 그 안에 다시 반별로 그룹화해서 Map에 저장한다.
+            
+                ```java
+                Map<Integer, Map<Integer, List<Student>>> stuByHakAndBan = stuStream  // 다중 그룹화 
+                                .collect(groupingBy(Student::getHak,                  // 1. 학년별 그룹화 
+                                        groupingBy(Student::getBan)                   // 2. 반별 그룹화
+                                ));
+                ```
+              
+                * 키(Key)가 학년이고 값(Value)이 Map인 Map 객체를 생성해서 반환한다.
                 
-            Map<Student.Gender, List<Student>> mapByGender = totalList.stream()
-                                                                      .collect(Collectors.groupingBy(Student::getGender));
-            ```
+                * 내부에 있는 Map은 키(Key)가 반이고 값(Value)이 학생을 그룹별로 담고 있는 List다.
+                    
+            * 학년별과 반별로 그룹화한 다음, 성적 등급으로 변환(mapping)하여 Set에 저장한다.  
+            
+                ```java
+                // Map의 첫 번째 Integer : 학년, 두 번째 Integer : 반 
+                Map<Integer, Map<Integer, Set<Student.Level>>> stuByHakAndBan =
+                        Stream.of(stuArr)
+                                .collect(groupingBy(Student::getHak,  // 다중 그룹화 (학년별, 반별) 
+                                         groupingBy(Student::getBan, 
+                                                mapping(s -> {        // 스트림 내의 요소를 성적 등급(Levl)으로 변환
+                                                    if(s.getScore() >= 200)       return Student.Level.HIGH;
+                                                    else if(s.getScore() >= 100)  return Student.Level.MID;
+                                                    else                          return Student.Level.LOW;
+                                                }, toSet())
+                                         ))
+                                );
+                ```
+              
+                * `mapping()` : 스트림 내의 요소를 다른 요소로 변환한다. 
+                
+        * 그룹화 이후 변환(mapping) 및 집계
+        
+            * `Collectors.groupingBy()`는 그룹화를 한 다음, 변환(mapping)이나 집계를 할 수 있도록 두 번째 매개변수로 다음과 같은 `Collector`를 지정 할 수 있다.
+        
+                * `mapping()` : 스트림 내의 요소를 다른 요소로 변환한 다음, 변환된 요소를 수집할 Collector를 지정한다. 
+                 
+                    * `Collector<T, ?, R> mapping( Function<T, U> mapper, Collector<U, A, R> collector )` : T를 U로 변환한 후, U를 R에 수집한다.
+                
+                * `averagingDouble()` : 평균 값을 계산한다.
+                
+                    * `Collector<T, ?, Double> averagingDouble( ToDoubleFunction<T> mapper )` : T를 Double로 변환한 후, 평균 값을 계산한다.
+                
+                * `counting()` : 요소의 총 개수를 계산한다.
+                
+                    * `Collector<T, ?, Long> counting()`
+        
+                * `joining()` : 문자열 스트림의 모든 요소를 구분자로 연결한다.
+                
+                    * `Collector<CharSequence, ?, String> joining( CharSequence delimiter)`
+                
+                * `maxBy()` : Comparator를 이용해서 최대 값을 계산한다. 
+                
+                    * `Collector<T, ?, Optional<T>> maxBy(Comparator<T> comparator)`
+                
+                * `minBy()` : Comparator를 이용해서 최소 값을 계산한다. 
+                
+                    * `Collector<T, ?, Optional<T>> minBy(Comparator<T> comparator)`
+                
+                * `summingInt()` : Int 타입의 합계를 계산한다. 
+                
+                    * `Collector<T, ?, Integer> summingInt(ToIntFunction)`
+                
+                * `summingLong()` : Long 타입의 합계를 계산한다. 
+                
+                    * `Collector<T, ?, Long> summingLong(ToLongFunction)`
+                
+                * `summingDouble()` : Double 타입의 합계를 계산한다. 
+                
+                    * `Collector<T, ?, Double> summingDouble(ToDoubleFunction)`
 
-        * (2) 학생의 거주 도시를 키(Key)로 해서 학생 이름 List가 저장된 Map을 반환
-
+        * 실습코드 
+        
             ```java
-            /*  1. groupingBy(Function<T, K> classifier, Collector<T, A, D> downstream) 
+            import java.util.*;
+            import java.util.function.*;
+            import java.util.stream.*;
+            import static java.util.stream.Collectors.*;
+            import static java.util.Comparator.*;
             
-                   Function<T, K> classifier     : Map에서 키(key)로 사용할 요소를 지정한다.
-                                                   이번 예제에서는 "Student::getCity"가 해당 됨
-                                                
-                   Collector<T, A, D> downstream : Map에서 값(value)으로 사용할 요소를 지정한다.
-                                                   이번 예제에서는 "Collectors.mapping(Student::getName, Collectors.toList())"가 해당 됨
-                                                   
-            	2. Collectors.mapping(Student::getName, Collectors.toList()) 
+            class Student {
+            	String name;
+            	boolean isMale; // 성별
+            	int hak;		// 학년
+            	int ban;		// 반
+            	int score;
             
-                   Collectors.mapping()의 반환 값은 Collector이다.
-                   
-                   첫 번째 매개변수는 어떤 요소 변환(mapping)할 것인지 지정한다. 
-                   (이번 예제에서는 학생 객체를 이름으로 변환한다.)
-                   
-                   두 번째 매개변수는 첫 번째 매개변수 값을 어떠한 컬렉션에 넣을지 지정한다. 
-                   (이번 예제에서는 List에 넣을 것이기 때문에 toList()를 지정한다.) */
-                   
-            Map<Student.City, List<String>> mapByCity = totalList.stream()
-                                                                 .collect(
-                                                                           Collectors.groupingBy(
-                                                                                        Student::getCity,
-                                                                                        Collectors.mapping(Student::getName, Collectors.toList())
-                                                                          )
-                                                                  );
+            	Student(String name, boolean isMale, int hak, int ban, int score) { 
+            		this.name	= name;
+            		this.isMale	= isMale;
+            		this.hak	= hak;
+            		this.ban	= ban;
+            		this.score  = score;
+            	}
+            
+            	String	getName()  { return name;}
+            	boolean isMale()   { return isMale;}
+            	int		getHak()   { return hak;}
+            	int		getBan()   { return ban;}
+            	int		getScore() { return score;}
+            
+            	public String toString() { 
+            		return String.format("[%s, %s, %d학년 %d반, %3d점]", name, isMale ? "남":"여", hak, ban, score); 
+            	}
+            
+            	enum Level {
+            		HIGH, MID, LOW
+            	}
+            }
+            
+            class StreamEx8 {
+            	public static void main(String[] args) {
+            		Student[] stuArr = {
+            			new Student("나자바", true,  1, 1, 300),	
+            			new Student("김지미", false, 1, 1, 250),	
+            			new Student("김자바", true,  1, 1, 200),	
+            			new Student("이지미", false, 1, 2, 150),	
+            			new Student("남자바", true,  1, 2, 100),	
+            			new Student("안지미", false, 1, 2,  50),	
+            			new Student("황지미", false, 1, 3, 100),	
+            			new Student("강지미", false, 1, 3, 150),	
+            			new Student("이자바", true,  1, 3, 200),	
+            
+            			new Student("나자바", true,  2, 1, 300),	
+            			new Student("김지미", false, 2, 1, 250),	
+            			new Student("김자바", true,  2, 1, 200),	
+            			new Student("이지미", false, 2, 2, 150),	
+            			new Student("남자바", true,  2, 2, 100),	
+            			new Student("안지미", false, 2, 2,  50),	
+            			new Student("황지미", false, 2, 3, 100),	
+            			new Student("강지미", false, 2, 3, 150),	
+            			new Student("이자바", true,  2, 3, 200)	
+            		};
+            
+            		System.out.printf("1. 단순그룹화(반별로 그룹화)%n");
+            		Map<Integer, List<Student>> stuByBan = Stream.of(stuArr)
+            				                                     .collect(groupingBy(Student::getBan));
+            		
+            		for(List<Student> ban : stuByBan.values()) {
+            			for(Student s : ban) {
+            				System.out.println(s);
+            			}
+            		}
+            
+            		System.out.printf("%n2. 단순그룹화(성적별로 그룹화)%n");
+            		Map<Student.Level, List<Student>> stuByLevel = Stream.of(stuArr)
+            				.collect(groupingBy(s-> {
+            						 if(s.getScore() >= 200) return Student.Level.HIGH;
+            					else if(s.getScore() >= 100) return Student.Level.MID;
+            					else                         return Student.Level.LOW;
+            				}));
+            
+            		TreeSet<Student.Level> keySet = new TreeSet<>(stuByLevel.keySet());
+            
+            		for(Student.Level key : keySet) {
+            			System.out.println("["+key+"]");
+            
+            			for(Student s : stuByLevel.get(key))
+            				System.out.println(s);
+            			System.out.println();
+            		}
+            
+            		System.out.printf("%n3. 단순그룹화 + 통계(성적별 학생수)%n");
+            		Map<Student.Level, Long> stuCntByLevel = Stream.of(stuArr)
+            				.collect(groupingBy(s-> {
+            						 if(s.getScore() >= 200) return Student.Level.HIGH;
+            					else if(s.getScore() >= 100) return Student.Level.MID;
+            					else                         return Student.Level.LOW;
+            				}, counting()));
+            
+            		for(Student.Level key : stuCntByLevel.keySet())
+            			System.out.printf("[%s] - %d명, ", key, stuCntByLevel.get(key));
+            		System.out.println();
+            /*
+            		for(List<Student> level : stuByLevel.values()) {
+            			System.out.println();
+            			for(Student s : level) {
+            				System.out.println(s);
+            			}
+            		}
+            */
+            		System.out.printf("%n4. 다중그룹화(학년별, 반별)%n");
+            		Map<Integer, Map<Integer, List<Student>>> stuByHakAndBan =
+                      Stream.of(stuArr)
+            				.collect(groupingBy(Student::getHak,
+            						 groupingBy(Student::getBan)
+            				));
+            
+            		for(Map<Integer, List<Student>> hak : stuByHakAndBan.values()) {
+            			for(List<Student> ban : hak.values()) {
+            				System.out.println();
+            				for(Student s : ban)
+            					System.out.println(s);
+            			}
+            		}
+            
+            		System.out.printf("%n5. 다중그룹화 + 통계(학년별, 반별 1등)%n");
+            		Map<Integer, Map<Integer, Student>> topStuByHakAndBan = Stream.of(stuArr)
+            				.collect(groupingBy(Student::getHak,
+            						 groupingBy(Student::getBan,
+            							collectingAndThen(
+            								maxBy(comparingInt(Student::getScore)),
+            								Optional::get
+            							)
+            						)
+            				));
+            
+            		for(Map<Integer, Student> ban : topStuByHakAndBan.values())
+            			for(Student s : ban.values())
+            				System.out.println(s);
+            
+            		System.out.printf("%n6. 다중그룹화 + 통계(학년별, 반별 성적그룹)%n");
+            		Map<String, Set<Student.Level>> stuByScoreGroup = Stream.of(stuArr)
+            			.collect(groupingBy(s-> s.getHak() + "-" + s.getBan(),
+            					mapping(s-> {
+            						 if(s.getScore() >= 200) return Student.Level.HIGH;
+            					else if(s.getScore() >= 100) return Student.Level.MID;
+            						 else                    return Student.Level.LOW;
+            					} , toSet())
+            			));
+            
+            		 Set<String> keySet2 = stuByScoreGroup.keySet();
+            
+            		for(String key : keySet2) {
+            			System.out.println("["+key+"]" + stuByScoreGroup.get(key));
+            		}
+            	}  // main의 끝
+            }
             ```
-          
-            ```java
-            
-            ```
-          
-* (3) 그룹화 이후 변환(mapping) 및 집계
-
-    * Collectors.groupingBy() 메서드는 그룹화를 한 다음, 변환(mapping)이나 집계를 할 수 있도록 두 번째 매개변수 값으로 다음과 같은 Collector를 가질 수 있다.
-
-        * Collector<T, ?, R> mapping( Function<T, U> mapper, Collector<U, A, R> collector ) : T를 U로 변환한 후, U를 R에 수집
-        
-        * Collector<T, ?, Double> averagingDouble( ToDoubleFunction<T> mapper ) : T를 Double로 변환한 후, 평균 값을 산출한다.
-
-        * Collector<T, ?, Long> counting() : 요소 개수를 산출
-
-        * Collector<CharSequence, ?, String> joining( CharSequence delimiter) : 문자열 스트림의 모든 요소를 구분자로 연결한다.
-        
-        * Collector<T, ?, Optional<T>> maxBy(Comparator<T> comparator) : Comparator를 이용해서 최대 T를 산출
-        
-        * Collector<T, ?, Optional<T>> minBy(Comparator<T> comparator) : Comparator를 이용해서 최소 T를 산출
-
-        * Collector<T, ?, Integer> summingInt(ToIntFunction) : int 타입의 합계를 산출
-        
-        * Collector<T, ?, Long> summingLong(ToLongFunction) : long 타입의 합계를 산출
-        
-        * Collector<T, ?, Double> summingDouble(ToDoubleFunction) : double 타입의 합계를 산출
-
 
 ## 14. 입출력(I/O)
 
