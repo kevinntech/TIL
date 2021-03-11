@@ -2004,5 +2004,328 @@
     }
     ```
 
+## 3. 참고 자료
+
+#### 1) AssertJ
+
+* 아래 내용은 [테스트 주도 개발(Test Driven Development) 시작하기](https://book.naver.com/bookdb/book_detail.nhn?bid=16267566 "테스트 주도 개발(Test Driven Development) 시작하기")를 참고하여 작성하였습니다. 
+
+    * (1) AssertJ
+    
+        * AssertJ는 다양한 단언(Assertion)을 제공하는 Java 라이브러리다.
+        
+            * JUnit은 단언(Assertion)에 대한 표현력이 부족하다.
+            
+            * AssertJ를 사용하면 테스트 코드의 표현력이 높아진다.
+    
+    * (2) AssertJ 사용법 
+    
+        * AssertJ의 기본 사용법
+        
+            * `assertThat(실제 값).검증 메소드(기대 값)`
+    
+        * AssertJ 검증 메소드
+        
+            * 기본 검증 메소드
+            
+                * 거의 모든 타입에 사용 할 수 있는 검증 메소드는 다음과 같다.  
+            
+                    * `isEqualTo(값)` : 값과 같은지 검증한다.
+                    
+                    * `isNotEqualTo(값)` : 값과 같지 않은지 검증한다.
+                    
+                    * `isNull()` : Null인지 검증한다.
+                    
+                    * `isNotNull()` : Null이 아닌지 검증한다.
+        
+                    * `isIn(값 목록)` : 값 목록에 포함되어 있는지 검증한다.
+                    
+                    * `isNotIn(값 목록)` : 값 목록에 포함되어 있지 않은지 검증한다.
+                    
+                * Comparable 인터페이스를 구현한 타입 또는 int, double과 같은 숫자 타입에 다음 메소드를 사용 할 수 있다.
+                
+                    * `isLessThan(값)` : 값 보다 작은지 검증한다.
+                    
+                    * `isLessThanOrEqualTo(값)` : 값 보다 작거나 같은지 검증한다.
+                    
+                    * `isGreaterThan(값)` : 값 보다 큰지 검증한다. 
+                    
+                    * `isGreaterThanOrEqualTo(값)` : 값 보다 크거나 같은지 검증한다.
+                    
+                    * `isBetween(값1, 값2)` : 값1과 값2 사이에 포함되는지 검증한다.
+
+                * boolean, Boolean 타입에 다음 메소드를 사용 할 수 있다.
+                
+                    * `isTrue()` : 값이 true인지 검증한다.
+                    
+                    * `isFalse()` : 값이 false인지 검증한다.
+                    
+            * String에 대한 검증 메소드
+            
+                * 특정 값을 포함하는지 검증하는 메소드는 다음과 같다.
+                
+                    * `contains(CharSequence... values)` : 인자로 지정한 문자열들을 모두 포함하고 있는지 검증한다. 
+                    
+                    * `containsOnlyOnce(CharSequence sequence)` : 해당 문자열을 딱 한 번만 포함하는지 검증한다.
+                    
+                    * `containsOnlyDigits()` : 숫자만 포함하는지 검증한다. 
+                    
+                    * `containsWhitespaces()` : 공백 문자를 포함하고 있는지 검증한다.
+                    
+                    * `containsOnlyWhitespaces()` : 공백 문자만 포함하는지 검증한다.
+                    
+                        * 공백 문자 여부는 `Character.isWhitespace()` 메서드를 따른다.
+                        
+                    * `containsPattern(CharSequence regex)` : 지정한 정규 표현식에 일치하는 문자를 포함하는지 검증한다.
+                    
+                    * `containsPattern(Pattern regex)` : 지정한 정규 표현식에 일치하는 문자를 포함하는지 검증한다.
+
+                * 특정 값을 포함하지 않는지 검증하는 메소드는 다음과 같다.
+                
+                    * `doesNotContain(CharSequence... values)` : 인자로 지정한 문자열들을 모두 포함하고 있지 않은지 검증한다.
+                    
+                    * `doesNotContainAnyWhitespaces()` : 공백 문자를 포함하고 있지 않은지를 검증한다.
+                    
+                    * `doesNotContainOnlyWhitespaces()` : 공백 문자만 포함하고 있지 않은지를 검증한다.
+                    
+                    * `doesNotContainPattern(CharSequence regex)` : 정규 표현식에 일치하는 문자를 포함하고 있지 않은지를 검증한다.
+                    
+                    * `doesNotContainPattern(Pattern pattern)` : 정규 표현식에 일치하는 문자를 포함하고 있지 않은지를 검증한다. 
+                    
+                * 특정 문자열로 시작하거나 끝나는지를 검증할 때 사용하는 메소드는 다음과 같다.
+                
+                    * `startsWith(CharSequence prefix)` : 지정한 문자열로 시작하는지를 검증한다.
+                    
+                    * `doesNotStartWith(CharSequence prefix)` : 지정한 문자열로 시작하지 않는지를 검증한다.
+                    
+                    * `endsWith(CharSequence suffix)` : 지정한 문자열로 끝나는지를 검증한다.
+                    
+                    * `doesNotEndWith(CharSequence suffix)` : 지정한 문자열로 끝나지 않는지를 검증한다.
+                    
+            * 숫자에 대한 검증 메소드
+            
+                * 숫자 타입에 대해 검증하는 메소드는 다음과 같다.
+                
+                    * `isZero()` : 0 인지를 검증한다.
+                    
+                    * `isNotZero()` : 0이 아닌지를 검증한다.
+                    
+                    * `isOne()` : 1 인지를 검증한다.
+                   
+                    * `isPositive()` : 양수 인지를 검증한다.
+                   
+                    * `isNotPositive()` : 양수가 아닌지를 검증한다.
+                    
+                    * `isNegative()` : 음수 인지를 검증한다.
+                    
+                    * `isNotNegative()` : 음수가 아닌지를 검증한다.
+                    
+            * 날짜 / 시간에 대한 검증 메소드
+            
+                * LocalDateTime, LocalDate, Date 등 날짜와 시간 관련 타입에 대해 검증하는 기본 메소드는 다음과 같다.
+                
+                    * `isBefore(비교할 값)` : 비교할 값 보다 이전인지 검증한다.
+                    
+                    * `isBeforeOrEqualTo(비교할 값)` : 비교할 값 보다 이후인지 검증한다.
+                    
+                    * `isAfter(비교할 값)` : 비교할 값 보다 이후인지 검증한다.
+                    
+                    * `isAfterOrEqualTo(비교할 값)` : 비교할 값 보다 이후이거나 같은지 검증한다.
+                    
+                * LocalDateTime, OffsetDateTime, ZonedDateTime 타입은 다음과 같은 검증 메소드를 추가적으로 제공한다.
+                
+                    * `isEqualToIgnoringNanos(비교할 값)` : 나노 시간을 제외한 나머지 값이 같은지 검증한다.
+                    
+                        * 즉, 초 단위까지 값이 같은지 검증한다.
+                        
+                    * `isEqualToIgnoringSeconds(비교할 값)` : 초 이하 시간을 제외한 나머지 값이 같은지 검증한다.
+                    
+                        * 즉, 분 단위까지 값이 같은지 검증한다.
+                        
+                    * `isEqualToIgnoringMinutes(비교할 값)` : 분 이하 시간을 제외한 나머지 값이 같은지 검증한다.
+                    
+                        * 즉, 시 단위까지 값이 같은지 검증한다.
+                        
+                    * `isEqualToIgnoringHours(비교할 값)` : 시 이하 시간을 제외한 나머지 값이 같은지 검증한다.
+                    
+                        * 즉, 일 단위까지 값이 같은지 검증한다.
+                        
+            * 컬렉션에 대한 검증 메소드
+            
+                * List, Set에 대해 검증하는 메소드는 다음과 같다.
+                
+                    * `hasSize(int expected)` : 컬렉션의 크기가 지정한 값과 같은지 검증한다.
+                    
+                    * `contains(E... values)` : 컬렉션이 지정한 값을 포함하는지 검증한다.
+                    
+                    * `containsOnly(E... values)` : 컬렉션이 지정한 값만 포함하는지 검증한다.
+                    
+                    * `containsAnyOf(E... values)` : 컬렉션이 지정한 값 중 일부를 포함하는지 검증한다.
+                    
+                    * `containsOnlyOnce(E... values)` : 컬렉션이 지정한 값을 한 번만 포함하는지 검증한다.
+                    
+                * Map에 대해 검증하는 메소드는 다음과 같다.
+                
+                    * `containsKey(K key)` : Map이 지정한 키를 포함하는지 검증한다.
+                    
+                    * `containsKey(K... keys)` : Map이 지정한 키들을 포함하는지 검증한다.
+                    
+                    * `containsOnlyKeys(K... keys)` : Map이 지정한 키만 포함하는지 검증한다.
+                    
+                    * `doesNotContainKeys(K... keys)` : Map이 지정한 키들을 포함하지 않는지 검증한다.
+                    
+                    * `containsValues(VALUE... values)` : Map이 지정한 값들을 포함하는지 검증한다.
+                    
+                    * `contains(Entry<K, V>... values)` : Map이 지정한 `Entry<K, V>`를 포함하는지 검증한다.
+                    
+            * Exception 관련 검증 메소드
+            
+                * `assertThatThrownBy()` : 예외 발생 여부를 검증한다. 
+                
+                    * `isInstanceOf()` : 발생한 예외 타입을 검증한다.
+                    
+                        ```java
+                        assertThatThrownBy(() -> readFile(new File("nofile.txt")))
+                          .isInstanceOf(IOException.class);
+                        ```
+                      
+                * `assertThatExceptionOfType()` : 특정 타입의 예외가 발생 했는지 검증한다.
+                
+                    ```java
+                    assertThatExceptionOfType(IOException.class)
+                        isThrownBy(() -> {
+                          readFile(new File("nofile.txct"))
+                        })
+                    ```
+                  
+                    * `isThrownBy()` : 예외가 발생 할 코드 블록을 지정한다.
+                      
+                * `assertThatCode()`, `doesNotThrowAnyException()`를 사용하면 예외가 발생하지 않는지를 검증 할 수 있다.
+                
+                    ```java
+                    assertThatCode(() -> {
+                      readFile(new File("pom.xml"));
+                    }).doesNotThrowAnyException(); 
+                    ```
+                  
+            * 여러 검증을 한 번에 수행하기
+            
+                * `SoftAssertions` : 여러 검증을 한 번에 수행할 때 사용한다. (JUnit 5의 `assertAll()`과 유사하다)
+                
+                    ```java
+                    SoftAssertions soft = new SoftAssertions();
+                    soft.assertThat(1).isBetween(0, 2);
+                    soft.assertThat(1).isGreaterThan(2);
+                    soft.assertThat(1).isLessThan(0);
+                    soft.assertAll();
+                    ```
+                  
+                    * `SoftAssertions`의 `assertThat()`는 해당 시점에 바로 검증을 수행하지 않는다. 
+                    
+                        * 1은 2 보다 작기 때문에 두 번째 `assertThat()`에서 검증을 통과 할 수가 없는데 이 코드를 실행하는 시점에는 검증 실패가 발생하지 않는다.
+                    
+                    * `assertAll()`가 실행될 때, 검증을 진행한다.
+                    
+            * 테스트에 설명 붙이기
+            
+                * `as()` : 테스트에 설명을 붙인다.
+                
+                    ```java
+                    assertThat(id).as("ID 검사").isEqualTo("abc");
+                    ```
+                   
+#### 2) MockMvc
+
+* (1) MockMvc
+
+    * `MockMvc` : 웹 애플리케이션을 WAS에 배포하지 않고도 스프링 MVC의 동작을 재현 할 수 있는 클래스를 말한다.
+
+* (2) MockMvc의 주요 메소드
+
+    * ① MockMvc 주입 받기
+
+        * `@WebMvcTest`, `@Autowired MockMvc mockMvc`
+        
+            * `@WebMvcTest`를 사용하면 자동으로 MockMvc 객체를 빈으로 등록한다. 그러므로 MockMvc 빈을 주입 받으면 된다.
+        
+        * `@SpringBootTest`, `@AutoConfigureMockMvc`, `@Autowired MockMvc mockMvc`
+        
+            * `@SpringBootTest`를 사용하면 자동으로 MockMvc 객체가 빈으로 등록되지 않는다. 
+            
+            * 그래서 `@AutoConfigureMockMvc`를 사용한 다음, MockMvc 빈을 주입 받는다.
+        
+    * ② `perform()` : 요청을 전송한다.
+    
+        * 해당 메소드는 `ResultActions` 객체를 리턴하며 `ResultActions` 객체는 `andExpect()`, `andDo()`, `andReturn()`를 제공한다.
+
+        * `perform()`와 함께 사용되는 메소드는 다음과 같다. 
+
+            * `get()`, `post()`, `put()`, `delete()` 
+        
+                * HTTP 메소드를 지정한다. 
+        
+                * 해당 메서드의 인자로 주소를 지정한다.
+        
+            * `param()` , `params()`
+        
+                * 요청 파라미터를 지정한다.
+        
+                * 단, 인자 값은 `String`만 허용된다.
+        
+                * 요청 파라미터가 하나일 때는 `param()`을, 여러 개일 때는 `params()`를 사용한다. 
+
+    * ③ `andExpect()` : 요청에 대한 응답을 검증한다. (즉, `perform()`의 결과를 검증)
+
+        * `andExpect()`와 함께 사용되는 메소드는 다음과 같다. 
+
+            * `status()` : 상태 코드를 검증한다.
+
+                * `isOk()` : 200
+
+                * `isNotFound()` : 404
+
+                * `isMethodNotAllowed()` : 405
+
+                * `isInternalServerError()` : 500
+
+                * `is(int status)` : 상태 코드를 직접 지정한다.
+
+            * `view()` : 리턴하는 뷰 이름을 검증한다. 
+
+                * `view().name("study")` : 리턴하는 뷰 이름이 `study` 인가?  
+
+            * `redirectUrl()` : 리다이렉트 응답을 검증한다.
+
+                * `redirectUrl("/study")` : `/study`로 리다이렉트 되었는가?
+
+            * `model()` : 컨트롤러에서 저장한 모델의 정보를 검증한다.
+
+            * `content()` : 응답 본문의 내용을 검증한다.
+
+            * `jsonPath()` : JSON 응답 값을 필드별로 검증한다.
+
+                * `$`를 기준으로 필드명을 명시한다.
+                
+    * ④ `andDo()` : `print()`와 함께 요청과 응답에 대한 정보를 출력한다.
+
+* (3) 실습하기
+
+    ```java
+    @RunWith(SpringRunner.class)
+    @WebMvcTest(UserController.class)
+    public class UserControllerTest {
+    
+        @Autowired
+        MockMvc mockMvc; // Web Mvc Test를 만들때 주로 사용하는 MockMvc 객체를 주입 받는다.
+    
+        @Test
+        public void hello() throws Exception {
+            mockMvc.perform(get("/hello")) // "/hello" 주소로 HTTP GET 요청을 한다.
+                    .andExpect(status().isOk()) // status가 OK 일 것으로 예상한다. 
+                    .andExpect(content().string("hello")); // 응답 본문의 내용이 hello 일 것으로 예상한다.
+        }
+    
+    }
+    ```
 
 
