@@ -1737,3 +1737,272 @@
     
     }
     ```
+  
+  
+#### 6) Mock 객체 확인
+
+* Mock 객체의 행동을 검증한다.
+
+* Mock 객체가 어떻게 사용이 됐는지 확인할 수 있다.
+   
+    * ① 특정 메소드가 특정 매개변수로 몇 번 호출 되었는지 또는 전혀 호출되지 않았는지를 검증한다.
+    
+        ```java
+        @ExtendWith(MockitoExtension.class)
+        class StudyServiceTest {
+        
+            @Test
+            void createNewStudy(@Mock MemberService memberService,
+                                @Mock StudyRepository studyRepository){
+                StudyService studyService = new StudyService(memberService, studyRepository);
+                assertNotNull(studyService);
+        
+                Member member = new Member();
+                member.setId(1L);
+                member.setEmail("keesun@email.com");
+        
+                Study study = new Study(10, "테스트");
+                      
+                when(memberService.findById(1L)).thenReturn(Optional.of(member));      
+                when(studyRepository.save(study)).thenReturn(study);
+        
+                studyService.createNewStudy(1L, study);
+        
+                assertEquals(member, study.getOwner());
+        
+                // Mock 객체(memberService)의 notify()가 어떤 인자 값이든 사용해서 1번 호출 되었는지를 검증한다.
+                verify(memberService, times(1)).notify(any());
+                // Mock 객체(memberService)의 validate()가 어떤 인자 값이든 사용해서 전혀 호출되지 않았는지를 검증한다.
+                verify(memberService, never()).validate(any());
+        
+            }
+        
+        }
+        ```
+      
+    * ② 특정 메소드가 어떤 순서대로 호출 되었는지를 검증한다.
+    
+        ```java
+        @ExtendWith(MockitoExtension.class)
+        class StudyServiceTest {
+        
+            @Test
+            void createNewStudy(@Mock MemberService memberService,
+                                @Mock StudyRepository studyRepository){
+                StudyService studyService = new StudyService(memberService, studyRepository);
+                assertNotNull(studyService);
+        
+                Member member = new Member();
+                member.setId(1L);
+                member.setEmail("keesun@email.com");
+        
+                Study study = new Study(10, "테스트");
+                      
+                when(memberService.findById(1L)).thenReturn(Optional.of(member));      
+                when(studyRepository.save(study)).thenReturn(study);
+        
+                studyService.createNewStudy(1L, study);
+        
+                // 순서에 대한 검증
+                InOrder inOrder = inOrder(memberService);     // Mock 객체로 부터 InOrder를 만든다.
+                inOrder.verify(memberService).notify(study);  // Mock 객체인 memberService의 notify(study)가 먼저 호출되고
+                inOrder.verify(memberService).notify(member); // notify(member)를 호출 되었는지를 검증한다.
+        
+            }
+        
+        }
+        ```
+
+    * ③ 특정 시점 이후에 아무 일도 벌어지지 않았는지를 검증한다.
+    
+        ```java
+        @ExtendWith(MockitoExtension.class)
+        class StudyServiceTest {
+        
+            @Test
+            void createNewStudy(@Mock MemberService memberService,
+                                @Mock StudyRepository studyRepository){
+                StudyService studyService = new StudyService(memberService, studyRepository);
+                assertNotNull(studyService);
+        
+                Member member = new Member();
+                member.setId(1L);
+                member.setEmail("keesun@email.com");
+        
+                Study study = new Study(10, "테스트");
+        
+                when(memberService.findById(1L)).thenReturn(Optional.of(member));
+                when(studyRepository.save(study)).thenReturn(study);
+        
+                studyService.createNewStudy(1L, study);
+        
+                assertEquals(member, study.getOwner());
+        
+                verify(memberService, times(1)).notify(study);
+                verifyNoMoreInteractions(memberService);
+            }
+        
+        }
+        ```
+      
+    * ④ 특정 시간 이내에 호출됐는지 검증한다. 
+    
+        ```java
+        verify(mock, timeout(100)).someMethod();
+        verify(mock, timeout(100).times(1)).someMethod();
+        ```
+     
+#### 7) Mockito BDD 스타일 API
+
+* (1) BDD(Behaviour-Driven Development, 행동 주도 개발)
+   
+    * `BDD`는 애플리케이션이 어떻게 "행동"해야 하는지에 대한 공통된 이해를 구성하는 방법이다.
+    
+    * `TDD`에서 창안했다.
+    
+* (2) 행동에 대한 스펙
+   
+    * ① `Title` : 행동의 이름
+
+    * ② `Narrative` : 행동에 대한 설명
+
+        * `As a`
+    
+        * `I want`   
+    
+        * `so that`
+
+    * ③ `인수 기준(Acceptance Criteria)` : 인수 테스트(Acceptance Testing)을 진행할 때 그 기준이 되는 항목이다.
+
+        * `Given` : 테스트를 위해 준비하는 과정이다.
+    
+            * 테스트에 사용하는 변수, 입력 값 등을 정의하거나, Mock 객체를 정의하는 구문도 Given에 포함된다.                      
+    
+        * `When` : 실제 테스트를 실행하는 과정이다.
+    
+        * `Then` : 테스트를 검증하는 과정이다.
+        
+            * 예상한 값과 실제 실행을 통해서 나온 값을 검증한다.
+
+    * [참고] 
+    
+        * `인수 테스트(Acceptance Testing)`는 해당 시스템이 실제 운영 환경에서 사용될 준비가 되었는지 최종적으로 확인하는 테스팅 단계를 말한다.
+
+* (3) 실습하기 - BDD 스타일
+     
+    ```java
+    @ExtendWith(MockitoExtension.class)
+    class StudyServiceTest {
+    
+        @Test
+        void createNewStudy(@Mock MemberService memberService,
+                            @Mock StudyRepository studyRepository){
+            // Given : 이러한 상황이 주어지면
+            StudyService studyService = new StudyService(memberService, studyRepository);
+            assertNotNull(studyService);
+    
+            Member member = new Member();
+            member.setId(1L);
+            member.setEmail("keesun@email.com");
+    
+            Study study = new Study(10, "테스트");
+    
+            when(memberService.findById(1L)).thenReturn(Optional.of(member));
+            when(studyRepository.save(study)).thenReturn(study);
+    
+            // When : 뭔가를 하면
+            studyService.createNewStudy(1L, study);
+    
+            // Then : 결과는 이러할 것이다.
+            assertEquals(member, study.getOwner());
+            verify(memberService, times(1)).notify(study);
+            verifyNoMoreInteractions(memberService); // memberService는 더 이상 사용되지 않을 것이다.
+    
+            /*
+             * 위의 코드에서 Mockito의 API 중 when(), verify()는 BDD 스타일에 어울리지 않는다.
+             * */
+        }
+    
+    }
+    ```
+          
+* (4) Mockito의 BDD 스타일 API
+
+    * `Mockito`는 `BddMockito`라는 클래스를 통해 BDD 스타일의 API를 제공한다. 
+    
+    * 앞서 살펴본 코드에서 `when()`, `verify()`는 BDD 스타일에 어울리지 않는다. 그러므로 다음과 같이 변경하자.
+    
+        * ① `when()`를 `given()`으로 변경한다.
+        
+            ```java
+            given(memberService.findById(1L)).willReturn(Optional.of(member));
+            given(studyRepository.save(study)).willReturn(study);
+            ```
+          
+        * ② `verify()`를 `then()`으로 변경한다.
+        
+            ```java
+            then(memberService).should(times(1)).notify(study);
+            then(memberService).shouldHaveNoMoreInteractions();
+            ```
+
+#### 8) Mockito 연습 문제
+
+* 연습문제
+
+    * studyRepository Mock 객체의 save 메소드를 호출 시 study를 리턴 하도록 만들기.
+    
+        * `given(studyRepository.save(study)).willReturn(study);`     
+    
+    * study의 status가 OPENED로 변경됐는지 확인
+    
+        * `assertEquals(StudyStatus.OPENED, study.getStatus());` 
+    
+    * study의 openedDataTime이 null이 아닌지 확인
+    
+        * `assertNotNull(study.getOpenedDateTime());` 
+    
+    * memberService의 notify(study)가 호출 됐는지 확인.
+    
+        * `then(memberService).should().notify(study);`
+    
+* 실습하기
+
+    ```java
+    @ExtendWith(MockitoExtension.class)
+    class StudyServiceTest {
+    
+        @Mock MemberService memberService;
+        @Mock StudyRepository studyRepository;
+    
+        // ...
+    
+        @DisplayName("다른 사용자가 볼 수 있도록 스터디를 공개한다.")
+        @Test
+        void openStudy() {
+            // Given
+            StudyService studyService = new StudyService(memberService, studyRepository);
+            Study study = new Study(10, "더 자바, 테스트");
+            
+            // TODO studyRepository Mock 객체의 save 메소드를 호출 시 study를 리턴하도록 만들기.
+            given(studyRepository.save(study)).willReturn(study);
+    
+            // When
+            studyService.openStudy(study);
+    
+            // Then
+            // TODO study의 status가 OPENED로 변경 됐는지 확인
+            assertEquals(StudyStatus.OPENED, study.getStatus());
+    
+            // TODO study의 openedDataTime이 null이 아닌지 확인
+            assertNotNull(study.getOpenedDateTime());
+    
+            // TODO memberService의 notify(study)가 호출 됐는지 확인.
+            then(memberService).should().notify(study);
+        }
+    
+    }
+    ```
+
+
+
