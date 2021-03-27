@@ -34,3 +34,34 @@
     
     * 본인 컴퓨터에 설치 했던 `PostgreSQL`를 Stop 하거나 도커를 이용하여 PostgreSQL를 설치할 때 포트를 변경하여 설치하자.
     
+## 3. 스프링 부트 
+
+* 스프링 시큐리티 status: 999 페이지로 리다이렉트
+
+    * 로그인을 할 때, 로그인은 되는데 `/error`로 리다이렉트 되며 아래와 같은 에러가 발생한다. 
+    
+        ```
+        {"timestamp":"2021-03-13T08:36:50.301+0000","status":999,"error":"None","message":"No message available"}
+        ```
+  
+    * 로그인을 할 때 사용되는 정적 리소스를 찾지 못하면 에러 페이지로 리다이렉트 된다고 한다. 스프링 시큐리티 설정에서 다음 내용을 추가해서 해결하자. 
+    
+        ```
+        @Configuration
+        @EnableWebSecurity
+        @RequiredArgsConstructor
+        public class SecurityConfig extends WebSecurityConfigurerAdapter {
+        
+            @Override
+            public void configure(WebSecurity web) throws Exception {
+                // 스택 오버 플로우 답변
+                //web.ignoring().antMatchers("/favicon.ico", "/resources/**", "/error");
+      
+                // 내 프로젝트에 실제 추가한 코드
+                web.ignoring().antMatchers("/error");
+            }
+        }
+        ```
+        
+        * [참고] https://stackoverflow.com/questions/61029340/spring-security-redirects-to-page-with-status-code-999/61029341
+         
