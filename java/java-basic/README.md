@@ -2582,23 +2582,23 @@ int[][] arr = {
         
         * `void putAll(Map t)` : 지정된 Map의 모든 key-value 쌍을 추가한다.
         
-        * `boolean containsKey(Object key)` : 지정된 key 객체와 일치하는 Map의 key 객체가 있는지 확인한다.
+        * `boolean containsKey(Object key)` : 지정된 key 객체가 Map에 있는지 확인한다.
         
-        * `boolean containsValue(Object value)` : 지정된 value 객체와 일치하는 Map의 value 객체가 있는지 확인한다.
+        * `boolean containsValue(Object value)` : 지정된 value 객체가 Map에 있는지 확인한다.
         
         * `Object get(Object key)` : 지정된 key 객체와 일치하는 value 객체를 찾아서 반환한다.
         
         * `Object remove(Object key)` : 지정된 key 객체와 일치하는 key-value 객체를 삭제한다.
         
-        * `Set entrySet()` : Map에 저장되어 있는 key-value 쌍을 Map.Entry 타입의 객체로 저장한 Set으로 반환한다.
-        
-        * `Set keySet()` : Map에 저장된 모든 key 객체를 반환한다.
+        * `Set entrySet()` : Map에 저장된 모든 entry 객체(key-value 쌍)를 Set에 저장해서 반환한다.
+            
+            * `Entry` : 키와 값의 한 쌍을 의미한다.
+            
+        * `Set keySet()` : Map에 저장된 모든 key 객체를 Set에 저장해서 반환한다.
         
         * `Collection values()` : Map에 저장된 모든 value 객체를 반환한다.
         
-            * `Entry` : 키와 값의 한 쌍을 의미한다.
-            
-                * Map에서 값(value)은 중복을 허용하기 때문에 반환 타입이 Collection이며 키(key)는 중복을 허용하지 않기 때문에 반환 타입이 Set이다.  
+            * `Map`에서 `값(value)`은 중복을 허용하기 때문에 반환 타입이 `Collection`이며 `키(key)`는 중복을 허용하지 않기 때문에 반환 타입이 `Set`이다.  
 
 #### 2) List
 
@@ -2670,9 +2670,9 @@ int[][] arr = {
         		    2) contains()로 꺼낸 객체가 list1에 있는지 확인
         		    3) remove(i)로 해당 객체를 list2에서 삭제
         		*/
-        		for(int i= list2.size()-1; i >= 0; i--) {
-        			if(list1.contains(list2.get(i)))
-        				list2.remove(i); // 인덱스가 i인 객체를 삭제한다.
+        		for(int i = list2.size() - 1; i >= 0; i--) {
+        		    if(list1.contains(list2.get(i)))
+        			    list2.remove(i); // 인덱스가 i인 객체를 삭제한다.
                         // list2.remove(new Integer(1)); // 내용이 1인 것을 삭제 (삭제할 때 조심하자!)
         		}
         		print(list1, list2);
@@ -2769,7 +2769,7 @@ int[][] arr = {
         
             ![image 27](images/img27.png)
         
-        * `이중 원형 연결 리스트(Doubly Circular Linked List)` : 이중 연결 리스트에서 첫 번째 요소와 마지막 요소를 서로 연결 시킨 것이다.
+        * `이중 원형 연결 리스트(Doubly Circular Linked List)` : 이중 연결 리스트에서 첫 번째 노드와 마지막 노드를 서로 연결 시킨 것이다.
         
             ![image 28](images/img28.png)
             
@@ -2779,7 +2779,7 @@ int[][] arr = {
 
 * (3) Stack
 
-    * 스택(Stack)은 LIFO 구조다. 마지막에 저장한 것을 제일 먼저 꺼내게 된다.
+    * `스택(Stack)`은 LIFO 구조다. 마지막에 저장한 것을 제일 먼저 꺼내게 된다.
 
         ![image 29](images/img29.png)
     
@@ -2835,7 +2835,7 @@ int[][] arr = {
 
         * `Object peek()` : 삭제 없이 요소를 읽어 온다.
         
-            * Queue가 비어 있으며 null을 반환 (예외 발생 X)
+            * Queue가 비어 있으면 null을 반환 (예외 발생 X)
             
     * Queue는 인터페이스이다. 그래서 Queue를 구현한 클래스를 사용해야 한다.
     
@@ -2872,7 +2872,7 @@ int[][] arr = {
 
 * (5) 덱(Deque)
 
-    * 덱(Deque)은 양쪽 끝에서 저장(offer)과 삭제(poll)가 가능하다.
+    * `덱(Deque)`은 양쪽 끝에서 저장(offer)과 삭제(poll)가 가능하다.
 
         ![image 31](images/img31.png)
 
@@ -2882,7 +2882,7 @@ int[][] arr = {
 
     * 우선 순위 큐?
 
-        * 우선 순위 큐는 저장 순서에 관계 없이 우선 순위가 높은 것부터 꺼낸다. 
+        * `우선 순위 큐`는 저장 순서에 관계 없이 우선 순위가 높은 것부터 꺼낸다. 
         
             * 제일 작은 값 부터 꺼낸다.
     
@@ -2920,7 +2920,7 @@ int[][] arr = {
 
 * (1) Iterator, ListIterator, Enumeration
       
-    * 컬렉션에 저장된 요소를 접근 하는데 사용되는 인터페이스다.
+    * 컬렉션에 저장된 요소에 접근 할 때 사용되는 인터페이스다.
 
 * (2) Enumeration
 
@@ -2938,11 +2938,9 @@ int[][] arr = {
             
             * Iterator의 hasNext()와 같다.
 
-        * `boolean hasMoreElements()` : 읽어 올 요소가 남아 있는지 확인한다. 
-        
-            * 있으면 true, 없으면 false를 반환한다.
-            
-            * Iterator의 hasNext()와 같다.
+        * `Object nextElement()` : 다음 요소를 읽어 온다.
+    
+            * nextElement()를 호출하기 전에 hasMoreElements()를 호출해서 읽어 올 요소가 있는지 확인하는 것이 안전하다.
 
 * (3) Iterator
 
@@ -2964,7 +2962,7 @@ int[][] arr = {
     
             * next()를 호출하기 전에 hasNext()를 호출해서 읽어 올 요소가 있는지 확인하는 것이 안전하다.
 
-        * `void remove()` : next()로 읽어 온 요소를 삭제한다. 
+        * `void remove()` : `next()`로 읽어 온 요소를 삭제한다. 
     
             * next()를 호출한 다음에 remove()를 호출 해야 한다 (선택적 기능)
             
@@ -3070,7 +3068,7 @@ int[][] arr = {
             
             // 람다식은 1~5의 범위에 속한 임의의 정수를 반환한다.
             Arrays.setAll(arr, (i) -> (int) (Math.random() * 5) + 1); 
-            System.out.println("arr="+Arrays.toString(arr));
+            System.out.println("arr = " + Arrays.toString(arr));
             ```
           
             * `setAll()`를 호출할 때는 함수형 인터페이스를 구현한 객체를 매개변수로 지정하던가 아니면 람다식을 지정해야 한다.
@@ -3117,7 +3115,7 @@ int[][] arr = {
 
 #### 5) Comparator와 Comparable
 
-* 정렬(sort)는 두 대상을 비교하여 자리 바꿈을 반복 하는 것이다.
+* 정렬(sort)은 두 대상을 비교하여 자리 바꿈을 반복 하는 것이다.
 
     * 정렬 방법은 변경 되지 않으며 정렬 기준만 달라지기 때문에 정렬 기준만 전달하면 된다.
 
@@ -3143,7 +3141,7 @@ int[][] arr = {
       
     * `compare()`와 `compareTo()`는 두 객체의 비교 결과를 반환 하도록 구현해야 한다.
     
-        * 비교하는 왼쪽이 작으면 음수, 같으면 0, 왼쪽이 크면 양수를 반환한다. 
+        * 비교하는 왼쪽이 작으면 `음수`, 같으면 `0`, 왼쪽이 크면 `양수`를 반환한다. 
     
             ```java
             public final class Integer extends Number implements Comparable {
@@ -3207,7 +3205,7 @@ int[][] arr = {
 
         * String의 Comparable 구현은 문자열이 사전 순으로 정렬 되도록 작성되어 있다.
         
-            * String의 오름차순 정렬(사전 순서)은 공백, 숫자, 대문자, 소문자의 순으로 정렬되는 것을 의미
+            * String의 오름차순 정렬(사전 순서)은 공백, 숫자, 대문자, 소문자의 순서로 정렬되는 것을 의미
 
         * String은 대소문자를 구분하지 않고 비교하는 Comparator를 상수 형태로 제공한다.
 
@@ -3237,8 +3235,8 @@ int[][] arr = {
         /*
         
          Comparator<Item>를 구현하는 ItemCompare 클래스를 작성한다.
-         compare()는 오름차순(알파벳은 ABC, 한글은 가나다, 숫자는 123)이면 음수 값을, 같다면 0, 내림차순은 양수 값을 리턴한다.
-         여기서 우선 순위는 품목 (오름차순), 이름 (오름차순), 생산일자 (내림차순) 순이다.
+         compare()는 비교하는 왼쪽이 작으면 음수, 두 객체가 같으면 0, 왼쪽이 크면 양수를 반환한다. (오름차순 기준)
+         여기서 우선 순위는 무게 (오름차순), 이름 (오름차순), 생산일자 (내림차순) 순이다.
         
         */
         
@@ -3955,7 +3953,7 @@ int[][] arr = {
         
     * 하나의 새로운 프로세스를 생성하는 것 보다 하나의 새로운 스레드를 생성하는 것이 더 적은 비용이 든다.
     
-        * `2 프로세스 드1 스레드` vs `1 프로세스 2 스레드`
+        * `2 프로세스 1 스레드` vs `1 프로세스 2 스레드`
         
             * 싱글 스레드 프로세스가 2개 vs 멀티 스레드 프로세스가 1개이며 대신 스레드가 2개 
         
