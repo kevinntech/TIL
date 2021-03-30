@@ -1394,41 +1394,45 @@
     
     * 예시
     
-        ```java
-        @Entity
-        @Inheritance(strategy = InheritanceType.JOINED)
-        @DiscriminatorColumn
-        public abstract class Item{
-          @Id @GeneratedValue
-          private Long id;
-      
-          private String name;
-      
-          private int price;
-        }   
-        ```
-      
-        * 상속 매핑은 부모 클래스에 `@Inheritance`를 사용해야 한다. 매핑 전략을 지정해야 하는데 여기서는 조인 전략을 사용한다.
-        
-        * `@DiscriminatorColumn`는 부모 클래스에 구분 컬럼을 지정한다. 해당 컬럼으로 저장된 자식 테이블을 구분 할 수 있다.
-        
-            * 구분 컬럼의 기본 이름은 DTYPE이다.
+        * 조인 전략을 사용한 예제 코드는 다음과 같다.
+    
+            ```java
+            @Entity
+            @Inheritance(strategy = InheritanceType.JOINED)
+            @DiscriminatorColumn
+            public abstract class Item{
+              @Id @GeneratedValue
+              private Long id;
+          
+              private String name;
+          
+              private int price;
+            }   
+            ```
+          
+            * 상속 매핑은 부모 클래스에 `@Inheritance`를 사용해야 한다. 매핑 전략을 지정해야 하는데 여기서는 조인 전략을 사용한다.
             
-            * `@DiscriminatorColumn`의 name 옵션으로 변경 할 수 있다.
+            * `@DiscriminatorColumn`는 부모 클래스에 구분 컬럼을 지정한다. 해당 컬럼으로 저장된 자식 테이블을 구분 할 수 있다.
+            
+                * 구분 컬럼의 기본 이름은 DTYPE이다.
 
-                ```java
-                @Entity
-                @DiscriminatorValue("M")
-                public class Movie extends Item{
-                  private String director;
-              
-                  private int price;
-                }   
-                ```
+            * `@DiscriminatorColumn`의 name 옵션으로 구분 컬럼의 이름을 변경 할 수 있다.
+
+        * 해당 엔티티를 저장할 때, 구분 컬럼에 입력할 값을 지정 할 수도 있다.
+        
+            ```java
+            @Entity
+            @DiscriminatorValue("M")
+            public class Movie extends Item{
+              private String director;
+          
+              private int price;
+            }   
+            ```
       
-        * `@DiscriminatorValue("M")` : 해당 엔티티를 저장할 때, 구분 컬럼에 입력할 값을 지정한다.
-
-        * 만약 영화(Movie) 엔티티를 저장하면 구분 컬럼인 DTYPE에 M이 저장된다.
+            * `@DiscriminatorValue("M")` : 해당 엔티티를 저장할 때, 구분 컬럼에 입력할 값을 지정한다.
+    
+            * 만약 영화(Movie) 엔티티를 저장하면 구분 컬럼인 DTYPE에 M이 저장된다.
 
 * (2) 단일 테이블 전략
 
@@ -1439,7 +1443,11 @@
         * 그리고 구분 컬럼(DTYPE)으로 어떤 자식 데이터가 저장되었는지 구분한다.
     
         * 이 전략을 사용할 때 주의점은 자식 엔티티가 매핑한 컬럼은 모두 null을 허용 해야한다는 점이다.
-
+        
+            * 예를 들어, Book 엔티티를 저장하면 ITEM 테이블의 AUTHOR, ISBN만 사용하고 다른 엔티티와 매핑된
+        
+            * ARTIST, DIRECTOR, ACTOR 컬럼은 사용하지 않으므로 null이 입력되기 때문이다.
+            
     * 예시
     
         ```java
@@ -1455,11 +1463,7 @@
           private int price;
         }   
         ```
-      
-        * 예를 들어, Book 엔티티를 저장하면 ITEM 테이블의 AUTHOR, ISBN만 사용하고 다른 엔티티와 매핑된
-    
-        * ARTIST, DIRECTOR, ACTOR 컬럼은 사용하지 않으므로 null이 입력되기 때문이다.
-        
+             
         * `@DiscriminatorColumn`을 지정하지 않아도 `DTYPE`이 추가된다.
 
 * (3) 구현 클래스 마다 테이블 전략
@@ -1493,7 +1497,8 @@
     ```java
     @MappedSuperclass
     public abstract class BaseEntity{
-      @Column(name = "INSERT_MEMBER")
+      // 없어도 됨. @Column를 사용 할 수 있다는 것을 보여주기 위함
+      @Column(name = "INSERT_MEMBER") 
       private String createdBy;
   
       private LocalDateTime createdDate;
@@ -1542,21 +1547,25 @@
         * 즉, 프록시 객체의 메소드를 호출하면 초기화가 진행된다.
 
             ```java
-            Member member = em.getReference(Member.class, “id1”);
+            Member member = em.getReference(Member.class, "id1");
             member.getName(); // 프록시 객체의 메소드 호출
             ```
 
     * 프록시의 초기화 과정
     
-        * ① 프록시 객체에 member.getName()을 호출해서 실제 데이터를 조회한다.
+        ![image 17](images/img17.png)
+    
+        * ① 프록시 객체(`member`)에 `getName()`을 호출해서 실제 데이터를 조회한다.
           
-        * ② 프록시 객체는 실제 엔티티가 생성되어 있지 않으면 영속성 컨텍스트에 실제 엔티티 생성을 요청하는데 이것을 초기화라 한다.
+        * ② 프록시 객체는 실제 엔티티 객체가 생성되어 있지 않으면 영속성 컨텍스트에 실제 엔티티 객체 생성을 요청하는데 이것을 초기화라 한다.
           
         * ③ 영속성 컨텍스트는 데이터베이스를 조회해서 실제 엔티티 객체를 생성한다.
           
-        * ④ 프록시 객체는 생성된 실제 엔티티 객체의 참조를 Member 타입의 target 멤버변수에 보관한다.
+        * ④ 프록시 객체는 생성된 실제 엔티티 객체의 참조를 `Member` 타입의 `target` 멤버변수에 보관한다.
+        
+            * ② ~ ④의 과정은 `target`에 값이 없을 때만 진행된다. 
           
-        * ⑤ 프록시 객체는 실제 엔티티 객체의 getName()을 호출해서 결과를 반환한다.
+        * ⑤ 프록시 객체는 실제 엔티티 객체의 `getName()`을 호출해서 결과를 반환한다.
         
 * 프록시 정리
 
@@ -1590,11 +1599,13 @@
     
     * ② `지연 로딩(LAZY LOADING)`: 연관된 엔티티를 실제 사용할 때까지 데이터베이스 조회를 지연하는 방식이다.
     
-        * 연관된 엔티티를 프록시로 조회한다. 프록시를 실제 사용할 때, 초기화하면서 데이터베이스를 조회한다.
+        * 연관된 엔티티를 프록시 객체로 가져온다. 프록시를 실제 사용할 때, 초기화하면서 데이터베이스를 조회한다.
     
-        * 예시 : `member.getTeam().getName()`처럼 조회한 팀 엔티티를 실제 사용하는 시점에 데이터베이스를 조회해서 프록시 객체를 초기화한다.
-    
-            * 조회 대상이 영속성 컨텍스트에 이미 있으면 프록시 객체가 아닌 실제 객체를 사용한다.
+        * 예시 : `em.find(Member.class, "member1")` 처럼 호출할 때, 회원(member1)을 조회하고 회원의 team 멤버변수에 프록시 객체를 넣어둔다.
+            
+            * `member.getTeam().getName()`처럼 팀 엔티티를 실제 사용하는 시점에 데이터베이스를 조회해서 프록시 객체를 초기화한다.
+        
+                * 조회 대상이 영속성 컨텍스트에 이미 있으면 프록시 객체가 아닌 실제 객체를 사용한다.
     
         * 설정 방법 : `@ManyToOne(fetch = FetchType.LAZY)`
         
@@ -1604,29 +1615,57 @@
 
     * 즉시 로딩(EAGER LOADING)을 적용하면 예상하지 못한 쿼리가 발생한다.
 
-    * 즉시 로딩은 JPQL에서 N+1 문제를 일으킨다.
+    * 즉시 로딩은 JPQL에서 `N+1` 문제를 일으킨다.
+
+        ```java
+        Team teamA = new Team();
+        teamA.setName("teamA");
+        em.persist(teamA);
+        
+        Team teamB = new Team();
+        teamB.setName("teamB");
+        em.persist(teamB);
+        
+        Member member1 = new Member();
+        member1.setUsername("member1");
+        member1.setTeam(teamA);
+        em.persist(member1);
+        
+        Member member2 = new Member();
+        member2.setUsername("member2");
+        member2.setTeam(teamB);
+        em.persist(member2);
+        
+        em.flush();
+        em.clear();
+        
+        List<Member> members = em.createQuery("select m from Member m", Member.class)
+                .getResultList();
+        ```
 
         * `N+1 문제` : 처음에 쿼리 1개를 실행 했을 때, 얻은 결과의 개수(N개)만큼 추가 쿼리가 발생하는 문제를 말한다.
-
-        * N+1 문제 해결 방안 (연관된 엔티티를 함께 조회해야 되는 경우)
-        
-            * JPQL의 fetch 조인을 이용한다.
-
-            * 또는 `@EntityGraph`를 이용한다.
             
-            * 또는 `@BatchSize`를 이용 할 수도 있다.
-
-    * `@ManyToOne`, `@OneToOne`은 기본 값이 즉시 로딩이므로 LAZY로 설정해야 한다.
+            * 지연 로딩을 사용하더라도 Loop를 이용하면 N+1 문제가 발생 할 수 있다.
+            
+            * 해결 방안은 다음과 같다. 
+            
+                * JPQL의 fetch 조인을 이용한다.
+    
+                * 또는 `@EntityGraph`를 이용한다.
+                
+                * 또는 `@BatchSize`를 이용 할 수도 있다.
+                
+    * `@ManyToOne`, `@OneToOne`의 기본 값은 즉시(EAGER) 로딩이므로 `LAZY`로 설정해야 한다.
     
         * `@XToOne` 시리즈 
 
 ### 3. 영속성 전이: CASCADE
 
-* CASCADE는 특정 엔티티를 영속 상태로 만들 때 연관된 엔티티도 함께 영속 상태로 만들고 싶을 때 사용한다.
+* `CASCADE`는 특정 엔티티를 영속 상태로 만들 때 연관된 엔티티도 함께 영속 상태로 만들고 싶을 때 사용한다.
 
-    * `@OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)`
-
-* 부모만 영속 상태로 만들면 연관된 자식 엔티티까지 함께 영속화해서 저장한다.
+    * 부모만 영속 상태로 만들면 연관된 자식 엔티티까지 함께 영속화해서 저장한다.
+    
+        * `@OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)`
 
 * 주의사항
 
@@ -1638,11 +1677,11 @@
     
 * CASCADE의 종류
 
-    * ALL: 모두 적용
+    * `ALL` : 모두 적용
 
-    * PERSIST: 영속
+    * `PERSIST` : 영속
 
-    * REMOVE: 삭제
+    * `REMOVE` : 삭제
     
     * ...
     
@@ -1654,19 +1693,19 @@
 
 * 주의사항
 
-    * `고아 객체 제거`는 참조가 제거된 엔티티는 다른 곳에서 참조하지 않는 고아 객체로 판단하고 삭제하는 기능이다.
-
     * 특정 엔티티가 개인 소유하는 엔티티에만 사용해야 한다.
 
-    * orphanRemoval는 `@OneToOne`, `@OneToMany`에만 사용할 수 있다.
+    * `orphanRemoval`는 `@OneToOne`, `@OneToMany`에만 사용할 수 있다.
 
-    * 고아 객체 제거 기능을 활성화 하면, 부모를 제거할 때 자식도 함께 제거된다. (부모를 제거하면 자식은 고아가 되기 때문이다.)
+    * 고아 객체 제거 기능을 활성화 하면, 부모를 제거할 때 자식도 함께 제거된다. 
+    
+        * 이것은 `CascadeType.REMOVE` 처럼 동작한다.
 
 * 영속성 전이 + 고아 객체, 생명주기
 
-    * `CascadeType.ALL + orphanRemovel=true` 
+    * `CascadeType.ALL + orphanRemovel=true` : 두 옵션을 모두 활성화 하면 부모 엔티티를 통해서 자식의 생명주기를 관리할 수 있다.
 
-        * 두 옵션을 모두 활성화 하면 부모 엔티티를 통해서 자식의 생명주기를 관리할 수 있다.
+        * 도메인 주도 설계(DDD)의 Aggregate Root 개념을 구현할 때, 유용하다.
 
 ## 9. 값 타입
 
@@ -1696,9 +1735,9 @@
 
         * ① `기본값 타입`
     
-            * 자바 기본 타입(int, double)
+            * 자바 기본 타입(int, double ...)
         
-            * 래퍼 클래스(Integer, Long)
+            * 래퍼 클래스(Integer, Long ...)
         
             * String
 
@@ -1722,23 +1761,27 @@
 
         * int, double 같은 기본 타입(primitive type)은 절대 공유되지 않는다.
 
-        * 기본 타입은 항상 값을 복사하기 때문이다.
+            * 기본 타입은 항상 값을 복사하기 때문이다.
+        
+            * 그래서 기본 타입을 값 타입으로 사용 했을 때, 안전하다.
 
-        * Integer 같은 래퍼 클래스나 String 같은 특수한 클래스는 공유 가능한 객체이지만 변경 불가능하다.
+        * Integer 같은 래퍼 클래스나 String 같은 특수한 클래스는 공유 가능한 객체이지만 변경 불가능(Immutable)하다.
         
 * (2) 임베디드 타입(복합 값 타입)
 
-    * 임베디드 타입(embedded type)은 새로운 값 타입을 직접 정의해서 사용하는 것을 말한다.
+    * `임베디드 타입(embedded type)`은 새로운 값 타입을 직접 정의해서 사용하는 것을 말한다.
     
-    * 주로 기본 값 타입들을 모아서 만들기 때문에 “복합 값 타입”이라고도 한다.
-    
-    * 임베디드 타입은 int, String과 같은 값 타입이다.
+        * 주로 기본 값 타입들을 모아서 만들기 때문에 `복합 값 타입`이라고도 한다.
+        
+        * 임베디드 타입도 int, String과 같은 값 타입이다.
 
-    * 사용 방법
+    * 임베디드 타입 사용 방법
 
-        * `@Embeddable` : 값 타입을 정의하는 곳에 사용한다.
+        * `@Embeddable` : 값 타입을 정의하는 곳에 표시한다.
+            
+            * 기본 생성자 필수
     
-        * `@Embedded` : 값 타입을 사용하는 곳에 사용한다.
+        * `@Embedded` : 값 타입을 사용하는 곳에 표시한다.
 
         * 예시
         
@@ -1789,7 +1832,6 @@
                 * */
           
             }
-
             ```
 
     * 임베디드 타입과 테이블 매핑
