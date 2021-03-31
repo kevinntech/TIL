@@ -1713,7 +1713,7 @@
 
 * JPA의 데이터 타입은 크게 `엔티티 타입`과 `값 타입`으로 나눌 수 있다.
 
-    * (1) 엔티티 타입
+    * ① 엔티티 타입
 
         * `엔티티 타입`은 `@Entity`로 정의하는 객체이다.
 
@@ -1721,7 +1721,7 @@
 
         * 예) 회원 엔티티의 키나 나이 값을 변경해도 식별자로 인식 가능하다. 
 
-    * (2) 값 타입(Value Type)
+    * ② 값 타입(Value Type)
 
         * `값 타입`은 int, Integer, String처럼 단순히 값으로 사용하는 자바 기본 타입이나 객체를 말한다.
 
@@ -1745,46 +1745,137 @@
 
         * ③ `컬렉션 값 타입(collection value type)`
         
-* (1) 기본 값 타입
-
-    * 예를 들어 `String name`, `int age`가 기본 값 타입이다.
-
-    * 생명주기를 엔티티에 의존한다.
-  
-        * Ex) 회원 엔티티를 삭제하면 이름, 나이 필드도 함께 삭제된다.
-
-    * 값 타입은 공유하면 안 된다.
-
-        * Ex) 회원 이름 변경 시 다른 회원의 이름도 함께 변경되면 안 되기 때문이다.
-
-    * [참고] 자바의 기본 타입은 절대 공유되지 않는다.
-
-        * int, double 같은 기본 타입(primitive type)은 절대 공유되지 않는다.
-
-            * 기본 타입은 항상 값을 복사하기 때문이다.
-        
-            * 그래서 기본 타입을 값 타입으로 사용 했을 때, 안전하다.
-
-        * Integer 같은 래퍼 클래스나 String 같은 특수한 클래스는 공유 가능한 객체이지만 변경 불가능(Immutable)하다.
-        
-* (2) 임베디드 타입(복합 값 타입)
-
-    * `임베디드 타입(embedded type)`은 새로운 값 타입을 직접 정의해서 사용하는 것을 말한다.
+    * (1) 기본 값 타입
     
-        * 주로 기본 값 타입들을 모아서 만들기 때문에 `복합 값 타입`이라고도 한다.
-        
-        * 임베디드 타입도 int, String과 같은 값 타입이다.
-
-    * 임베디드 타입 사용 방법
-
-        * `@Embeddable` : 값 타입을 정의하는 곳에 표시한다.
+        * 예를 들어 `String name`, `int age`가 기본 값 타입이다.
+    
+        * 생명주기를 엔티티에 의존한다.
+      
+            * Ex) 회원 엔티티를 삭제하면 이름, 나이 필드도 함께 삭제된다.
+    
+        * 값 타입은 공유하면 안 된다.
+    
+            * Ex) 회원 이름 변경 시 다른 회원의 이름도 함께 변경되면 안 되기 때문이다.
+    
+        * [참고] 자바의 기본 타입은 절대 공유되지 않는다.
+    
+            * int, double 같은 기본 타입(primitive type)은 절대 공유되지 않는다.
+    
+                * 기본 타입은 항상 값을 복사하기 때문이다.
             
-            * 기본 생성자 필수
+                * 그래서 기본 타입을 값 타입으로 사용 했을 때, 안전하다.
     
-        * `@Embedded` : 값 타입을 사용하는 곳에 표시한다.
-
-        * 예시
+            * Integer 같은 래퍼 클래스나 String 같은 특수한 클래스는 공유 가능한 객체이지만 변경 불가능(Immutable)하다.
+            
+    * (2) 임베디드 타입(복합 값 타입)
+    
+        * `임베디드 타입(embedded type)`은 새로운 값 타입을 직접 정의해서 사용하는 것을 말한다.
         
+            * 주로 기본 값 타입들을 모아서 만들기 때문에 `복합 값 타입`이라고도 한다.
+            
+            * 임베디드 타입도 int, String과 같은 값 타입이다.
+    
+        * 임베디드 타입 사용 방법
+    
+            * `@Embeddable` : 값 타입을 정의하는 곳에 표시한다.
+                
+                * 기본 생성자 필수
+        
+            * `@Embedded` : 값 타입을 사용하는 곳에 표시한다.
+    
+            * 예시
+            
+                ```java
+                @Entity
+                public class Member{
+                
+                    @Id @GeneratedValue
+                    @Column(name = "MEMBER_ID")
+                    private Long id;
+                
+                    @Column(name = "USERNAME")
+                    private String username;
+                
+                    // Period
+                    @Embedded
+                    private Period workPeriod;
+                
+                    // 주소
+                    @Embedded
+                    private Address homeAddress;
+                
+                    // Getter, Setter
+                }
+                ```
+              
+                ```java
+                @Embeddable
+                public class Address {
+                    private String city;
+                    private String street;
+                    private String zipcode;
+                
+                    // 기본 생성자 필수
+                    public Address() {
+                    }
+                
+                    public Address(String city, String street, String zipcode) {
+                        this.city = city;
+                        this.street = street;
+                        this.zipcode = zipcode;
+                    }
+              
+                    /*
+                    * Getter만 만들기
+                    * "값 타입"을 여러 엔티티에서 공유하면 위험하다. 그 이유는 부작용(side effect)이 발생하기 때문이다.
+                    * 불변 객체(immutable object)로 만들기 위해, 생성자로만 값을 설정하고 수정자(Setter)는 만들지 않는다.
+                    * */
+              
+                }
+                ```
+    
+        * 임베디드 타입과 테이블 매핑
+        
+            * 임베디드 타입은 엔티티의 값일 뿐이다. 따라서 값이 속한 엔티티의 테이블에 매핑한다.
+        
+            * 임베디드 타입을 사용하기 전과 후에 **매핑하는 테이블은 같다.**
+        
+            * 임베디드 타입 덕분에 객체와 테이블을 아주 세밀하게(find-grained) 매핑하는 것이 가능하다.
+            
+        * `@AttributeOverride`
+    
+            * 한 엔티티에서 같은 값 타입을 사용하면 테이블에 매핑하는 컬럼 명이 중복된다.
+    
+            * 이때는 `@AttributeOverrides`, `@AttributeOverride`를 사용해서 컬럼 명 속성을 재 정의한다.
+           
+        * 임베디드 타입과 null
+    
+            * 임베디드 타입의 값이 null이면 매핑한 컬럼 값은 모두 null이 된다.
+            
+        * [참고] 자바에서 제공하는 객체 비교는 2가지가 있다.
+    
+            * ① `동일성(identity) 비교` : 인스턴스의 참조 값을 비교, == 사용
+    
+            * ② `동등성(equivalence) 비교` : 인스턴스의 값을 비교, equals() 사용
+    
+    * (3) 값 타입 컬렉션
+    
+        * 값 타입 컬렉션?
+    
+            * `값 타입 컬렉션`은 **값 타입을 컬렉션에 넣어서 사용하는 것**을 말한다.
+    
+                * 값 타입을 하나 이상 저장할 때, 값 타입 컬렉션을 사용한다.
+                    
+            * `@ElementCollection`, `@CollectionTable`를 사용해서 맵핑한다.
+            
+            * 데이터베이스는 컬렉션을 같은 테이블에 저장할 수 없다. 
+            
+            * 컬렉션을 저장하기 위한 별도의 테이블이 필요하다.
+            
+            * 값 타입 컬렉션은 기본적으로 지연 로딩 전략을 사용한다.
+            
+        * 예시 - 값 타입 컬렉션 맵핑
+                  
             ```java
             @Entity
             public class Member{
@@ -1796,133 +1887,48 @@
                 @Column(name = "USERNAME")
                 private String username;
             
-                // Period
-                @Embedded
-                private Period workPeriod;
-            
-                // 주소
                 @Embedded
                 private Address homeAddress;
             
+                @ElementCollection
+                @CollectionTable(name = "FAVORITE_FOOD",
+                                 joinColumns = @JoinColumn(name = "MEMBER_ID"))
+                @Column(name = "FOOD_NAME")
+                private Set<String> favoriteFoods = new HashSet<>();
+            
+                @ElementCollection
+                @CollectionTable(name = "ADDRESS",
+                                 joinColumns = @JoinColumn(name = "MEMBER_ID"))
+                private List<Address> addressHistory = new ArrayList<>();
+            
                 // Getter, Setter
-            }
-            ```
-          
-            ```java
-            @Embeddable
-            public class Address {
-                private String city;
-                private String street;
-                private String zipcode;
-            
-                // 기본 생성자 필수
-                public Address() {
-                }
-            
-                public Address(String city, String street, String zipcode) {
-                    this.city = city;
-                    this.street = street;
-                    this.zipcode = zipcode;
-                }
-          
-                /*
-                * Getter만 만들기
-                * "값 타입"을 여러 엔티티에서 공유하면 위험하다. 그 이유는 부작용(side effect)이 발생하기 때문이다.
-                * 불변 객체(immutable object)로 만들기 위해, 생성자로만 값을 설정하고 수정자(Setter)는 만들지 않는다.
-                * */
           
             }
             ```
-
-    * 임베디드 타입과 테이블 매핑
+          
+        * 값 타입 컬렉션의 제약사항
     
-        * 임베디드 타입은 엔티티의 값일 뿐이다. 따라서 값이 속한 엔티티의 테이블에 매핑한다.
-    
-        * 임베디드 타입을 사용하기 전과 후에 **매핑하는 테이블은 같다.**
-    
-        * 임베디드 타입 덕분에 객체와 테이블을 아주 세밀하게(find-grained) 매핑하는 것이 가능하다.
-        
-    * @AttributeOverride
-
-        * 한 엔티티에서 같은 값 타입을 사용하면 테이블에 매핑하는 컬럼 명이 중복된다.
-
-        * 이때는 `@AttributeOverrides`, `@AttributeOverride`를 사용해서 컬럼 명 속성을 재 정의한다.
-       
-    * 임베디드 타입과 null
-
-        * 임베디드 타입의 값이 null이면 매핑한 컬럼 값은 모두 null이 된다.
-        
-    * [참고] 자바에서 제공하는 객체 비교는 2가지가 있다.
-
-        * ① `동일성(identity) 비교` : 인스턴스의 참조 값을 비교, == 사용
-
-        * ② `동등성(equivalence) 비교` : 인스턴스의 값을 비교, equals() 사용
-
-* (3) 값 타입 컬렉션
-
-    * 값 타입 컬렉션?
-
-        * `값 타입 컬렉션`은 **값 타입을 컬렉션에 넣어서 사용하는 것**을 말한다.
-
-            * 값 타입을 하나 이상 저장할 때, 값 타입 컬렉션을 사용한다.
+            * **값 타입 컬렉션에 변경사항이 발생하면, 주인 엔티티와 연관된 모든 데이터를 삭제하고, 값 타입 컬렉션에 있는 현재 값을 모두 다시 저장한다.**
+            
+                * 값을 추적할 필요가 없고 정말 단순한 경우에만 값 타입 컬렉션을 사용한다. 
                 
-        * `@ElementCollection`, `@CollectionTable`를 사용해서 맵핑한다.
-        
-        * 데이터베이스는 컬렉션을 같은 테이블에 저장할 수 없다. 
-        
-        * 컬렉션을 저장하기 위한 별도의 테이블이 필요하다.
-        
-        * 값 타입 컬렉션은 기본적으로 지연 로딩 전략을 사용한다.
-        
-    * 값 타입 컬렉션 맵핑 예시
-              
-        ```java
-        @Entity
-        public class Member{
-        
-            @Id @GeneratedValue
-            @Column(name = "MEMBER_ID")
-            private Long id;
-        
-            @Column(name = "USERNAME")
-            private String username;
-        
-            @Embedded
-            private Address homeAddress;
-        
-            @ElementCollection
-            @CollectionTable(name = "FAVORITE_FOOD",
-                             joinColumns = @JoinColumn(name = "MEMBER_ID"))
-            @Column(name = "FOOD_NAME")
-            private Set<String> favoriteFoods = new HashSet<>();
-        
-            @ElementCollection
-            @CollectionTable(name = "ADDRESS",
-                             joinColumns = @JoinColumn(name = "MEMBER_ID"))
-            private List<Address> addressHistory = new ArrayList<>();
-        
-            // Getter, Setter
-      
-        }
-        ```
-      
-    * 값 타입 컬렉션의 제약사항
-
-        * 값 타입 컬렉션에 변경사항이 발생하면, 주인 엔티티와 연관된 모든 데이터를 삭제하고, 값 타입 컬렉션에 있는 현재 값을 모두 다시 저장한다.
-
-        * 값 타입 컬렉션을 매핑하는 테이블은 모든 컬럼을 묶어서 기본 키를 구성해야 한다.
-
-        * 컬럼에 null을 입력 할 수 없고, 같은 값을 중복해서 저장 할 수 없다.
-        
-    * 값 타입 컬렉션 대안
-
-        * 실무에서는 `값 타입 컬렉션` 대신에 일대다 관계를 위한 엔티티를 만들고, 여기에서 값 타입을 사용한다.
-        
-            * 다대일 일대다 양방향 관계로 하면 update 쿼리를 없앨 수 있다.
-        
-        * `영속성 전이(Cascade)` + `고아 객체 제거(ORPHAN REMOVE)` 기능을 적용하면 값 타입 컬렉션처럼 사용 할 수 있다.
-        
-        * 예시
+                    * Ex) 셀렉트 박스에 내가 좋아하는 음식을 여러 개를 체크 할 수 있도록 하는 경우
+            
+            * 값 타입 컬렉션을 매핑하는 테이블은 모든 컬럼을 묶어서 기본 키(PK)를 구성해야 한다.
+    
+                * 컬럼에 `null`을 입력 할 수 없고, 같은 값을 중복해서 저장 할 수 없다.
+            
+        * 값 타입 컬렉션 대안
+    
+            * 실무에서는 `값 타입 컬렉션` 대신에 **일대다 관계를 위한 엔티티를 만들고, 여기에서 값 타입을 사용**한다.
+            
+                * 일대다 단방향 매핑은 다른 테이블에 외래 키가 있기 때문에 update 쿼리가 발생한다.
+            
+                * 다대일 일대다 양방향 매핑을 하면 update 쿼리가 발생하지 않는다.
+            
+            * `영속성 전이(Cascade)` + `고아 객체 제거(ORPHAN REMOVE)` 기능을 적용하면 값 타입 컬렉션처럼 사용 할 수 있다.
+            
+        * 예시 - 값 타입 컬렉션 대안
         
             * ① AddressEntity 만들기
          
@@ -1971,7 +1977,112 @@
                 
                 }
                 ```
-              
+
+### 2. 값 타입과 불변 객체 
+
+* 값 타입과 불변 객체
+
+    * (1) 값 타입 공유 참조
+    
+        * 임베디드 타입과 같은 "값 타입"을 여러 엔티티에서 공유하면 위험하다.
+       
+        * 그 이유는 부작용(side effect)이 발생하기 때문이다.
+        
+            ```java
+            Address address = new Address("city", "street", "10000");
+            
+            // 회원 1
+            Member member1 = new Member();
+            member1.setUsername("member1");
+            member1.setHomeAddress(address);
+            em.persist(member1);
+            
+            // 회원 2
+            Member member2 = new Member();
+            member2.setUsername("member2");
+            member2.setHomeAddress(address);
+            em.persist(member2);
+            
+            // 회원 1의 주소만 "newCity"로 변경되길 기대했지만 회원 2의 주소도 같이 변경된다.
+            member1.getHomeAddress().setCity("newCity");
+            ```
+
+            * 회원1, 회원2가 같은 address 인스턴스를 참조하고 있는 상황에서 city 값을 newCity로 변경하면 회원 1, 2 모두 값이 변경된다.
+            
+            * 이러한 부작용을 막으려면 값(인스턴스)을 복사해서 사용하면 된다.
+
+    * (2) 값 타입 복사
+    
+        * 값 타입의 실제 인스턴스인 값을 공유하는 것은 위험하다.
+          
+        * 대신 값(인스턴스)를 복사해서 사용해야 한다.
+        
+            ```java
+            Address address = new Address("city", "street", "10000");
+            
+            // 회원 1
+            Member member1 = new Member();
+            member1.setUsername("member1");
+            member1.setHomeAddress(address);
+            em.persist(member1);
+            
+            // 회원1의 address 값을 복사해서 새로운 newAddress 값을 생성한 다음, 그 주소로 변경한다.
+            Address copyAddress = new Address(address.getCity(),
+                    address.getStreet(),
+                    address.getZipcode());
+            
+            // 회원 2
+            Member member2 = new Member();
+            member2.setUsername("member2");
+            member2.setHomeAddress(copyAddress);
+            em.persist(member2);
+            
+            // 원래 의도한 대로 회원 1의 주소만 변경된다.
+            member1.getHomeAddress().setCity("newCity");
+            ```
+
+    * (3) 불변 객체
+    
+        * 임베디드 타입처럼 직접 정의한 `값 타입`은 자바의 기본 타입(primitive)이 아니라 객체 타입이다.
+        
+            * 값 타입은 부작용 걱정 없이 사용 할 수 있어야 한다. 부작용이 일어나면 값 타입이라 할 수 없다.
+
+            * 객체 타입을 수정 할 수 없게 만들면 부작용을 원천 차단 할 수 있다.
+
+        * 따라서 **값 타입은 불변 객체(immutable object)로 설계해야 한다.**
+
+            * `불변 객체`는 **생성 시점 이후 절대 값을 변경할 수 없는 객체**를 말한다.
+
+            * 불변 객체를 구현하는 간단한 방법은 **생성자로만 값을 설정하고 수정자(Setter)를 만들지 않으면 된다.** 
+
+                * 또는 수정자를 Private으로 만들어도 된다.
+
+        * [참고] Integer, String은 자바가 제공하는 대표적인 불변 객체
+
+### 3. 값 타입의 비교
+
+* 값 타입은 인스턴스가 달라도 그 안에 값이 같으면 같은 것으로 봐야 한다.
+
+    ```java
+    int a = 10;
+    int b = 10;
+    ```
+  
+    ```java
+    Address a = new Address("서울시");
+    Address b = new Address("서울시");
+    ```
+
+* 자바에서 제공하는 객체 비교는 2가지가 있다.
+
+    * ① `동일성(identity) 비교` : 인스턴스의 참조 값을 비교, `==` 사용
+    
+    * ② `동등성(equivalence) 비교` : 인스턴스의 값을 비교, `equals()` 사용
+    
+        * 값 타입은 `a.equals(b)`를 사용해서 동등성 비교를 해야 한다.
+        
+        * 즉, `equals()` 메소드를 적절하게 재정의 해야 한다. (주로 모든 필드 사용)
+
 ## 10. 객체지향 쿼리 언어
 
 ### 1. 객체지향 쿼리 언어 소개 
