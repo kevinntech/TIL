@@ -1661,9 +1661,9 @@
 
 ### 3. 영속성 전이: CASCADE
 
-* `CASCADE`는 특정 엔티티를 영속 상태로 만들 때 연관된 엔티티도 함께 영속 상태로 만들고 싶을 때 사용한다.
+* `CASCADE`는 해당 엔티티의 상태 변화를 연관된 엔티티에 전파시킨다.
 
-    * 부모만 영속 상태로 만들면 연관된 자식 엔티티까지 함께 영속화해서 저장한다.
+    * 예를 들어, 부모만 영속 상태로 만들면 연관된 자식 엔티티까지 함께 영속화해서 저장한다.
     
         * `@OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)`
 
@@ -1677,13 +1677,17 @@
     
 * CASCADE의 종류
 
-    * `ALL` : 모두 적용
+    * **`ALL` : 모두 적용**
 
-    * `PERSIST` : 영속
+    * **`PERSIST` : 영속**
 
-    * `REMOVE` : 삭제
+    * **`REMOVE` : 삭제**
     
-    * ...
+    * `MERGE` : 병합
+
+    * `REFRESH` : REFRESH
+
+    * `DETACH` : DETACH
     
 ### 4. 고아 객체
 
@@ -1776,63 +1780,61 @@
             * 임베디드 타입도 int, String과 같은 값 타입이다.
     
         * 임베디드 타입 사용 방법
-    
-            * `@Embeddable` : 값 타입을 정의하는 곳에 표시한다.
-                
-                * 기본 생성자 필수
         
-            * `@Embedded` : 값 타입을 사용하는 곳에 표시한다.
-    
-            * 예시
+            ```java
+            @Entity
+            public class Member{
             
-                ```java
-                @Entity
-                public class Member{
-                
-                    @Id @GeneratedValue
-                    @Column(name = "MEMBER_ID")
-                    private Long id;
-                
-                    @Column(name = "USERNAME")
-                    private String username;
-                
-                    // Period
-                    @Embedded
-                    private Period workPeriod;
-                
-                    // 주소
-                    @Embedded
-                    private Address homeAddress;
-                
-                    // Getter, Setter
+                @Id @GeneratedValue
+                @Column(name = "MEMBER_ID")
+                private Long id;
+            
+                @Column(name = "USERNAME")
+                private String username;
+            
+                // Period
+                @Embedded
+                private Period workPeriod;
+            
+                // 주소
+                @Embedded
+                private Address homeAddress;
+            
+                // Getter, Setter
+            }
+            ```
+          
+            ```java
+            @Embeddable
+            public class Address {
+                private String city;
+                private String street;
+                private String zipcode;
+            
+                // 기본 생성자 필수
+                public Address() {
                 }
-                ```
-              
-                ```java
-                @Embeddable
-                public class Address {
-                    private String city;
-                    private String street;
-                    private String zipcode;
-                
-                    // 기본 생성자 필수
-                    public Address() {
-                    }
-                
-                    public Address(String city, String street, String zipcode) {
-                        this.city = city;
-                        this.street = street;
-                        this.zipcode = zipcode;
-                    }
-              
-                    /*
-                    * Getter만 만들기
-                    * "값 타입"을 여러 엔티티에서 공유하면 위험하다. 그 이유는 부작용(side effect)이 발생하기 때문이다.
-                    * 불변 객체(immutable object)로 만들기 위해, 생성자로만 값을 설정하고 수정자(Setter)는 만들지 않는다.
-                    * */
-              
+            
+                public Address(String city, String street, String zipcode) {
+                    this.city = city;
+                    this.street = street;
+                    this.zipcode = zipcode;
                 }
-                ```
+          
+                /*
+                * Getter만 만들기
+                * "값 타입"을 여러 엔티티에서 공유하면 위험하다. 그 이유는 부작용(side effect)이 발생하기 때문이다.
+                * 불변 객체(immutable object)로 만들기 위해, 생성자로만 값을 설정하고 수정자(Setter)는 만들지 않는다.
+                * */
+          
+            }
+            ```
+          
+            * `@Embeddable` : 임베디드 타입을 정의하는 곳에 표시한다.
+                  
+                * 기본 생성자 필수
+          
+            * `@Embedded` : 임베디드 타입을 사용하는 곳에 표시한다.
     
         * 임베디드 타입과 테이블 매핑
         
@@ -1847,17 +1849,41 @@
             * 한 엔티티에서 같은 값 타입을 사용하면 테이블에 매핑하는 컬럼 명이 중복된다.
     
             * 이때는 `@AttributeOverrides`, `@AttributeOverride`를 사용해서 컬럼 명 속성을 재 정의한다.
-           
+
+                ```java
+                @Entity
+                public class Member{
+                
+                    //...
+                
+                    @Embedded
+                    private Address homeAddress;
+                
+                    @Embedded
+                    @AttributeOverrides({
+                            @AttributeOverride(name = "city",
+                                    column = @Column(name = "COMPANY_CITY")),
+                            @AttributeOverride(name = "street",
+                                    column = @Column(name = "COMPANY_STREET")),
+                            @AttributeOverride(name = "zipcode",
+                                    column = @Column(name = "COMPANY_ZIPCODE"))
+                    })
+                    private Address companyAddress;
+                
+                }
+                ```
+
         * 임베디드 타입과 null
     
             * 임베디드 타입의 값이 null이면 매핑한 컬럼 값은 모두 null이 된다.
-            
-        * [참고] 자바에서 제공하는 객체 비교는 2가지가 있다.
-    
-            * ① `동일성(identity) 비교` : 인스턴스의 참조 값을 비교, == 사용
-    
-            * ② `동등성(equivalence) 비교` : 인스턴스의 값을 비교, equals() 사용
-    
+
+                ```java
+                member.setAddress(null); // null 입력
+                em.persist(member);
+                ```
+              
+                * 회원 테이블의 주소와 관련된 CITY, STREET, ZIPCODE 컬럼 값은 모두 null이 된다.
+
     * (3) 값 타입 컬렉션
     
         * 값 타입 컬렉션?
@@ -2007,7 +2033,7 @@
             member1.getHomeAddress().setCity("newCity");
             ```
 
-            * 회원1, 회원2가 같은 address 인스턴스를 참조하고 있는 상황에서 city 값을 newCity로 변경하면 회원 1, 2 모두 값이 변경된다.
+            * 회원1, 회원2가 같은 Address 인스턴스를 참조하고 있는 상황에서 city 값을 newCity로 변경하면 회원 1, 2 모두 값이 변경된다.
             
             * 이러한 부작용을 막으려면 값(인스턴스)을 복사해서 사용하면 된다.
 
@@ -2026,7 +2052,7 @@
             member1.setHomeAddress(address);
             em.persist(member1);
             
-            // 회원1의 address 값을 복사해서 새로운 newAddress 값을 생성한 다음, 그 주소로 변경한다.
+            // 회원1의 address 값을 복사해서 새로운 copyAddress 값을 생성한 다음, 그 주소로 변경한다.
             Address copyAddress = new Address(address.getCity(),
                     address.getStreet(),
                     address.getZipcode());
@@ -2055,9 +2081,9 @@
 
             * 불변 객체를 구현하는 간단한 방법은 **생성자로만 값을 설정하고 수정자(Setter)를 만들지 않으면 된다.** 
 
-                * 또는 수정자를 Private으로 만들어도 된다.
+                * 또는 수정자를 `Private`으로 만들어도 된다.
 
-        * [참고] Integer, String은 자바가 제공하는 대표적인 불변 객체
+        * [참고] `Integer`, `String`은 자바가 제공하는 대표적인 불변 객체
 
 ### 3. 값 타입의 비교
 

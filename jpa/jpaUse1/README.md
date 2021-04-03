@@ -41,7 +41,7 @@ public class HelloController {
 
 #### 2) View 작성하기
 
-* 서버 사이드 렌더링이 되면 th:text의 결과를 태그의 내용물로 대체한다. 
+* 서버 사이드 렌더링이 되면 `th:text`의 결과를 태그의 내용물로 대체한다. 
     
  ```html
 <!DOCTYPE HTML>
@@ -133,6 +133,11 @@ public class MemberRepositoryTest {
         //then
         Assertions.assertThat(findMember.getId()).isEqualTo(member.getId());
         Assertions.assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
+
+        /*
+        * 같은 트랜잭션 안에서 엔티티를 저장하고 조회하면 영속성 컨텍스트가 같다.
+        * 같은 영속성 컨텍스트 안에서는 Id 값이 같으면 엔티티가 동일하다.
+        * */
         Assertions.assertThat(findMember).isEqualTo(member);
         System.out.println("findMember == memer: " + (findMember == member));
     }
