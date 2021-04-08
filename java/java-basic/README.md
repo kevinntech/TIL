@@ -3933,6 +3933,451 @@ int[][] arr = {
 
 ## 11. 제네릭스, 열거형, 애노테이션
 
+#### 1) 제네릭?
+
+* 제네릭의 정의
+
+    * `제네릭(Generic)`은 타입을 파라미터화 해서 컴파일 시 구체적인 타입이 결정 되도록 하는 것이다.
+
+        * 컴파일 시 타입을 체크 해 주는 기능이다.
+        
+            ```java
+            // Tv 객체만 저장 할 수 있는 ArrayList를 생성
+            ArrayList<Tv> tvList = new ArrayList<Tv>();
+            
+            tvList.add(new Tv());     // OK
+            tvList.add(new Audio());  // 컴파일 에러. Tv 외에 다른 타입은 저장 불가
+            ```
+          
+            * `ArrayList` : 일반 클래스
+            
+            * `ArrayList<E>` : 제네릭 클래스
+            
+                * `제네릭 클래스`는 클래스 이름 옆에 `타입 매개변수`를 선언한 것을 말한다.
+
+* 제네릭의 장점
+
+    * 객체의 타입 안정성을 높인다.
+
+        * "타입 안정성을 높인다"는 것은 의도하지 않은 타입의 객체가 저장되는 것을 막고, 저장된 객체를 꺼내올 때
+    
+        * 원래의 타입과 다른 타입으로 잘못 형변환 되어 발생할 수 있는 오류를 줄여준다는 뜻이다.
+
+    * 형 변환의 번거로움을 줄여준다.
+
+#### 2) 제네릭 클래스의 선언
+
+* 제네릭 클래스를 작성할 때, `Object` 타입 대신 타입 매개변수(`E`)를 선언해서 사용한다. 
+
+    * ① 예를 들어, `ArrayList` 클래스는 다음과 같이 정의 되어 있었다.
+
+        ```java
+        public class ArrayList extends AbstractList{
+        
+            private transient Object[] elementData;
+            public boolean add(Object o) { /* 내용 생략 */ }
+            public Object add(int index) { /* 내용 생략 */ }
+            
+            //...
+            
+        }
+        ```
+      
+    * ② 클래스 이름 옆에 `<E>`를 붙인 다음, `Object`가 모두 `E`로 변경되었다. (JDK 1.5 부터)
+
+        ```java
+        public class ArrayList<E> extends AbstractList<E>{
+        
+            private transient E[] elementData;
+            public boolean add(E o) { /* 내용 생략 */ }
+            public E add(int index) { /* 내용 생략 */ }
+            
+            //...
+            
+        }
+        ```
+      
+        * `E` : Element
+        
+        * `T` : Type
+      
+* 제네릭 클래스(`ArrayList<E>`)의 객체를 생성할 때는 타입 매개변수(`E`) 대신에 실제 타입(`String`)을 지정해야 한다.
+       
+    ```java
+    // 타입 매개변수 E 대신에 실제 타입 Tv를 대입
+    ArrayList<Tv> tvList = new ArrayList<Tv>();
+    
+    tvList.add(new Tv());
+    Tv t = tvList.get(0); // 형 변환 생략 가능
+    ```
+  
+    * 타입 매개변수 대신 실제 타입이 지정되면, 형 변환을 생략 할 수 있다. 
+
+#### 3) 제네릭의 용어
+
+* 제네릭 관련 용어
+
+    * `Box<T>` : 제네릭 클래스. 
+    
+        * "T의 Box" 또는 "T Box"라고 읽는다.
+    
+    * `T` : 타입 변수 또는 타입 매개변수. (T는 타입 문자)
+    
+    * `Box` : 원시 타입(raw type)
+
+* 다음과 같이 타입 매개변수에 타입을 지정하는 것을 `제네릭 타입 호출`이라 한다.
+
+    * `Box<String> b = new Box<String>();`
+
+        * 지정된 타입 `String`을 `매개변수화된 타입`이라 한다. 
+        
+            * 해당 용어가 좀 길어서, `대입된 타입`이라는 용어를 사용할 것이다.
+
+#### 4) 제네릭 타입과 다형성
+
+* 참조 변수와 생성자의 대입된 타입은 일치해야 한다.
+
+    ```java
+    ArrayList<Tv> tvList = new ArrayList<Tv>(); // OK. 일치
+    
+    ArrayList<Product> productList = new ArrayList<Tv>(); // 에러 발생. 불일치
+    ```
+
+* 제네릭 클래스 간의 다형성은 성립한다. 
+
+    ```java
+    List<Tv> list1 = new ArrayList<Tv>();
+  
+    List<Tv> list2 = new LinkedList<Tv>();
+    ```
+  
+    * 여전히 대입된 타입은 일치해야 한다.
+    
+* 매개변수의 다형성도 성립한다.
+
+    * `ArrayList`에 `Product`를 대입한다.
+
+        ```java
+        ArrayList<Product> list = new ArrayList<Product>();
+        list.add(new Product());
+        list.add(new Tv());     // OK
+        list.add(new Audio());  // OK
+        ```
+
+    * `E`에는 `Product`가 대입된다. 그래서 `add()`의 매개변수로 `Product`와 그 자손 객체가 가능하다. 
+    
+        ```java
+        // boolean add(E e){ ... }
+        boolean add(Product e){ ... }
+        ```
+
+* JDK 1.7 부터 타입 추론이 가능한 경우, 생성자의 대입된 타입을 생략 할 수 있다.
+  
+    ```java
+    ArrayList<Product> list = new ArrayList<>();
+    ```
+  
+    * 참조변수의 타입으로 `ArrayList`가 `Product` 타입의 객체만 저장한다는 것을 알 수 있기 때문에 생략 가능하다.
+    
+#### 5) 제한된 제네릭 클래스
+
+* 제네릭 타입에 `extends`를 사용하면, 대입 할 수 있는 타입을 제한한다. (`<T extends 조상 타입>`)
+    
+    * 다음 코드는 대입 할 수 있는 타입을 Fruit과 그 자손으로 지정한다. 
+    
+        ```java
+        class FruitBox<T extends Fruit> { // Fruit과 그 자손만 타입으로 지정 가능
+            ArrayList<T> list = new ArrayList<T>();
+            //...
+        }
+        ```
+
+    * Fruit의 자손인 Apple은 대입 할 수 있지만 Toy는 대입 할 수 없다. 
+    
+        ```java
+        FruitBox<Apple> appleBox = new FruitBox<Apple>(); // OK.
+        FruitBox<Toy> toyBox = new FruitBox<Toy>(); // 에러 발생. Toy는 Fruit의 자손이 아니다.
+        ```
+
+* 인터페이스를 구현해야 한다는 제약이 필요할 때도 `extends`를 사용한다. 
+
+    ```java
+    interface Eatable {}
+    
+    // Eatable 인터페이스를 구현한 클래스만 타입 매개변수 T에 대입 될 수 있다.
+    class FruitBox<T extends Eatable> { ... } 
+    
+    // Fruit의 자손이면서 Eatable 인터페이스를 구현한 클래스만 타입 매개변수 T에 대입 될 수 있다.
+    class FruitBox<T extends Fruit & Eatable> { ... } 
+    ```
+  
+* 예시
+
+    ```java
+    class Fruit implements Eatable {
+    	public String toString() { return "Fruit";}
+    }
+    class Apple extends Fruit { public String toString() { return "Apple";}}
+    class Grape extends Fruit { public String toString() { return "Grape";}}
+    class Toy                 { public String toString() { return "Toy"  ;}}
+    
+    interface Eatable {}
+    
+    class Ex12_3 {
+    	public static void main(String[] args) {
+    		FruitBox<Fruit> fruitBox = new FruitBox<Fruit>();
+    		FruitBox<Apple> appleBox = new FruitBox<Apple>();
+    		FruitBox<Grape> grapeBox = new FruitBox<Grape>();
+    //		FruitBox<Grape> grapeBox = new FruitBox<Apple>(); // 에러. 타입 불일치
+    //		FruitBox<Toy>   toyBox   = new FruitBox<Toy>();   // 에러.
+    
+    		fruitBox.add(new Fruit());
+    		fruitBox.add(new Apple());
+    		fruitBox.add(new Grape());
+    		appleBox.add(new Apple());
+    //		appleBox.add(new Grape());  // 에러. Grape는 Apple의 자손이 아님
+    		grapeBox.add(new Grape());
+    
+    		System.out.println("fruitBox-"+fruitBox);
+    		System.out.println("appleBox-"+appleBox);
+    		System.out.println("grapeBox-"+grapeBox);
+    	}  // main
+    }
+    
+    class FruitBox<T extends Fruit & Eatable> extends Box<T> {}
+    
+    class Box<T> {
+    	ArrayList<T> list = new ArrayList<T>();
+    	void add(T item) { list.add(item);     }
+    	T get(int i)     { return list.get(i); }
+    	int size()       { return list.size(); }
+    	public String toString() { return list.toString();}
+    }
+    ```
+
+#### 6) 제네릭의 제약
+
+* static 멤버에는 타입 매개변수(`T`)를 사용 할 수 없다. 
+
+    * 타입 매개변수에 대입하는 것은 인스턴스 마다 다르게 지정 할 수 있다.
+
+        ```java
+        Box<Apple> appleBox = new Box<Apple>(); // OK. Apple 객체만 저장 가능
+        Box<Grape> grapeBox = new Box<Grape>(); // OK. Grepe 객체만 저장 가능 
+        ```
+
+    * static 멤버는 같은 클래스의 모든 인스턴스들이 공통으로 사용하는 멤버이기 때문에 타입 매개변수(`T`)를 사용 할 수 없다. 
+
+        ```java
+        class Box<T> {
+            static T item; // 에러
+            static int compare(T t1, T t2){ ... } // 에러
+            
+            //... 
+        }
+        ```
+
+* 타입 매개변수(`T`)로 배열을 생성 할 수 없다. (타입 매개변수로 배열을 선언하는 것은 가능)
+
+    * 즉, new 연산자 뒤에 타입 매개변수(`T`)를 사용 할 수 없다.
+
+        ```java
+        class Box<T> {
+            T[] itemArr; // OK. T 타입의 배열을 위한 참조변수
+                //...
+                
+            T[] toArray(); {
+            	T[] tmpArr = new T[itemArr.length]; // 에러. 제네릭 타입의 배열 생성 불가
+      
+                //...
+      
+                return tmpArr;
+            }
+
+        }
+        ```
+      
+* 제네릭 타입의 배열을 생성해야 한다면 Object 배열을 만들고 T 타입의 배열로 형 변환하면 된다.
+  
+    ```java
+    T[] tmpArr = (T[]) new Object[itemArr.length]; // Object 배열을 만들고 T 타입 배열로 형 변환 하면 된다.
+    ```
+
+#### 7) 와일드 카드 '?'
+
+* 와일드 카드를 사용하면 하나의 참조 변수로 대입된 타입이 다른 객체를 참조 할 수 있다.
+
+    * 와일드카드를 사용하면 대입된 타입이 다르더라도 가능하다. 
+
+    * 와일드카드는 `?`로 표현하며 와일드 카드는 어떠한 타입도 될 수 있다.
+    
+        * `<? extends T>` : 와일드 카드의 상한 제한. T와 그 자손들만 가능
+        
+        * `<? super T>`  : 와일드 카드의 하한 제한. T와 그 조상들만 가능
+        
+        * `<?>` : 제한없음. 모든 타입 가능. `<? extends Object>`와 동일
+
+* 와일드 카드에는 `&`를 사용 할 수 없다.
+
+    * `<? extends T & E>`는 불가능하다.
+
+* 메서드의 매개변수에 와일드 카드를 사용 할 수 있다. (클래스를 선언할 때는 사용 X)
+
+    ```java
+    static Juice makeJuice(FruitBox<? extends Fruit> box) {
+    	String tmp = "";
+    	for(Fruit f: box.getList()) tmp += f + " ";
+    	return new Juice(tmp);
+    }
+    ```
+
+    ```java
+    System.out.println(Juicer.makeJuice(new FruitBox<Fruit>())); // OK. FruitBox<Fruit>
+    System.out.println(Juicer.makeJuice(new FruitBox<Apple>())); // OK. FruitBox<Apple>
+    ```
+
+    * 와일드 카드를 사용하면 `makeJuice()`의 매개변수로 `FruitBox<Fruit>` 뿐만 아니라, `FruitBox<Apple>`와 `FruitBox<Grape>`도 가능하다.
+
+        * `makeJuice()`의 매개변수가 `FruitBox<Fruit>`이면 대입된 타입이 일치하는 `FruitBox<Fruit>`만 가능하다. 
+
+#### 8) 제네릭 메서드
+
+* `제네릭 메서드`는 반환 타입 앞에 타입 매개변수를 선언한 메서드이다.
+  
+    ```java
+    static <T> void sort(List<T> list, Comparator<? super T> c)
+    ```
+
+    * `Collections.sort()`가 제네릭 메서드다.
+
+* 제네릭 클래스의 타입 매개변수 `<T>`와 제네릭 메서드의 타입 매개변수 `<T>`는 다르다.
+  
+    ```java
+    class FruitBox<T> {  
+        static <T> void sort(List<T> list, Comparator<? super T> c) {
+            //...
+        }
+    }
+    ```
+  
+    * 제네릭 메서드의 타입 매개변수 `<T>`는 메소드 안에서만 사용 할 수 있다.
+    
+    * 제네릭 클래스의 타입 매개변수 `<T>` 보다 제네릭 메서드의 타입 매개변수의 우선순위가 더 높다. 
+
+* 예시
+
+    * 앞서 살펴본 `makeJuice()`를 제네릭 메서드로 변경하면 다음과 같다.
+    
+        ```java
+        static <T extends Fruit> Juice makeJuice(FruitBox<T> box) { // T는 Fruit과 그 자손들만 가능
+          String tmp = "";
+          for(Fruit f: box.getList()) tmp += f + " ";
+          return new Juice(tmp);
+        }
+        ```
+      
+        * static 멤버에는 타입 매개변수를 사용 할 수 없지만, 메서드에 제네릭 타입을 선언하고 사용하는 것은 가능하다.
+  
+    * 제네릭 메서드는 호출할 때 마다, 타입 매개변수에 타입을 대입해야 한다.
+      
+        ```java
+        FruitBox<Fruit> fruitBox = new FruitBox<Fruit>();
+        FruitBox<Apple> appleBox = new FruitBox<Apple>();
+        
+        System.out.println(Juicer.<Fruit>makeJuice(fruitBox)); // 메서드를 호출 할 때 타입을 대입 해야 하나
+        System.out.println(Juicer.makeJuice(fruitBox));        // 대입된 타입을 생략 할 수 있다.
+        ```
+        
+        * 대부분의 경우, 추론이 가능하므로 타입 매개변수를 생략 할 수 있다.
+
+    * 제네릭 메서드를 호출할 때, 타입을 생략하지 않는다면 클래스 이름을 작성해야 한다.
+      
+        ```java
+        System.out.println(<Fruit>makeJuice(fruitBox));         // 에러. 클래스 이름 생략 불가
+        System.out.println(this.<Fruit>makeJuice(fruitBox));	// OK
+        System.out.println(Juicer.<Fruit>makeJuice(fruitBox));	// OK
+        ```
+      
+* 제네릭 메서드와 와일드 카드의 차이
+
+    * `와일드 카드`는 하나의 참조변수로 서로 다른 타입이 대입된 여러 제네릭 객체를 다루기 위한 것이다.
+    
+    * `제네릭 메서드`는 메서드를 호출 할 때 마다 다른 제네릭 타입을 대입 할 수 있도록 하기 위한 것이다.
+
+#### 9) 제네릭 타입의 형 변환
+
+* 제네릭 타입과 원시 타입 간의 형 변환은 가능하지만 경고가 발생한다. 
+
+    ```java
+    Box box = null;              // 원시 타입 (Box)
+    Box<Object> objBox = null;  // 제네릭 타입 (Box<Object>)
+    
+    box = (Box)objBox; // OK. 제네릭 타입 -> 원시 타입 (경고 발생)
+    objBox = (Box<Object>)box; // OK. 원시 타입 -> 제네릭 타입 (경고 발생)
+    ```
+  
+    * 제네릭 타입과 원시 타입을 섞어서 사용하지는 말자!
+
+* 대입된 타입이 다른 제네릭 타입 간의 형 변환은 불가능하다.
+
+    ```java
+    Box<Object> objBox = null;
+    Box<String> strBox = null;
+    
+    objBox = (Box<Object>) strBox; // 에러. Box<String> -> Box<Object>
+    strBox = (Box<String>) objBox; // 에러. Box<Object> -> Box<String>
+    ```
+  
+    * 즉, `Box<String> b = new Box<Object>();`는 불가능하다.
+
+* 와일드 카드가 사용된 제네릭 타입으로는 형 변환이 가능하다.
+
+    * ① `FruitBox<Apple>` → `FruitBox<? extends Fruit>`
+
+        ```java
+        Box<Object> objBox = (Box<Object>) new Box<<String>();                  // 에러. 형변환 불가능
+        Box<? extends Object> wBox = (Box<? extends Object>) new Box<String>(); // OK
+        Box<? extends Object> wBox2 = new Box<String>();                        // 위 문장과 동일 (형변환 생략 가능)
+        ```
+     
+        ```java
+        // 매개변수로 FruitBox<Fruit>, FruitBox<Apple>, FruitBox<Grape> 등이 가능
+        static Juice makeJuice(FruitBox<? extends Fruit> box) { ... }
+        
+        FruitBox<? extends Fruit> box = new FruitBox<Fruit>(); // OK
+        
+        // FruitBox<Apple> → FruitBox<? extends Fruit>
+        FruitBox<? extends Fruit> box = new FruitBox<Apple>(); // OK
+        ```
+            
+    * ② `FruitBox<? extends Fruit>` → `FruitBox<Apple>`
+      
+        ```java
+        // FruitBox<? extends Fruit> → FruitBox<Apple> 
+        FruitBox<? extends Fruit> box = null;
+        FruitBox<Apple> appleBox = (FruitBox<Apple>) box; // OK. 미확인 타입으로 형 변환 경고
+        ```
+
+        * 와일드 카드가 사용된 제네릭 타입에서 제네릭 타입으로의 형변환은 "확인되지 않은 형변환"이라는 경고가 발생한다.
+
+        * `FruitBox<? extends Fruit>`는 대입될 수 있는 타입은 여러 개인데, 명확한 타입인 `FruitBox<Apple>`으로 형 변환하려고 하기 때문에 경고가 발생하는 것이다.
+
+#### 10) 제네릭 타입의 제거
+
+* 컴파일러는 제네릭 타입을 제거하고, 필요한 곳에 형 변환을 넣는다.
+
+    * ① 제네릭 타입의 경계(bound)를 제거한다.
+    
+        ![image 38](images/img38.png)
+
+    * ② 제네릭 타입을 제거한 후에 타입이 일치하지 않으면, 형 변환을 추가한다. 
+    
+        ![image 39](images/img39.png)
+
+    * ③ 와일드 카드가 포함되어 있는 경우에는 적절한 타입으로의 형 변환이 추가된다.
+
+        ![image 40](images/img40.png)
+
 ## 12. 스레드(Thread)
 
 #### 1) 프로세스와 스레드(process & thread)
@@ -7410,73 +7855,6 @@ int[][] arr = {
             ```
 
 ## 14. 입출력(I/O)
-
-    
-
-
-
-
-
-    
-
-      
-
-
-      
-  
-    
-   
-
-    
-
-            
-
-
-    
-
-
-
-
-
-
-
-    
-
-
-
-
-    
-
-
-
-
-
-
-        
-
-        
-
-
-    
-    
-    
-    
-    
-    
-
-    
-
-    
-
-    
-
-
-
-
-
-
-
-
 
 
 
