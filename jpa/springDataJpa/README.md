@@ -148,7 +148,11 @@
 
         * 따라서 개발자가 직접 구현 클래스를 만들지 않아도 된다.
 
-* `JpaRepository` 인터페이스를 상속 받으면 컴포넌트 스캔의 대상이 되며 `@Repository`를 생략 할 수 있다.
+            * `@Repository`를 생략 할 수 있다.
+            
+                * `JpaRepository` 인터페이스를 상속 받으면 컴포넌트 스캔의 대상이 된다.
+                
+                * JPA 예외를 스프링 예외로 변환한다. 
 
 #### 2) 공통 인터페이스 적용
 
@@ -211,14 +215,22 @@
 
 * 스프링 데이터 JPA는 메소드 이름을 분석해서 JPQL을 생성하고 실행한다.
 
-     ```java
+    ```java
     public interface MemberRepository extends JpaRepository<Member, Long> {
     
-        List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
+      List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
     
     }
-     ```
+    ```
+  
+    * 위의 메소드는 다음과 같은 JPQL을 생성한다.
 
+        ```java
+        select m 
+        from Member m 
+        where m.username = :username and m.age > :age
+        ```
+      
 * 메소드 이름으로 사용 할 수 있는 키워드
 
     * [스프링 데이터 JPA 공식 문서](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods "") 참고
@@ -227,7 +239,19 @@
 
     * 조회 : `find...By` , `read...By` , `query...By`, `get...By`
     
-        * `findHelloBy`처럼 ...에 식별하기 위한 내용이 들어가도 된다.
+        * Ex) `findHelloBy`처럼 `...`에 식별하기 위한 내용이 들어가도 된다.
+    
+            * `findHelloBy`는 where 조건이 지정되지 않은 전체 조회가 된다.
+            
+            * `By` 키워드 다음에는 where 조건을 지정한다.
+
+    * AND : `And`
+    
+        * where 절에 and가 추가된다.
+        
+    * OR : `Or`
+    
+        * where 절에 or가 추가된다.
 
     * COUNT : `count...By`
     
@@ -257,44 +281,46 @@
 
 * JPA NamedQuery
 
-    * 스프링 데이터 JPA는 메소드 이름으로 JPA의 `NamedQuery`를 호출하는 기능을 제공한다.
-
-    * `NamedQuery`는 쿼리에 이름을 부여해서 사용하는 방법이다.
+    * `NamedQuery`는 쿼리에 이름을 부여해서 호출하는 방법이다.
     
-    * `NamedQuery`**는 실무에서 거의 사용되지 않는다.**
+        * **실무에서 거의 사용되지 않는다.**
 
-* `@NamedQuery` 애노테이션으로 Named 쿼리 정의
+* 실습 - JPA NamedQuery
 
-     ```java
-    @Entity
-    @NamedQuery(
-            name="Member.findByUsername",
-            query="select m from Member m where m.username = :username")
-    public class Member {
-        //...
-    }
-     ```
-
-* 스프링 데이터 JPA로 Named 쿼리 호출
-
-    ```java
-    public interface MemberRepository extends JpaRepository<Member, Long> { //** 제네릭에 있는 Member 엔티티
-        @Query(name = "Member.findByUsername") // 생략 가능
-        List<Member> findByUsername(@Param("username") String username);
-    }
-    ```
-
-    * 스프링 데이터 JPA는 선언한 `엔티티 이름 + .(점) + 메서드 이름`으로 Named 쿼리를 찾아서 실행한다.
+    * ① `@NamedQuery` 애노테이션으로 Named 쿼리를 정의한다.
     
-        * 만약 실행할 Named 쿼리가 없으면 `메소드 이름으로 쿼리 생성` 방식을 사용한다.
+         ```java
+        @Entity
+        @NamedQuery(
+                name="Member.findByUsername",
+                query="select m from Member m where m.username = :username")
+        public class Member {
+            //...
+        }
+         ```
+    
+    * ② 스프링 데이터 JPA로 Named 쿼리 호출한다.
+    
+        ```java
+        public interface MemberRepository extends JpaRepository<Member, Long> { //** 제네릭에 있는 Member 엔티티
+            @Query(name = "Member.findByUsername") // 생략 가능
+            List<Member> findByUsername(@Param("username") String username);
+        }
+        ```
+    
+        * 스프링 데이터 JPA는 선언한 `엔티티 이름 + .(점) + 메서드 이름`으로 Named 쿼리를 찾아서 실행한다.
         
-        * 필요하면 전략을 변경할 수 있지만 권장하지 않는다.
-    
-    * `@Param`는 이름 기반 파라미터를 바인딩 할 때 사용하는 애노테이션이다.
+            * 만약 실행할 Named 쿼리가 없으면 `메소드 이름으로 쿼리 생성` 방식을 사용한다.
+            
+            * 필요하면 전략을 변경할 수 있지만 권장하지 않는다.
+            
+        * Named 쿼리는 애플리케이션 실행 시점에 문법 오류를 발견 할 수 있다.
+        
+        * `@Param`는 이름 기반 파라미터를 바인딩 할 때 사용하는 애노테이션이다.
 
 #### 3) @Query, 리포지토리 메소드에 쿼리 정의하기
 
-* `@Query`를 사용해서 리포지토리 메소드에 쿼리를 직접 정의한다.
+* `@Query`는 리포지토리 메소드에 직접 쿼리를 정의할 때 사용한다.
 
     ```java
     public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -305,9 +331,9 @@
     }
     ```
 
-* 실행할 메서드에 정적 쿼리를 직접 작성하므로 `이름 없는 Named 쿼리`라 할 수 있다.
-
-* `JPA Named 쿼리`처럼 애플리케이션 실행 시점에 문법 오류를 발견할 수 있다는 장점이 있다. 
+    * 실행할 메서드에 정적 쿼리를 직접 작성하므로 `이름 없는 Named 쿼리`라 할 수 있다.
+    
+    * `@Query`는 애플리케이션 실행 시점에 문법 오류를 발견할 수 있다는 장점이 있다. 
 
 #### 4) @Query, 값과 DTO 조회하기
 
@@ -344,7 +370,7 @@
             }
             ```
            
-        * ② DTO로 직접 조회하려면 JPA의 new 명령어를 사용해야 한다. 그리고 DTO에서 일치하는 생성자가 있어야 한다.
+        * ② DTO로 직접 조회하려면 JPA의 `new` 명령어를 사용해야 한다. 그리고 DTO에서 일치하는 생성자가 있어야 한다.
         
             ```java
             public interface MemberRepository extends JpaRepository<Member, Long> {           
@@ -357,13 +383,13 @@
 
 * 파라미터 바인딩
 
-   * 스프링 데이터 JPA는 `위치 기반 파라미터 바인딩`과 `이름 기반 파라미터 바인딩`을 모두 지원한다.
+    * 스프링 데이터 JPA는 `위치 기반 파라미터 바인딩`과 `이름 기반 파라미터 바인딩`을 모두 지원한다.
     
-     ```java
-     select m from Member m where m.username = ?0 //위치 기반 
-     select m from Member m where m.username = :name //이름 기반
-     ```
-  
+        ```java
+        select m from Member m where m.username = ?0 //위치 기반 
+        select m from Member m where m.username = :name //이름 기반
+        ```
+        
         * 코드 가독성과 유지보수를 위해 `이름 기반 파라미터 바인딩`을 사용하자.
 
 * 컬렉션 파라미터 바인딩
@@ -391,11 +417,15 @@
 
     * ① 컬렉션 조회인 경우
     
-        * 조회 결과가 없으면 비어있는 컬렉션을 반환
+        * 조회 결과가 없으면 비어있는 컬렉션을 반환한다.
+        
+            * `null` 체크를 하지 않아도 됨
     
     * ② 단건 조회인 경우
     
-        * 조회 결과가 없으면 `null`을 반환
+        * 조회 결과가 없으면 `null`을 반환한다.
+        
+            * `null` 일 수도 있다면 반환타입으로 단건 Optional(`Optional<Member>`)를 사용하자.
         
         * 조회 결과가 2건 이상이면 `javax.persistence.NonUniqueResultException` 예외가 발생한다.
      
@@ -437,12 +467,20 @@
 * `스프링 데이터 JPA`는 쿼리 메소드에 `페이징과 정렬` 기능을 사용 할 수 있도록 **2가지 파라미터**를 제공한다.
 
     * `org.springframework.data.domain.Sort` : 정렬 기능
-    
+
+        ```java
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+      
+        String sortProperty = sort.toString().contains("id") ? "id" : "updatedDate";
+        ```
+
     * `org.springframework.data.domain.Pageable` : 페이징 기능 (내부에 Sort 포함)
 
 * 파라미터에 `Pageable`을 사용하면 다음과 같은 `특별한 반환 타입`을 사용 할 수 있다. 
 
     * `org.springframework.data.domain.Page` : 추가 count 쿼리를 호출하는 페이징 결과
+    
+        * `Page`는 0 부터 시작이다. 
     
     * `org.springframework.data.domain.Slice`
     
@@ -546,25 +584,29 @@
         }
         ```
 
-    * 더보기 기능 구현 시 사용 할 수 있다.
+    * 더보기 기능을 구현할 때, 사용 할 수 있다.
 
 * 추가 내용
 
     * count 쿼리를 분리하기
     
-        * count 쿼리에는 left join 조인 하는 것이 의미 없기 때문에 이러한 경우에 사용 할 수 있다.
+        * count 쿼리에는 `left join` 조인을 하는 것이 의미 없기 때문에 이러한 경우에 사용 할 수 있다.
     
             ```java
             @Query(value = "select m from Member m left join m.team t",
                    countQuery = "select count(m.username) from Member m")
             Page<Member> findByAge(int age, Pageable pageable);
             ```
+          
+            * 정렬 조건이 복잡해지면 `Sort`로 해결하기 어렵다. 
+            
+            * 이러한 경우에는 `@Query`에 `JPQL`로 정렬 기준을 작성하자.
     
     * 페이지를 유지하면서 엔티티를 DTO로 변환하기
     
-        * 컨트롤러에서 엔티티를 바로 반환하면 안된다. 
+        * API를 작성 할 때, 컨트롤러에서 엔티티를 바로 반환하면 안된다. 
         
-        * 그 이유는 엔티티를 변경하면 API 스펙이 변경되기 때문이다. (API 장애 발생 할 수 있음)
+        * 그 이유는 엔티티를 변경하면 API의 스펙이 변경되기 때문이다. (API 장애가 발생 할 수 있음)
          
         * 그래서 엔티티는 외부에 노출 시키지 말고 DTO로 변환해서 반환해야 한다.  
     
@@ -640,12 +682,90 @@
 
 #### 10) @EntityGraph
 
-* N+1 문제가 발생하는 경우
+* `N+1` 문제가 발생하는 경우
 
-    * member와 team은 지연 로딩 관계이다. 
+    ```java
+    @Test
+    public void findMemberLazy(){
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
     
-    * 따라서 team의 데이터를 조회할 때 마다 쿼리가 실행된다. (N+1 문제 발생함)
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+    
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 10, teamA);
+    
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+    
+        em.flush();
+        em.clear();
+    
+        /*  */
+        List<Member> members = memberRepository.findAll();
+    
+        for (Member member : members) {
+            System.out.println("member = " + member.getUsername());
+            System.out.println("member.team = " + member.getTeam().getName());
+        }
+    }
+    ```
+        
+    * Member와 연괸된 Team은 지연 로딩(LAZY)으로 설정되어 있다.
+    
+        * Member를 조회할 때, Team 필드에는 프록시 객체를 넣어둔다.
+        
+        * 그래서 `member.getTeam()`까지는 데이터베이스를 조회하지 않는다.
+        
+        * 그러나 `member.getTeam().getName()`를 하는 순간, 데이터베이스를 조회한다.
+        
+            * `Team`의 필드를 건드릴 때, 위와 같이 동작한다.
+    
+    * 위의 코드는 `N+1` 문제가 발생한다.
 
+        * 먼저, Member를 조회하는 쿼리가 발생한다. (`1`)
+
+            ```java
+            select
+                member0_.member_id as member_i1_0_,
+                member0_.age as age2_0_,
+                member0_.team_id as team_id4_0_,
+                member0_.username as username3_0_ 
+            from
+                member member0_
+            ```
+          
+        * 그리고 team 필드를 사용 할 때 마다 추가적인 N개의 쿼리가 발생한다. (`N`)
+
+            ```java
+            // teamA
+            select
+                team0_.team_id as team_id1_1_0_,
+                team0_.name as name2_1_0_ 
+            from
+                team team0_ 
+            where
+                team0_.team_id=1
+            ```
+          
+            ```java
+            // teamB
+            select
+                team0_.team_id as team_id1_1_0_,
+                team0_.name as name2_1_0_ 
+            from
+                team team0_ 
+            where
+                team0_.team_id=2
+            ```
+          
+            * 이번 예제에서는 추가 쿼리가 2번 발생했다.
+            
+            * 만약 2개의 Member에 teamA만 설정 했다면 추가 쿼리는 1번만 발생하게 될 것이다.
+            
+                * 그 이유는 영속성 컨텍스트에 이미 존재하기 때문이다.
+          
 * 엔티티를 조회할 때 연관된 엔티티들을 함께 조회하는 방법
 
     * `JPQL`에서 `페치 조인`을 사용하면 된다.
@@ -655,50 +775,55 @@
         List<Member> findMemberFetchJoin();
         ```
       
-    * 엔티티 그래프는 엔티티를 조회하는 시점에 연관된 엔티티를 함께 조회하는 기능이다.
+    * `엔티티 그래프`는 엔티티를 조회하는 시점에 연관된 엔티티를 함께 조회하는 기능이다.
     
         * `@EntityGraph`는 사실상 페치 조인(FETCH JOIN)의 간편 버전이다.
         
-        * LEFT OUTER JOIN 사용
+        * LEFT OUTER JOIN을 사용한다.
     
-       ```java
-       // 공통 메서드 오버라이드
-       @Override
-       @EntityGraph(attributePaths = {"team"})
-       List<Member> findAll();
-       
-       // JPQL + 엔티티 그래프
-       // 쿼리는 작성 했는데 페치 조인만 적용하고 싶은 경우에 다음과 같이 할 수 있다.
-       @EntityGraph(attributePaths = {"team"})
-       @Query("select m from Member m") 
-       List<Member> findMemberEntityGraph();
-       
-       // 메소드 이름으로 쿼리를 생성하는 경우에 사용하면 특히 편리하다.
-       @EntityGraph(attributePaths = {"team"})
-       List<Member> findByUsername(@Param("username") String username);
-       ```
-      
-        * `attributePaths` : 쿼리 수행 시, 함께 조회 할 필드명을 지정한다
+           ```java
+           // 공통 메서드 오버라이드
+           @Override
+           @EntityGraph(attributePaths = {"team"})
+           List<Member> findAll();
+           
+           // JPQL + 엔티티 그래프
+           // 쿼리는 작성 했는데 페치 조인만 적용하고 싶은 경우에 다음과 같이 할 수 있다.
+           @EntityGraph(attributePaths = {"team"})
+           @Query("select m from Member m") 
+           List<Member> findMemberEntityGraph();
+           
+           // 메소드 이름으로 쿼리를 생성하는 경우에 사용하면 특히 편리하다.
+           @EntityGraph(attributePaths = {"team"})
+           List<Member> findEntityGraphByUsername(@Param("username") String username);
+           ```
+          
+            * `attributePaths` : 쿼리 수행 시, 함께 조회 할 필드명을 지정한다
 
     * `@NamedEntityGraph`
     
-        * Named 엔티티 그래프는 `@NamedEntityGraph`로 정의한다.
-        
+        * `@NamedEntityGraph`는 Named 엔티티 그래프를 정의할 때, 사용한다.
+                
+            ```java
+            @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
+            @Entity
+            public class Member {
+              //...
+            }
+            ```
+            
             * `name` : 엔티티 그래프의 이름을 정의한다.
             
             * `attributeNodes` : 함께 조회할 속성을 선택한다. 이때, `@NamedAttributeNode`를 사용하고 그 값으로 함께 조회할 속성을 선택하면 된다.
-        
-           ```java
-           @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
-           @Entity
-           public class Member {}
+
+        * Named 엔티티 그래프를 사용한다.
+                
+            ```java
+            @EntityGraph("Member.all") 
+            List<Member> findMemberEntityGraph();
+            ```
           
-           @EntityGraph("Member.all") 
-           @Query("select m from Member m")
-           List<Member> findMemberEntityGraph();
-           ```         
-        
-        * Named 엔티티 그래프는 잘 사용하지 않는 것 같음.
+            * Named 엔티티 그래프는 잘 사용하지 않는 기능으로 보인다.
         
 #### 11) JPA Hint & Lock
 
@@ -708,25 +833,32 @@
     
     * JPA 쿼리 힌트를 사용하는 방법은 다음과 같다.
     
-       ```java
-       @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
-       Member findReadOnlyByUsername(String username);
-       ```
-      * `readOnly`로 설정하면 변경 감지 기능이 동작하지 않는다.
+        ```java
+        @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+        Member findReadOnlyByUsername(String username);
+        ```
       
-      * 그리고 내부적으로 성능 최적화를 해서 스냅샷을 만들지 않는다.
-          
+        * `readOnly`로 설정하면 변경 감지 기능이 동작하지 않는다.
+        
+        * 그리고 내부적으로 성능 최적화를 해서 스냅샷을 만들지 않는다. (성능 최적화가 이루어짐)
+        
+            * 즉, 데이터를 변경하지 않고 화면에 출력하는 용도로만 사용한다.
+            
+            * 성능 테스트를 했을 때, 느리다면 해당 힌트를 적용하자. 무조건적으로 적용하는 것은 좋지 않다.
+     
 * @Lock
 
     * 쿼리 시 락을 걸려면 `org.springframework.data.jpa.repository.Lock` 애노테이션을 사용하면 된다.
-    
-    * JPA가 제공하는 락은 `자바 ORM 표준 JPA 프로그래밍` 책에서 `16.1 절`을 참고하자.
-    
+
        ```java
        @Lock(LockModeType.PESSIMISTIC_WRITE)
        List<Member> findLockByUsername(String username);
        ```
-
+      
+    * JPA가 제공하는 락은 `자바 ORM 표준 JPA 프로그래밍` 책에서 `16.1 절`을 참고하자.
+    
+        * 실시간 트래픽이 많은 서비스에서는 가급적 락을 걸면 안된다.
+    
 ## 5. 확장 기능
 
 #### 1) 사용자 정의 리포지토리 구현
@@ -777,8 +909,15 @@
         * 이렇게 하면 스프링 데이터 JPA가 인식해서 스프링 빈으로 등록한다.
         
         * **스프링 데이터 2.x 부터**는 클래스 이름을 짓는 규칙을 `사용자 정의 인터페이스명 + Impl`로 하는 것이 가능하다.
-    
-            * 예를 들어 위의 예제에서 `MemberRepositoryImpl` 대신에 `MemberRepositoryCustomImpl` 같이 작성해도 된다.
+
+            ```java
+            @RequiredArgsConstructor
+            public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
+                //...
+            }
+            ```
+
+            * 예를 들어, `MemberRepositoryImpl` 대신에 `MemberRepositoryCustomImpl` 같이 작성해도 된다.
             
             * 해당 방식이 사용자 정의 인터페이스 이름과 구현 클래스 이름이 비슷하므로 더 직관적이므로 해당 방식을 사용하는 것을 권장한다.
 
@@ -809,15 +948,13 @@
 
 #### 2) Auditing
 
-* Auditing
-
-    * `Auditing`는 엔티티를 생성, 변경할 때 변경한 사람과 시간을 추적하는 기능이다.
-
-        * 등록일, 수정일, 등록자, 수정자
+* `Auditing`는 엔티티의 변경 시점에 언제, 누가 변경 했는지에 대한 정보를 기록하는 기능이다.
+        
+    * Ex) 등록일, 수정일, 등록자, 수정자
  
 * Auditing 구현
   
-    * 순수 JPA 사용
+    * (1) 순수 JPA 사용
     
         * 등록일, 수정일을 적용한 클래스 작성
     
@@ -848,7 +985,13 @@
             }
             ```
           
-            * JPA 주요 이벤트 어노테이션 : `@PrePersist`, `@PostPersist`, `@PreUpdate`, `@PostUpdate`
+            * JPA 주요 이벤트 애노테이션 : `@PrePersist`, `@PostPersist`, `@PreUpdate`, `@PostUpdate`
+
+                * `@PrePersist` : `persist()` 하기 전에 호출된다.
+
+                * `@PreUpdate` : `update()` 하기 전에 호출된다.
+                
+                * ...
 
         * 앞서 작성한 클래스를 상속 받는다.
         
@@ -856,7 +999,7 @@
             public class Member extends JpaBaseEntity {}
             ```   
 
-    * 스프링 데이터 JPA 사용
+    * (2) 스프링 데이터 JPA 사용
     
         * 설정
         
@@ -964,7 +1107,35 @@
                 public class Member extends BaseEntity {}
                 ```
 
-        * `@EntityListeners(AuditingEntityListener.class)`를 생략하고 `스프링 데이터 JPA`가 제공하는 이벤트를 엔티티 전체에 적용하는 방법이 있는데 해당 강좌를 참고하자.
+        * 실무에서 대부분의 엔티티는 등록시간, 수정시간이 필요하지만, 등록자, 수정자는 없을 수도 있다. 
+        
+            ```java
+            public class BaseTimeEntity {
+                @CreatedDate
+                @Column(updatable = false)
+                private LocalDateTime createdDate;
+          
+                @LastModifiedDate
+                private LocalDateTime lastModifiedDate;
+            }
+          
+            public class BaseEntity extends BaseTimeEntity {
+                @CreatedBy
+                @Column(updatable = false)
+                private String createdBy;
+          
+                @LastModifiedBy
+                private String lastModifiedBy;
+            }
+            ```
+          
+            * 그래서 위와 같이 Base 타입을 분리하고, 원하는 타입을 선택해서 상속한다.
+            
+                * 등록, 수정 시간만 필요하다면 `BaseTimeEntity`를 상속하고 둘다 필요하다면 `BaseEntity`를 상속한다. 
+
+        * `@EntityListeners(AuditingEntityListener.class)`를 생략하고 XML을 만들어서 `스프링 데이터 JPA`가 제공하는 이벤트를 엔티티 전체에 적용 할 수 있다.
+        
+            * 자세한 내용은 해당 강좌를 참고하자.
     
 #### 3) Web 확장
 
@@ -1028,16 +1199,22 @@
         ```
       
         * 컨트롤러의 핸들러에서 파라미터로 `Pageable`을 받을 수 있다.
+
+            * `Page` : 페이징에 대한 결과 정보를 의미한다.
+            
+            * `Pageable` : 페이징에 대한 파라미터 정보를 의미한다.
         
-        * `Pageable`은 다음 요청 파라미터 정보로 만들어진다. (실제는 `PageRequest` 객체가 생성되어 주입된다.)
+        * `Pageable`은 아래와 같은 `요청 파라미터` 정보로 만들어진다. (실제는 `PageRequest` 객체를 생성해서 주입한다.)
         
-            * [예시] `/members?page=0&size=3&sort=id,desc&sort=username,desc   `
+            * [예시] `/members?page=0&size=3&sort=id,desc&sort=username,desc`
                      
-            * `page` : 현재 페이지, 0부터 시작한다.
-            
-            * `size` : 한 페이지에 노출할 데이터 건수
-            
-            * `sort` : 정렬 조건을 정의한다. (ASC | DESC)
+                * `page` : 현재 페이지, 0부터 시작한다.
+                
+                * `size` : 한 페이지에 노출할 데이터 건수
+                
+                * `sort` : 정렬 조건을 정의한다. (ASC | DESC)
+                
+                    * ASC는 기본 값이므로 생략 가능하다.
         
     * Pageable 기본 값 변경
 
@@ -1048,7 +1225,7 @@
             spring.data.web.pageable.max-page-size=2000 /# 최대 페이지 사이즈/
             ```
           
-        * 개별 설정 : `@PageableDefault` 애노테이션을 사용
+        * 개별 설정 : `@PageableDefault` 애노테이션을 사용한다.
         
             ```java
             @GetMapping("/members")
@@ -1074,33 +1251,39 @@
                   
     * Page 내용을 DTO로 변환하기       
 
-        * 엔티티를 API로 노출하면 다양한 문제가 발생한다. 그래서 엔티티를 꼭 DTO로 변환해서 반환해야 한다.
+        * 엔티티를 외부 API로 노출하면 다양한 문제가 발생한다. 그래서 엔티티를 꼭 DTO로 변환해서 반환해야 한다.
      
-            * API로 반환할 때는 컨트롤러의 리턴 타입을 `Page<Member>`가 아닌 `Page<MemberDto>`로 사용해야 한다.
+            * 외부 API로 반환할 때는 컨트롤러의 리턴 타입을 `Page<Member>`가 아닌 `Page<MemberDto>`로 사용해야 한다.
      
         * Page는 `map()`을 지원해서 내부 데이터를 다른 것으로 변경할 수 있다.
 
-            ```java
-            @Data
-            public class MemberDto {          
-                private Long id;
-            
-                private String username;
+            * DTO를 작성한다.
+
+                ```java
+                @Data
+                public class MemberDto {          
+                    private Long id;
                 
-                public MemberDto(Member member){
-                    this.id = member.getId();
-                    this.username = member.getUsername();
+                    private String username;
+                    
+                    public MemberDto(Member member){
+                        this.id = member.getId();
+                        this.username = member.getUsername();
+                    }
                 }
-            }
-            ```
-                  
-            ```java
-            @GetMapping("/members")
-            public Page<MemberDto> list(@PageableDefault(size = 5) Pageable pageable){
-                return memberRepository.findAll(pageable)
-                        .map(MemberDto::new);
-            }
-            ```
+                ```
+              
+                * DTO에서 엔티티(Member)를 필드가 아닌 파라미터로 사용하는 것은 좋은 방법이다. 
+
+            * `Page.map()`을 사용해서 엔티티를 DTO로 변경한다.
+            
+                ```java
+                @GetMapping("/members")
+                public Page<MemberDto> list(@PageableDefault(size = 5) Pageable pageable){
+                    return memberRepository.findAll(pageable)
+                      .map(MemberDto::new);
+                }
+                ```
           
     * Page를 1 부터 시작하기       
 
@@ -1108,19 +1291,78 @@
         
             * 첫 번째 방법 - 실질적인 해결책
             
-                * Pageable, Page를 파라미터와 응답 값으로 사용하지 않고, 직접 클래스를 만들어서 처리한다. 
+                * `Pageable`, `Page`를 파라미터와 응답 값으로 사용하지 않고, 직접 클래스를 만들어서 처리한다. 
                 
-                * 그리고 직접 PageRequest(Pageable 구현체)를 생성해서 리포지토리에 넘긴다. 
+                * 그리고 직접 `PageRequest`(Pageable 구현체)를 생성해서 리포지토리에 전달한다. 
                 
                 * 물론 응답 값도 Page 대신에 직접 만들어서 제공해야 한다.
                 
             * 두 번째 방법
             
                 * `spring.data.web.pageable.one-indexed-parameters`를 true로 설정한다. 
-                
-                * 그런데 이 방법은 web에서 page 파라미터를 -1 처리 할 뿐이다.
-                
-                * 따라서 응답 값인 Page에 모두 0 페이지 인덱스를 사용하는 한계가 있다.
+                                
+                    * Ex) `http://localhost:8080/members?page=1` 처럼 페이지 1을 요청한다. 
+                    
+                        ```json
+                        {
+                            "content": [
+                                {
+                                    "id": 1,
+                                    "username": "user0",
+                                    "teamName": null
+                                },
+                                {
+                                    "id": 2,
+                                    "username": "user1",
+                                    "teamName": null
+                                },
+                                {
+                                    "id": 3,
+                                    "username": "user2",
+                                    "teamName": null
+                                },
+                                {
+                                    "id": 4,
+                                    "username": "user3",
+                                    "teamName": null
+                                },
+                                {
+                                    "id": 5,
+                                    "username": "user4",
+                                    "teamName": null
+                                }
+                            ],
+                            "pageable": {
+                                "sort": {
+                                    "sorted": false,
+                                    "unsorted": true,
+                                    "empty": true
+                                },
+                                "offset": 0,
+                                "pageNumber": 0, // 0 인덱스
+                                "pageSize": 5,
+                                "paged": true,
+                                "unpaged": false
+                            },
+                            "last": false,
+                            "totalPages": 20,
+                            "totalElements": 100,
+                            "numberOfElements": 5,
+                            "first": true,
+                            "number": 0, // 0 인덱스
+                            "size": 5,
+                            "sort": {
+                                "sorted": false,
+                                "unsorted": true,
+                                "empty": true
+                            },
+                            "empty": false
+                        }
+                        ```
+                        
+                        * 그런데 이 방법은 web에서 page 파라미터를 -1 처리 할 뿐이다.
+                        
+                        * 따라서 응답 값인 Page에 모두 0 페이지 인덱스를 사용하는 한계가 있다.
 
         * 가급적 권장하는 것은 페이지 인덱스를 0 부터 처리하자.
         
@@ -1143,8 +1385,8 @@
         * `@Transactional` 적용
             
             * JPA의 모든 변경은 트랜잭션 안에서 이루어져야 한다.
-            
-                * `스프링 데이터 JPA`는 변경(등록, 수정, 삭제) 메소드에 `@Transactional`로 트랜잭션 처리가 되어 있다.
+                
+                * `스프링 데이터 JPA`는 변경(등록, 수정, 삭제) 메소드를 트랜잭션 안에서 처리해야 한다. (그렇지 않으면 예외가 발생함)
                 
                     ```java
                     @Transactional
@@ -1159,6 +1401,8 @@
                         }
                     }
                     ```
+                    
+                    * 스프링 데이터 JPA에서 등록, 삭제 메소드는 `@Transactional`로 트랜잭션 처리가 되어 있다.
 
                 * 서비스 계층에서 트랜잭션을 시작하면 리포지토리는 해당 트랜잭션을 전파 받아서 사용한다.
              
@@ -1190,9 +1434,9 @@
 
     * JPA 식별자 생성 전략이 `@GenerateValue`면 `save()` 호출 시점에 식별자가 없으므로 새로운 엔티티로 인식해서 정상 동작한다. 
     
-    * 그런데 `@Id`만 사용해서 직접 할당하게 되면 이미 식별자 값이 있는 상태로 `save()`를 호출하게 된다. 
+    * 그런데 `@Id`만 사용해서 직접 식별자를 할당하게 되면 이미 식별자 값이 있는 상태로 `save()`를 호출하게 된다. 
     
-    * 따라서 이 경우에는 `merge()`가 호출되며 `merge()`는 우선 DB를 호출해서 값을 확인하고, DB에 값이 없으면 새로운 엔티티로 인지하므로 매우 비효율적이다.
+    * 따라서 이 경우에는 `merge()`가 호출되며 `merge()`는 우선 DB에서 값을 조회하고, DB에 값이 없으면 새로운 엔티티로 인지하므로 매우 비효율적이다.
     
     * 그래서 `Persistable` 인터페이스를 사용해서 새로운 엔티티 확인 여부를 직접 구현한다.
     
@@ -1220,7 +1464,8 @@
             
             /*
             * @CreatedDate는 persist()가 되기 전에 호출된다.   
-            * createdDate가 null이면 새로운 객체로 본다.
+            * 그래서 판단 로직을 다음과 같이 구성한다.
+            * createdDate가 null이면 새로운 객체로 판단한다.
             * createdDate의 값이 있다면 새로운 객체가 아니다.
             * */        
             @Override
