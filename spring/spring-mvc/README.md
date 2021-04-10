@@ -2934,7 +2934,7 @@
         
     * `@RequestMapping`은 HTTP 요청을 처리하는 핸들러를 지정하는 애노테이션이다.
       
-    * HTTP 메소드를 따로 지정하지 않으면 모든 HTTP 메소드를 처리하게 된다.
+        * HTTP 메소드를 따로 지정하지 않으면 모든 HTTP 메소드를 처리하게 된다.
      
 * (2) HTTP method 맵핑하기 1 - 모든 HTTP 메소드 처리
 
@@ -3027,22 +3027,22 @@
 
     * ① 컨트롤러를 작성한다.
     
-        * 여러 HTTP 메소드에 대해 처리 하고 싶은 경우에는 `@RequestMapping`의 `method `속성에 {}로 배열을 지정 할 수 있다.
+        * 여러 HTTP 메소드에 대해 처리 하고 싶은 경우에는 `@RequestMapping`의 `method` 속성에 `{}`로 배열을 지정 할 수 있다.
           
         * 아래의 핸들러는 HTTP GET과 PUT 요청에 대해서 허용한다.
     
-        ```java
-        @Controller
-        public class SampleController {
-        
-            @RequestMapping(value = "/hello" , method = {RequestMethod.GET, RequestMethod.PUT})
-            @ResponseBody
-            public String hello(){
-                return "hello";
+            ```java
+            @Controller
+            public class SampleController {
+            
+                @RequestMapping(value = "/hello" , method = {RequestMethod.GET, RequestMethod.PUT})
+                @ResponseBody
+                public String hello(){
+                    return "hello";
+                }
+            
             }
-        
-        }
-        ```
+            ```
       
     * ② 테스트 코드를 변경한다.
        
@@ -3086,7 +3086,7 @@
 
     * ⑤ `@DeleteMapping`
     
-* (6) `@RequestMapping`를 클래스에 지정
+* (6) 클래스에 `@RequestMapping`를 지정
 
     * 다음과 같이 클래스에 `@RequestMapping`를 지정하면 해당 컨트롤러의 모든 핸들러는 GET 요청만 처리한다. 
     
@@ -3172,14 +3172,28 @@
 
 * (1) URI, URL, URN 차이점
 
-    * URI (Uniform Resource Identifier, 통합 자원 식별자)
-   
-        * 인터넷 상의 자원을 식별하기 위한 문자열
+    * `URI (Uniform Resource Identifier, 통합 자원 식별자)` : 인터넷 상에 존재하는 자원을 구분하는 식별자를 말한다.
 
-        * URI의 하위 개념으로 URL과 URN이 있다.
+        * URI는 URL과 URN을 모두 포함하는 개념이다.
 
         * 예시
-        
+
+            * `http://www.test.com`
+            
+                * 서버를 의미하므로 URL이면서 URI다.
+                
+            * `http://www.test.com/member`
+            
+                * 인터넷 상의 자원을 의미하므로 URL이면서 URI다.
+
+            * `http://www.test.com/member/123`
+            
+                * 여기서 URL은 `member`라는 자원의 위치를 표기한 `http://www.test.com/member` 다.
+                
+                * 내가 원하는 정보에 도달 하기 위해서는 `123`라는 식별자(Identifier)가 필요하다.
+                
+                * 그래서 `http://www.test.com/member/123` 라는 주소는 URI는 맞지만 URL은 아니다.
+
             * `http://www.test.com/books.php?id=1234`
             
                 * `http://www.test.com/` 라는 서버에 위치한 `books.php` 파일은 쿼리 스트링 파라미터인 id의 값에 따라 여러가지 결과가 나타난다.
@@ -3190,16 +3204,10 @@
 
                 * 그래서 `http://www.test.com/books.php?id=1234` 라는 주소는 URI는 맞지만 URL은 아니다.
 
-    * URL (Uniform Resource Locator)
-   
-        * 인터넷 상의 자원의 위치를 나타내는 것
+    * `URL (Uniform Resource Locator)` : 인터넷 상에 존재하는 자원의 위치를 말한다.
 
-        * URI는 URL을 포함하는 개념이다. (URI > URL)
-
-    * URN (Uniform Resource Name)
-   
-        * 인터넷 상의 자원의 이름을 나타내는 것 (자원의 위치에 영향을 받지 않는 유일 무이한 이름을 말한다.)
-
+    * `URN (Uniform Resource Name)` : 인터넷 상에 존재하는 자원의 이름을 말한다.
+    
         * URN은 서로 중복되지 않는 유일한 값이어야 한다.
         
         * 예시
@@ -3418,7 +3426,7 @@
 
 * (1) 특정한 타입의 데이터를 보내는 요청만 처리하는 핸들러
 
-    * 특정한 타입의 데이터를 보내는 요청만 처리하는 핸들러를 만들고 싶다면 `consumes` 옵션을 지정한다.
+    * `consumes` 옵션 : 특정한 타입의 데이터를 보내는 요청만 처리하는 핸들러로 지정한다.
     
         * ① `@RequestMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)`
 
@@ -3494,7 +3502,7 @@
           
 * (2) 특정한 타입의 응답을 만드는 핸들러
 
-    * 특정한 타입의 응답을 만드는 핸들러를 지정하려면 `produces` 옵션을 지정한다.
+    * `produces` 옵션 : 특정한 타입의 응답을 만드는 핸들러로 지정한다.
        
         * ① `@RequestMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)`
           
@@ -3569,10 +3577,8 @@
      
 #### 5) HTTP 요청 맵핑하기 4부: 헤더와 파라미터 맵핑
 
-* (1) 특정한 헤더가 있을 때, 요청을 처리하고 싶은 경우
+* (1) `@RequestMapping(headers = "key")` : 어떤 HTTP 요청 헤더가 있을 때, 요청을 처리 하도록 한다.
 
-    * `@RequestMapping(headers = "key")`
-    
     * 실습하기
     
         * ① 컨트롤러 작성
@@ -3611,9 +3617,7 @@
             }
             ```
 
-* (2) 특정한 헤더가 없을 때, 요청을 처리하고 싶은 경우
-
-    * `@RequestMapping(headers = "!key")`
+* (2) `@RequestMapping(headers = "!key")` : 어떤 HTTP 요청 헤더가 없을 때, 요청을 처리 하도록 한다.
     
     * 실습하기
     
@@ -3653,9 +3657,7 @@
             }
             ```
 
-* (3) 특정한 헤더 키/값이 있을 때, 요청을 처리하고 싶은 경우
-
-    * `@RequestMapping(headers = "key=value")`
+* (3) `@RequestMapping(headers = "key=value")` : 어떤 HTTP 요청 헤더 키/값이 있을 때, 요청을 처리 하도록 한다.
     
     * 실습하기
            
@@ -3672,10 +3674,8 @@
         }
         ```
       
-* (4) 특정한 요청 매개변수 키를 가지고 있을 때, 요청을 처리하고 싶은 경우
-
-    * `@RequestMapping(params = "a")`
-    
+* (4) `@RequestMapping(params = "a")` : 어떤 요청 매개변수를 가지고 있을 때, 요청을 처리 하도록 한다.
+   
     * 실습하기
            
         * ① 컨트롤러 작성
@@ -3714,14 +3714,10 @@
             }
             ```
           
-* (5) 특정한 요청 매개변수가 없을 때, 요청을 처리하고 싶은 경우
+* (5) `@RequestMapping(params = "!a")` : 어떤 요청 매개변수가 없을 때, 요청을 처리 하도록 한다.
 
-    * `@RequestMapping(params = "!a")`
-
-* (6) 특정한 요청 매개변수 키/값을 가지고 있을 때, 요청을 처리하고 싶은 경우
-
-    * `@RequestMapping(params = "a=b")`
-      
+* (6) `@RequestMapping(params = "a=b")` : 어떤 요청 매개변수 키/값을 가지고 있을 때, 요청을 처리 하도록 한다.
+   
     * 실습하기
           
         ```java

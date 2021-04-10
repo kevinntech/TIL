@@ -1395,7 +1395,7 @@ public class MyEventHandler{
     }
     ```
 
-    * ResourceLoader의 `getResource()` : 지정한 리소스의 Resource 객체를 얻는다. 
+    * ResourceLoader의 `getResource()` : 지정한 이름의 Resource 객체를 얻는다. 
     
     * Resource의 메소드
     
