@@ -2334,7 +2334,7 @@ int[][] arr = {
             
 #### 6) ZoneOffset과 OffsetDateTime
 
-* `ZoneOffset`은 UTC(표준 시)로 부터 얼마만큼 떨어져 있는지를 표현할 때 사용한다.
+* `ZoneOffset`은 협정 세계시(UTC)와 차이 나는 시간(시차)을 표현할 때 사용한다. 
 
     * 예를 들어, 한국은 UTC+9 이다. 즉, UTC 보다 9시간이 빠르다.
     
@@ -2348,7 +2348,7 @@ int[][] arr = {
       
 * `OffsetDateTime`은 `ZoneOffset`으로 시간대를 표현한다.
 
-    * `ZonedDateTime`은 ZoneId로 시간대를 표현한다.
+* `ZonedDateTime`은 `ZoneId`로 시간대를 표현한다.
     
 * `OffsetDateTime`은 서로 다른 시간대에 존재하는 컴퓨터 간의 통신에 유용하다.
 
@@ -4083,7 +4083,7 @@ int[][] arr = {
 
 * 제네릭 타입에 `extends`를 사용하면, 대입 할 수 있는 타입을 제한한다. (`<T extends 조상 타입>`)
     
-    * 다음 코드는 대입 할 수 있는 타입을 Fruit과 그 자손으로 지정한다. 
+    * 다음 코드는 대입 할 수 있는 타입을 Fruit과 그 자손으로 제한한다. 
     
         ```java
         class FruitBox<T extends Fruit> { // Fruit과 그 자손만 타입으로 지정 가능
@@ -4238,7 +4238,7 @@ int[][] arr = {
 
     * 와일드 카드를 사용하면 `makeJuice()`의 매개변수로 `FruitBox<Fruit>` 뿐만 아니라, `FruitBox<Apple>`와 `FruitBox<Grape>`도 가능하다.
 
-        * `makeJuice()`의 매개변수가 `FruitBox<Fruit>`이면 대입된 타입이 일치하는 `FruitBox<Fruit>`만 가능하다. 
+        * `makeJuice()`의 매개변수가 `FruitBox<Fruit>`였다면 대입된 타입이 일치하는 `FruitBox<Fruit>`만 가능하다. 
 
 #### 8) 제네릭 메서드
 
