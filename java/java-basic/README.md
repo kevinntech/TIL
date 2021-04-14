@@ -5770,7 +5770,7 @@ int[][] arr = {
 
 * (1) 람다식이란?
 
-    * `람다식`은 함수(메서드)를 하나의 `식(Expression)`으로 표현한 것이다.
+    * `람다식`은 함수(메서드)를 하나의 식(Expression)으로 표현한 것이다.
     
         * `(매개변수 선언) -> { 실행문; }`
         
@@ -5909,7 +5909,7 @@ int[][] arr = {
     
 * (2) 함수형 인터페이스의 종류
 
-    * ① `Runnable` : **매개변수도 없고 반환 값도 없는** 추상 메서드를 가지고 있다.
+    * ① `Runnable` : 매개변수도 없고 반환 값도 없다. 
     
         * `void run()`
         
@@ -5926,34 +5926,28 @@ int[][] arr = {
             thread.start();
             ```           
         
-    * ② `Consumer` : **매개변수만 있고 반환 값이 없는** 추상 메서드를 가지고 있다. 
+    * ② `Consumer` : 매개변수만 있고 반환 값이 없다. 
     
         * `void accept(T t)`
         
-    * ③ `Supplier` : **매개변수는 없고 반환 값만 있는** 추상 메서드를 가지고 있다.
+    * ③ `Supplier` : 매개변수 없이 특정 타입의 값을 반환한다.
     
         * `T get()`
         
-    * ④ `Function` : **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다. 
+    * ④ `Function` : 매개변수를 받아서 특정 타입으로 변환해서 값을 반환한다. 
     
         * `R apply(T t)`
         
-            * 주로 **매개변수의 값을 반환 타입으로 매핑(형 변환)** 할 경우에 사용한다.
-        
-    * ⑤ `Operator` : **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다.
+    * ⑤ `Operator` : 매개변수를 받아서 동일한 타입의 값을 반환한다. 
         
         * `T apply(T t)`
         
         * `T apply(T t, T t)`
-        
-            * 주로 **매개변수의 값을 연산한 다음, 동일한 타입으로 그 결과를 반환** 할 경우에 사용한다.
-        
-    * ⑥ `Predicate` : **매개변수와 반환 값이 모두 있는** 추상 메서드를 가지고 있다.
+                
+    * ⑥ `Predicate` : 매개변수를 받아서 boolean 값을 반환한다.
         
         * `boolean test(T t)`
         
-            * **매개변수의 값을 검사해서 boolean 값을 반환** 할 때 사용한다.
-
 * (3) 매개변수가 2개인 함수형 인터페이스
 
     * ① `BiConsumer<T, U>` : 두 개의 매개변수만 있고 반환 값이 없다.
@@ -5979,7 +5973,7 @@ int[][] arr = {
       
 * (5) 매개변수의 타입과 반환타입이 일치하는 함수형 인터페이스
 
-    * `UnaryOperator<T>` : T 객체를 매개변수로 받아서 연산한 후 T 객체를 반환한다.
+    * `UnaryOperator<T>` : 매개변수를 하나 받아서 동일한 타입의 값을 반환한다. 
     
         * `Function`의 자손 
         
@@ -5987,7 +5981,7 @@ int[][] arr = {
         
             * `T apply(T t)`
     
-    * `BinaryOperator<T>` : T 객체 2개를 매개변수로 받아서 연산한 다음, T 객체를 반환한다.
+    * `BinaryOperator<T>` : 매개변수를 두개 받아서 동일한 타입의 값을 반환한다. 
     
         * `BiFunction`의 자손
         
@@ -5999,11 +5993,11 @@ int[][] arr = {
 
     * Consumer
 
-        * `Consumer<T>` : T 객체를 매개변수로  받아서 소비한다.
+        * `Consumer<T>` : T 객체를 매개변수로 받아서 소비한다.
         
         * `BiConsumer<T, U>` : T 와 U 객체를 매개변수로 받아서 소비한다.
  
-        * `IntConsumer` : int 값을 매개변수로  받아서 소비한다.
+        * `IntConsumer` : int 값을 매개변수로 받아서 소비한다.
         
         * `ObjIntConsumer<T>` : T 객체와 int 값을 매개변수로 받아서 소비한다.
         
@@ -6226,27 +6220,164 @@ int[][] arr = {
         
             * `boolean removeIf(Predicate<E> filter)` : 조건(filter)에 맞는 요소를 삭제한다.
 
+                ```java
+                List<Integer> numbers = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
+                numbers.removeIf(n -> (n % 2 == 0));
+                
+                System.out.println(numbers); // [결과] : [1, 3, 5, 7, 9]
+                ```
+              
         * List 인터페이스
               
-            * `void replaceAll(UnaryOperator<E> operator)` : 모든 요소를 변환(operator)하여 대체한다.
-      
+            * `void replaceAll(UnaryOperator<E> operator)` : 모든 요소에 교체 작업(operator)을 수행한다.
+
+                ```java
+                List<String> names = Arrays.asList("leo", "oliver", "kai");
+                names.replaceAll(name -> name.toUpperCase());
+                
+                System.out.println(names); // [LEO, OLIVER, KAI]
+                ```
+
         * Iterable 인터페이스
           
             * `void forEach(Consumer<T> action)` : 모든 요소에 작업(action)을 수행한다.
             
+                * 리스트를 순회할 때 사용한다. 
+            
         * Map 인터페이스
         
-            * `V compute(K key, BiFunction<K, V, V> f)` : 지정된 키(key)의 값에 작업(f)를 수행
+            * `V putIfAbsent(K key, V value)` : 지정된 키(key)가 없다면 Map에 값(value)을 추가한다. 
+
+                ```java
+                Map<String, Integer> map = new HashMap<>();
+                map.put("A", 1);
+                
+                map.putIfAbsent("A", 2); // 이미 A가 존재하기 때문에 대체되지 않았다.
+                System.out.println(map); // [결과] : {A=1}
+                ```
+
+            * `V compute(K key, BiFunction<K, V, V> f)` : 지정된 키(key)의 값에 작업(f)를 수행한다.
+
+                ```java
+                Map<String, Integer> map = new HashMap<>();
+                map.put("A", 1);
+                
+                map.compute("A", (key, value) -> value + 1);
+                //map.compute("B", (key, value) -> value + 1); // 존재하지 않는 Key에 대해서는 NPE가 발생한다.
+                System.out.println(map); // [결과] : {A=2}
+                ```
+              
+                * `BiFunction<K, V, V>`은 K 객체와 V 객체를 매개변수로 받아서 V 객체를 반환한다. 그리고 이 결과로 지정된 키의 값을 대체한다. 
+
+            * `V computeIfAbsent(K key, Function<K, V> f)` : 지정된 키(key)가 없다면, 작업(f)을 수행한 다음, Map에 그 결과를 추가한다.
+
+                ```java
+                Map<String, Integer> map = new HashMap<>();
+                map.put("A", 1);
+                
+                map.computeIfAbsent("BB", key -> key.length());
+                System.out.println(map); // [결과] : {BB=2, A=1}
+                ```
+              
+                * `Function<K, V>`은 K 객체를 매개변수로 받아서 V 객체를 반환한다. 그리고 이 결과를 Map에 추가한다.
             
-            * `V computeIfAbsent(K key, Function<K, V> f)` : 지정된 키(key)가 없으면, 작업(f)을 수행 후 추가
+            * `V computeIfPresent(K key, BiFunction<K, V, V> f)` : 지정된 키(key)가 있다면 해당 키의 값에 작업(f)를 수행한다.
+
+                ```java
+                Map<String, Integer> map = new HashMap<>();
+                map.put("A", 1);
+                
+                map.computeIfPresent("A", (key, value) -> value + 1);
+                map.computeIfPresent("B", (key, value) -> value + 1); // 존재하지 않으므로 아무런 일도 일어나지 않는다.
+                System.out.println(map); // [결과] : {A=2}
+                ```
+              
+                * `BiFunction<K, V, V>`은 K 객체와 V 객체를 매개변수로 받아서 V 객체를 반환한다. 그리고 이 결과로 지정된 키의 값을 대체한다.
+
+            * `V merge(K key, V value, BiFunction<V, V, V> f)` : 모든 요소에 병합 작업(f)을 수행한다.
+
+                ```java
+                Map<String, Integer> map = new HashMap<>();
+                map.put("A", 1);
+                
+                map.merge("A", 1, (value1, value2) -> value1 + 2);
+                map.merge("B", 1, (value1, value2) -> value1 + 2);
+                map.merge("C", 1, (value1, value2) -> value1 + 2);
+                map.merge("C", 1, (value1, value2) -> map.get("D")); // C는 Map에 추가되었다가 삭제됨
+                
+                System.out.println(map); // [결과] : {A=3, B=1}
+                ```
+
+                * 첫 번째 파라미터는 key를 전달 받는다.
+                
+                * 두 번째 파라미터는 key가 존재하지 않을 경우, 삽입될 value를 전달 받는다.
+                
+                * 세 번째 파라미터는 key가 존재할 경우 remapping할 BiFunction을 전달 받는다.
+                
+                    * Map에 key가 존재하면 BiFunction의 연산 결과를 value에 remapping한다.
+                    
+                    * Map에 key가 존재하고 BiFunction의 연산 결과가 null이면 map에서 해당 요소는 삭제된다.
+
+            * `V getOrDefault(Object key, V defaultValue)` : 지정된 키(key)와 일치하는 값(객체)을 반환한다. 없다면 지정한 기본 값을 반환한다. 
+
+                ```java
+                Map<String, Integer> map = new HashMap<>();
+                map.put("A", 1);
+                
+                System.out.println(map.getOrDefault("B", 0)); // [결과] : 0
+                ```
+
+            * `void forEach(BiConsumer<K, V> action)` : Map의 모든 요소에 작업(action)을 수행한다.
+
+                ```java
+                Map<String, Integer> map = new HashMap<>();
+                map.put("A", 1);
+                map.put("B", 3);
+                map.put("C", 5);
+                
+                map.forEach((key, value) -> System.out.println("key : " + key + ", value : " + value));
+                
+                /* [결과]
+                   key : A, value : 1
+                   key : B, value : 3
+                   key : C, value : 5 */
+                ```
+
+                * `BiConsumer<K, V>` : K 와 V 객체를 매개변수로 받아서 소비한다.
+
+            * `V replace(K key, V newValue)` : 지정된 키의 값을 새로운 값으로 교체한다. 그리고 기존 값을 반환한다.
             
-            * `V computeIfPresent(K key, BiFunction<K, V, V> f)` : 지정된 키가 있을 때, 작업(f)을 수행
+                ```java
+                Map<String, Integer> map = new HashMap<>();
+                map.put("A", 2);
+                
+                map.replace("A", 3);
+                System.out.println(map); // [결과] : {A=3}
+                ```
+              
+            * `boolean replace(K key, V oldValue, V newValue)` : 지정된 키의 값이 oldValue와 같다면 새로운 값으로 교체한다. 같지 않다면 교체되지 않는다.
             
-            * `V merge(K key, BiFunction<V, V, V> f)` : 모든 요소에 병합 작업(f)을 수행
+                ```java
+                Map<String, Integer> map = new HashMap<>();
+                map.put("A", 2);
+                
+                map.replace("A", 2, 5);
+                System.out.println(map); // [결과] : {A=5}
+                ```
+
+            * `void replaceAll(BiFunction<K, V, V> f)` : 모든 요소에 교체 작업(f)을 수행한다.
             
-            * `void forEach(BiConsumer<K, V> action)` : 모든 요소에 작업(action)을 수행
-            
-            * `void replaceAll(BiFunction<K, V, V> f)` : 모든 요소에 치환 작업(f)을 수행
+                ```java
+                Map<String, Integer> map = new HashMap<>();
+                map.put("A", 2);
+                map.put("B", 4);
+                map.put("C", 6);
+                
+                map.replaceAll((key, value) -> value * 2);
+                System.out.println(map); // [결과] : {A=4, B=8, C=12}
+                ```
+              
+                * `BiFunction<K, V, V>`은 K 객체와 V 객체를 매개변수로 받아서 V 객체를 반환한다. 그리고 이 결과로 Map의 모든 값을 교체한다.
             
     * 예시
     
