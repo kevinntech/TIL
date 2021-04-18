@@ -6210,12 +6210,10 @@ int[][] arr = {
         
             ![image 37](images/img37.png)
 
-* (5) 컬렉션 프레임워크와 함수형 인터페이스
+* (5) 컬렉션 프레임워크의 인터페이스 관련 디폴트 메서드
 
     * 컬렉션 프레임워크의 인터페이스에 여러 개의 디폴트 메서드가 추가 되었다.
-    
-    * 그 중 함수형 인터페이스를 사용하는 컬렉션 프레임워크의 메서드를 살펴본다.
-    
+
         * Collection 인터페이스
         
             * `boolean removeIf(Predicate<E> filter)` : 조건(filter)에 맞는 요소를 삭제한다.
@@ -6246,7 +6244,7 @@ int[][] arr = {
             
         * Map 인터페이스
         
-            * `V putIfAbsent(K key, V value)` : 지정된 키(key)가 없다면 Map에 값(value)을 추가한다. 
+            * ① `V putIfAbsent(K key, V value)` : 지정된 키(key)가 없다면 Map에 값(value)을 추가한다. 
 
                 ```java
                 Map<String, Integer> map = new HashMap<>();
@@ -6256,7 +6254,7 @@ int[][] arr = {
                 System.out.println(map); // [결과] : {A=1}
                 ```
 
-            * `V compute(K key, BiFunction<K, V, V> f)` : 지정된 키(key)의 값에 작업(f)를 수행한다.
+            * ② `V compute(K key, BiFunction<K, V, V> f)` : 지정된 키(key)의 값에 작업(f)를 수행한다.
 
                 ```java
                 Map<String, Integer> map = new HashMap<>();
@@ -6269,7 +6267,7 @@ int[][] arr = {
               
                 * `BiFunction<K, V, V>`은 K 객체와 V 객체를 매개변수로 받아서 V 객체를 반환한다. 그리고 이 결과로 지정된 키의 값을 대체한다. 
 
-            * `V computeIfAbsent(K key, Function<K, V> f)` : 지정된 키(key)가 없다면, 작업(f)을 수행한 다음, Map에 그 결과를 추가한다.
+            * ③ `V computeIfAbsent(K key, Function<K, V> f)` : 지정된 키(key)가 없다면, 작업(f)을 수행한 다음, Map에 그 결과를 추가한다.
 
                 ```java
                 Map<String, Integer> map = new HashMap<>();
@@ -6281,7 +6279,7 @@ int[][] arr = {
               
                 * `Function<K, V>`은 K 객체를 매개변수로 받아서 V 객체를 반환한다. 그리고 이 결과를 Map에 추가한다.
             
-            * `V computeIfPresent(K key, BiFunction<K, V, V> f)` : 지정된 키(key)가 있다면 해당 키의 값에 작업(f)를 수행한다.
+            * ④ `V computeIfPresent(K key, BiFunction<K, V, V> f)` : 지정된 키(key)가 있다면 해당 키의 값에 작업(f)를 수행한다.
 
                 ```java
                 Map<String, Integer> map = new HashMap<>();
@@ -6294,7 +6292,7 @@ int[][] arr = {
               
                 * `BiFunction<K, V, V>`은 K 객체와 V 객체를 매개변수로 받아서 V 객체를 반환한다. 그리고 이 결과로 지정된 키의 값을 대체한다.
 
-            * `V merge(K key, V value, BiFunction<V, V, V> f)` : 모든 요소에 병합 작업(f)을 수행한다.
+            * ⑤ `V merge(K key, V value, BiFunction<V, V, V> f)` : 모든 요소에 병합 작업(f)을 수행한다.
 
                 ```java
                 Map<String, Integer> map = new HashMap<>();
@@ -6318,7 +6316,7 @@ int[][] arr = {
                     
                     * Map에 key가 존재하고 BiFunction의 연산 결과가 null이면 map에서 해당 요소는 삭제된다.
 
-            * `V getOrDefault(Object key, V defaultValue)` : 지정된 키(key)와 일치하는 값(객체)을 반환한다. 없다면 지정한 기본 값을 반환한다. 
+            * ⑥ `V getOrDefault(Object key, V defaultValue)` : 지정된 키(key)와 일치하는 값(객체)을 반환한다. 없다면 지정한 기본 값을 반환한다. 
 
                 ```java
                 Map<String, Integer> map = new HashMap<>();
@@ -6327,7 +6325,7 @@ int[][] arr = {
                 System.out.println(map.getOrDefault("B", 0)); // [결과] : 0
                 ```
 
-            * `void forEach(BiConsumer<K, V> action)` : Map의 모든 요소에 작업(action)을 수행한다.
+            * ⑦ `void forEach(BiConsumer<K, V> action)` : Map의 모든 요소에 작업(action)을 수행한다.
 
                 ```java
                 Map<String, Integer> map = new HashMap<>();
@@ -6345,7 +6343,7 @@ int[][] arr = {
 
                 * `BiConsumer<K, V>` : K 와 V 객체를 매개변수로 받아서 소비한다.
 
-            * `V replace(K key, V newValue)` : 지정된 키의 값을 새로운 값으로 교체한다. 그리고 기존 값을 반환한다.
+            * ⑧ `V replace(K key, V newValue)` : 지정된 키의 값을 새로운 값으로 교체한다. 그리고 기존 값을 반환한다.
             
                 ```java
                 Map<String, Integer> map = new HashMap<>();
@@ -6355,7 +6353,7 @@ int[][] arr = {
                 System.out.println(map); // [결과] : {A=3}
                 ```
               
-            * `boolean replace(K key, V oldValue, V newValue)` : 지정된 키의 값이 oldValue와 같다면 새로운 값으로 교체한다. 같지 않다면 교체되지 않는다.
+            * ⑨ `boolean replace(K key, V oldValue, V newValue)` : 지정된 키의 값이 oldValue와 같다면 새로운 값으로 교체한다. 같지 않다면 교체되지 않는다.
             
                 ```java
                 Map<String, Integer> map = new HashMap<>();
@@ -6365,7 +6363,7 @@ int[][] arr = {
                 System.out.println(map); // [결과] : {A=5}
                 ```
 
-            * `void replaceAll(BiFunction<K, V, V> f)` : 모든 요소에 교체 작업(f)을 수행한다.
+            * ⑩ `void replaceAll(BiFunction<K, V, V> f)` : 모든 요소에 교체 작업(f)을 수행한다.
             
                 ```java
                 Map<String, Integer> map = new HashMap<>();
@@ -6515,11 +6513,7 @@ int[][] arr = {
 
 * (1) 스트림(Stream)
 
-    * `스트림(Stream)`은 다양한 데이터 소스를 표준화된 방법으로 다루기 위한 것이다.
-    
-        * 데이터 소스 : 컬렉션 또는 배열처럼 여러 데이터를 저장하고 있는 것을 말함
-        
-        * 예를 들어, 컬렉션은 List, Set과 Map은 사용 방법이 다르다. (100% 표준화 된 것은 아님)
+    * `스트림(Stream)`은 컬렉션, 배열 등의 저장 요소를 하나씩 참조해서 람다식으로 처리 할 수 있도록 해주는 기능이다. 
         
     * 스트림으로 작업하는 과정은 다음과 같다.
     
@@ -6527,23 +6521,23 @@ int[][] arr = {
                       
         * ② `중간 연산` : 여러 번 가능
         
-        * ③ `최종 연산` : 1번만 가능
+        * ③ `최종 연산` : 한 번만 가능
         
     * 스트림이 제공하는 기능 - 중간 연산과 최종 연산
     
         * `중간 연산` : 연산 결과가 스트림인 연산이다. 반복적으로 적용 가능
         
-        * `최종 연산` : 연산 결과가 스트림이 아닌 연산이다. 단 한번만 적용 가능 (스트림의 요소를 소모)
+        * `최종 연산` : 연산 결과가 스트림이 아닌 연산이다. 단 한 번만 적용 가능 (스트림의 요소를 소모)
         
-        * `stream.distinct().limit(5).sorted().forEach(System.out::println)`
-        
-            * `distinct().limit(5).sorted()` : 중간 연산
+            * Ex) `stream.distinct().limit(5).sorted().forEach(System.out::println)`
             
-            * `forEach(System.out::println)` : 최종 연산
+                * `distinct().limit(5).sorted()` : 중간 연산
+                
+                * `forEach(System.out::println)` : 최종 연산
             
 * (2) 스트림의 특징
 
-    * 스트림은 데이터 소스로 부터 데이터를 읽기만 할 뿐 변경하지 않는다. (즉, 원본을 변경하지 않는다.)
+    * ① 스트림은 데이터 소스로 부터 데이터를 읽기만 할 뿐 변경하지 않는다. (즉, 원본을 변경하지 않는다.)
     
         ```java
         List<Integer> list = Arrays.asList(3, 1, 5, 4, 2);
@@ -6558,7 +6552,7 @@ int[][] arr = {
         System.out.println(sortedList); // [1, 2, 3, 4, 5]
         ```
       
-    * 스트림은 일회용이다. (필요하면 다시 스트림을 생성해야 한다.)
+    * ② 스트림은 일회용이다. (필요하면 다시 스트림을 생성해야 한다.)
     
         ```java
         String[] strArr = {"aaa", "ddd", "ccc"};
@@ -6573,7 +6567,7 @@ int[][] arr = {
         int numOfStr = (int) strStream.count();
         ```
       
-    * 최종 연산이 수행되기 전까지는 중간 연산이 수행되지 않는다. - 지연된 연산을 수행
+    * ③ 최종 연산이 수행되기 전까지는 중간 연산이 수행되지 않는다. - 지연된 연산을 수행
     
         ```java
         /*
@@ -6585,7 +6579,7 @@ int[][] arr = {
                 .forEach(i -> System.out.print(i + ", "));
         ```
       
-    * 스트림은 작업을 내부 반복으로 처리한다.
+    * ④ 스트림은 작업을 내부 반복으로 처리한다.
     
         * `내부 반복` : 메서드의 내부에 반복문을 숨긴 것을 말한다.
         
@@ -6603,7 +6597,7 @@ int[][] arr = {
             ```java
             stream().forEach(System.out::println);
             ```          
-    * 스트림의 작업을 병렬로 처리 할 수 있다. - 병렬 스트림
+    * ⑤ 스트림의 작업을 병렬로 처리 할 수 있다. - 병렬 스트림
     
         * 병렬 스트림은 내부적으로 `fork&join 프레임워크`를 이용해서 자동적으로 연산을 병렬로 수행한다.
         
@@ -6614,7 +6608,7 @@ int[][] arr = {
                     .sum();
             ```
           
-    * 기본형 스트림을 제공한다. - IntStream, LongStream, DoubleStream
+    * ⑥ 기본형 스트림을 제공한다. - IntStream, LongStream, DoubleStream
     
         * 즉, 데이터 소스의 요소를 기본형으로 다루는 스트림을 제공한다.
     
