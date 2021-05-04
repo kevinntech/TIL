@@ -8,7 +8,7 @@
     * `Stepping` : 디버그 중 건너 뛸 수 있는 요소를 지정한다.
     
         * `[Shift]`를 두 번 누른 다음, Stepping으로 검색하면 설정 할 수 있다.
-
+    
 * (2) 단축키
 
     * 단축 키워드
@@ -94,3 +94,30 @@
         * `Ctrl + Space` 단축키와 같이 사용하면 유용하다.
     
     * `Command + Shift + ↑↓` : 라인 단위로 코드 이동 시키기
+
+* (3) Live Templates 기능
+
+    * ① `[IntelliJ IDEA]` - `[Preferences]` 를 클릭한다.
+    
+    * ② `live template`으로 검색한다.
+    
+    * ③ + 버튼을 클릭한 다음, `Template Group...`으로 그룹을 생성한다.
+    
+    * ④ 다시 + 버튼을 클릭한 다음, `Live Template`으로 다음과 같은 라이브 템플릿을 작성한다.
+    
+        ```java
+        @Test
+        public void $NAME$() throws Exception {
+            //given
+            $END$
+            //when
+            
+            //then
+        }
+        ```
+    
+    * ⑤ `Abbreviation`를 tdd로 지정한다.
+      
+    * ⑥ `Define`를 클릭하여 `Java`를 체크한다.
+
+    * ⑦ `Use static import if possible` , `Shorten FQ names`를 체크한다.
