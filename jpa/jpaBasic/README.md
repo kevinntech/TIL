@@ -376,13 +376,15 @@
     
                 * 동일성(identity) 비교
                 
-                    * 인스턴스의 참조 값을 비교하는 것을 말한다. (== 사용)
-                
-                    * 동일성은 참조 값을 비교하는 == 비교의 값이 같다는 것을 의미한다.
+                    * `동일성`은 실제 인스턴스가 같다는 것을 의미한다. 
+
+                    * 따라서 인스턴스의 참조 값을 비교하는 `==` 비교의 결과가 같다는 것을 의미한다.
          
                 * 동등성(equality) 비교
                 
-                    * 인스턴스의 값을 비교하는 것을 말한다. (equals() 사용)
+                    * `동등성`은 실제 인스턴스는 다를 수 있지만 인스턴스가 가지고 있는 값은 같다는 것을 의미한다.
+                    
+                    * 따라서 인스턴스가 가지고 있는 값을 비교하는 `equals()`의 결과가 같다는 것을 의미한다.
     
     * 엔티티 등록
     
@@ -1542,7 +1544,7 @@
     
 * 프록시 객체의 초기화
     
-    * `프록시 객체의 초기화`는 프록시 객체가 실제 사용될 때, 데이터베이스를 조회해서 실제 엔티티 객체를 생성하는 것을 말한다.
+    * `프록시 객체의 초기화`는 프록시 객체가 사용될 때, 데이터베이스를 조회해서 실제 엔티티 객체를 생성하는 것을 말한다.
     
         * 즉, 프록시 객체의 메소드를 호출하면 초기화가 진행된다.
 
@@ -1591,7 +1593,7 @@
 
 * JPA는 개발자가 연관된 엔티티의 조회 시점을 선택 할 수 있도록 두 가지 방법을 제공한다.
 
-    * ① `즉시 로딩(EAGER LOADING)` : 엔티티를 조회할 때, 연관된 엔티티도 함께 조회하는 방식이다.
+    * ① `즉시 로딩(EAGER LOADING)` : 연관된 엔티티를 함께 조회하는 방식이다.
     
         * 예시 : `em.find(Member.class, "member1")` 처럼 호출할 때, 회원 엔티티와 연관된 팀 엔티티도 함께 조회한다.
     
@@ -1661,43 +1663,119 @@
 
 ### 3. 영속성 전이: CASCADE
 
-* `CASCADE`는 해당 엔티티의 상태 변화를 연관된 엔티티에 전파시킨다.
-
-    * 예를 들어, 부모만 영속 상태로 만들면 연관된 자식 엔티티까지 함께 영속화해서 저장한다.
+* CASCADE 란?
     
-        * `@OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)`
-
-* 주의사항
-
-    * 영속성 전이는 연관관계를 매핑하는 것과 아무 관련이 없다.
+    * `CASCADE`는 해당 엔티티의 상태 변화를 연관된 엔티티에 전파시킨다.
     
-    * 단지 엔티티를 영속화할 때 연관된 엔티티도 함께 영속화하는 편리함을 제공할 뿐이다.
+        * 예를 들어, 부모만 영속 상태로 만들면 연관된 자식 엔티티까지 함께 영속화해서 저장한다.
+        
+            * `@OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)`
+
+    * CASCADE의 종류
     
-    * 하나의 부모만 자식들을 관리 한다면 CASCADE 속성을 사용 할 수 있다.
+        * **`ALL` : 모두 적용**
     
-* CASCADE의 종류
-
-    * **`ALL` : 모두 적용**
-
-    * **`PERSIST` : 영속**
-
-    * **`REMOVE` : 삭제**
+        * **`PERSIST` : 영속**
     
-    * `MERGE` : 병합
+        * **`REMOVE` : 삭제**
+        
+        * `MERGE` : 병합
+    
+        * `REFRESH` : REFRESH
+    
+        * `DETACH` : DETACH
+        
+    * 주의사항
+    
+        * 영속성 전이는 연관관계를 매핑하는 것과 아무 관련이 없다.
+        
+        * 단지 엔티티를 영속화할 때 연관된 엔티티도 함께 영속화하는 편리함을 제공할 뿐이다.
+        
+        * 하나의 부모만 자식들을 관리 한다면 CASCADE 속성을 사용 할 수 있다.
+        
+* 실습하기
+    
+    * 부모 엔티티
+    
+        ```java
+        @Entity
+        public class Parent{
+          @Id @GeneratedValue
+          private Long id;
+          
+          @OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)
+          private List<Child> children = new ArrayList<>();
+      
+          public void addChild(Child child){
+              children.add(child);
+              child.setParent(this);
+          }
+        }
+        ```
+        
+    * 자식 엔티티
+    
+        ```java
+        @Entity
+        public class Child{
+          @Id @GeneratedValue
+          private Long id;
+          
+          @ManyToOne
+          @JoinColumn(name = "parent_id")
+          private Parent parent;
+        }
+        ```
+      
+    * 부모를 영속화할 때, 연관된 자식들도 함께 영속화한다.
 
-    * `REFRESH` : REFRESH
-
-    * `DETACH` : DETACH
+        ```java
+        Child child1 = new Child();
+        Child child2 = new Child();
+      
+        Parent parent = new Parent();
+        parent.addChild(child1); // 연관관계 설정
+        parent.addChild(child2); // 연관관계 설정
+      
+        em.persist(parent); // 부모 저장, 연관된 자식들 저장
+        ```
     
 ### 4. 고아 객체
 
 * `고아 객체(ORPHAN) 제거`는 부모 엔티티와 연관관계가 끊어진 자식 엔티티를 자동으로 삭제하는 기능이다.
 
-    * `@OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST, orphanRemoval = true)`
+    * `@OneToMany(orphanRemoval = true)`
+
+* 실습하기
+    
+    * 고아 객체 제거 기능을 활성화한다. 
+    
+        ```java
+        @Entity
+        public class Parent{
+          @Id @GeneratedValue
+          private Long id;
+          
+          @OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST, orphanRemoval = true)
+          private List<Child> children = new ArrayList<>();
+      
+          public void addChild(Child child){
+              children.add(child);
+              child.setParent(this);
+          }
+        }
+        ```
+              
+    * 이제 컬렉션에서 제거한 자식 엔티티는 자동으로 삭제된다.
+
+        ```java
+        Parent findParent = em.find(Parent.class, parent.getId());
+        findParent.getChildren().remove(0);
+        ```
 
 * 주의사항
 
-    * 특정 엔티티가 개인 소유하는 엔티티에만 사용해야 한다.
+    * 특정 엔티티가 개인 소유하는 엔티티에만 고아 객체 제거 기능을 사용해야 한다.
 
     * `orphanRemoval`는 `@OneToOne`, `@OneToMany`에만 사용할 수 있다.
 
@@ -1709,7 +1787,7 @@
 
     * `CascadeType.ALL + orphanRemovel=true` : 두 옵션을 모두 활성화 하면 부모 엔티티를 통해서 자식의 생명주기를 관리할 수 있다.
 
-        * 도메인 주도 설계(DDD)의 Aggregate Root 개념을 구현할 때, 유용하다.
+        * 도메인 주도 설계(DDD)의 `Aggregate Root` 개념을 구현할 때, 유용하다.
 
 ## 9. 값 타입
 
@@ -1723,7 +1801,7 @@
 
         * 데이터가 변해도 식별자를 통해 지속해서 추적 할 수 있다.
 
-        * 예) 회원 엔티티의 키나 나이 값을 변경해도 식별자로 인식 가능하다. 
+            * Ex) 회원 엔티티의 키나 나이 값을 변경해도 식별자로 인식 가능하다. 
 
     * ② 값 타입(Value Type)
 
@@ -1731,7 +1809,7 @@
 
         * 식별자가 없고 값만 있으므로 변경 시 추적 할 수 없다.
 
-        * 예) 숫자 100을 200으로 변경하면 완전히 다른 값으로 대체된다.
+            * Ex) 숫자 100을 200으로 변경하면 완전히 다른 값으로 대체된다.
         
 * 값 타입 분류
 
@@ -1773,9 +1851,9 @@
             
     * (2) 임베디드 타입(복합 값 타입)
     
-        * `임베디드 타입(embedded type)`은 새로운 값 타입을 직접 정의해서 사용하는 것을 말한다.
+        * `임베디드 타입(embedded type)`은 다른 타입들을 포함하고 있는 타입을 말한다.
         
-            * 주로 기본 값 타입들을 모아서 만들기 때문에 `복합 값 타입`이라고도 한다.
+            * `복합 값 타입`이라고도 한다.
             
             * 임베디드 타입도 int, String과 같은 값 타입이다.
     
@@ -1830,11 +1908,11 @@
             }
             ```
           
-            * `@Embeddable` : 임베디드 타입을 정의하는 곳에 표시한다.
+            * `@Embeddable` : 임베디드 타입을 정의하는 곳에 붙여준다.
                   
                 * 기본 생성자 필수
           
-            * `@Embedded` : 임베디드 타입을 사용하는 곳에 표시한다.
+            * `@Embedded` : 임베디드 타입을 사용하는 곳에 붙여준다.
     
         * 임베디드 타입과 테이블 매핑
         
@@ -2081,13 +2159,13 @@
 
             * 불변 객체를 구현하는 간단한 방법은 **생성자로만 값을 설정하고 수정자(Setter)를 만들지 않으면 된다.** 
 
-                * 또는 수정자를 `Private`으로 만들어도 된다.
+                * 또는 수정자를 `private`으로 만들어도 된다.
 
         * [참고] `Integer`, `String`은 자바가 제공하는 대표적인 불변 객체
 
 ### 3. 값 타입의 비교
 
-* 값 타입은 인스턴스가 달라도 그 안에 값이 같으면 같은 것으로 봐야 한다.
+* 값 타입은 인스턴스가 달라도 그 안에 있는 값이 같으면 같은 것으로 봐야 한다.
 
     ```java
     int a = 10;

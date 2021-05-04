@@ -2343,7 +2343,7 @@ public class MyEventHandler{
   
 * 기존의 코드를 건들지 않고 성능을 측정 할 수는 없을까? 라는 생각에 적용 할 수 있는 것이 Proxy 패턴이다.
   
-* 일단, SimpleEventService 클래스에서 성능을 측정하는 코드를 제거하자.
+* 일단, `SimpleEventService` 클래스에서 성능을 측정하는 코드를 제거하자.
 
     ```java
     @Service
@@ -2375,9 +2375,9 @@ public class MyEventHandler{
     }
     ```
 
-* 그 다음, SimpleEventService와 동일한 인터페이스를 구현한 Proxy 클래스를 작성한 다음, 빈으로 등록한다.
+* 그 다음, `SimpleEventService`와 동일한 인터페이스를 구현한 Proxy 클래스를 작성한 다음, 빈으로 등록한다.
   
-* 그리고 @Primary로 우선 순위를 가지는 빈으로 지정해서 해당 빈이 주입 되도록 한다.
+* 그리고 `@Primary`로 우선 순위를 가지는 빈으로 지정해서 해당 빈이 주입 되도록 한다.
   
     ```java
     @Primary
@@ -2410,9 +2410,9 @@ public class MyEventHandler{
 
     * 프록시는 `Real Subject`에게 일을 대신 처리 하도록 위임을 한 다음, 부가 기능(성능을 측정하는 코드)를 수행한다.
 
-    * 그러면 `Client`에 해당하는 AppRunner는 @Autowired로 EventService를 주입 받는데 
+    * 그러면 `Client`에 해당하는 `AppRunner`는 `@Autowired`로 `EventService`를 주입 받는데 
     
-    * @Primary로 지정한 ProxySimpleEventService 빈이 주입된다.
+    * `@Primary`로 지정한 `ProxySimpleEventService` 빈이 주입된다.
 
 * 앞서 Proxy 클래스를 만들어서 모든 문제가 해결된 것처럼 보이지만 아직도 문제점이 존재한다.
  
@@ -2424,17 +2424,13 @@ public class MyEventHandler{
 
 * 스프링 IoC 컨테이너가 제공하는 기반 시설과 동적 프록시를 사용하여 여러 복잡한 문제를 해결한 것이 바로 스프링 AOP이다.
   
-  * `동적 프록시 (Dynamic Proxy)`
+  * `동적 프록시 (Dynamic Proxy)` : 애플리케이션이 실행되고 있는 도중에 프록시 객체를 생성하는 방법을 말한다. 
   
-    * 동적으로 프록시 객체를 생성하는 방법을 말한다.
-  
-    * 여기서 말하는 동적이란 런타임에 생성된다는 것을 의미한다.
-
-  * 스프링 IoC 컨테이너는 특정 클래스가 빈으로 등록될 때, 해당 Bean을 대체하는 동적 프록시 빈을 만들어 등록 시켜준다.
+  * `스프링 IoC 컨테이너`는 특정 클래스가 빈으로 등록될 때, 해당 Bean을 대체하는 동적 프록시 빈을 만들어 등록시켜 준다.
 
       * 이때, 사용되는 것이 AbstractAutoProxyCreator이다.
       
-      * 그리고 AbstractAutoProxyCreator는 BeanPostProcessor의 구현체이다.
+      * AbstractAutoProxyCreator는 BeanPostProcessor의 구현체이다.
 
 ## 8. 스프링 AOP : @AOP
 
@@ -2466,17 +2462,22 @@ public class MyEventHandler{
     @Aspect
     public class PerfAspect {
     
-        // me.whiteship 패키지와 하위 패키지에 있는 EventService의 모든 메서드에 advice를 적용 합니다.
+        /*
+         * [PointCut] :me.whiteship 패키지와 하위 패키지에 있는 EventService의 모든 메서드에 advice를 적용 합니다.
+         * */
         @Around("execution(* me.whiteship..*.EventService.*(..))")
         public Object logPerf(ProceedingJoinPoint pjp) throws Throwable{
+            /*
+            * [Advice]
+            * */
             long begin = System.currentTimeMillis();
-            
+    
             Object retVal = pjp.proceed();
             System.out.println(System.currentTimeMillis() - begin); // 실행 시간 출력
-            
+    
             return retVal;
-        }  
-  
+        }
+    
     }
     ```
   
@@ -2486,7 +2487,7 @@ public class MyEventHandler{
 
     * 그리고 파라미터로 지정된 `ProceedingJoinPoint`는 해당 Advice가 적용되는 대상을 의미한다.
 
-    * 여기서 주의할 점은 `@Around`의 경우, 반드시 `proceed()`가 호출되어야 한다"는 것이다.
+    * 여기서 주의할 점은 `@Around`의 경우, 반드시 `proceed()`가 호출되어야 한다는 것이다.
 
     * `proceed()`는 타겟 메서드를 의미하며 `proceed()`를 호출 해야 타겟 메소드가 실행된다.
 
@@ -2640,19 +2641,21 @@ public class MyEventHandler{
 
 * 추상화 계층을 사용하는 이유
 
-    * `편의성` : 우리는 Spring이 제공하는 추상화 계층을 사용함으로써 `Servlet`과 같은 Row 레벨의 기능을 사용하지 않아도 된다.
+    * `편의성` : 우리는 Spring이 제공하는 추상화 계층을 사용함으로써 `Servlet`과 같은 Row 레벨로 코드를 작성하지 않아도 된다.
     
 	* `Portable` : 어떠한 기술을 다른 기술로 변경 할 수 있다는 의미다.
 	         
-        * 코드를 거의 변경하지 않고 `Servlet` 또는 `Reactive` 기반으로 개발 하도록 변경 할 수 있다.
-    
-	        * 즉, 우리는 Spring이 제공하는 추상화 계층을 사용하지만, 실제로는 `Tomcat` 또는 `Netty`를 사용한다.
+        * 코드를 거의 변경하지 않고 다음과 같이 변경 할 수 있다.
         
-        * 직접 톰캣, 제티, 언더토우와 같은 서버를 변경 할 수도 있다.
+            * ① `Servlet` 또는 `Reactive` 기반으로 개발 하도록 변경 할 수 있다.
+    
+	            * 즉, 우리는 Spring이 제공하는 추상화 계층을 사용하지만, 실제로는 `Tomcat` 또는 `Netty`를 사용한다.
+        
+            * ② 톰캣, 제티, 언더토우와 같은 서버를 변경 할 수도 있다.
 
-* PSA 예시
+* 예시
 
-    * 스프링 웹 MVC
+    * ① 스프링 웹 MVC
 
         * 기존의 서블릿을 이용한 애플리케이션
         
@@ -2710,20 +2713,27 @@ public class MyEventHandler{
           
             * 스프링의 PetClinic 예제를 보면 서블릿 애플리케이션을 만들고 있는데도 서블릿을 전혀 사용하고 있지 않다.
             
-    * 스프링 트랜잭션
+    * ② 스프링 트랜잭션
 
         * 기존 JDBC의 트랜잭션 처리
 
             ```java
-            dbConnection = getDBConnect();
-            
-            // SQL를 여러 번 호출 하더라도 커밋을 하지 않는다.
-            dbConnection.setAutoCommit(false); // 기본 값 true
-            
-            // INSERT 문
-            
-            dbConnection.commit();
-            dbConnection..setAutoCommit(true);
+            try{
+                dbConnection = getDBConnect();
+                
+                // SQL를 여러 번 호출 하더라도 커밋을 하지 않는다.
+                dbConnection.setAutoCommit(false); // 기본 값은 true이다.
+                
+                // INSERT 문
+                
+                dbConnection.commit();
+                System.out.println("Done!");
+            } catch(SQLException e){
+                System.out.println(e.getMessage());
+                dbConnection.rollback();
+            } finally{
+                //...
+            }
             ```
             
             * JDBC의 트랜잭션 처리는 Low Level의 처리가 필요하다.

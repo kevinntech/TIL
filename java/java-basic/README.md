@@ -6938,11 +6938,11 @@ int[][] arr = {
                         );
                 
                         studentStream.sorted(Comparator.comparing(Student::getBan) // 반별 정렬
-                                .thenComparing(Comparator.naturalOrder()))     	// 기본 정렬
+                                  .thenComparing(Comparator.naturalOrder()))     	// 기본 정렬
                                 .forEach(System.out::println);
                 
                 //        studentStream.sorted(Comparator.comparing(Student::getBan)  // 반 별로 정렬
-                //                .thenComparing(Student::getTotalScore, Comparator.reverseOrder()))  // 총점 별로 정렬
+                //                    .thenComparing(Student::getTotalScore, Comparator.reverseOrder()))  // 총점 별로 정렬
                 //                .forEach(System.out::println);
                     }
                 }
@@ -6986,31 +6986,14 @@ int[][] arr = {
     * 예시
     
         ```java
-        class Ex14_6 {
-            public static void main(String[] args) {
-                File[] fileArr = { new File("Ex1.java"), new File("Ex1.bak"),
-                        new File("Ex2.java"), new File("Ex1"), new File("Ex1.txt")
-                }; // File 객체 배열 생성
+        List<String> words = Arrays.asList("자바스크립트", "파이썬", "자바");
         
-                Stream<File> fileStream = Stream.of(fileArr); // File 객체 배열을 대상으로 스트림을 만든다.
+        List<Integer> result = words.stream()
+                .map(word -> word.length())
+                .collect(Collectors.toList());
         
-                // map()으로 Stream<File>을 Stream<String>으로 변환한다.
-                Stream<String> filenameStream = fileStream.map(File::getName);
-                filenameStream.forEach(System.out::println); // 모든 파일의 이름을 출력
-        
-                fileStream = Stream.of(fileArr);  // 스트림을 다시 생성한다.
-        
-                /* 파일 스트림(Stream<File>)에서 파일 확장자(대문자)를 중복없이 뽑아내기 */
-                fileStream.map(File::getName)                       // Stream<File> → Stream<String>
-                        .filter(s -> s.indexOf('.') != -1)          // 확장자가 있는 것만 남긴다. (.이 있는 것만 남긴다.)
-                        .map(s -> s.substring(s.indexOf('.') + 1)) // 확장자 문자열로 변환한다.
-                        .map(String::toUpperCase)                  // 모두 대문자로 변환한다.
-                        .distinct()                                //  중복 제거
-                        .forEach(System.out::println);             // JAVA BAK TXT
-        
-                System.out.println();
-            }
-        }
+        // 결과 : [6, 3, 2]
+        System.out.println(result);
         ```
 
 * (5) flatMap()
@@ -7019,46 +7002,35 @@ int[][] arr = {
     
         * `flatMap()` : 중첩된 구조를 한 단계 제거하고 단일 요소 스트림으로 반환한다. 
     
-            * 그리고 스트림을 요소로 하는 스트림을 하나의 스트림으로 합칠 때도 사용 할 수 있다.
+            * 즉, 스트림의 스트림(`Stream<Stream<String>>`)을 하나의 스트림으로 변환할 때 사용한다. 
             
-            * 스트림의 스트림을 스트림으로 만들 때 사용한다. 
-
     * 예시
     
         ```java
-        public class Ex14_7 {
-            public static void main(String[] args) {
-                // Stream 내의 각 요소가 String 배열이다.
-                Stream<String[]> strArrStrm = Stream.of(
-                        new String[]{"abc", "def", "jkl"},
-                        new String[]{"ABC", "GHI", "JKL"}
-                );
+        List<String> words = Arrays.asList("자바스크립트", "파이썬", "자바");
         
-        //		Stream<Stream<String>> strStrmStrm = strArrStrm.map(Arrays::stream);
-                Stream<String> strStrm = strArrStrm.flatMap(Arrays::stream);
+        List<String> result = words.stream()
+                .map(word -> word.split(""))
+                .flatMap(arr -> Arrays.stream(arr))
+                .collect(Collectors.toList());
         
-                strStrm.map(String::toLowerCase)
-                        .distinct()
-                        .sorted()
-                        .forEach(System.out::println);
-                System.out.println();
-        
-                // 각 문자열의 단어 하나 하나가 Stream의 요소인 것으로 만들고자 한다.
-                String[] lineArr = {
-                        "Believe or not It is true",
-                        "Do or do not There is no try",
-                };
-        
-                Stream<String> lineStream = Arrays.stream(lineArr);
-                lineStream.flatMap(line -> Stream.of(line.split(" +"))) // " +" : 하나 이상의 공백 (정규식)
-                        .map(String::toLowerCase)
-                        .distinct()
-                        .sorted()
-                        .forEach(System.out::println);
-                System.out.println();
-            }
-        }
+        // 결과 : [자, 바, 스, 크, 립, 트, 파, 이, 썬, 자, 바]
+        System.out.println(result);
         ```
+      
+        * words.stream()
+        
+            * `List<String>` -> `Stream<String>`
+        
+        * map(word -> word.split(""))
+        
+            * `Stream<String>` -> `Stream<String[]>` : 각 단어를 개별 문자열 배열로 변환
+        
+        * flatMap(arr -> Arrays.stream(arr))
+        
+            * `Stream<String[]>` -> "Arrays.stream()" -> `Stream<Stream<String>>` : 각 배열을 별도의 스트림으로 변환
+            
+            * `Stream<Stream<String>>` -> "flatMap()" -> `Stream<String>` : 중첩된 구조를 제거하고 하나의 스트림으로 만든다. 
 
 * (6) 스트림의 요소를 소비하지 않고 엿보기 - peek()
 
@@ -7073,8 +7045,7 @@ int[][] arr = {
     * 예시
     
          ```java
-         .peek(s -> System.out.printf("filename=%s%n", s))
-         .peek(s -> System.out.printf("extension=%s%n", s))
+         .peek(System.out::println)
          ```
 
 #### 9) Optional
@@ -7164,7 +7135,7 @@ int[][] arr = {
         Optional.ofNullable(str).ifPresent(System.out::println);
         ```
       
-    * ⑦ `Optional filter(Predicate)` : Optional에 들어있는 값을 걸러낸다.
+    * ⑦ `Optional filter(Predicate)` : Optional에서 조건(Predicate)에 맞는 요소만 걸러낸다.
         
         * 인자로 전달한 람다식의 결과가 false이면 비어있는 Optional을 반환한다.
         
@@ -7351,22 +7322,28 @@ int[][] arr = {
 
 #### 11) collect()
  
-* (1) collect()
+* (1) collect()와 Collectors
 
-    * `collect()`는 스트림의 요소를 수집한다. 매개변수로 `Collector`가 필요하다.
-
+    * `collect()`는 스트림의 요소를 수집한다. 매개변수로 `Collector`가 필요하다. 
+    
         * `R collect(Collector <T, A, R> collector)` : T 요소를 A에 누적한 다음, 결과를 R로 변환해서 반환한다.
 
         * `R collect(Supplier supplier, BiConsumer accumulator, BiConsumer combiner)`
             
             * 잘 사용되지 않음
+                
+    * `reduce()`과 `Collectors.reducing()`의 차이점 
 
+        * `reduce()` : 전체 집계를 한다.
+        
+        * `reducing()` : 전체 집계 또는 그룹별 집계를 한다.
+                    
     * `Collector`는 수집(`collect()`)에 필요한 메서드를 정의해 놓은 인터페이스다.
 
         ```java
          public interface Collector<T, A, R> {        // T(요소)를 A에 누적한 다음, 결과를 R로 변환해서 반환 
-            Supplier<A>          supplier();          // StringBuilder::new            누적할 곳
-            BiConsumer<A, T>     accumulator();       // (sb, s) -> sb.append(s)       누적방법
+            Supplier<A>          supplier();          // StringBuilder::new            누적할 곳 ★★★
+            BiConsumer<A, T>     accumulator();       // (sb, s) -> sb.append(s)       누적방법 ★★★
             BinaryOperator<A>    combiner();          // (sb1, sb2) -> sb1.append(sb2) 결합방법 (병렬)
             Function<A, R>       finisher();           // sb -> sb.toString()           최종변환
             Set<Characteristics> characteristics();   // 컬렉터의 특성이 담긴 Set을 반환
@@ -7384,60 +7361,165 @@ int[][] arr = {
         
         * `characteristics()` : 컬렉터가 수행하는 작업의 속성에 대한 정보를 제공한다.
 
-    * 스트림의 모든 요소를 컬렉션으로 변환하기
-    
-        * `Collectors` 클래스는 미리 작성된 컬렉터를 static 메서드로 제공한다.
+    * `Collectors` 클래스는 Collector 인터페이스의 구현체를 static 메서드로 제공한다.
 
-            * `toList()` : 스트림의 모든 요소를 List에 수집할 때 사용한다.
+        * 변환 - `mapping()`, `toList()`, `toSet()`, `toMap()`, `toCollection()` ...
+        
+        * 통계 - `counting()`, `summingInt()`, `averagingInt()`, `maxBy()`, `minBy()`, `summarizingInt()` ...
+        
+        * 문자열 결합 - `joining()`
+        
+        * 리듀싱 - `reducing()`
+        
+        * 그룹화와 분할 - `groupingBy()`, `partitioningBy()`, `collectingAndThen()`
+
+* (2) Collectors에 대해 상세하게 살펴보기
+
+    * 앞으로 예제에서 사용할 Student 코드는 다음과 같다. 
+    
+        ```java
+        class Student {
+            String id;
+            String name;
+            boolean isMale; // 성별
+            int hak;        // 학년
+            int ban;        // 반
+            int score;
+        
+            public Student(String id, String name, boolean isMale, int hak, int ban, int score) {
+                this.id = id;
+                this.name = name;
+                this.isMale = isMale;
+                this.hak = hak;
+                this.ban = ban;
+                this.score = score;
+            }
+        
+            public String   getId()      { return id; }
+            public String	getName()    { return name;	}
+            public boolean  isMale()     { return isMale; }
+            public int      getHak()     { return hak;	}
+            public int      getBan()     { return ban;	}
+            public int      getScore()   { return score; }
+            public Student  getStudent() { return this; }
+        
+            public String toString() {
+                return String.format("[%s, %s, %d학년 %d반, %3d점]",
+                        name, isMale ? "남":"여", hak, ban, score);
+            }
+        
+        }
+        
+        public class StreamEx {
+            public static void main(String[] args) {
+                Student[] stuArr = {
+                        new Student("1", "나자바", true,  1, 1, 300),
+                        new Student("2",  "김지미", false, 1, 1, 250),
+                        new Student("3",  "김자바", true,  1, 1, 200),
+                        new Student("4",  "이지미", false, 1, 2, 150),
+                        new Student("5",  "남자바", true,  1, 2, 100),
+                        new Student("6",  "안지미", false, 1, 2,  50),
+                        new Student("7",  "황지미", false, 1, 3, 100),
+                        new Student("8",  "강지미", false, 1, 3, 150),
+                        new Student("9",  "이자바", true,  1, 3, 200),
+                        new Student("10",  "나자바", true,  2, 1, 300)
+                };
+        
+                // Student 스트림 생성 
+                Stream<Student> stuStream = Arrays.stream(stuArr);
+        
+            }
+        }
+        ```
+
+    * 스트림의 모든 요소를 컬렉션으로 변환하기
+
+        * `toList()` : 스트림의 모든 요소를 List에 수집할 때 사용한다.
+        
+            * 문법
             
                 * `Collector<T, ?, List<T>> toList()` : T를 List에 저장하는 Collector를 반환한다.
                 
                     * List, Set, Map, 컬렉션에 누적할 경우에는 별도의 누적기가 필요없으므로 ?로 표기한다. 
-    
-            * `toSet()` : 스트림의 모든 요소를 Set에 수집할 때 사용한다. 
+                
+            * 예시 
             
-                * `Collector<T, ?, Set<T>> toSet()` : T를 Set에 저장하는 Collector를 반환한다.
-    
-            * `toCollection()` : 스트림의 모든 요소를 특정 Collection에 수집할 때 사용한다. 
-            
+                ```java
+                // 학생들 이름만 뽑아서 List로 만든다.
+                List<String> names = stuStream.map(Student::getName) // Stream<Student> -> Stream<String>
+                        .collect(Collectors.toList()); // Stream<String> -> List<String>
+                ```
+
+        * `toSet()` : 스트림의 모든 요소를 Set에 수집할 때 사용한다. 
+        
+            * `Collector<T, ?, Set<T>> toSet()` : T를 Set에 저장하는 Collector를 반환한다.
+
+        * `toCollection()` : 스트림의 모든 요소를 특정 Collection에 수집할 때 사용한다. 
+
+            * 문법
+
                 * `Collector<T, ?, Collection<T>> toCollection(Supplier<T>)`
                 
                     * Supplier가 제공하는 컬렉션에 T를 저장하는 Collector를 반환한다.
-    
-            * `toMap()` : 스트림의 모든 요소를 Map에 수집할 때 사용한다.  
+
+            * 예시 
             
+                ```java
+                ArrayList<String> list = names.stream()
+                        .collect(Collectors.toCollection(ArrayList::new)); // Stream<String> -> ArrayList<String>
+                ```
+
+        * `toMap()` : 스트림의 모든 요소를 Map에 수집할 때 사용한다.  
+
+            * 문법
+
                 * `Collector<T, ?, Map<K, U>> toMap(Function<T, K> keyMapper, Function<T, U> valueMapper)`
                 
                     * T를 K와 U로 변환해서 K는 key로, U는 value로 Map에 저장하는 Collector를 반환한다.
-                
-            * `toConcurrentMap()` : 스트림의 모든 요소를 ConcurrentMap에 수집할 때 사용한다.
+
+            * 예시 
             
-                * `Collector<T, ?, ConcurrentMap<K,U>> toConcurrentMap(Function<T, K> keyMapper, Function<T, U> valueMapper)`
-            
-                    * T를 K와 U로 변환해서 K는 key로, U는 value로 ConcurrentMap에 저장하는 Collector를 반환한다.
+                ```java
+                Map<String, Student> map = stuStream
+                        .collect(Collectors.toMap(student -> student.getId(), student -> student)); // Stream<Student> -> Map<String, Student>
+                ```
+
+        * `toConcurrentMap()` : 스트림의 모든 요소를 ConcurrentMap에 수집할 때 사용한다.
+        
+            * `Collector<T, ?, ConcurrentMap<K,U>> toConcurrentMap(Function<T, K> keyMapper, Function<T, U> valueMapper)`
+        
+                * T를 K와 U로 변환해서 K는 key로, U는 value로 ConcurrentMap에 저장하는 Collector를 반환한다.
 
     * 스트림의 모든 요소를 배열로 변환하기
 
         * `toArray()` : 스트림의 모든 요소를 배열에 담아서 반환한다. 
         
+            ```java
+            Object[] students = studentStream.toArray();
+            ```
+        
             * 해당 메소드에서 반환하는 배열 타입은 `Object[]`이다.
         
         * `toArray(IntFunction<T[]> generator)` : 스트림의 모든 요소를 특정 타입의 배열에 담아서 반환한다. 
 
+            ```java
+            Student[] students = studentStream.toArray(Student[]::new);
+            ```
+          
             * 해당 메소드에서 반환하는 배열 타입은 `T[]`이다.
             
                 * `IntFunction<T[]>`에서 매개변수로 전달하는 int 값은 배열의 길이다. 
 
     * 스트림의 통계
 
-        * `counting()` : 요소의 총 개수를 계산한다.
+        * `counting()` : 스트림에 있는 요소의 총 개수를 계산한다.
 
             ```java
             long count = stuStream.count();
             long count = stuStream.collect(counting()); // Collectors.counting() [static import 사용]
             ```
           
-        * `summingInt()` : Int 타입의 합계를 계산한다. 
+        * `summingInt()` : 스트림에 있는 요소의 합계를 계산한다. (int 타입) 
 
             ```java
             // 학생의 총점을 모두 더한다. 
@@ -7445,10 +7527,11 @@ int[][] arr = {
             long totalScore = stuStream.collect(summingInt(Student::getTotalScore));
             ```
 
-        * `maxBy()` : Comparator를 이용해서 최대 값을 계산한다. 
+        * `maxBy()` : 스트림에 있는 요소의 최대 값을 계산한다. (Comparator를 이용)
 
             ```java
             OptionalInt topScore = stuStream.mapToInt(Student::getTotalScore).max();
+            // 총점을 기준으로 최대 값을 찾는다.
             Optional<Student> topStudent = stuStream
                                 .max(Comparator.comparingInt(Student::getTotalScore));
             Optional<Student> topStudent = stuStream
@@ -7486,43 +7569,41 @@ int[][] arr = {
                 
             * 예시
             
-                ```java
-                IntStream intStream = new Random().ints(1, 46).distinct().limit(6);
-                
-                OptionalInt max = intStream.reduce(Integer::max);
-                Optional<Integer> max = intStream.boxed().collect(reducing(Integer::max)); // 그룹별 리듀싱 가능
-                ```
-              
-                * `boxed()` : 기본형 스트림을 스트림으로 변환한다. 
-                
-                    * Ex) `IntStream` -> `Stream<Integer>`
+                * 1번
+            
+                    ```java
+                    IntStream intStream = new Random().ints(1, 46).distinct().limit(6);
                     
-                ```java
-                long sum = intStream.reduce(0, (a, b) -> a + b); // 초기 값, 누적 작업 
-                long sum = intStream.boxed().collect(reducing(0, (a, b) -> a + b));
-                ```
-              
-                ```java
-                int grandTotal = stuStream.map(Student::getTotalScore).reduce(0, Integer::sum);
-                int grandTotal = stuStream.collect(reducing(0, Student::getTotalScore, Integer::sum));
-                ```
-                
-            * `reduce()`과 `reducing()`의 차이점 
+                    OptionalInt max = intStream.reduce(Integer::max); // 전체 리듀싱
+                    Optional<Integer> max = intStream.boxed().collect(reducing(Integer::max)); // 그룹별 리듀싱 가능
+                    ```
+                  
+                    * `boxed()` : 기본형 스트림을 스트림으로 변환한다. 
+                    
+                        * Ex) `IntStream` -> `Stream<Integer>`
 
-                * `reduce()` : 전체 집계를 한다.
+                * 2번
                 
-                * `reducing()` : 전체 집계 또는 그룹별 집계를 한다.
+                    ```java
+                    long sum = intStream.reduce(0, (a, b) -> a + b); // 초기 값, 누적 작업 
+                    long sum = intStream.boxed().collect(reducing(0, (a, b) -> a + b));
+                    ```
+
+                * 3번
                 
+                    ```java
+                    int grandTotal = stuStream.map(Student::getTotalScore).reduce(0, Integer::sum);
+                    int grandTotal = stuStream.collect(reducing(0, Student::getTotalScore, Integer::sum));
+                    ```
+                              
     * `joining()` : 문자열 스트림의 모든 요소를 구분자로 연결한다.
 
-        * 예시
-        
-            ```java
-            String studentNames = stuStream.map(Student::getName).collect(joining());
-            String studentNames = stuStream.map(Student::getName).collect(joining(",")); // 구분자 
-            String studentNames = stuStream.map(Student::getName).collect(joining(",", "[", "]")); // 구분자, prefix, suffix
-            String studentInfo = stuStream.collect(joining(",")); // Student의 toString()로 결합 
-            ```
+        ```java
+        String studentNames = stuStream.map(Student::getName).collect(joining());
+        String studentNames = stuStream.map(Student::getName).collect(joining(",")); // 구분자 
+        String studentNames = stuStream.map(Student::getName).collect(joining(",", "[", "]")); // 구분자, prefix, suffix
+        String studentInfo = stuStream.collect(joining(",")); // Student의 toString()로 결합 
+        ```
 
 * (2) 그룹화와 분할
 
@@ -7535,9 +7616,13 @@ int[][] arr = {
             Collector partitioningBy(Predicate predicate, Collector downstream)
             ```
                 
-            * 지정된 조건(`Predicate`)에 일치하는 그룹과 일치하지 않는 그룹으로 분할한다.
+            * `partitioningBy()`는 지정된 조건(`Predicate`)에 일치하는 그룹과 일치하지 않는 그룹으로 분할한다.
             
-            * `partitioningBy()`는 분할의 기준(Boolean)을 Key로, 해당 스트림의 요소가 같은 그룹별로 담긴 List를 Value로 갖는 Map을 반환한다.  
+                * Key가 분할의 기준이며 Value가 같은 그룹별 List인 Map을 반환한다.
+            
+            * `Collectors.partitioningBy()`는 그룹화를 한 다음, 변환이나 집계를 할 수 있도록 두 번째 매개변수(`downstream`)로 `Collector`를 지정 할 수 있다.
+                
+            * [참고] groupingBy()는 스트림의 요소를 Function으로, partitioningBy()는 Predicate로 분류한다.
             
         * 예시
         
@@ -7551,11 +7636,9 @@ int[][] arr = {
                 List<Student> femaleStudent = stuBySex.get(false);    // Map에서 여학생 목록을 얻는다.
                 ```
                 
-                * 분할의 기준(Boolean)을 Key로, 해당 스트림의 요소(Student)가 같은 그룹별로 담긴 List를 Value로 갖는 Map을 반환한다. 
+                * Key가 분할의 기준(Boolean)이며 Value가 해당 스트림의 요소(Student)가 같은 그룹별로 저장된 List인 Map을 반환한다. 
                 
-                    * 학생들을 성별로 분할하고 나서, 같은 그룹에 속하는 학생 List를 만든 다음, 
-                    
-                    * 성별을 Key로, 학생 List를 Value로 갖는 Map을 만든다.
+                    * 즉, Key가 성별, Value가 학생 List인 Map을 만든다.
                 
             * 학생들을 성별로 나누어 분할한 다음, 집계(남학생과 여학생의 수)를 한다.
           
@@ -7583,7 +7666,7 @@ int[][] arr = {
                 ```java
                 Map<Boolean, Map<Boolean, List<Student>>> failedStuBySex =    // 다중 분할 
                         stuStream.collect(partitioningBy(Student::isMale,     // 1. 성별로 분할(남/녀)
-                                partitioningBy(s -> s.getScore() <= 100))     // 2. 성적으로 분할(불합격/합격)
+                                partitioningBy(s -> s.getScore() < 150))     // 2. 성적으로 분할(불합격/합격)
                         );
                 List<Student> failedMaleStu   = failedStuBySex.get(true).get(true); // 남학생이면서 불합격
                 List<Student> failedFemaleStu = failedStuBySex.get(false).get(true); // 여학생이면서 불합격
@@ -7705,8 +7788,12 @@ int[][] arr = {
             }
             ```
           
-            * `collectingAndThen()`과 `Optional::get`을 함께 사용하면 `Optional`에서 값을 꺼내서 반환한다.  
-
+            * `collectingAndThen()`는 Collecting을 진행한 후 결과에 대해 다른 작업을 수행 할 수 있는 Collector다.
+            
+                * Ex) `collectingAndThen(maxBy(comparingInt(Student::getScore)), Optional::get)`
+            
+                    * 스트림 요소 중 최대 값을 구한 다음, Optional에서 값을 꺼내서 반환한다.
+            
     * `groupingBy()` : 스트림을 n개의 그룹으로 분할한다.
     
         * 문법
@@ -7731,11 +7818,11 @@ int[][] arr = {
         
                     * K를 키(key)로 하고 T를 담고있는 D 객체를 값(value)으로 한 Supplir가 제공하는 Map 객체에 담아서 반환한다.
 
-                        * `classifier` : `groupBy()`의 기준 값으로 사용 할 값을 반환하는 람다식을 지정한다. 
+                        * `classifier` : `groupingBy()`의 기준 값으로 사용 할 람다식을 지정한다. 
                                                 
-                        * `mapFactory` : `groupBy()`의 결과로 만들어지는 Map을 생성하는 람다식을 지정한다.
+                        * `mapFactory` : `groupingBy()`의 결과로 만들어지는 Map을 생성하는 람다식을 지정한다.
                                                 
-                        * `downstream` : `groupBy()`의 결과로 얻게되는 Collector를 지정한다.
+                        * `downstream` : `groupingBy()`의 결과로 얻게되는 Collector를 지정한다.
 
         * 예시
         
@@ -7782,7 +7869,7 @@ int[][] arr = {
                 
         * 그룹화 이후 변환(mapping) 및 집계
         
-            * `Collectors.groupingBy()`는 그룹화를 한 다음, 변환(mapping)이나 집계를 할 수 있도록 두 번째 매개변수로 다음과 같은 `Collector`를 지정 할 수 있다.
+            * `Collectors.groupingBy()`는 그룹화를 한 다음, 변환(mapping)이나 집계를 할 수 있도록 두 번째 매개변수(`downstream`)로 다음과 같은 `Collector`를 지정 할 수 있다.
         
                 * `mapping()` : 스트림 내의 요소를 다른 요소로 변환한 다음, 변환된 요소를 수집할 Collector를 지정한다. 
                  
