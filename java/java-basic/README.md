@@ -7873,39 +7873,21 @@ int[][] arr = {
         
                 * `mapping()` : 스트림 내의 요소를 다른 요소로 변환한 다음, 변환된 요소를 수집할 Collector를 지정한다. 
                  
-                    * `Collector<T, ?, R> mapping( Function<T, U> mapper, Collector<U, A, R> collector )` : T를 U로 변환한 후, U를 R에 수집한다.
-                
                 * `averagingDouble()` : 평균 값을 계산한다.
-                
-                    * `Collector<T, ?, Double> averagingDouble( ToDoubleFunction<T> mapper )` : T를 Double로 변환한 후, 평균 값을 계산한다.
                 
                 * `counting()` : 요소의 총 개수를 계산한다.
                 
-                    * `Collector<T, ?, Long> counting()`
-        
                 * `joining()` : 문자열 스트림의 모든 요소를 구분자로 연결한다.
-                
-                    * `Collector<CharSequence, ?, String> joining( CharSequence delimiter)`
                 
                 * `maxBy()` : Comparator를 이용해서 최대 값을 계산한다. 
                 
-                    * `Collector<T, ?, Optional<T>> maxBy(Comparator<T> comparator)`
-                
                 * `minBy()` : Comparator를 이용해서 최소 값을 계산한다. 
                 
-                    * `Collector<T, ?, Optional<T>> minBy(Comparator<T> comparator)`
-                
                 * `summingInt()` : Int 타입의 합계를 계산한다. 
-                
-                    * `Collector<T, ?, Integer> summingInt(ToIntFunction)`
-                
+                 
                 * `summingLong()` : Long 타입의 합계를 계산한다. 
                 
-                    * `Collector<T, ?, Long> summingLong(ToLongFunction)`
-                
                 * `summingDouble()` : Double 타입의 합계를 계산한다. 
-                
-                    * `Collector<T, ?, Double> summingDouble(ToDoubleFunction)`
 
         * 실습코드 
         
