@@ -11,7 +11,9 @@
 
     * `JVM (Java Virtual Machine) `
     
-        * 자바 가상 머신으로 자바 바이트 코드(.class 파일)를 OS에 특화된 코드로 변환(인터프리터와 JIT 컴파일러를 사용)하여 실행한다.
+        * 자바 가상 머신으로 자바 바이트 코드(.class 파일)를 네이티브 코드로 변환(인터프리터와 JIT 컴파일러를 사용)하여 실행한다.
+    
+            * `네이티브 코드` : OS에 특화된 코드
          
         * 바이트 코드를 실행하는 표준(JVM 자체는 표준)이자 구현체(특정 밴더가 구현한 JVM)다. 
         
@@ -111,7 +113,7 @@
             
     * (3) `실행 엔진(Execution Engine)`
 
-        * ① `인터프리터(Interpreter)` : 바이트 코드를 한줄 씩 읽어서 네이티브 코드로 변환한 다음, 실행한다.
+        * ① `인터프리터(Interpreter)` : 바이트 코드를 한 줄씩 읽어서 네이티브 코드로 변환한 다음, 실행한다.
             
             * 똑같은 코드가 여러 번 나오더라도 매번 네이티브 코드로 변환해야 되기 때문에 비효율적이다.
             
@@ -129,7 +131,7 @@
     
     * (5) `네이티브 메소드 라이브러리(Native Method Libraries)` : 실행 엔진에 필요한 네이티브 라이브러리를 모아 놓은 것이다.
         
-            * 네이티브 메소드는 항상 JNI를 통해서 사용한다.
+        * 네이티브 메소드는 항상 JNI를 통해서 사용한다.
     
 * 자바 실행 과정
  
@@ -137,7 +139,7 @@
     
     * ② 클래스 로더가 JVM의 메모리에 저장된 바이트 코드(`.class`)를 읽어서 JVM의 메모리에 저장한다.
 
-    * ③ 실행 엔진(Execution Engine)이 바이트 코드를 한줄 씩 읽어서 네이티브 코드로 변환한 다음, 실행한다.
+    * ③ 실행 엔진(Execution Engine)이 바이트 코드를 한 줄씩 읽어서 네이티브 코드로 변환한 다음, 실행한다.
 
         * 똑같은 코드를 여러 번 해석하는 것은 비효율적이므로 JIT 컴파일러를 사용한다.
         
@@ -173,45 +175,45 @@
             
                 * `검증(Verification)` : 클래스 파일(.class)이 올바른 형식으로 되어 있는지 검증한다.
                 
-                * `준비(Preparation)` : 클래스 변수에 메모리를 할당하고 메모리를 기본 값으로 초기화한다.
+                * `준비(Preparation)` : 클래스 변수에 필요한 메모리를 할당하고 기본 값으로 초기화한다.
                 
-                * `해석(Resolution)` : 심볼릭 메모리 참조를 메소드 영역에 있는 실제 참조로 변경한다.
+                * `해석(Resolution)` : 심볼릭 메모리 참조를 메소드 영역에 있는 실제 참조로 변경한다. (옵션)
                 
-        * 초기화(initialization) 
-        
-            * 이 단계에서 모든 클래스 변수가 코드 및 static 블록(있는 경우)에 정의된 값으로 초기화 된다.
+        * 초기화(initialization)
+          
+            * static 변수의 값을 할당하며 static 블록이 실행된다.
    
 * 클래스 로더의 종류
 
-    * 클래스 로더는 계층 구조로 이루어져 있으며 기본적으로 세가지 클래스 로더가 제공된다.
+    * 클래스 로더는 계층 구조로 이루어져 있으며 기본적으로 세 가지 클래스 로더가 제공된다.
 
-    * `부트스트랩 클래스 로더(BootStrap ClassLoader)`
-    
-        * JVM을 기동할 때 생성되며, Object 클래스들을 비롯하여 자바 API들을 로드한다.
+        * ① `부트스트랩 클래스 로더(BootStrap ClassLoader)`
         
-    * `플랫폼 클래스 로더(Platform ClassLoader)`
-    
-        * 기본 자바 API를 제외한 확장 클래스들을 로드한다.
-    
-        * 예전에는 `확장 클래스 로더(Extension ClassLoader)`라고 불렸다.
-    
-    * `애플리케이션 클래스 로더(Application ClassLoader)`
-    
-        * 애플리케이션의 클래스들을 로드한다
-        
-        * 즉, 사용자가 지정한 클래스패스 내의 클래스들을 로드한다.
-      
-            * 클래스패스(classpath)
+            * JVM을 기동할 때 생성되며, Object 클래스들을 비롯하여 자바 API들을 로드한다.
             
-                * 클래스를 찾는 경로를 말한다.
+        * ② `플랫폼 클래스 로더(Platform ClassLoader)`
+        
+            * 기본 자바 API를 제외한 확장 클래스들을 로드한다.
+        
+            * 예전에는 `확장 클래스 로더(Extension ClassLoader)`라고 불렸다.
+        
+        * ③ `애플리케이션 클래스 로더(Application ClassLoader)`
+        
+            * 애플리케이션의 클래스들을 로드한다.
+            
+                * 즉, 사용자가 지정한 클래스패스 내의 클래스들을 로드한다.
+              
+                    * 클래스패스(classpath)
+                    
+                        * 클래스를 찾는 경로를 말한다.
+                        
+                        * 애플리케이션 실행할 때 주는 -classpath 옵션 또는 java.class.path 환경 변수의 값에 해당하는 위치
                 
-                * 애플리케이션 실행할 때 주는 -classpath 옵션 또는 java.class.path 환경 변수의 값에 해당하는 위치
-            
-        * `시스템 클래스 로더(System Class Loader)`라고도 한다.
+            * `시스템 클래스 로더(System Class Loader)`라고도 한다.
         
 * `ClassLoader`가 클래스를 읽는 순서는 다음과 같다.
 
-    * 최상위인 `BootStrap ClassLoader` → `Platform ClassLoader `→ `Application ClassLoader` 순서대로 읽게 된다.
+    * 최상위인 `BootStrap ClassLoader` → `Platform ClassLoader `→ `Application ClassLoader`의 순서대로 읽게 된다.
     
     * 애플리케이션 클래스 로더(Application ClassLoader)에서도 클래스를 읽지 못한다면, `ClassNotFoundException` 예외가 발생한다.
     
