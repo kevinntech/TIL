@@ -37,7 +37,7 @@
     
     * `Command + Shift + T` : 테스트 코드 만들기
     
-    * `Command + Option + B` : 구현으로 이동하기
+    * `Command + Option + B (마우스 왼쪽 버튼)` : 구현으로 이동하기
     
     * `Option + Enter` : 퀵 픽스
     
@@ -85,6 +85,8 @@
         
         * `Command + Option + /` : 여러 줄 주석 처리하기
     
+        * `/**` + `Enter` : 자동 주석 생성
+    
     * `F1` : Java Doc 보기 (Quick Documentation)
     
     * `Command + D` : 현재, 코드 라인 복사하기
@@ -94,6 +96,8 @@
         * `Ctrl + Space` 단축키와 같이 사용하면 유용하다.
     
     * `Command + Shift + ↑↓` : 라인 단위로 코드 이동 시키기
+    
+    * `클래스명 + 오른쪽 마우스 버튼` + `Diagrams -> Show Diagram` : 다이어그램 확인
 
 * (3) Live Templates 기능
 
@@ -121,3 +125,11 @@
     * ⑥ `Define`를 클릭하여 `Java`를 체크한다.
 
     * ⑦ `Use static import if possible` , `Shorten FQ names`를 체크한다.
+
+* (4) 인텔리제이 실행 시 자동 빌드
+
+    * ① 인텔리제이 환경설정에서 `Build project automatically`를 체크한다.
+    
+    * ② 키보드에서 Shift를 두 번 눌렀을 때 나타나는 검색 창에서 Registry를 입력한다.
+    
+    * ③ `compiler.automake.allow.when.app.running`을 체크한다.
