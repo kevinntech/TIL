@@ -2444,7 +2444,7 @@
 
 ### 1. 객체지향 쿼리 언어 소개 
 
-* JPA는 다양한 쿼리 방법을 지원
+* (1) JPA는 다양한 쿼리 방법을 지원
 
     * JPQL
     
@@ -2456,7 +2456,7 @@
 
     * JDBC API 직접 사용, MyBatis, SpringJdbcTemplate 함께 사용
 
-* JPQL
+* (2) JPQL
 
     * 애플리케이션이 필요한 데이터만 DB에서 가져오려면 결국 검색 조건이 포함된 SQL이 필요하다. 
 
@@ -2468,7 +2468,7 @@
     
     * SQL은 데이터베이스 테이블을 대상으로 쿼리한다.
     
-* Criteria
+* (3) Criteria
 
     * JPQL을 생성하는 빌더 역할을 한다.
     
@@ -2476,9 +2476,9 @@
 
     * **단점: 너무 복잡하고 실용성이 없다.** 
     
-    * `Criteria` 대신에 `QueryDSL` 사용 권장
+        * `Criteria` 대신에 `QueryDSL` 사용 권장
     
-* QueryDSL
+* (4) QueryDSL
 
     * JPQL을 생성하는 빌더 역할을 한다.
 
@@ -2492,7 +2492,13 @@
     
     * 단순하고 쉽기 때문에 실무에서 사용하는 것을 권장한다.
 
-* 네이티브 SQL
+    * [참고] 레퍼런스 문서
+    
+        * `영어` : http://www.querydsl.com/static/querydsl/4.4.0/reference/html_single/
+          
+        * `한글` : http://www.querydsl.com/static/querydsl/4.0.1/reference/ko-KR/html_single/
+
+* (5) 네이티브 SQL
 
     * SQL을 직접 사용 할 수 있는 기능을 제공한다.
     
@@ -2502,24 +2508,24 @@
 
         ```java
         String sql =
-            “SELECT ID, AGE, TEAM_ID, NAME FROM MEMBER WHERE NAME = ‘kim’";
+            "SELECT ID, AGE, TEAM_ID, NAME FROM MEMBER WHERE NAME = ‘kim’";
         List<Member> resultList =
                     em.createNativeQuery(sql, Member.class).getResultList();
         ```
 
-* JDBC 직접 사용, SpringJdbcTemplate 등
+* (6) JDBC 직접 사용, SpringJdbcTemplate 등
 
     * JPA를 사용하면서 JDBC 커넥션을 직접 사용하거나, 스프링 JdbcTemplate, 마이바티스 등을 함께 사용 할 수 있다.
     
     * 단 영속성 컨텍스트를 적절한 시점에 강제로 플러시를 할 필요가 있다.
     
-        * 예) JPA를 우회해서 SQL을 실행하기 직전에 영속성 컨텍스트를 수동으로 flush() 해야 한다.
+        * Ex) JPA를 우회해서 SQL을 실행하기 직전에 영속성 컨텍스트를 수동으로 `flush()` 해야 한다.
 
 ### 2. JPQL
 
 * JPQL(Java Persistence Query Language, 자바 영속성 쿼리 언어)
 
-    * JPQL는 테이블이 아닌 엔티티 객체를 대상으로 검색하는 객체지향 쿼리 언어이다.
+    * `JPQL`는 테이블이 아닌 엔티티 객체를 대상으로 검색하는 객체지향 쿼리 언어이다.
     
     * 애플리케이션이 필요한 데이터만 DB에서 가져오려면 결국 검색 조건이 포함된 SQL이 필요하다. 
         
@@ -2572,13 +2578,13 @@
     
         * 결과가 없으면 비어있는 리스트를 반환한다.
         
-        ```java
-        List<Member> resultList = em.createQuery("select m from Member m", Member.class).getResultList();
-
-        for (Member member1 : resultList) {
-            System.out.println("member = " + member1);
-        }
-        ```
+            ```java
+            List<Member> resultList = em.createQuery("select m from Member m", Member.class).getResultList();
+    
+            for (Member member1 : resultList) {
+                System.out.println("member = " + member1);
+            }
+            ```
     
     * `query.getSingleResult()` : 결과가 정확히 하나일 때, 단일 객체를 반환한다.
 
@@ -2590,10 +2596,12 @@
 
     * JPQL는 `이름 기준 파라미터 바인딩`과 `위치 기준 파라미터 바인딩`을 제공한다.
     
-        * `이름 기준 파라미터`는 파라미터를 이름으로 구분하는 방법이다.
+        * `이름 기준 파라미터`는 이름을 기준으로 파라미터를 구분하는 방법이다.
         
-            * 앞에 `:`를 사용한다.
+            * 문법 : `:이름`
             
+            * 예시
+              
                 ```java
                 TypedQuery<Member> query = em.createQuery("select m from Member m where m.username = :username", Member.class);
                 query.setParameter("username", "member1");
@@ -2601,19 +2609,23 @@
                 
                 System.out.println("singleResult = " + singleResult.getUsername());
                 ```
-              
-        * `위치 기준 파라미터`는 ? 다음에 위치 값을 주면 된다. (위치 값은 1부터 시작한다.)
-        
-            ```java
-            Member singleResult = em.createQuery("select m from Member m where m.username = ?1", Member.class)
-                    .setParameter(1, "member1")
-                    .getSingleResult();
-    
-            System.out.println("singleResult = " + singleResult.getUsername());
-            ```
 
-    * `이름 기준 파라미터 바인딩 방식`을 사용하는 것이 좋다.
-    
+                * `이름 기준 파라미터 바인딩 방식`을 사용하는 것이 좋다.
+
+        * `위치 기준 파라미터`는 위치를 기준으로 파라미터를 구분하는 방법이다.
+
+            * 문법 : `?:위치 값`  (위치 값은 1 부터 시작함)        
+
+            * 예시
+              
+                ```java
+                Member singleResult = em.createQuery("select m from Member m where m.username = ?1", Member.class)
+                        .setParameter(1, "member1")
+                        .getSingleResult();
+        
+                System.out.println("singleResult = " + singleResult.getUsername());
+                ```
+              
 * 프로젝션
 
     * `프로젝션(projection)`은 SELECT 절에 조회할 대상을 지정하는 것을 말한다.
@@ -2629,29 +2641,35 @@
     * 예시
     
         ```java
-        SELECT m FROM Member m                    // 엔티티 프로젝션 
-        SELECT m.team FROM Member m               // 엔티티 프로젝션
-        SELECT m.address FROM Member m            // 임베디드 타입 프로젝션
-        SELECT m.username, m.age FROM Member m    // 스칼라 타입 프로젝션
+        SELECT m FROM Member m                    // Member 엔티티를 조회한다. [엔티티 프로젝션] 
+        SELECT m.team FROM Member m               // Member 엔티티와 연관된 Team 엔티티를 조회한다. [엔티티 프로젝션]
+        SELECT m.address FROM Member m            // Member 엔티티의 Address 임베디드 타입을 조회한다. [임베디드 타입 프로젝션]
+        SELECT m.username, m.age FROM Member m    // [스칼라 타입 프로젝션]
         ```
       
+        * [참고] `SELECT a FROM Address a`처럼 FROM 절에 임베디드 타입을 사용하는 것은 불가능하다.
+
     * 프로젝션에서 여러 값을 조회하는 방법
     
-        * ① Query 타입으로 조회
-        
-        * ② Object[] 타입으로 조회
+        * ① `Query` 타입으로 조회
+
+            ```java
+            Query query = em.createQuery("select m.username, m.age from Member m");
+            ```
+
+        * ② `Object[]` 타입으로 조회
 
             ```java
             List<Object[]> resultList = em.createQuery("select distinct m.username, m.age from Member m")
                     .getResultList();
 
             for (Object[] row : resultList) {
-                System.out.println("username = " + row[0]);
-                System.out.println("age = " + row[1]);
+                System.out.println("username = " + row[0]); // username = member1
+                System.out.println("age = " + row[1]);  // age = 10
             }
             ```
-
-        * ③ new 명령어로 조회
+        
+        * ③ `new` 명령어로 조회 (여러 개의 단순 값을 DTO로 바로 조회)
         
             * DTO를 작성한다.
 
@@ -2691,9 +2709,9 @@
 
     * JPA는 페이징을 다음 두 API로 추상화 했다.
 
-        * `setFirstResult(int startPosition)` : 조회 시작 위치 (0부터 시작한다)
+        * `setFirstResult(int startPosition)` : 조회 시작 위치를 지정한다. (0 부터 시작)
         
-        * `setMaxResults(int maxResult)` : 조회할 데이터 수
+        * `setMaxResults(int maxResult)` : 조회할 데이터 수를 지정한다.
         
     * 예시
 
@@ -2759,7 +2777,7 @@
 
 * 조인
 
-    * 내부 조인은 INNER JOIN을 사용한다. (INNER는 생략 가능)
+    * 내부 조인은 `[INNER] JOIN`을 사용한다. (`INNER`는 생략 가능)
     
         ```java          
         // 내부 조인
@@ -2790,84 +2808,97 @@
         String query = "select m from Member m, Team t where m.username = t.name";
         ```
       
+        * 카테시안 곱이라고도 한다.
+      
     * ON 절
     
-        * ON절을 사용하면 **조인 대상을 필터링**하고 조인 할 수 있다.
+        * ON 절은 **조인 대상을 필터링**하고 조인할 때, 사용한다.
         
-            * 예) 회원과 팀을 조인하면서, 팀 이름이 A인 팀만 조인
+            * Ex) 회원과 팀을 조인하면서, 팀 이름이 A인 것만 조회한다.
             
                 ```java          
                 String query = "select m from Member m left join m.team t on t.name = 'teamA'";
                 ```
         
-        * **연관관계가 없는 엔티티 외부 조인**이 가능하다.
+        * **연관관계가 없는 엔티티를 외부 조인**할 때도, 사용한다. (하이버네이트 5.1 부터)
         
-            * 예) 회원의 이름과 팀의 이름이 같은 대상 외부 조인
+            * Ex) 회원의 이름과 팀의 이름이 같은 대상 외부 조인
             
                 ```java          
                 String query = "select m from Member m left join Team t on m.username = t.name";
                 ```
               
-* 서브쿼리
+* 서브 쿼리
 
-    * `서브쿼리(SubQuery)`은 쿼리문 안에 포함되어 있는 또 다른 쿼리문을 말한다.
+    * `서브 쿼리(Sub Query)`은 쿼리문 안에 포함되어 있는 또 다른 쿼리문을 말한다.
     
-        * JPQL에서 서브쿼리는 WHERE, HAVING 절에서만 사용 할 수 있다.
+        * JPQL는 WHERE, HAVING 절에서만 서브 쿼리를 사용 할 수 있다.
         
-            * 하이버네이트는 SELECT 절의 서브쿼리도 허용한다.
+            * 하이버네이트는 SELECT 절의 서브 쿼리를 지원한다.
             
-            * FROM절의 서브쿼리는 지원하지 않는다.
+            * FROM 절의 서브 쿼리 (인라인 뷰)는 지원하지 않는다.
             
-                * 조인으로 해결 할 수 있다면 조인으로 해결한다.
+                * 조인으로 해결 할 수 있다면 조인을 사용한다.
                 
                 * 또는 네이티브 쿼리로 해결 할 수도 있다.
             
-        * 예시 - 나이가 평균보다 많은 회원
+        * 예시
+          
+            * 나이가 평균보다 많은 회원
             
-            ```java          
-            select m from Member m
-            where m.age > (select avg(m2.age) from Member m2)
-            ```
+                ```java          
+                select m from Member m
+                where m.age > (select avg(m2.age) from Member m2)
+                ```
 
-    * 서브쿼리 지원 함수
+                * 위와 같이 메인 쿼리와 서브 쿼리를 전혀 관계가 없는 쿼리가 성능이 좋다.
+
+            * 한 건이라도 주문한 고객
+            
+                ```java          
+                select m from Member m
+                where (select count(o) from Order o where m = o.member) > 0
+                ```
+              
+                * 위와 같이 메인 쿼리와 서브 쿼리가 연관성이 있는 쿼리는 성능이 좋지 않다.
+
+    * 서브 쿼리 지원 함수
  
         * EXISTS
         
-            * 문법 : `[NOT] EXISTS (subquery)`
-            
-            * 설명 : 서브쿼리에 결과가 존재하면 참이다. (NOT은 반대) 
+            * `[NOT] EXISTS (subquery)` : 서브 쿼리에 결과가 존재하면 참이다. (NOT은 반대) 
 
-            ```java          
-            // 팀A에 소속인 회원
-            select m from Member m 
-            where exists ( select t from m.team t WHERE t.name = '팀A')
-            ```
+            * 예시
+            
+                ```java          
+                // 팀A에 소속인 회원
+                select m from Member m 
+                where exists ( select t from m.team t WHERE t.name = '팀A')
+                ```
 
         * {ALL | ANY | SOME} 
         
-            * 문법 : `{ALL | ANY | SOME} (subquery)`
+            * `{ALL | ANY | SOME} (subquery)` : 비교 연산자와 같이 사용한다.
             
-            * 설명 : 비교 연산자와 같이 사용한다.
-            
-                * ALL : 조건을 모두 만족하면 참이다.
+                * `ALL` : 조건을 모두 만족하면 참이다.
                 
-                * ANY, SOME: 둘은 같은 의미. 조건을 하나라도 만족하면 참이다.
+                * `ANY`, `SOME`: 조건을 하나라도 만족하면 참이다. (둘은 같은 의미)
 
-            ```java          
-            // 전체 상품 각각의 재고보다 주문량이 많은 주문들
-            select o from Order o
-            where o.orderAmount > ALL (select p.stockAmount from Product p)
-          
-            // 어떤 팀이든 팀에 소속된 회원 
-            select m from Member m
-            where m.team = ANY (select t from Team t)
-            ```
+            * 예시
+            
+                ```java          
+                // 전체 상품 각각의 재고보다 주문량이 많은 주문들
+                select o from Order o
+                where o.orderAmount > ALL (select p.stockAmount from Product p)
+              
+                // 어떤 팀이든 팀에 소속된 회원 
+                select m from Member m
+                where m.team = ANY (select t from Team t)
+                ```
 
         * IN
         
-            * 문법 : `[NOT] IN (subquery)`
-            
-            * 설명 : 서브쿼리의 결과 중 하나라도 같은 것이 있으면 참이다.
+            * `[NOT] IN (subquery)` : 서브 쿼리의 결과 중 하나라도 같은 것이 있으면 참이다.
             
 * 조건식
 
