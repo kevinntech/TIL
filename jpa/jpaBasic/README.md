@@ -3456,24 +3456,119 @@
         
     * 페치 조인의 특징과 한계
     
-        * ① 페치 조인 대상에는 별칭을 줄 수 없다. 
-
-            * Ex) `select t from Team t join fetch t.members m where m.age > 10` (X)
-
-                * SELECT, WHERE 절, 서브 쿼리에 페치 조인 대상을 사용 할 수 없다.
-
-                * 하이버네이트는 가능하지만 가급적 사용하지 말자.
+        * ① fetch join의 대상은 on, where 등에서 필터링 조건으로 사용하면 안된다.
     
-                    * 별칭을 잘못 사용하면 연관된 데이터 수가 달라져서 데이터 무결성이 깨질 수 있기 때문이다.
+            * 아래 예시를 살펴보며 좀 더 자세히 이해해보자.
 
-                        * 객체 그래프 탐색은 연관된 데이터를 모두 조회 할 수 있어야 한다. 데이터를 일부만 제외하고 조회하면 안된다.
+                * 1번. 
+                  
+                    * `select t from Team t join fetch t.members m where m.age > 10` (X)
+    
+                        * 페치 조인 대상에 별칭을 주고 where 조건으로 사용하면 Collection 형태로 조회되는 데이터가 전부 조회되지 않고 일부만 나오기 때문에 문제가 생길 수 있다.
+
+                * 2번.
+    
+                    * `select t from Team t join fetch t.members m where t.name=:teamName` (O)
+
+                        * 해당 쿼리에서 `Team`은 fetch join 대상이 아니므로 where에서 마음껏 사용해도 된다.
+
+                        * 하지만 `t.members m`은 페치 조인 대상이다. 따라서 on, where 등에서 필터링 조건으로 사용하면 위험하다.
+
+                * 3번.
+    
+                    ```java
+                    @Entity
+                    public class Member {
+                    
+                        @Id @GeneratedValue
+                        private Long id;
+                        private String username;
+                    
+                        @ManyToOne
+                        @JoinColumn(name = "team_id")
+                        private Team team;
+                    
+                    }
+                    ```
+
+                    ```java
+                    @Entity
+                    public class Team {
+                    
+                        @Id @GeneratedValue
+                        private Long id;
+                    
+                        private String name;
+                    
+                        @OneToMany(mappedBy = "team")
+                        private List<Member> members = new ArrayList<>();
                         
-                        * 데이터 100 건 중에서 팀과 연관된 회원 5 건만 가져오고 싶다면 팀에서 members를 가져오는 것이 아닌 처음부터 member를 5개 조회해야 한다. 
+                    }
+                    ```
+                    
+                    ```java
+                    @RunWith(SpringRunner.class)
+                    @SpringBootTest
+                    @Transactional
+                    public class DemoApplicationTests {
+                    
+                        @Autowired
+                        EntityManager em;
+                    
+                        @Test
+                        public void contextLoads() {
+                    
+                            Team team = new Team();
+                            team.setName("teamA");
+                            em.persist(team);
+                    
+                            Member member1 = new Member();
+                            member1.setUsername("m1");
+                            member1.setTeam(team);
+                            em.persist(member1);
+                    
+                            Member member2 = new Member();
+                            member2.setUsername("m2");
+                            member2.setTeam(team);
+                            em.persist(member2);
+                    
+                            em.flush();
+                            em.clear();
+                    
+                            List<Team> result = em.createQuery("select t from Team t join fetch t.members m where m.username = 'm1'", Team.class)
+                                    .getResultList();
+                    
+                            for (Team team1 : result) {
+                                System.out.println("team1 = " + team1.getName());
+                                List<Member> members = team1.getMembers();
+                                for (Member member : members) {
+                                    System.out.println("member = " + member.getUsername());
+                                }
+                            }
+                    
+                        }
+                    
+                    }
+                    ```
+                  
+                    * 실행 결과를 보면 member가 하나만 존재한다.
 
-            * Ex) `select t from Team t join fetch t.members m join fetch m.team` (O)
+                        * `team1 = teamA`
 
-                * 페치 조인을 여러 단계로 하는 경우에는 사용 할 수 있다. 
+                        * `member = m1`
 
+                    * 애플리케이션에서 fetch join의 결과는 연관된 모든 엔티티가 있을 것이라 가정하고 사용해야 한다. 
+
+                    * 이렇게 페치 조인에 별칭을 잘못 사용해서 컬렉션 결과를 필터링하면, 객체의 상태와 DB의 상태 일관성이 깨져버린다.
+
+                    * [결론] **fetch join의 대상은 on, where 등에서 필터링 조건으로 사용하면 안된다.**
+
+                * 4번. 
+                  
+                    * `select t from Team t join fetch t.members m join fetch m.team` (O)
+    
+                        * 페치 조인을 여러 단계로 하는 경우에는 페치 조인의 대상에 별칭을 줄 수 있다.
+    
         * ② 둘 이상의 컬렉션은 페치 조인을 할 수 없다.
 
             * JPA 구현체에 따라 가능한 경우도 있는데 가급적 사용하면 안된다.
@@ -3556,6 +3651,18 @@
 
                     * `hibernate.default_batch_fetch_size`로 글로벌 설정이 가능하다.
 
+    * 엔티티와 DB 데이터의 일관성
+      
+        * JPA의 엔티티 데이터는 DB의 데이터와 일관성을 유지해야 한다.
+        
+            * 임의로 데이터를 제외하고 조회하면 DB에 해당 데이터가 없다고 판단하는 것과 똑같다.
+        
+        * 예를 들어, 통계 쿼리를 작성해야 한다면, 엔티티가 아닌 그냥 값으로 조회하면 된다.
+        
+            * 엔티티는 객체 그래프를 유지하고 DB와 데이터 일관성을 유지한다. 하지만 엔티티가 아닌 일반 값들은 그럴 필요가 없다.
+              
+            * 필요한 값들만 조회해서 DTO로 반환하면 된다. 
+
     * 정리하기
     
         * ① 연관된 엔티티들을 SQL 한 번으로 조회한다. - 성능 최적화 
@@ -3571,7 +3678,7 @@
         * ⑤ **여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 만들어야 하면, 페치 조인 보다는 일반 조인을 사용하고 필요한 데이터들만 조회해서 DTO로 반환하는 것이 효과적이다.**
         
             * **Ex) 통계 쿼리**
-
+    
 * 다형성 쿼리
 
     * `TYPE`은 엔티티의 상속 구조에서 조회 대상을 특정 자식 타입으로 한정할 때 사용한다.
