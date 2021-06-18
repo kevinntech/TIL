@@ -7369,15 +7369,68 @@ int[][] arr = {
 
         * 즉, 자바의 열거형은 값과 타입을 모두 체크한다.
 
+            * 열거형을 사용하지 않고 다음과 같이 상수를 정의한다고 가정한다. 
+
+                ```java
+                class Card{
+                    static final int CLOVER = 0;
+                    static final int HEART = 1;
+                    static final int DIAMOND = 2;
+                    static final int SPADE = 3;
+                    
+                    static final int TWO = 0;
+                    static final int THREE = 1;
+                    static final int FOUR = 2;
+                    
+                    final int kind;
+                    final int num;
+                }
+                ```
+
+            * 그러면 다음 코드의 결과는 true이다. 
+
+                ```java
+                if(Card.CLOVER == Card.TWO) // [결과] true
+                ```
+              
+                * 결과가 true지만 false여야 의미상 맞다. 
+
+            * 이번에는 열거형을 사용해서 상수를 정의한다고 가정한다.
+
+                ```java
+                class Card{
+                    //           0       1       2       3
+                    enum Kind {CLOVER, HEART, DIAMOND, SPADE} // 열거형 Kind를 정의 
+                    enum Value {TWO, THREE, FOUR} // 열거형 Value를 정의
+                    
+                    final Kind kind;
+                    final Value value;
+                }
+                ```
+
+            * 그러면 다음 코드의 결과는 컴파일 에러가 발생한다.
+
+                ```java
+                if(Card.Kind.CLOVER == Card.Value.TWO) // [결과] 컴파일 에러 
+                ```
+              
+                * 값은 같지만 타입이 달라서 비교 할 수 없다. 
+
 #### 2) 열거형의 정의와 사용
 
 * 열거형을 정의하는 방법
 
-    * 문법 : `enum 열거형이름 { 상수명 1, 상수명2, . . . }`
+    * 문법 : `enum 열거형이름 { 상수명1, 상수명2, . . . }`
 
     * 예시 : `enum Direction { EAST, WEST, SOUTH, NORTH }`
 
         * Direction이라는 열거형을 선언한다. 상수의 값은 자동으로 0 부터 시작하는 정수 값이 부여된다. 
+
+* 열거형에 정의된 상수를 사용하는 방법
+
+    * 문법 : `열거형이름.상수명`
+    
+    * 예시 : `Direction.EAST`
 
 * 열거형 타입의 변수를 선언하고 사용하는 방법
 
@@ -7389,22 +7442,22 @@ int[][] arr = {
         Direction dir;	// 열거형을 인스턴스 변수로 선언
     
         void init() {
-            dir = Direction.EAST; // 유닛의 방향을 EAST로 초기화
             // 열거형 변수의 값은 열거형 상수 값(EAST, WEST ..) 중 하나 이어야 한다.
+            dir = Direction.EAST; // 유닛의 방향을 EAST로 초기화
         }
     }
     ```
 
-* 열거형 상수의 비교에 ==와 compareTo()를 사용 할 수 있다.
+* 열거형 상수의 비교에 `==`와 `compareTo()`를 사용 할 수 있다.
 
-    * 열거형을 비교할 때는 compareTo()를 사용 해야 한다.
+    * 열거형을 비교할 때는 `compareTo()`를 사용 해야 한다.
     
-    * compareTo()는 열거형 상수가 정의된 순서의 차이를 반환한다.
+    * `compareTo()`는 열거형 상수가 정의된 순서의 차이를 반환한다.
 
         ```java
-        if( dir == Direction.EAST ){
+        if(dir == Direction.EAST){
             x++;
-        } else if (dir > Direction.WEST){ // 에러. 열거형 상수에 비교 연산자 사용 불가 
+        } else if (dir > Direction.WEST){ // 에러. 열거형 상수에 비교 연산자를 사용 할 수 없다. 
             ...
         } else if (dir.compareTo(Direction.WEST) > 0){ // compareTo()는 가능
             
@@ -7413,78 +7466,82 @@ int[][] arr = {
 
 #### 3) 모든 열거형의 조상 - java.lang.Enum
 
-* 모든 열거형은 추상 클래스 Enum의 자손이며 아래의 메서드를 상속 받는다.
+* 추상 클래스 `Enum` : 모든 열거형의 조상이며 아래의 메서드가 정의되어 있다. 
 
     * `Class<E> getDeclaringClass()` : 열거형의 Class 객체를 반환한다.
 
-    * `String name()` : 열거형 상수의 이름을 문자열로 반환한다.
+    * `String name()` : **열거형 상수의 이름을 문자열로 반환한다.**
 
-    * `int ordinal()` : 열거형 상수가 정의된 순서를 반환한다. (0 부터 시작)
+    * `int ordinal()` : **열거형 상수가 정의된 순서를 반환한다.** (0 부터 시작)
 
-    * `T valueOf(Class<T> enumType, String name)` : 지정된 열거형에서 name과 일치하는 열거형 상수를 반환한다.
+    * `T valueOf(Class<T> enumType, String name)` : **지정된 열거형에서 name과 일치하는 열거형 상수를 반환한다.**
 
 * 아래와 같이 컴파일러가 자동적으로 추가해주는 메서드가 있다.
 
-    * `static E values()` : 해당 열거형의 모든 상수를 배열에 담아 반환한다.
+    * `static E values()` : 해당 열거형의 모든 상수를 배열에 담아서 반환한다.
     
     * `static E valueOf(String name)` : 전달된 문자열과 일치하는 해당 열거형의 상수를 반환한다.
 
-        ```java
-        enum Direction { EAST, SOUTH, WEST, NORTH }
-        
-        class EnumEx1 {
-            public static void main(String[] args) {
-                Direction d1 = Direction.EAST; // 열거형타입.상수이름
-                Direction d2 = Direction.valueOf("WEST");
-                Direction d3 = Enum.valueOf(Direction.class, "EAST");
-        
-                System.out.println("d1="+d1);
-                System.out.println("d2="+d2);
-                System.out.println("d3="+d3);
-        
-                System.out.println("d1==d2 ? "+ (d1==d2));
-                System.out.println("d1==d3 ? "+ (d1==d3));
-                System.out.println("d1.equals(d3) ? "+ d1.equals(d3));
-        //		System.out.println("d2 > d3 ? "+ (d1 > d3)); // 에러
-                System.out.println("d1.compareTo(d3) ? "+ (d1.compareTo(d3)));
-                System.out.println("d1.compareTo(d2) ? "+ (d1.compareTo(d2)));
-        
-                switch(d1) {
-                    case EAST: // switch문의 case에는 Direction.EAST 라고 쓸 수 없다.
-                        System.out.println("The direction is EAST."); break;
-                    case SOUTH:
-                        System.out.println("The direction is SOUTH."); break;
-                    case WEST:
-                        System.out.println("The direction is WEST."); break;
-                    case NORTH:
-                        System.out.println("The direction is NORTH."); break;
-                    default:
-                        System.out.println("Invalid direction."); break;
-                }
-        
-                Direction[] dArr = Direction.values(); // 열거형의 모든 상수를 배열로 반환
-        
-                for(Direction d : dArr)  // for(Direction d : Direction.values())
-                    System.out.printf("%s=%d%n", d.name(), d.ordinal());
+        * `열거형이름.상수명`과 동일하다고 볼 수 있다. 
+
+* 예시 
+
+    ```java
+    enum Direction { EAST, SOUTH, WEST, NORTH }
+    
+    class EnumEx1 {
+        public static void main(String[] args) {
+            Direction d1 = Direction.EAST; // 열거형타입.상수이름
+            Direction d2 = Direction.valueOf("WEST");
+            Direction d3 = Enum.valueOf(Direction.class, "EAST");
+    
+            System.out.println("d1="+d1);
+            System.out.println("d2="+d2);
+            System.out.println("d3="+d3);
+    
+            System.out.println("d1==d2 ? "+ (d1==d2));              // false
+            System.out.println("d1==d3 ? "+ (d1==d3));              // true
+            System.out.println("d1.equals(d3) ? "+ d1.equals(d3));  // true
+    //		System.out.println("d2 > d3 ? "+ (d1 > d3));            // 열거형 상수는 객체이므로 비교 연산자를 사용 할 수 없다. (에러)
+            System.out.println("d1.compareTo(d3) ? "+ (d1.compareTo(d3))); // 0
+            System.out.println("d1.compareTo(d2) ? "+ (d1.compareTo(d2))); // -2
+    
+            switch(d1) {
+                case EAST: // switch문의 case에는 Direction.EAST 라고 쓸 수 없다.
+                    System.out.println("The direction is EAST."); break; // 해당 문장이 실행됨
+                case SOUTH:
+                    System.out.println("The direction is SOUTH."); break;
+                case WEST:
+                    System.out.println("The direction is WEST."); break;
+                case NORTH:
+                    System.out.println("The direction is NORTH."); break;
+                default:
+                    System.out.println("Invalid direction."); break;
             }
+    
+            Direction[] dArr = Direction.values(); // 열거형의 모든 상수를 배열로 반환한다.
+    
+            for(Direction d : dArr)  // for(Direction d : Direction.values())
+                System.out.printf("%s=%d%n", d.name(), d.ordinal());
         }
-        ```
+    }
+    ```
 
 #### 4) 열거형에 멤버 추가하기
 
-* 불연속적인 열거형 상수의 경우, 원하는 값을 괄호() 안에 적는다.
+* 불연속적인 열거형 상수의 경우, 원하는 값을 괄호 `()` 안에 적는다.
 
     ```java
-    enum Direction { EAST(1), SOUTH(5), WEST(-1), NORTH(10) }
+    enum Direction { EAST(1), SOUTH(5), WEST(-1), NORTH(10) } // 괄호 ()는 생성자를 호출하는 것이다.
     ```
 
-* 괄호()를 사용하려면, 인스턴스 변수와 생성자를 새로 추가해줘야 한다.
+* 괄호 `()`를 사용하려면, 인스턴스 변수와 생성자를 새로 추가해야 한다.
 
     ```java
     enum Direction {
         EAST(1), SOUTH(5), WEST(-1), NORTH(10); // 끝에 ';'를 추가해야 한다.
     
-        private final int value; // 정수를 저장할 필드(인스턴스 변수)를 추가
+        private final int value;                      // 정수를 저장할 필드(인스턴스 변수)를 추가
         Direction(int value) { this.value = value; } // 생성자를 추가
     
         public int getValue() { return value; }
@@ -7501,24 +7558,61 @@ int[][] arr = {
 
     ```java
     enum Direction {
-        EAST(1, ">"), SOUTH(2, "V"), WEST(3, "<"), NORTH(4, "^"); // 끝에 ';'를 추가해야 한다.
+        EAST(1, ">"), SOUTH(2,"V"), WEST(3, "<"), NORTH(4,"^");
     
+        private static final Direction[] DIR_ARR = Direction.values(); // 열거형의 모든 상수를 배열에 저장한다.
         private final int value;
         private final String symbol;
     
-        Direction(int value, String symbol) { // 접근 제어자 private이 생략됨 
-            this.value = value;
+        Direction(int value, String symbol) { // 접근 제어자 private이 생략됨
+            this.value  = value;
             this.symbol = symbol;
         }
     
-        public int getValue() { return value; }
+        public int getValue()     { return value;  }
         public String getSymbol() { return symbol; }
+    
+        public static Direction of(int dir) {
+            if (dir < 1 || dir > 4)
+                throw new IllegalArgumentException("Invalid value :" + dir);
+    
+            return DIR_ARR[dir - 1];
+        }
+    
+        // 방향을 회전시키는 메서드. num의 값만큼 90도씩 시계방향으로 회전한다.
+        public Direction rotate(int num) {
+            num = num % 4; // 범위 제한 (0 ~ 3)
+    
+            if(num < 0) num +=4; // num이 음수일 때는 시계반대 방향으로 회전 
+    
+            return DIR_ARR[(value-1+num) % 4];
+        }
+    
+        public String toString() {
+            return name() + getSymbol();
+        }
+  
+    } // enum Direction
+    
+    class EnumEx2 {
+        public static void main(String[] args) {
+            for(Direction d : Direction.values())
+                System.out.printf("%s=%d%n", d.name(), d.getValue());
+    
+            Direction d1 = Direction.EAST;
+            Direction d2 = Direction.of(1);
+    
+            System.out.printf("d1=%s, %d%n", d1.name(), d1.getValue());
+            System.out.printf("d2=%s, %d%n", d2.name(), d2.getValue());
+            System.out.println(Direction.EAST.rotate(1));
+            System.out.println(Direction.EAST.rotate(2));
+            System.out.println(Direction.EAST.rotate(-1));
+            System.out.println(Direction.EAST.rotate(-2));
+        }
     }
     ```
-
-* 열거형에 멤버를 추가하는 예시
-
-    * 자세한 내용은 자바의 정석 p697~698를 참고하자.
+  
+    * 자세한 내용은 자바의 정석 p695~696를 참고하자.
 
 #### 5) 열거형의 이해
 
@@ -7551,24 +7645,26 @@ int[][] arr = {
 
 * 애노테이션?
 
-    * 애노테이션은 소스코드에 붙여서 특별한 의미를 부여하는 기능이다.
+    * `애노테이션`은 소스코드에 붙여서 특별한 의미를 부여하는 기능이다.
 
-    * 주석(comment)처럼 프로그래밍 언어에 영향을 미치지 않으면서도 다른 프로그램에게 유용한 정보를 제공할 수 있다.
+        * 주석(comment)처럼 프로그래밍 언어에 영향을 미치지 않으면서도 다른 프로그램에게 유용한 정보를 제공할 수 있다.
 
-* 애노테이션의 사용 예시
+        * [참고] `/** */` : Javadoc 주석 
 
-    * @Test는 이 메서드를 테스트 해야 한다는 것을 테스트 프로그램에게 알리는 역할을 할 뿐, 메서드가 포함된 프로그램 자체에는 아무런 영향을 미치지 않는다.
+* 예시
+
+    * `@Test`는 해당 메서드를 테스트 해야 한다는 것을 JUnit이라는 테스트 프로그램에게 알리는 역할을 할 뿐, 메서드가 포함된 프로그램 자체에는 아무런 영향을 미치지 않는다.
 
         ```java
         @Test // 이 메서드가 테스트 대상임을 테스트 프로그램에게 알린다.
         public void method() {
-            // . . .
+            //...
         }
         ```
 
 #### 2) 표준 애노테이션
 
-* 표준 애노테이션?
+* (1) 표준 애노테이션?
 
     * 표준 애노테이션은 Java에서 제공하는 애노테이션이다.
     
@@ -7596,24 +7692,26 @@ int[][] arr = {
         
             * `@Repeatable` : 애노테이션을 반복해서 적용할 수 있게 한다. (JDK 1.8)
     
-    * @Override
+* (2) @Override
 
-        * @Override는 오버라이딩을 올바르게 했는지 컴파일러가 체크하게 한다.
+    * `@Override` : 오버라이딩을 올바르게 했는지 컴파일러가 체크하도록 한다.
 
-        * 오버라이딩 할 때, 메서드 이름을 잘못 적는 실수를 하는 경우가 많다.
+    * 예시 
 
+        * 오버라이딩을 할 때, 메서드 이름을 잘못 적는 실수를 하는 경우가 많다.
+    
             ```java
             class Parent {
                 void parentMethod() {}
             }
             
             class Child extends Parent {
-                void parentmethod() {} // 오버라이딩 하려 했으나 실수로 이름을 잘못 적음
+                void parentmethod() {} // 오버라이딩을 하려 했으나 실수로 이름을 잘못 적음
             }
             ```
     
-        * 오버라이딩 할 때, 메서드 이름을 잘못 적는 실수를 하는 경우가 많다.
-
+        * 오버라이딩을 할 때는 메서드 선언부 앞에 `@Override`를 붙이자.
+    
             ```java
             class Parent {
                 void parentMethod() { }
@@ -7621,125 +7719,174 @@ int[][] arr = {
             
             class Child extends Parent {
                 @Override
-                void parentmethod() { } // 조상 메서드의 이름을 잘못적었음. 
+                void parentmethod() { } // 조상 메서드의 이름을 잘못 적었음. 
+            }
+            ```
+          
+            * 그러면 컴파일러가 오버라이딩이 잘못된 경우, 알려준다.
+
+* (3) @Deprecated
+
+    * `@Deprecated` : 앞으로 사용하지 않을 것을 권장하는 대상에 붙인다.
+
+        * Ex) Date 클래스의 `getDate()`
+
+            ```java
+            @Deprecated
+            public int getDate() {
+                return normalize().getDayOfMonth();
             }
             ```
 
-    * @Deprecated
+    * `@Deprecated`가 붙은 대상이 사용된 코드를 컴파일하면 나타나는 메시지는 아래와 같다.
 
-        * `@Deprecated`는 앞으로 사용하지 않을 것을 권장하는 대상에 붙인다.
+        ```
+        Note: AnnotationEx2.java uses or overrides a deprecated API.
+        Note: Recompile with -Xlint:deprecation for details.
+        ```
+
+* (4) @FuntionalInterface
+
+    * `@FuntionalInterface` : 함수형 인터페이스를 올바르게 작성했는지 컴파일러가 체크하도록 한다.
+
+        * 함수형 인터페이스는 하나의 추상 메서드만 가져야 한다는 제약이 있다.
+
+            ```java
+            @FunctionalInterface
+            public interface Runnable{
+                public abstract void run(); // 추상 메서드
+            }
+            ```
+
+* (5) @SuppressWarnings
+
+    * `@SuppressWarnings` : 컴파일러의 경고 메시지가 나타나지 않도록 억제한다.
+
+        * `@SuppressWarnings`로 억제 할 수 있는 경고 메시지 중 자주 사용되는 것은 다음과 같다.
     
-        * @Deprecated의 예시로는 Date 클래스의 getDate()가 있다.
-        
-        * @Deprecated가 붙은 대상을 사용하는 코드를 작성하고 컴파일하면 나타나는 메시지는 아래와 같다.
-
-    * @FuntionalInterface
-
-        * `@FuntionalInterface`는 함수형 인터페이스를 올바르게 작성했는지 컴파일러가 체크하게 한다.
-
-            * 함수형 인터페이스는 하나의 추상 메서드만 가져야 한다는 제약이 있음.
-
-                ```java
-                @FunctionalInterface
-                public interface Runnable{
-                    public abstract void run(); // 추상 메서드
-                }
-                ```
-
-    * @SuppressWarnings
-
-        * `@SuppressWarnings`는 컴파일러의 경고 메시지가 나타나지 않게 억제한다.
-
-        * @SuppressWarnings로 억제 할 수 있는 경고 메시지 중 자주 사용되는 것은 아래와 같다.
+            * ① `deprecation` : @Deprecated가 붙은 대상을 사용해서 발생하는 경고를 억제할 때 사용한다.
+            
+            * ② `unchecked` : 제네릭으로 타입을 지정하지 않았을 때 발생하는 경고를 억제할 때 사용한다.
+            
+            * ③ `rawtypes` : 제네릭을 사용하지 않아서 발생하는 경고를 억제할 때 사용한다.
+            
+            * ④ `varargs` : 가변 인자의 타입이 제네릭 타입일 때 발생하는 경고를 억제할 때 사용한다.
     
-            * ① deprecation : @Deprecated가 붙은 대상을 사용해서 발생하는 경고를 억제할 때 사용한다.
-            
-            * ② unchecked : 제네릭으로 타입을 지정하지 않았을 때 발생하는 경고를 억제할 때 사용한다.
-            
-            * ③ rawtypes : 제네릭을 사용하지 않아서 발생하는 경고를 억제할 때 사용한다.
-            
-            * ④ varargs : 가변 인자의 타입이 제네릭 타입일 때  발생하는 경고를 억제할 때 사용한다.
+        * 괄호 `()` 안에 억제 하고자 하는 경고 메시지의 종류를 문자열로 지정한다.
     
-        * 괄호() 안에 억제 하고자 하는 경고 메시지의 종류를 문자열로 지정한다.
-
             ```java
             @SuppressWarnings("unchecked") // 제네릭과 관련된 경고를 억제
             ArrayList list = new ArrayList(); // 제네릭 타입을 지정하지 않았음
             list.add(obj);
             ```
-
+    
         * 둘 이상의 경고를 동시에 억제하려면 다음과 같이 한다.
-
+    
             ```java
             @SuppressWarnings({"deprecation", "unchecked", "varargs"})
             ```
-
-        * '-Xlint' 옵션으로 컴파일 하면, 경고 메시지를 확인 할 수 있다.
-
-            * 경고의 내용 중에서 대괄호 [] 안에 있는 것이 경고 메시지의 종류이다.
+    
+        * `-Xlint` 옵션으로 컴파일을 하면, 경고 메시지를 확인 할 수 있다.
+    
+            * 경고의 내용 중에서 대괄호 `[]` 안에 있는 것이 경고 메시지의 종류이다.
 
 #### 3) 메타 애노테이션
 
-* 메타 애노테이션?
+* (1) 메타 애노테이션?
 
-    * 메타 애노테이션은 애노테이션을 정의할 때 사용하는 애노테이션이다.
+    * `메타 애노테이션(Meta Annotation)` : 애노테이션을 정의할 때 사용하는 애노테이션이다.
 
-    * 애노테이션을 정의할 때, 애노테이션의 적용 대상(target)이나 유지 기간(retention) 등을 지정하는데 사용된다.
+        * 애노테이션을 정의할 때, 애노테이션의 적용 대상(target)이나 유지 기간(retention) 등을 지정하는데 사용된다.
+    
+        * 메타 애노테이션은 java.lang.annotation 패키지에 포함되어 있다. 
 
-* @Target
+* (2) @Target
 
-    * `@Target`은 애노테이션이 적용 가능한 대상을 지정하는데 사용된다.
+    * `@Target` : 애노테이션이 적용 가능한 대상을 지정할 때 사용한다.
       
-    * 여러 개의 값을 지정할 때는 배열에서 처럼 괄호 {}를 사용해야 한다.
-
-        ```java
-        @Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE})
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface SuppressWarnings {
-            String[] value();
-        }
-        ```
-
-    * @Target으로 지정 할 수 있는 애노테이션 적용 대상의 종류는 다음과 같다.
-
-        |     대상 타입     |                 의미               |
-        |:----------------|:----------------------------------|
-        | ANNOTATION_TYPE | 애노테이션                           |
-        | CONSTRUCTOR     | 생성자                              |
-        | FIELD           | 필드(멤버 변수, enum 상수)             |
-        | LOCAL_VARIABLE  | 지역변수                             |
-        | METHOD          | 메서드                              |
-        | PACKAGE         | 패키지                              |
-        | PARAMETER       | 매개변수                             |
-        | TYPE            | 타입 (클래스, 인터페이스, enum)         |
-        | TYPE_PARAMETER  | 타입 매개변수(JDK 1.8)                |
-        | TYPE_USE        | 타입이 사용되는 모든 곳 (JDK 1.8)       |
+        * 여러 개의 값을 지정할 때는 배열에서 처럼 괄호 {}를 사용해야 한다.
     
-        * ANNOTATION_TYPE은 애노테이션을 선언할 때 붙일 수 있다는 의미다.
+            ```java
+            @Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE})
+            @Retention(RetentionPolicy.SOURCE)
+            public @interface SuppressWarnings {
+                String[] value();
+            }
+            ```
+    
+        * @Target으로 지정 할 수 있는 애노테이션 적용 대상의 종류는 다음과 같다.
+    
+            |     대상 타입     |                 의미               |
+            |:----------------|:----------------------------------|
+            | ANNOTATION_TYPE | 애노테이션                           |
+            | CONSTRUCTOR     | 생성자                              |
+            | FIELD           | 필드(멤버 변수, enum 상수)             |
+            | LOCAL_VARIABLE  | 지역변수                             |
+            | METHOD          | 메서드                              |
+            | PACKAGE         | 패키지                              |
+            | PARAMETER       | 매개변수                             |
+            | TYPE            | 타입 (클래스, 인터페이스, enum)         |
+            | TYPE_PARAMETER  | 타입 매개변수(JDK 1.8)                |
+            | TYPE_USE        | 타입이 사용되는 모든 곳 (JDK 1.8)       |
+
+            * `ANNOTATION_TYPE` : 애노테이션을 선언할 때 붙일 수 있다는 의미다.
+            
+            * `CONSTRUCTOR` : 생성자를 선언할 때 붙일 수 있다는 의미다.
+
+            * `FIELD` : 멤버 변수 또는 enum 상수를 선언할 때 붙일 수 있다는 의미다.
+
+            * `TYPE` : 클래스, 인터페이스, enum를 선언할 때 붙일 수 있다는 의미다.
+
+            * `TYPE_PARAMETER` : 타입 매개변수를 선언할 때 붙일 수 있다는 의미다.
+            
+            * `TYPE_USE` : 타입을 사용할 때 붙일 수 있다는 의미다.
+
+* (3) @Retention
+
+    * `@Retention` : 애노테이션이 유지(retention)되는 기간을 지정할 때 사용한다.
+    
+        |     유지 정책     |                    의미                 |
+        |:----------------|:---------------------------------------|
+        | SOURCE          | 소스 파일에만 존재. 클래스 파일에는 존재하지 않음  |
+        | CLASS           | 클래스 파일에 존재. 실행 시에 사용 불가. 기본 값  |
+        | RUNTIME         | 클래스 파일에 존재. 실행 시에 사용 가능         |
+
+        * `SOURCE` : 소스 코드까지만 유지된다.
         
-        * CONSTRUCTOR는 생성자를 선언할 때 붙일 수 있다는 의미다.
+            * 즉, 컴파일 하면 해당 애노테이션 정보는 사라진다.
         
-        * TYPE_USE는 타입이 사용되는 모든 곳에 붙일 수 있다는 의미다.
+        * `CLASS` : 컴파일까지 유지된다. (컴파일을 한 .class 파일에도 유지)
+        
+            * 런타임 시, 클래스를 메모리로 읽어오면 해당 애노테이션 정보는 사라진다.
+        
+        * `RUNTIME` : 런타임까지 유지된다.
+        
+            * 애플리케이션 구동 중에도 애노테이션 정보가 유지되도록 할 때 사용한다.
+            
+            * 실행 시에 리플렉션을 통해 클래스 파일에 저장된 애노테이션의 정보를 읽어서 처리 할 수 있다.
 
-* @Retention
+    * 예시
 
-    * @Retention은 애노테이션이 유지(retention)되는 기간을 지정하는데 사용된다.
+        * 컴파일러에 의해 사용되는 애노테이션의 유지 정책은 SOURCE이다.
+        
+            ```java
+            @Target(ElementType.METHOD)
+            @Retention(RetentionPolicy.SOURCE)
+            public @interface Override {}
+            ```
     
-      |     유지 정책     |                    의미                 |
-      |:----------------|:---------------------------------------|
-      | SOURCE          | 소스 파일에만 존재. 클래스 파일에는 존재하지 않음  |
-      | CLASS           | 클래스 파일에 존재. 실행 시에 사용 불가. 기본 값  |
-      | RUNTIME         | 클래스 파일에 존재. 실행 시에 사용 가능         |
-
-    * 컴파일러에 의해 사용되는 애노테이션의 유지 정책은 SOURCE이다.
+        * 실행 시에 사용 가능한 애노테이션의 정책은 RUNTIME이다.
+        
+            ```java
+            @Documented
+            @Retention(RetentionPolicy.RUNTIME)
+            @Target(ElementType.TYPE)
+            public @interface FunctionalInterface {}
+            ```
     
-        ```java
-        @Target(ElementType.METHOD)
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface Override {}
-        ```
+* (4) @Documented
 
-    * 실행 시에 사용 가능한 애노테이션의 정책은 RUNTIME이다.
+    * `@Documented` : 애노테이션에 대한 정보가 javadoc으로 작성한 문서에 포함되도록 한다.
 
         ```java
         @Documented
@@ -7748,78 +7895,73 @@ int[][] arr = {
         public @interface FunctionalInterface {}
         ```
 
-        * 유지 정책을 RUNTIME으로 하면, 실행 시에 리플렉션을 통해 클래스 파일에 저장된 애노테이션의 정보를 읽어서 처리할 수 있다.
+* (5) @Inherited
 
-* @Documented
-
-    * @Documented는 애노테이션에 대한 정보가 javadoc으로 작성한 문서에 포함되도록 한다.
-
-        ```java
-        @Documented
-        @Retention(RetentionPolicy.RUNTIME)
-        @Target(ElementType.TYPE)
-        public @interface FunctionalInterface {}
-        ```
-
-* @Inherited
-
-    * @Inherited는 애노테이션이 자손 클래스에 상속 되도록 한다.
+    * `@Inherited` : 애노테이션이 자손 클래스에 상속 되도록 한다.
     
-    * @Inherited가 붙은 애노테이션을 조상 클래스에 붙이면, 자손 클래스도 이 애노테이션이 붙은 것과 같이 인식된다.
-
-        ```java
-        @Inherited // @SupperAnno가 자손까지 영향 미치게
-        @interface SupperAnno {}
-        
-        @SuperAnno
-        class Parent {}
-        
-        class Child extends Parent {} // Child에 애노테이션이 붙은 것으로 인식한다.
-        ```
-
-* @Repeatable
-
-    * @Repeatable는 반복해서 붙일 수 있는 애노테이션을 정의할 때 사용한다.
+        * `@Inherited`가 붙은 애노테이션을 조상 클래스에 붙이면, 자손 클래스도 이 애노테이션이 붙은 것과 같이 인식된다.
     
-        ```java
-        @interface ToDos{ // 여러 개의 ToDo 애노테이션을 담을 컨테이너 애노테이션 ToDos
-            ToDo[] value(); // ToDo 애노테이션 배열 타입의 요소를 선언. 이름이 반드시 value 이어야 함 
-        }
-        
-        // ToDo 애노테이션을 여러 번 반복해서 쓸 수 있게 한다.
-        @Repeatable(ToDos.class) // 괄호 안에 컨테이너 애노테이션을 지정해 줘야한다.
-        @interface ToDo {
-            String value();
-        }
-        ```
+            ```java
+            @Inherited // @SupperAnno가 자손까지 영향 미치게
+            @interface SupperAnno {}
+            
+            @SuperAnno
+            class Parent {}
+            
+            class Child extends Parent {} // Child에 애노테이션이 붙은 것으로 인식한다.
+            ```
 
-    * @Repeatable이 붙은 애너테이션은 반복해서 붙일 수 있다.
+* (6) @Repeatable 
 
-        ```java
-        @ToDo("delete test codes.")
-        @ToDo("override inherited methods")
-        class MyClass {
-            ...
-        }
-        ```
+    * `@Repeatable` : 반복해서 붙일 수 있는 애노테이션을 정의할 때 사용한다.
 
-* @Native
+        * ① 반복해서 붙일 수 있는 애노테이션을 정의한다.  
 
-    * @Native는 native 메서드에 의해 참조되는 상수에 붙이는 애노테이션이다.
+            ```java
+            // ToDo 애노테이션을 여러 번 반복해서 쓸 수 있게 한다.
+            @Repeatable(ToDos.class) // 괄호 안에 컨테이너 애노테이션을 지정해 줘야한다.
+            @interface ToDo {
+                String value();
+            }
+            ```
+
+        * ② `@Repeatable`인 @ToDo를 하나로 묶을 컨테이너 애노테이션을 정의해야 한다. 
+
+            ```java
+            @interface ToDos{ // 여러 개의 ToDo 애노테이션을 담을 컨테이너 애노테이션 ToDos
+                ToDo[] value(); // ToDo 애노테이션 배열 타입의 요소를 선언한다. 이름이 반드시 value 이어야 함 
+            }
+            ```
+
+    * 예시 
+
+        * `@Repeatable`이 붙은 애노테이션은 반복해서 붙일 수 있다.
+    
+            ```java
+            @ToDo("delete test codes.")
+            @ToDo("override inherited methods")
+            class MyClass {
+                //...
+            }
+            ```
+
+* (7) @Native
+
+    * `@Native` : native 메서드에 의해 참조되는 상수에 붙이는 애노테이션이다.
 
         ```java
         @Native public static final long MIN_VALUE = 0x8000000000000000L;
         ```
 
-    * 네이티브 메서드는 JVM이 설치된 OS의 메서드를 말한다.
-    
-    * 네이티브 메서드는 보통 C 언어로 작성되어 있는데, 자바에서는 메서드의 선언부만 정의하고 구현은 하지 않는다.
-    
-    * 자바에 정의된 네이티브 메서드와 OS의 메서드를 연결해주는 작업은 JNI(Java Native Interface)가 담당한다.
+        * `네이티브 메서드`는 JVM이 설치된 OS의 메서드를 말한다.
+        
+            * 네이티브 메서드는 보통 C 언어로 작성되어 있는데, 자바에서는 메서드의 선언부만 정의하고 구현은 하지 않는다.
+            
+            * 자바에 정의된 네이티브 메서드와 OS의 메서드를 연결해주는 작업은 JNI(Java Native Interface)가 담당한다.
 
 #### 4) 애노테이션 타입 정의하기
 
-* 새로운 애노테이션을 정의하는 방법
+* (1) 새로운 애노테이션을 정의하는 방법
 
     ```java
     @interface 애노테이션이름{
@@ -7828,58 +7970,57 @@ int[][] arr = {
     }
     ```
 
-* 애노테이션의 요소
+* (2) 애노테이션의 요소(element)
 
-    * 애노테이션의 요소(element)는 애노테이션 내에 선언된 메서드를 말한다.
+    * `애노테이션의 요소` : 애노테이션 내에 선언된 추상 메서드를 말한다.
+
+    * 예시 
+
+        * 아래에 선언된 TestInfo 애노테이션은 다섯 개의 요소를 갖는다.
     
-    * 아래에 선언된 TestInfo 애노테이션은 다섯 개의 요소를 갖는다.
-
-        ```java
-        @interface TestInfo {
-            int       count();
-            String    testedBy();
-            String[]  testTools();
-            TestType  testType(); // enum TestType { FIRST , FINAL }
-            DateTime  testDate(); // 자신이 아닌 다른 애노테이션(@DateTime)을 포함 할 수 있다.
-        }
-        
-        @interface DateTime {
-            String yymmdd();
-            String hhmmss();
-        }
-        ```
-
-    * 애노테이션의 요소는 반환 값이 있고, 매개 변수는 없는 추상 메서드의 형태를 가진다.
-
-        * 그리고 애노테이션을 적용할 때 이 요소들의 값을 모두 지정 해야 한다.
+            ```java
+            @interface TestInfo {
+                int       count();
+                String    testedBy();
+                String[]  testTools();
+                TestType  testType(); // enum TestType { FIRST , FINAL }
+                DateTime  testDate(); // 자신이 아닌 다른 애노테이션(@DateTime)을 포함 할 수 있다.
+            }
+            
+            @interface DateTime {
+                String yymmdd();
+                String hhmmss();
+            }
+            ```
     
-        * (요소의 이름도 같이 적어주므로 순서는 상관 없다.)
-
+            * 애노테이션의 요소는 반환 값이 있고, 매개변수는 없는 추상 메서드의 형태를 가진다.
+    
+        * 그리고 애노테이션을 적용할 때, 이 요소들의 값을 모두 지정해야 한다. 요소의 이름도 같이 적어주므로 순서는 상관없다.
+    
             ```java
             @TestInfo(
                 count = 3, testedBy ="Kim",
                 testTools = {"JUnit", "AutoTester"},
                 testType = TestType.FIRST,
                 testDate = @DateTime(yymmdd = "160101", hhmmss = "235959")
-            }
-            public class NewClass { . . . }
+            )
+            public class NewClass { ... }
             ```
 
-* 애노테이션 요소의 기본 값
+* (3) 애노테이션 요소의 기본 값
 
-    * 애노테이션을 적용 시 값을 지정하지 않으면, 사용 될 수 있는 요소의 기본 값을 지정 할 수 있다. (기본 값으로 null은 사용 불가)
+    * 애노테이션의 값을 지정하지 않을 때 사용되는 기본 값을 지정 할 수 있다. (기본 값으로 null은 사용 불가)
     
         ```java
         @interface TestInfo {
             int count() default 1;
-        
         }
         
         @TestInfo // @TestInfo(count = 1)과 동일 
         public class NewClass { ... }
         ```
 
-    * 애노테이션의 요소가 하나이고 이름이 value인 경우,  애노테이션을 적용할 때 요소의 이름을 생략 하고 값만 적어도 된다.
+    * 애노테이션의 요소가 하나이고 이름이 value인 경우, 애노테이션을 적용할 때 요소의 이름을 생략하고 값만 적어도 된다.
 
         ```java
         @interface TestInfo {
@@ -7890,35 +8031,34 @@ int[][] arr = {
         public class NewClass { ... }
         ```
 
-    * 요소의 타입이 배열인 경우, 중괄호 {}를 사용해서 여러 개의 값을 지정할 수 있다.
+    * 요소의 타입이 배열인 경우, 중괄호 `{}`를 사용해서 여러 개의 값을 지정 할 수 있다.
 
         ```java
         @interface TestInfo {
             String[] testTools();
         }
         
-        @TestInfo(testTools = {"JUnit", "AutoTester"}) // 값이 여러 개 인 경우
-        @TestInfo(testTools = "JUnit") // 값이 하나일 때는 괄호 {} 생략 가능
-        @TestInfo(testTools = {}) // 값이 없을 때는 괄호 {}가 반드시 필요
+        //@TestInfo(testTools = {"JUnit", "AutoTester"}) // 값이 여러 개 인 경우
+        //@TestInfo(testTools = "JUnit") // 값이 하나일 때는 중괄호 {} 생략 가능
+        @TestInfo(testTools = {}) // 값이 없을 때는 중괄호 {}가 반드시 필요하다
         class NewClass { ... }
         ```
 
-    * 기본 값을 지정할 때도 괄호{}를 사용할 수 있다.
+    * 기본 값을 지정할 때도 중괄호 `{}`를 사용할 수 있다.
     
         ```java
         @interface TestInfo {
-            String[] info() default {"aaa", "bbb"}; // 기본 값이 여러 개인 경우, 괄호 {} 사용
-            String[] info2() default "ccc"; // 기본 값이 하나 인 경우, 괄호 생략 가능
+            String[] info() default {"aaa", "bbb"}; // 기본 값이 여러 개인 경우, 중괄호 {}를 사용한다.
+            String[] info2() default "ccc"; // 기본 값이 하나 인 경우, 중괄호 {} 생략 가능하다. 
         }
         
         @TestInfo // @TestInfo (info={"aaa", "bbb"}, info2="ccc")와 동일 
-        @TestInfo(info2={}) // @TestInfo (info={"aaa", "bbb"}, info2={})와 동일 
         class NewClass { ... }
         ```
 
-* java.lang.annotation.Annotation
+* (4) java.lang.annotation.Annotation
 
-    * Annotation은 모든 애노테이션의 조상이지만 상속은 불가능하다.
+    * `Annotation` : 모든 애노테이션의 조상이다. 
 
         ```java
         @interface TestInfo extends Annotation { // 에러. 허용되지 않는 표현
@@ -7928,38 +8068,40 @@ int[][] arr = {
         }
         ```
       
-    * 사실, Annotation은 인터페이스로 정의되어 있다.
+        * `Annotation` 인터페이스는 모든 애노테이션의 조상이지만 직접 조상으로 지정해서 상속하는 것은 불가능하다.
+    
+        * `Annotation` 인터페이스에는 `equals()`, `hashCode()`, `toString()`과 같은 메소드가 정의되어 있기 때문에 모든 애노테이션은 이러한 메소드를 호출 할 수 있다. 
 
-* 마커 애노테이션 (Marker Anntation)
+* (5) 마커 애노테이션 (Marker Anntation)
 
-    * 마커 애노테이션은 요소가 하나도 정의되지 않은 애노테이션이다.
+    * `마커 애노테이션` : 요소가 하나도 정의되지 않은 애노테이션이다.
 
         ```java
         @Target(ElementType.METHOD)
         @Retention(RetentionPolicy.SOURCE)
         public @interface Override {} // 마커 애노테이션. 정의된 요소가 하나도 없다.
         ```
-
-* 애노테이션 요소의 규칙
+      
+* (6) 애노테이션 요소의 규칙
 
     * 애노테이션의 요소를 선언할 때 지켜야 하는 규칙은 다음과 같다.
 
         * ① 요소의 타입은 기본형, String, enum, 애노테이션, Class만 허용된다.
         
-        * ② 괄호() 안에 매개변수를 선언할 수 없다.
+        * ② 괄호 () 안에 매개변수를 선언 할 수 없다.
         
-        * ③ 예외를 선언할 수 없다.
+        * ③ 예외를 선언 할 수 없다.
         
-        * ④ 요소를 타입 매개변수로 정의할 수 없다.
+        * ④ 요소를 타입 매개변수로 정의 할 수 없다.
 
-    * 아래 예시를 참고하자.
+    * 아래의 코드에서 잘못된 부분을 찾아보자.  
 
         ```java
         @interface AnnTest {
             int id = 100;                    // OK. 상수 선언. static final int id = 100;
-            String major(int i, int j);      // 에러. 매개변수를 선언할 수 없음
-            String minor() Throws Exception; // 에러. 예외를 선언할 수 없음
-            ArrayList<T> list();             // 에러. 요소의 타입에 타입 매개변수 사용 불가
+            String major(int i, int j);      // 에러. 매개변수를 선언 할 수 없다.
+            String minor() Throws Exception; // 에러. 예외를 선언 할 수 없다.
+            ArrayList<T> list();             // 에러. 요소의 타입에 타입 매개변수를 사용 할 수 없다.
         }
         ```
 
