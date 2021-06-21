@@ -3264,51 +3264,51 @@ int[][] arr = {
 
             * 같은 클래스에 정의된 멤버들끼리는 서로 자유롭게 접근하고 외부에서는 메서드를 통해서만 멤버 변수에 접근 할 수 있는 구조로 만드는 것
 
-                    ```java
-                    public class TimeTest {
-                        public static void main(String[] args)
-                        {
-                            Time t = new Time(12, 35, 30);
-                            System.out.println(t);
-                    //          t.hour = 13;
-                            t.setHour(t.getHour()+1);   // 현재 시간보다 1 시간 후로 변경한다.
-                            System.out.println(t);      // System.out.println(t.toString());과 같다.
-                        }
+                ```java
+                public class TimeTest {
+                    public static void main(String[] args)
+                    {
+                        Time t = new Time(12, 35, 30);
+                        System.out.println(t);
+                //          t.hour = 13;
+                        t.setHour(t.getHour()+1);   // 현재 시간보다 1 시간 후로 변경한다.
+                        System.out.println(t);      // System.out.println(t.toString());과 같다.
                     }
-                    
-                    class Time {
-                        private int hour;
-                        private int minute;
-                        private int second;
-                    
-                        Time(int hour, int minute, int second) {
-                            setHour(hour);
-                            setMinute(minute);
-                            setSecond(second);
-                        }
-                    
-                        public int getHour() { return hour; }
-                        public void setHour(int hour) {
-                            if (hour < 0 || hour > 23) return;
-                            this.hour = hour;
-                        }
-                        public int getMinute() { return minute; }
-                        public void setMinute(int minute) {
-                            if (minute < 0 || minute > 59) return;
-                            this.minute = minute;
-                        }
-                        public int getSecond() { return second; }
-                        public void setSecond(int second) {
-                            if (second < 0 || second > 59) return;
-                            this.second = second;
-                        }
-                        public String toString() {
-                            return hour + ":" + minute + ":" + second;
-                        }
+                }
+                
+                class Time {
+                    private int hour;
+                    private int minute;
+                    private int second;
+                
+                    Time(int hour, int minute, int second) {
+                        setHour(hour);
+                        setMinute(minute);
+                        setSecond(second);
                     }
-                    ```
+                
+                    public int getHour() { return hour; }
+                    public void setHour(int hour) {
+                        if (hour < 0 || hour > 23) return;
+                        this.hour = hour;
+                    }
+                    public int getMinute() { return minute; }
+                    public void setMinute(int minute) {
+                        if (minute < 0 || minute > 59) return;
+                        this.minute = minute;
+                    }
+                    public int getSecond() { return second; }
+                    public void setSecond(int second) {
+                        if (second < 0 || second > 59) return;
+                        this.second = second;
+                    }
+                    public String toString() {
+                        return hour + ":" + minute + ":" + second;
+                    }
+                }
+                ```
 
-                    * println()로 참조 변수를 출력하는 것은 참조 변수가 가리키는 인스턴스의 toString() 메서드를 호출하는 것과 같다.
+                * println()로 참조 변수를 출력하는 것은 참조 변수가 가리키는 인스턴스의 toString() 메서드를 호출하는 것과 같다.
 
     * 생성자의 접근 제어자
 
@@ -8111,29 +8111,31 @@ int[][] arr = {
 
 * 프로세스와 스레드
 
-    * `프로세스` : 실행 중인 프로그램
+    * `프로세스` : 실행 중인 프로그램이다. 
     
         * 자원(메모리, CPU ...)과 스레드로 구성되어 있다. 
     
-    * `스레드` : 프로세스 내에서 실제 작업을 수행한다.
+    * `스레드` : 프로세스 내에서 실제 작업을 수행하는 것이다. 
     
         * 모든 프로세스는 최소한 하나의 스레드를 가지고 있다.
         
             * `프로세스`는 공장, `스레드`는 일꾼에 비유 할 수 있다.
         
             * Ex) 싱글 스레드 프로세스, 멀티 스레드 프로세스
+
+    * 싱글 스레드 프로세스 vs 멀티 스레드 프로세스
+    
+        * `싱글 스레드 프로세스` : 1개의 프로세스 내에 스레드가 1개 있다. 
         
+        * `멀티 스레드 프로세스` : 1개의 프로세스 내에 스레드가 여러 개 있다. 
+
     * 하나의 새로운 프로세스를 생성하는 것 보다 하나의 새로운 스레드를 생성하는 것이 더 적은 비용이 든다.
     
         * `2 프로세스 1 스레드` vs `1 프로세스 2 스레드`
+    
+            * 싱글 스레드 프로세스를 2개 만들기 vs 멀티 스레드 프로세스에서 스레드를 2개 만들기  
         
-            * 싱글 스레드 프로세스가 2개 vs 멀티 스레드 프로세스가 1개이며 대신 스레드가 2개 
-        
-            * 둘 다 실제 작업을 수행하는 스레드는 2개이며 `1 프로세스 2 스레드`가 더 적은 비용이 든다. 
-        
-        * `CGI` 방식은 클라이언트의 요청이 있을 때 마다 프로세스를 만드는 방식 이었으며 `Java Servlet`은 하나의 프로세스에 클라이언트의 요청이 있을 때 마다 스레드를 만드는 방식이다.
-
-            * 자바는 멀티 스레드를 지원한다. 
+            * 둘 다 실제 작업을 수행하는 스레드는 2개지만 `1 프로세스 2 스레드`가 더 적은 비용이 든다. 
 
 #### 2) 멀티 스레드의 장단점
 
@@ -8143,77 +8145,71 @@ int[][] arr = {
 
     * 장점
     
-        * 시스템 자원을 보다 **효율적**으로 사용 할 수 있다.
+        * ① 시스템 자원을 보다 **효율적**으로 사용 할 수 있다.
     
-        * 사용자에 대한 **응답성**이 향상된다.
+        * ② 사용자에 대한 **응답성**이 향상된다.
         
             * 메신저 프로그램에서 파일을 전송하면서 대화를 할 수 있다. (싱글 스레드에서는 한 번에 한 가지 일만 할 수 있음)
     
-        * 작업이 분리되어 **코드가 간결**해 진다.
+        * ③ 작업이 분리되어 **코드가 간결**해 진다.
         
-        * 즉, "여러 모로 좋다."
+            * 즉, "여러 모로 좋다."
         
     * 단점
     
-        * `동기화(Synchronization)`에 주의해야 한다.
+        * ① `동기화(Synchronization)`에 주의해야 한다.
         
-        * `교착 상태(dead-lock)`가 발생하지 않도록 주의해야 한다.
+        * ② `교착 상태(dead-lock)`가 발생하지 않도록 주의해야 한다.
         
-        * 각 스레드가 효율적으로 고르게 실행될 수 있게 해야 한다.
+        * ③ 각 스레드가 효율적으로 고르게 실행될 수 있게 해야 한다.
         
-        * 즉, "프로그래밍을 할 때, 고려해야 할 사항들이 많다."
-    
+            * 즉, "프로그래밍을 할 때, 고려해야 할 사항들이 많다."
+
 #### 3) 스레드의 구현과 실행
 
 * (1) 스레드를 구현하는 방법은 다음 두 가지가 존재한다.
 
     * ① **`Thread` 클래스를 상속**해서 스레드를 구현하는 것
-    
-        ```java
-        class MyThread extends Thread{
-          public void run(){ // Thread 클래스의 run()을 오버라이딩
-              /* 스레드가 수행할 작업을 작성한다. */
-          }
-        }
-        ```
-      
-        * Thread 클래스를 상속 받으면 다른 클래스를 상속 받을 수 없으므로 인터페이스를 구현하는 것이 좋다. 
-    
-    * ② **`Runnable` 인터페이스를 구현**해서 스레드를 구현하는 것
-    
-        ```java
-        class MyThread implements Runnable{
-          public void run(){ // Runnable 인터페이스의 추상 메서드 run()을 구현 
-              /* 스레드가 수행할 작업을 작성한다. */
-          }
-        }
-        ```
 
-* (2) 스레드 생성 및 실행
+        * Thread 클래스를 상속받은 클래스를 작성한다. 
 
-    * ① `Thread` 클래스를 상속하는 경우
+            ```java
+            class MyThread extends Thread{
+              public void run(){ // Thread 클래스의 run()을 오버라이딩
+                  /* 스레드가 수행할 작업을 작성한다. */
+              }
+            }
+            ```
+          
+            * Thread 클래스를 상속 받으면 다른 클래스를 상속 받을 수 없으므로 Runnable 인터페이스를 구현하는 것이 좋다. 
     
-        * Thread의 자손 클래스의 인스턴스를 생성한 다음, 해당 스레드를 실행한다.
-    
+        * 앞서 작성한 클래스의 인스턴스를 생성한 다음, 해당 스레드를 실행한다.
+        
             ```java
             MyThread t1 = new MyThread();
             t1.start();
             ```
 
-    * ② `Runnable` 인터페이스를 구현하는 경우
+    * ② **`Runnable` 인터페이스를 구현**해서 스레드를 구현하는 것
 
-        * Runnable 인터페이스를 구현한 클래스의 인스턴스를 생성한 다음, 이 인스턴스를 Thread 클래스의 생성자의 매개변수로 제공한다. 
-        
-        * 그리고 해당 스레드를 실행한다.
-           
+        * Runnable 인터페이스를 구현한 클래스를 작성한다.
+
             ```java
-            Runnable r = new MyThread2();
-            Thread t2 = new Thread(r); // Thread(Runnable r)
-            // Thread t2 = new Thread(new MyThread2());
-            t2.start();
+            class MyThread2 implements Runnable{
+              public void run(){ // Runnable 인터페이스의 추상 메서드 run()을 구현 
+                  /* 스레드가 수행할 작업을 작성한다. */
+              }
+            }
             ```
 
-* (3) 실습 - 스레드 생성 및 실행
+        * 앞서 작성한 클래스의 인스턴스로 Thread 인스턴스를 만든 다음, 해당 스레드를 실행한다.
+
+            ```java
+            Thread t2 = new Thread(new MyThread2()); // Thread(Runnable r)
+            t2.start();
+            ```
+          
+* (2) 스레드 생성 및 실행
 
     ```java
     public class Ex13_1 {
@@ -8240,20 +8236,19 @@ int[][] arr = {
     class ThreadEx1_2 implements Runnable{ // Runnable 인터페이스를 구현해서 스레드를 구현하는 것
         public void run(){ // 스레드가 수행 할 작업을 작성한다.
             for(int i = 0; i < 5; i++){
-                // Thread.currentThread() : 현재 실행중인 스레드를 반환한다.
                 System.out.println(Thread.currentThread().getName());
             }
         }
     }
     ```
   
-    * `currentThread()` : 현재 실행중인 스레드의 참조를 반환한다.
+    * `Thread.currentThread()` : 현재 실행중인 Thread를 반환한다.
     
-    * `getName()` : 스레드의 이름을 반환한다. 
+        * `getName()` : 스레드의 이름을 반환한다. 
 
-* (4) 스레드 실행 - start()
+* (3) 스레드 실행 - start()
 
-    * 스레드를 생성한 후에 `start()`를 호출해야 스레드가 작업을 시작한다.
+    * 스레드를 생성한 다음, `start()`를 호출해야 스레드가 작업을 시작한다.
     
         ```java
         ThreadEx1_1 t1 = new ThreadEx1_1(); // 스레드 t1를 생성한다.
@@ -8263,25 +8258,27 @@ int[][] arr = {
         t2.start();  // 스레드 t2를 실행시킨다.
         ```
 
-        * 스레드를 생성한 후에 `start()`를 호출한 것은 실행 가능한 상태가 된 것일 뿐, 즉시 실행되는 것이 아니다. 
+        * 스레드를 생성한 다음 `start()`를 호출한 것은 실행 가능한 상태가 된 것일 뿐, 즉시 실행되는 것이 아니다. 
         
-        * 스레드 t1를 먼저 `start()` 했다고 해서 반드시 먼저 실행되는 것은 아니다.
+        * t1의 `start()`를 먼저 호출 했다고 해서 반드시 먼저 실행되는 것은 아니다.
         
             * 스레드의 실행 순서는 운영체제(OS)의 스케줄러가 결정한다.
 
-* (5) start()와 run()
+* (4) start()와 run()
+
+    * `main()`에서 `run()`를 호출하는 것은 단순히 클래스에 선언된 메서드를 호출하는 것일 뿐이다. 
+
+    * `start()`는 새로운 호출 스택(call stack)을 생성한 다음에 `run()`를 호출해서 새로 생성된 호출 스택에 `run()`가 첫 번째로 올라가게 한다. 
+
+        * 즉, 스레드 마다 별도의 호출 스택을 갖게 된다.  
 
     * 자세한 내용은 자바의 정석 3판 p728 ~ p729를 참고하자.
-
-        * `start()`는 새로운 호출 스택(call stack)을 생성한다.
-        
-        * 그리고 `run()`를 호출해서 생성된 호출 스택에 `run()`가 첫 번째로 올라가게 한다. 
 
 #### 4) 싱글 스레드와 멀티 스레드, 스레드의 I/O 블락킹
 
 * (1) main 스레드
 
-    * `main 스레드`는 main 메서드의 코드를 수행하는 스레드
+    * `main 스레드`는 main 메서드의 코드를 수행하는 스레드다.
     
     * 스레드는 `사용자 스레드(일반 스레드)`와 `데몬 스레드` 두 종류가 있다.
     
@@ -8325,9 +8322,20 @@ int[][] arr = {
             }
         }
         ```
-      
-        * 멀티 스레드이므로 main 스레드 하나가 종료 되었다고 프로그램 전체가 종료되지는 않는다. 
 
+        * 다음 코드를 주석 처리하고 실행 해보자. 
+
+            ```java
+            try {
+                th1.join();	// main 스레드가 th1의 작업이 끝날 때까지 기다린다.
+                th2.join();	// main 스레드가 th2의 작업이 끝날 때까지 기다린다.
+            } catch(InterruptedException e) {}
+            ```
+
+            * 멀티 스레드이므로 main 스레드가 종료 되더라도 프로그램 전체가 종료되지는 않는다. 
+    
+            * 그 이유는 실행 중인 다른 스레드가 존재하기 때문이다. 
+    
 * (2) 싱글 스레드와 멀티 스레드
     
     * 싱글 스레드
@@ -8339,12 +8347,12 @@ int[][] arr = {
                 public static void main(String args[]) {
                     long startTime = System.currentTimeMillis();
             
-                    for(int i=0; i < 300; i++)
+                    for(int i=0; i < 300; i++) // 작업 A
                         System.out.printf("%s", new String("-"));
             
                     System.out.print("소요시간1:" +(System.currentTimeMillis()- startTime));
             
-                    for(int i=0; i < 300; i++)
+                    for(int i=0; i < 300; i++) // 작업 B
                         System.out.printf("%s", new String("|"));
             
                     System.out.print("소요시간2:"+(System.currentTimeMillis() - startTime));
@@ -8402,12 +8410,12 @@ int[][] arr = {
     
     * `I/O 블락킹(blocking)` : 입출력 시 작업이 중단되는 것을 말한다.
 
-        * 싱글 스레드
-        
+        * 싱글 스레드는 사용자로 부터 입력을 기다리는 구간에는 아무 일도 하지 않는다.
+
             ```java
             class Ex13_4 {
                 public static void main(String[] args) throws Exception {
-                    /* A 작업 */
+                    /* A 작업 : 사용자로 부터 입력을 받는다 */
                     String input = JOptionPane.showInputDialog("아무 값이나 입력하세요."); 
                     System.out.println("입력하신 값은 " + input + "입니다.");
             
@@ -8421,14 +8429,12 @@ int[][] arr = {
                 }
             }
             ```
-          
-            * 사용자로 부터 입력을 기다리는 구간에는 아무 일도 하지 않는다. 
             
-        * 멀티 스레드
+        * 멀티 스레드는 사용자로 부터 입력을 기다리는 구간에는 다른 스레드가 작업을 수행한다.
         
             ```java
             class Ex13_5 {
-                /* A 작업 */
+                /* A 작업 : 사용자로 부터 입력을 받는다 */
             	public static void main(String[] args) throws Exception { 
             		ThreadEx5_1 th1 = new ThreadEx5_1();
             		th1.start();
@@ -8450,70 +8456,70 @@ int[][] arr = {
             	} // run()
             }
             ```
-          
-            * 사용자로 부터 입력을 기다리는 구간에는 B 작업이 수행된다.
 
 #### 5) 스레드의 우선순위(priority of thread), 스레드 그룹(thread group)
 
-* (1) `스레드의 우선순위` : 스레드의 우선순위를 서로 다르게 지정해서 특정 스레드가 더 많은 작업시간을 갖도록 할 수 있다.
-    
-    * `void setPriority(int newPriority)` : 스레드의 우선순위를 지정한 값으로 변경한다.
-    
-    * `int getPriority()` : 스레드의 우선순위를 반환한다.
+* (1) `스레드의 우선순위` : 스레드의 우선순위를 서로 다르게 지정해서 특정 스레드가 더 많은 작업 시간을 갖도록 할 수 있다.
 
+    * `스레드의 우선순위` : 스레드의 우선순위를 서로 다르게 지정해서 특정 스레드가 더 많은 작업 시간을 갖도록 할 수 있다.
+
+        * `void setPriority(int newPriority)` : 스레드의 우선순위를 지정한 값으로 변경한다.
+        
+        * `int getPriority()` : 스레드의 우선순위를 반환한다.
+    
+            ```java
+            public static final int MAX_PRIORITY = 10 // 최대 우선 순위
+            public static final int MIN_PRIORITY = 1 // 최소 우선 순위
+            public static final int NORM_PRIORITY = 5 // 보통 우선 순위
+            ```
+          
+            * 스레드가 가질 수 있는 우선순위의 범위는 1 ~ 10이며 숫자가 높을수록 우선순위가 높다.
+            
+                * 사실, 스레드의 우선순위는 해당 스레드가 수행하는 작업이 중요하므로 더 우선적으로 수행 되었으면 좋겠다는 희망사항을 OS의 스케줄러에 전달하는 것일뿐이다.
+                
+                * 스레드에 높은 우선순위를 준다고 해서 무조건 더 많은 실행시 간을 갖게 될 것이라고 기대 할 수는 없다.
+                
+                    * 스레드에 높은 우선순위를 주면 더 많은 실행 시간을 갖게 되어 빨리 끝날 확률이 더 높아지긴 함
+            
+            * 스레드의 우선순위는 스레드를 생성한 스레드로 부터 상속 받는다.
+        
+    * 실습하기 
+    
         ```java
-        public static final int MAX_PRIORITY = 10 // 최대 우선 순위
-        public static final int MIN_PRIORITY = 1 // 최소 우선 순위
-        public static final int NORM_PRIORITY = 5 // 보통 우선 순위
+        class Ex13_6 {
+            public static void main(String args[]) {
+                ThreadEx6_1 th1 = new ThreadEx6_1();
+                ThreadEx6_2 th2 = new ThreadEx6_2();
+        
+                th2.setPriority(7);
+        
+                System.out.println("Priority of th1(-) : " + th1.getPriority());
+                System.out.println("Priority of th2(|) : " + th2.getPriority());
+                th1.start();
+                th2.start();
+            }
+        }
+        
+        class ThreadEx6_1 extends Thread {
+            public void run() {
+                for(int i=0; i < 300; i++) {
+                    System.out.print("-");
+                    for(int x=0; x < 10000000; x++); // 시간 지연용 for문
+                }
+            }
+        }
+        
+        class ThreadEx6_2 extends Thread {
+            public void run() {
+                for(int i=0; i < 300; i++) {
+                    System.out.print("|");
+                    for(int x=0; x < 10000000; x++); // 시간 지연용 for문
+                }
+            }
+        }
         ```
-      
-        * 스레드가 가질 수 있는 우선순위의 범위는 1 ~ 10이며 숫자가 높을수록 우선순위가 높다.
-        
-            * 사실, 스레드의 우선순위는 해당 스레드가 수행하는 작업이 중요하므로 더 우선적으로 수행 되었으면 좋겠다는 희망사항을 OS의 스케줄러에 전달하는 것일뿐이다.
-            
-            * 스레드에 높은 우선순위를 준다고 해서 무조건 더 많은 실행시 간을 갖게 될 것이라고 기대 할 수는 없다.
-            
-                * 스레드에 높은 우선순위를 주면 더 많은 실행 시간을 갖게 되어 빨리 끝날 확률이 더 높아지긴 함
-        
-        * 스레드의 우선순위는 스레드를 생성한 스레드로 부터 상속 받는다.
-        
-* (2) 실습 - 스레드의 우선순위
 
-    ```java
-    class Ex13_6 {
-        public static void main(String args[]) {
-            ThreadEx6_1 th1 = new ThreadEx6_1();
-            ThreadEx6_2 th2 = new ThreadEx6_2();
-    
-            th2.setPriority(7);
-    
-            System.out.println("Priority of th1(-) : " + th1.getPriority());
-            System.out.println("Priority of th2(|) : " + th2.getPriority());
-            th1.start();
-            th2.start();
-        }
-    }
-    
-    class ThreadEx6_1 extends Thread {
-        public void run() {
-            for(int i=0; i < 300; i++) {
-                System.out.print("-");
-                for(int x=0; x < 10000000; x++); // 시간 지연용 for문
-            }
-        }
-    }
-    
-    class ThreadEx6_2 extends Thread {
-        public void run() {
-            for(int i=0; i < 300; i++) {
-                System.out.print("|");
-                for(int x=0; x < 10000000; x++); // 시간 지연용 for문
-            }
-        }
-    }
-    ```
-
-* (3) 스레드 그룹(thread group)
+* (2) 스레드 그룹(thread group)
 
     * `스레드 그룹`은 서로 관련된 스레드를 그룹으로 묶어서 다루기 위한 것이다.
     
