@@ -2434,11 +2434,11 @@
 
 * (1) HTTP 메시지 컨버터란?
 
-    * `HTTP 메시지 컨버터`는 요청 본문에서 메시지를 읽어들이거나(`@RequestBody`), 응답 본문에 메시지를 작성할 때(`@ResponseBody`) 적용된다.
-    
-        * `@RequestBody`는 HTTP 요청 본문(body)에 있는 메시지를 `HTTP 메시지 컨버터`를 사용해서 객체로 변환한다.
+    * `HTTP 메시지 컨버터`는 HTTP 메시지 본문의 내용을 객체로 변환 (`@RequestBody`) 하거나 객체를 HTTP 메시지 본문에 입력(`@ResponseBody`)한다.
+
+        * `@RequestBody`는 HTTP 요청 본문(body)에 있는 내용을 `HTTP 메시지 컨버터`를 사용해서 객체로 변환한다.
         
-        * `@ResponseBody`는 HTTP 응답 본문(body)에 메시지를 작성할 때 사용한다.
+        * `@ResponseBody`는 HTTP 응답 본문(body)에 객체를 입력할 때 사용한다.
 
             ```java
             @Controller
@@ -4579,9 +4579,9 @@
 
 * (1) @ModelAttribute
 
-    * `@ModelAttribute`는 사용자가 요청 시 전달하는 값을 복합 타입 객체로 바인딩 할 때 사용한다.
-     
-        * 해당 애노테이션은 생략 할 수 있다. 하지만 헷갈릴 수 있기 때문에 생략하는 것은 권장 하고 싶지 않다.
+    * `@ModelAttribute`는 요청 매개변수(폼 데이터)를 받아서 복합 타입 객체로 바인딩 할 때 사용한다.
+
+          * 해당 애노테이션은 생략 할 수 있다. 하지만 헷갈릴 수 있기 때문에 생략하는 것은 권장 하고 싶지 않다.
     
         * `@ModelAttribute`를 사용하면 첫 번째 코드 블럭의 내용을 두 번째 코드 블럭처럼 변경 할 수 있다.
         

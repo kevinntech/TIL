@@ -33,7 +33,7 @@
 
 #### 1) 제어의 역전(IoC: Inversion of Control)
 
-* `제어의 역전(IoC)`은`의존성 주입(Dependency Injection)`이라고도 하며, **어떤 객체가 사용하는 의존 객체를 직접 만들어 사용하는게 아니라 주입 받아 사용하는 방법**을 말한다.
+* `제어의 역전(IoC)`은 `의존성 주입(Dependency Injection)`이라고도 하며, **어떤 객체가 사용하는 의존 객체를 직접 만들어 사용하는게 아니라 주입 받아 사용하는 방법**을 말한다.
 
 * 의존 객체를 직접 만들어 사용하는 예시는 다음과 같다.
 
@@ -75,7 +75,7 @@
 
 #### 3) 스프링 IoC 컨테이너
 
-* `스프링 IoC 컨테이너`는 빈 설정 파일로 부터 빈 정의를 읽어 들이고 빈을 생성한 다음, 제공하는 역할을 한다.
+* `스프링 IoC 컨테이너`는 빈 설정 파일로 부터 빈 정의를 읽어 들이고 빈을 생성한 다음, 제공(주입)하는 역할을 한다.
 
 * Annotation을 사용하여 POJO 객체를 Bean으로 등록하고 Bean으로 등록된 객체를 주입 받아서 사용한다.
 
@@ -165,10 +165,10 @@
         
 * 빈(Bean)을 사용하기
 
-    * 빈 설정 파일을 사용하는 `ApplicationContext`를 `ClassPathXmlApplicationContext` 클래스를 이용하여 만든 다음, Bean을 사용 할 수 있다.
+    * XML 빈 설정 파일을 사용하는 `ClassPathXmlApplicationContext`를 만든 다음, Bean을 사용 할 수 있다.
 
         ```java
-        Applicationcontext context = new ClassPathXmlApplicationContext("application.xml");
+        ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");
         ```
 
     * 해당 방법은 빈을 일일이 등록 해야 하기 때문에 번거롭다. 이러한 이유로 등장한 것이 `<context:component-scan>` 이다.
@@ -176,13 +176,14 @@
 ##### 2-2) `application.xml` 과 `<context:component-scan>` 태그를 활용한 빈 등록 
 
 * 빈 설정 파일(application.xml)에 `<context:component-scan>` 태그를 이용하면 `base-package`에서 부터
+  
 * `@Component`와 이를 확장한 애노테이션(`@Service`, `@Repository`, `@Controller`)을 스캔하여 해당 클래스를 빈으로 등록한다.
 
     ```html
     <context:component-scan base-package="me.whiteship.springapplicationcontext"/>
     ```
   
-* 그리고 `@Autowired` 애노테이션을 사용하여 빈을 주입 받을 수 있다.  즉, 컨테이너에서 빈을 꺼낼 수 있다.
+* 그리고 `@Autowired` 애노테이션을 사용해서 빈을 주입 받을 수 있다. 즉, 컨테이너에서 빈을 꺼낼 수 있다.
 
     ```java
     @Service
@@ -201,7 +202,7 @@
 
 * 빈 설정 파일을 xml이 아닌 Java로 만들 수 없을까? 라는 생각에 등장한 것이 바로 Java 설정 파일이다.
 
-* 방금 전까지 선언 했던 애노테이션(@Repository, @Service, @Autowird)을 모두 제거한다.
+* 방금 전까지 선언 했던 애노테이션(`@Repository`, `@Service`, `@Autowird`)을 모두 제거한다.
 
 * 그리고 `@Configuration`을 붙인 `ApplicationConfig` 클래스를 작성한다.
 
@@ -223,7 +224,7 @@
           
             * `@Configuration` : 스프링 IoC 컨테이너에게 해당 클래스가 빈 설정 파일이라는 것을 알려준다.
        
-            * `@Bean` : 메서드의 실행 결과로 반환되는 객체를 Bean으로 등록한다. (클래스에 `@Bean` 선언 불가능)
+            * `@Bean` : 메서드의 실행 결과로 반환되는 객체를 Bean으로 등록한다. (클래스에는 `@Bean` 선언 불가능)
             
                 * `@Configuration`이 선언된 클래스 내에 있는 메서드에 사용된다.
                 
@@ -242,14 +243,15 @@
                 public BookService bookService() {
                   BookService bookService = new BookService();
                   bookService.setBookRepositry(bookRepository());  // setter를 사용한 의존성 주입
-                   return bookService;
+          
+                  return bookService;
                 }
             }
             ```        
       
     * 빈(Bean)을 사용하기
     
-        * 빈 설정 파일을 사용하는 `ApplicationContext`를 `AnnotionConfigApplicationContext` 클래스를 이용하여 만든 다음, Bean을 사용 할 수 있다.
+        * Java 빈 설정 파일을 사용하는 `AnnotionConfigApplicationContext`를 만든 다음, Bean을 사용 할 수 있다.
         
             ```java
             ApplicationContext context = new AnnotationConfigApplicationContext(ApplicationConfig.class)
@@ -275,15 +277,15 @@
         
     * 빈(Bean)을 사용하기
     
-        * 빈 설정 파일을 사용하는 `ApplicationContext`를 `AnnotionConfigApplicationContext` 클래스를 이용하여 만든 다음, Bean을 사용 할 수 있다.
+        * Java 빈 설정 파일을 사용하는 `AnnotionConfigApplicationContext`를 만든 다음, Bean을 사용 할 수 있다.
 
 ##### 2-5) @SpringBootApplication  ★★★
 
-* `@SpringBootApplication`는 내부적으로 `@Configuration`과 `@ComponentScan` 애노테이션이 포함되어 있기 때문에
+* `@SpringBootApplication`는 내부적으로 `@Configuration`과 `@ComponentScan` 애노테이션을 포함하고 있다.
 
-* `@SpringBootApplication`이 붙어 있는 클래스 자체가 Bean 설정 파일이다.
+* 따라서 `@SpringBootApplication`이 붙어 있는 클래스 자체가 Bean 설정 파일이다.
 
-* 그래서 SpringBoot의 경우, ApplicationConfig 파일이 필요 없다.
+* 그러므로 SpringBoot의 경우, ApplicationConfig 파일이 필요 없다.
            
     ```java
     @SpringBootApplication
@@ -366,6 +368,8 @@
         }
         ```
       
+        * 생성자가 하나인 경우에는 `@Autowired`를 생략 할 수 있다. (스프링 4.3 부터) 
+      
     * 세터(setter)
   
       ```java
@@ -395,13 +399,13 @@
       
 #### 4) @Autowired에서 발생 할 수 있는 경우의 수
 
-* 해당 타입의 빈이 없는 경우 
+* 해당 타입의 빈이 없는 경우, 실패 
 
-* 해당 타입의 빈이 한 개인 경우  
+* **해당 타입의 빈이 한 개인 경우**  
 
 * 해당 타입의 빈이 여러 개인 경우
 
-    * 빈 이름으로 시도하여 같은 이름의 빈을 찾으면 해당 빈 사용 
+    * **빈 이름으로 시도하여 같은 이름의 빈을 찾으면 해당 빈 사용** 
 
     * 빈 이름으로 시도하여 같은 이름의 빈을 찾지 못하면 실패
 
@@ -425,15 +429,15 @@
 
 * 해결책으로는 다음 3가지가 존재한다.
 
-    * `@Primary` : 같은 타입의 빈이 여러 개 일 때, 우선 순위를 가지는 빈으로 지정하여 해당 빈이 주입 되도록 한다.
+    * ① `@Primary` : 같은 타입의 빈이 여러 개 일 때, 우선 순위를 가지는 빈으로 지정하여 해당 빈이 주입 되도록 한다.
 
         ```java
         @Repository
-         @Primary
-         public class KeesunBookRepository implements BookRepository{}
+        @Primary
+        public class KeesunBookRepository implements BookRepository{}
         ```
 
-    * `@Qualifier`
+    * ② `@Qualifier`
     
         * `@Qualifier`는 `@Autowired`와 함께 사용하며 빈의 이름이 같은 객체를 찾는다.
           
@@ -447,7 +451,7 @@
                  
         * `@Qualifier` 보다 좀 더 type-safe 한 `@Primary`를 사용하는 것을 권장한다. 
 
-    * `해당 타입의 모든 빈을 주입 받기`
+    * ③ `해당 타입의 모든 빈을 주입 받기`
     
         * 다음과 같이 List를 사용하면 해당 타입의 (BookRepository) 타입의 모든 빈을 주입 받을 수 있다.  
 
@@ -480,13 +484,13 @@
 
             * **생성자 주입**의 경우, 생성자를 호출하면서 의존 관계 주입도 한번에 처리된다. 
             
-            * `초기화 콜백`: 빈이 생성되고, 빈의 의존관계 주입이 완료된 후 호출
+            * `초기화 콜백`: 빈이 생성되고, 빈의 의존관계 주입이 완료된 이후에 호출된다.
             
-            * `소멸전 콜백`: 빈이 소멸되기 직전에 호출
+            * `소멸전 콜백`: 빈이 소멸되기 직전에 호출된다.
          
     * 빈 생명주기 콜백
     
-        * 초기화, 소멸 인터페이스(InitializingBean, DisposableBean)
+        * ① 초기화, 소멸 인터페이스(InitializingBean, DisposableBean)
 
             * `InitializingBean`은 `afterPropertiesSet()` 메서드로 초기화를 지원한다.
         
@@ -494,7 +498,7 @@
             
             * 인터페이스를 사용하는 초기화, 종료 방법은 스프링 초창기에 나온 방법들이고, 지금은 다음의 더 나은 방법들이 있어서 거의 사용하지 않는다.
             
-        * 설정 정보에 초기화 메서드, 종료 메서드를 지정
+        * ② 빈 설정 정보에 초기화 메서드, 소멸 메서드를 지정
         
             * 빈 설정 정보에 `@Bean(initMethod = "init", destroyMethod = "close")`처럼 초기화, 소멸 메서드를 지정할 수 있다.
 
@@ -531,9 +535,9 @@
                 }
                 ```
 
-        * `@PostConstruct`, `@PreDestory` 애노테이션
+        * ③ `@PostConstruct`, `@PreDestory` 애노테이션
         
-            * `@PostConstruct` : 빈이 생성되고, 빈의 의존관계 주입이 완료된 후 호출될 초기화 메소드에 적용한다.
+            * `@PostConstruct` : 빈이 생성되고, 의존관계 주입이 완료된 이후에 호출될 초기화 메소드에 적용한다.
         
             * `@PreDestroy` : 빈이 소멸되기 직전에 호출될 소멸 메소드에 적용한다.
     
@@ -564,13 +568,13 @@
 
 #### 3) 컴포넌트 스캔 대상 : @Component를 확장한 애노테이션
 
-* @Repository
+* `@Repository`
 
-* @Service
+* `@Service`
 
-* @Controller
+* `@Controller`
 
-* @Configuration
+* `@Configuration`
 
 ### 2-5. IoC 컨테이너 5부: 빈의 스코프(Scope)
 
@@ -578,9 +582,11 @@
 
 * `싱글톤`은 해당 Bean의 인스턴스를 단 한번만 생성한다. (기본 값)
 
-* `프로토타입`은 해당 Bean의 인스턴스를 매번 새롭게 생성한다. 
+* `프로토타입`은 해당 Bean의 인스턴스를 매번 새롭게 생성한다.
 
-* 프로토타입과 유사한 Scope는 Request, Session, WebSocket 등이 있다.
+    * 스프링 컨테이너에서 프로토타입 스코프의 빈을 조회하면 스프링 컨테이너는 항상 새로운 인스턴스를 생성해서 반환한다.
+
+    * 프로토타입과 유사한 Scope는 `Request`, `Session`, `WebSocket` 등이 있다.
 
 * `@Scope`는 빈의 범위를 지정한다.
 
@@ -644,7 +650,7 @@
 
 #### 3) 싱글톤과 프로토타입을 같이 사용 하는 경우, 발생할 수 있는 문제점 
 
-* 프로토타입 빈이 싱글톤 빈을 참조하는 경우
+* ① 프로토타입 빈이 싱글톤 빈을 참조하는 경우
 
     * 아무 문제가 없다.
     
@@ -652,7 +658,7 @@
           
         * 그 새로운 인스턴스가 참조하고 있는 싱글톤 Bean은 항상 동일하며 원래 의도한대로 사용되는 것이므로 문제가 없다.  
 
-* 싱글톤 빈이 프로토타입 빈을 참조하는 경우 
+* ② 싱글톤 빈이 프로토타입 빈을 참조하는 경우 
 
     * 문제가 발생함
     
@@ -681,15 +687,17 @@
       }
       ``` 
   
-  * 앞서 살펴본 문제점을 해결하는 방법은 @Scope 애노테이션을 사용할 때 proxyMode를 설정하는 것이다.
+  * 앞서 살펴본 문제점을 해결하는 방법은 `@Scope` 애노테이션을 사용할 때 `proxyMode`를 설정하는 것이다.
   
-    * scopedProxyMode.DEFAULT가 기본 값이며  이는 Proxy를 사용하지 않는다는 것을 의미한다.
+    * `scopedProxyMode.DEFAULT`가 기본 값이며 이는 Proxy를 사용하지 않는다는 것을 의미한다.
     
     * `proxyMode = ScopedProxyMode.TARGET_CLASS` → 해당 Bean을 클래스 기반의 Proxy로 감싸도록 한다. 
 
-    * Proxy로 감싸는 이유는 무엇일까?
-    
-        * 싱글톤 Bean이 프로토타입 Bean을 직접 참조하는 것이 아닌 Proxy를 거쳐서 참조 하도록 해야 프로토타입 Bean을 매번 새로운 인스턴스로 바꿔 줄 수 있다.
+        * Q. Proxy로 감싸는 이유는 무엇일까?
+
+            ![image 4](images/img4.png)
+        
+        * A. 싱글톤 Bean이 프로토타입 Bean을 직접 참조하는 것이 아닌 Proxy를 거쳐서 참조 하도록 해야 프로토타입 Bean을 매번 새로운 인스턴스로 바꿔 줄 수 있다.
 
           ```java
           @Component 
@@ -701,24 +709,27 @@
               
 #### 4) 싱글톤 객체 사용 시 주의할 점
 
-* 프로퍼티(필드)가 공유 되므로 thread-safe 할 것이라고 보장 받을 수 없음
+* 프로퍼티(필드)가 공유 되므로 thread-safe 할 것이라고 보장 받을 수 없다.
+  
     * 그러므로 thread-safe한 방법으로 코딩을 해야 한다.
     
-* 싱글톤 객체는 ApplicationContext 초기 구동 시 생성하게 된다.
+* ApplicationContext 초기 구동 시 싱글톤 인스턴스를 생성하게 된다.
 
 ### 2-6. IoC 컨테이너 6부: Environment 1부. 프로파일
          
-#### 1) Environment
+#### 1) EnvironmentCapable, Environment
 
-* `Environment`는 프로파일과 프로퍼티를 다루는 인터페이스이다. 
+* `EnvironmentCapable` 인터페이스는 `Environment`에 대한 참조를 제공한다.
 
     * `ApplicationContext extends EnvironmentCapable`
-    
-        * `ApplicationContext`는 `EnvironmentCapable` 인터페이스를 상속 받기 때문에
-        
-        * `ApplicationContext`의 `getEnvironment()`로 `Environment` 객체를 가져올 수 있다.
 
-* `Environment`를 이용하여 활성화 된 프로파일을 확인 하거나 프로파일을 설정 할 수 있다.
+        * `ApplicationContext`는 `EnvironmentCapable` 인터페이스를 상속 받기 때문에 `ApplicationContext`의 `getEnvironment()`로 `Environment` 객체를 가져올 수 있다.
+
+* `Environment`는 현재 애플리케이션이 실행중인 환경을 나타내는 인터페이스이다.
+  
+    * 프로파일과 프로퍼티를 다룰 때 사용한다. 
+    
+    * `Environment`를 이용하여 활성화 된 프로파일을 확인 하거나 프로파일을 설정 할 수 있다.
 
 #### 2) 프로파일(Profile)
 
@@ -805,7 +816,7 @@ public class AppRunner implements ApplicationRunner {
          
         * 그래서 BookRepository 빈도 등록되지 않았다.
 
-* 예시 2 - 빈 설정 파일이 아닌 해당 빈(Bean)에 바로 프로파일을 정의하기 
+* 예시 2 - 해당 빈(Bean)에 바로 프로파일을 정의하기 
 
     ```java
     @Repository
@@ -816,19 +827,19 @@ public class AppRunner implements ApplicationRunner {
 
 #### 5) 프로파일 설정하기
 
-* Active profiles 설정
+* ① Active profiles 설정
 
     * 인텔리제이에서 [Edit Configurations]를 클릭한다.
 
-    * `Active profiles`를 `test`로 지정한 다음, [Apply] – [OK]를 클릭 한다.
+    * `Active profiles`를 `test`로 지정한 다음, [Apply] – [OK]를 클릭한다.
 
-* VM Options 설정
+* ② VM Options 설정
 
     * [Edit Configurations]를 클릭한 다음, VM options를 `-Dspring.profiles.active="test"`로 지정하는 것도 가능하다.
 
     * 프로파일 설정을 완료하고 AppRunner를 다시 실행 하면 getActiveProfiles()가 test로 출력되는 것을 확인 할 수 있다.
 
-* `@ActiveProfiles`
+* ③ `@ActiveProfiles` : 테스트 시 활성화할 프로파일을 지정한다.
 
 #### 6) 프로파일 표현식
 
@@ -951,7 +962,7 @@ public class AppRunner implements ApplicationRunner {
 
 * (1) `resources` 디렉토리에 메시지 설정 파일을 생성한다.
 
-    * `[파일명]_[언어]_[국가].properties` 형식으로 메시지 설정 파일을 생성 해야한다.  
+    * `[파일명]_[언어]_[국가].properties` 형식으로 메시지 설정 파일을 생성해야 한다.  
     
         * `messages.properties` : 기본 메시지 설정 파일
             
@@ -1038,7 +1049,7 @@ public class AppRunner implements ApplicationRunner {
           
         * `setDefaultEncoding("UTF-8");` : 인코딩을 UTF-8로 설정한다. (한글이 깨지지 않도록 하기 위함)
           
-        * `setCacheSeconds()` : 메시지를 캐싱하는 최대 시간(초)를 설정한다. 
+        * `setCacheSeconds()` : 메시지를 캐싱하는 최대 시간(초)을 설정한다. 
 
     * ② 1초 마다 메시지를 읽어서 출력하도록 한다.
     
@@ -1170,7 +1181,7 @@ public class AppRunner implements ApplicationRunner {
         }
         ```
 
-        * 위의 코드는 스프링 코드가 노출되지 않는 POJO 기반의 프로그래밍이며 이는 개발자가 테스트 및 유지보수 하기 쉽게 만들어 준다.
+        * 위의 코드는 스프링 코드가 노출되지 않는 POJO 기반의 프로그래밍이며 이는 개발자가 테스트 및 유지보수 하기 쉽게 만들어준다.
 
         * `비침투성(non-invasive)` : 프레임워크의 코드가 자신의 코드에 노출되지 않는 것을 말한다.
         
@@ -1330,7 +1341,7 @@ public class AppRunner implements ApplicationRunner {
   
 * `ContextStoppedEvent` : ApplicationContext를 stop()하여 라이프 사이클 빈들이 정지 신호를 받은 시점에 발생. 
   
-* `ContextClosedEvent` : ApplicationContext를 close()하여 싱글톤 빈 소멸되는 시점에 발생. 
+* `ContextClosedEvent` : ApplicationContext를 close()하여 싱글톤 빈이 소멸되는 시점에 발생. 
   
 * `RequestHandledEvent` : HTTP 요청을 처리했을 때 발생. 
 
@@ -1471,7 +1482,7 @@ public class MyEventHandler{
 
 #### 4) 리소스 읽어오기
 
-* `Resource`의 타입은 리소스 위치를 지정하는 `location` 문자열과 `ApplicationContext`의 타입에 따라 결정된다.
+* **`Resource`의 타입은 리소스 위치를 지정하는 `location` 문자열과 `ApplicationContext`의 타입에 따라 결정된다.**
 
     * ApplicationContext가 `ClassPathXmlApplicationContext`이면 Resource의 타입은 `ClassPathResource`가 된다.
     
@@ -1595,9 +1606,7 @@ public class MyEventHandler{
         
         * `validate()`는 다음 메소드를 이용하여 구현한다.
         
-            * `ValidationUtils.rejectIfEmptyOrWhitespace()`
-            
-                * 객체의 필드가 비어있거나 공백일 경우에 에러 코드를 추가한다.  
+            * `ValidationUtils.rejectIfEmptyOrWhitespace()` : 객체의 필드가 비어있거나 공백일 경우에 에러 코드를 추가한다.  
                   
                 * 파라미터로는 Errors 객체, 필드명, 에러코드, 디폴트 메시지를 전달한다.
                   
@@ -1652,7 +1661,7 @@ public class MyEventHandler{
          
         * BeanPropertyBindingResult 클래스는 Errors 인터페이스의 구현체이며 객체에 대한 에러 정보를 담을 때 사용한다. 
         
-        * Spring MVC를 사용할 경우, BeanPropertyBindingResult는 Spring MVC가 자동으로 생성해서 파라미터에 전달하므로 해당 클래스를 직접 사용하는 경우는 거의 없다.
+        * Spring MVC를 사용할 경우, `BeanPropertyBindingResult`는 Spring MVC가 자동으로 생성해서 파라미터에 전달하므로 해당 클래스를 직접 사용하는 경우는 거의 없다.
           
 #### 4) LocalValidatorFactoryBean
 
@@ -1660,7 +1669,7 @@ public class MyEventHandler{
 
     * ① Validator 빈을 주입 받기
     
-         *  Validator를 직접 구현하지 않고 Validator 타입의 필드에 의존성 주입을 받으면 `LocalValidatorFactoryBean`이 주입된다.
+         * Validator를 직접 구현하지 않고 Validator 타입의 필드에 의존성 주입을 받으면 `LocalValidatorFactoryBean`이 주입된다.
 
             ```java
             @Component
@@ -1668,7 +1677,7 @@ public class MyEventHandler{
             
                 @Autowired
                 Validator validator;  // Validator 빈을 주입 받기
-                ...
+
             }
             ```
 
@@ -1676,7 +1685,7 @@ public class MyEventHandler{
                    
     * ② Bean Validation 애노테이션을 사용
     
-         * `LocalValidatorFactoryBean`는 `@NotEmpty`, `@Email`과 같은 Bean Validation 애노테이션을 체크하여 검증한다.
+         * `LocalValidatorFactoryBean`는 `@NotEmpty`, `@Email`과 같은 Bean Validation 애노테이션을 체크해서 검증한다.
          
             ```java
             public class Event {
@@ -1751,11 +1760,11 @@ public class MyEventHandler{
 
 #### 1) 데이터 바인딩
 
-* 데이터 바인딩이란?
+* `데이터 바인딩`이란?
 
-    * `[기술적인 관점]` 프로퍼티 값을 타겟 객체에 설정하는 기능을 말한다.
+    * [기술적인 관점] : 프로퍼티 값을 타겟 객체에 설정하는 기능을 말한다.
     
-    * `[사용자 관점]` 사용자가 입력한 값을 도메인 객체에 동적으로 변환해 넣어주는 기능을 말한다.
+    * [사용자 관점] : 사용자가 입력한 값을 도메인 객체에 동적으로 변환해 넣어주는 기능을 말한다.
 
     * 정리하자면, 사용자가 입력하는 값은 주로 문자열이며 그 값을 객체가 가지고 있는 다양한 프로퍼티 타입으로 변환해서 넣어주는 기능을 말한다.
 
@@ -1767,7 +1776,9 @@ public class MyEventHandler{
 
     * `PropertyEditor`는 스프링 3.0 이전까지 `DataBinder`가 변환 작업에 사용한 인터페이스이다.
     
-        * 상태 정보을 저장 하고 있어서 쓰레드-세이프 하지 않다. (서로 다른 쓰레드에게 value가 공유된다.)
+        * 상태 정보을 저장 하고 있어서 쓰레드-세이프 하지 않다. 
+          
+            * PropertyEditor가 가지고 있는 value가 서로 다른 쓰레드에게 공유된다.
     
         * 따라서 `PropertyEditor`는 싱글톤 scope 빈으로 등록해서 사용하면 안된다. 
     
@@ -1998,13 +2009,24 @@ public class MyEventHandler{
             }
         }
         ```
-  
-        * `parse()` : 문자열(String)을 객체(Object)로 변환한다. 
-    
-        * `print()` : 객체(Object)를 문자열(String)으로 변환한다.
+
+        * 주요 메소드
+
+            * `parse()` : 문자열(String)을 객체(Object)로 변환한다. 
         
-            * PropertyEditor와 차이점은 문자열을 Locale에 따라 다국화 하는 기능도 제공한다.
-              
+            * `print()` : 객체(Object)를 문자열(String)으로 변환한다.
+            
+                * PropertyEditor와 차이점은 문자열을 Locale에 따라 다국화 하는 기능도 제공한다.
+    
+        * 빈으로 등록 할 수 있다는 것은 다른 빈을 주입 받을 수 있다는 이야기다.
+    
+            * MessageSource를 주입 받아서 국제화 기능을 적용 할 수도 있다.
+
+                ```java
+                @Autowired
+                MessageSource messageSource;
+                ```
+
     * (2) 스프링 부트 없이 `Spring Web MVC`만 사용하는 경우에 Formatter 등록하기
                 
         * 스프링 웹 설정 파일(WebConfig)에서 `addFormatters()`를 오버라이딩 한 다음, `FormatterRegistry`의 `addFormatter()`로 포매터를 등록한다.
@@ -2021,15 +2043,17 @@ public class MyEventHandler{
 
 #### 3) ConversionService
 
-![image 2](images/img2.png)
+* `ConversionService`는 여러 `Converter`와 `Formatter`를 관리하며 변환 기능을 제공한다.
 
-* `Converter`와 `Formatter`는 `ConversionService`에 등록 되어 실제 변환 작업을 하게된다.
-
-    * [참고] `PropertyEditor`는 `DataBinder` 인터페이스를 통해 사용된다.
+    * 즉, `Converter`와 `Formatter`는 `ConversionService`에 등록 되어 실제 변환 작업을 하게된다.
+    
+        * [참고] `PropertyEditor`는 `DataBinder` 인터페이스를 통해 사용된다.
 
 * 스프링 MVC, 빈 (value) 설정, SpEL에서 사용한다.
 
 * 스프링이 제공하는 여러 가지 `ConversionService` 구현체 중 `DefaultFormattingConversionService`가 자주 사용된다.
+
+    ![image 2](images/img2.png)
 
     * 해당 클래스는 `ConversionService`와 `FormatterRegistry`를 구현하였다.
     
@@ -2039,7 +2063,7 @@ public class MyEventHandler{
 
 #### 4) 스프링 부트에서 Converter와 Formatter
 
-* 웹 애플리케이션인 경우에 `DefaultFormattingConversionSerivce`를 상속해서 만든 `WebConversionService`를 빈으로 등록해 준다.
+* 웹 애플리케이션인 경우에는 `DefaultFormattingConversionSerivce`를 상속해서 만든 `WebConversionService`를 빈으로 등록해 준다.
 
 * 스프링 부트를 사용하면 자동으로 `Converter`와 `Formatter` 빈을 찾아서 `ConversionService`에 등록해 준다.
 
@@ -2057,7 +2081,9 @@ public class MyEventHandler{
 
 * `#{"표현식"}`는 표현식을 평가(실행)한다.
 
-* 표현식 안에는 프로퍼티를 사용 할 수 있다. `#{${my.data} + 1}`는 가능
+* 표현식 안에는 프로퍼티를 사용 할 수 있다. 
+  
+    * `#{${my.data} + 1}`는 가능하다.
 
 ##### ② 프로퍼티 참조
 
@@ -2107,6 +2133,32 @@ public class MyEventHandler{
         }
     }
     ```
+
+#### 4) SpEL가 사용되는 곳 
+
+* `@Value` 애노테이션
+
+* `@ConditionalOnExpression` 애노테이션
+
+* 스프링 시큐리티
+
+    * 메소드 시큐리티, `@PreAuthorize`, `@PostAuthorize`, `@PreFilter`, `@PostFilter`
+
+    * XML 인터셉터 URL 설정
+
+    * ...
+    
+* 스프링 데이터 
+    
+    * @Query 애노테이션
+    
+        * 예시
+          
+            * `@Query("select u from User u where u.firstname = :#{#customer.firstname}")`
+
+            * `@Query("select u from User u where u.emailAddress = ?#{principal.emailAddress}")`
+
+* Thymeleaf
 
 ## 6. 스프링 AOP : 개념 소개
 

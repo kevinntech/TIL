@@ -1997,28 +1997,32 @@
 * (2) 테스트 코드 작성
 
     * `@SpringBootTest`
-    
-        * 스프링 부트의 통합 테스트 애노테이션이며 테스트에 필요한 모든 의존성을 제공한다.
 
-            * JUnit 4에서는 `@RunWith(SpringRunner.class)`와 같이 사용해야 한다.
-            
-            * JUnit 5에서는 `@SpringBootTest` 안에 `@ExtendWith(SpringExtension.class)`가 포함되어 때문에 생략 가능하다.
-        
-        * `webEnvironment`의 타입
-        
-            * `MOCK` : 내장 서블릿 컨테이너를 구동 하지 않고 서블릿 컨테이너를 Mocking 한 것을 실행한다. (기본 값)
-            
-                * `webEnvironment`가 Mock 타입이면 실제 서블릿 컨테이너를 구동 하지 않고 서블릿 컨테이너를 Mocking 한 것을 실행한다.
- 
-                * 이 때는 `MockMVC`라는 클라이언트를 사용해야 한다.
-            
-            * `RANDOM_PORT`, `DEFINED_PORT` : 내장 서블릿 컨테이너를 구동한다.
-            
-                * `webEnvironment`가 `RANDOM_PORT` 또는 `DEFINED_PORT` 타입이면 해당 포트로 내장 서블릿 컨테이너를 구동한다.
+        * `@SpringBootTest`는 Test용 ApplicationContext를 만든 다음, Spring Main Application(@SpringBootApplication)를 기준으로 하위의 모든 Bean을 스캔해서 등록한다.
+
+        * 그리고 `@MockBean`으로 정의된 빈만 Mock 객체로 교체한다.
+
+            * 즉, 스프링 부트의 통합 테스트 애노테이션이며 테스트에 필요한 모든 의존성을 제공한다.
+    
+                * JUnit 4에서는 `@RunWith(SpringRunner.class)`와 같이 사용해야 한다.
                 
-                * 이 때는 `MockMvc`가 아닌 `TestRestTemplate` 이나 `WebTestClient`라는 클라이언트를 사용해야 한다.
-                        
-            * `NONE` : 서블릿 환경을 제공하지 않는다.
+                * JUnit 5에서는 `@SpringBootTest` 안에 `@ExtendWith(SpringExtension.class)`가 포함되어 때문에 생략 가능하다.
+        
+    * `webEnvironment`의 타입
+    
+        * `MOCK` : 내장 서블릿 컨테이너를 구동 하지 않고 서블릿 컨테이너를 Mocking 한 것을 실행한다. (기본 값)
+        
+            * `webEnvironment`가 Mock 타입이면 실제 서블릿 컨테이너를 구동 하지 않고 서블릿 컨테이너를 Mocking 한 것을 실행한다.
+
+            * 이 때는 `MockMVC`라는 클라이언트를 사용해야 한다.
+        
+        * `RANDOM_PORT`, `DEFINED_PORT` : 내장 서블릿 컨테이너를 구동한다.
+        
+            * `webEnvironment`가 `RANDOM_PORT` 또는 `DEFINED_PORT` 타입이면 해당 포트로 내장 서블릿 컨테이너를 구동한다.
+            
+            * 이 때는 `MockMvc`가 아닌 `TestRestTemplate` 이나 `WebTestClient`라는 클라이언트를 사용해야 한다.
+                    
+        * `NONE` : 서블릿 환경을 제공하지 않는다.
 
     * `MockMvc` 사용
     
@@ -3714,3 +3718,262 @@
         * 또는 @SpringBootTest(properties = "spring.datasource.url={테스트DB URL}”)와 같이 할 수도 있다.
               
         * 슬라이싱 테스트를 만드는 것이 더 간단하고 안전하기 때문에 이 방법을 권장한다.
+
+#### 27) 스프링 REST 클라이언트 1부 : RestTemplate과 WebClient
+
+* (1) RestTemplate과 WebClient
+
+    * REST 클라이언트는 스프링 프레임워크가 제공하는 것이며 스프링 부트는 REST 클라이언트를 쉽게 사용할 수 있도록 Bean을 등록 해준다. (RestTemplateBuilder, WebClient.Builder)
+    
+    * 그래서 이 Builder를 주입 받은 다음, 필요할 때 마다 REST 클라이언트 인스턴스를 생성해서 사용해야 한다. 그리고 2가지 선택 사항이 존재한다.
+    
+        * ① RestTemplate
+        
+        * ② WebClient
+
+* (2) RestTemplate를 이용한 실습
+
+    * ① 프로젝트 생성하기
+
+    * ② 컨트롤러 작성
+    
+        * 핸들러를 2개 작성하는데 각각 응답을 보내기 전 5초, 3초 동안 쉬게 한다.
+        
+            ```java
+            @RestController
+            public class SampleController {
+            
+                @GetMapping("/hello")
+                public String hello() throws InterruptedException {
+                    Thread.sleep(5000l);
+                    return "hello";
+                }
+            
+                @GetMapping("/world")
+                public String world() throws InterruptedException {
+                    Thread.sleep(3000l);
+                    return "world";
+                }
+            
+            }
+            ```
+
+        * ③ REST API의 클라이언트 역할을 하는 RestRunner 클래스를 작성한다.
+
+            ```java
+            @Component
+            public class RestRunner implements ApplicationRunner {
+            
+                @Autowired
+                RestTemplateBuilder restTemplateBuilder;
+            
+                @Override
+                public void run(ApplicationArguments args) throws Exception {
+                    RestTemplate restTemplate = restTemplateBuilder.build();
+            
+                    // REST API의 시간 측정을 위해 StopWatch 생성
+                    StopWatch stopWatch = new StopWatch();
+                    stopWatch.start();
+            
+                    // TODO /hello
+                    // Blocking I/O 기반의 Synchrounous API : 해당 호출이 끝나기 전까지는 다음 라인으로 넘어가지 않는다.
+                    // 한 라인씩 순차적으로 실행 된다.
+                    String helloResult = restTemplate.getForObject("http://localhost:8080/hello", String.class);
+                    System.out.println(helloResult);
+            
+                    // TODO /world
+                    String worldResult = restTemplate.getForObject("http://localhost:8080/world", String.class);
+                    System.out.println(worldResult);
+            
+                    stopWatch.stop();
+                    System.out.println(stopWatch.prettyPrint());
+                }
+            
+            }
+            ```
+
+            * 해당 프로젝트에는 SPRING WEB 의존성을 추가 하였기 때문에 RestTemplate을 사용할 수 있다.
+
+            * 그 이유는 RestTemplateAutoConfiguration에서 확인 할 수 있다.
+    
+            * 그래서 `RestTemplateBuilder`를 주입 받을 수 있다.
+
+* (3) WebClient를 이용한 실습
+
+    * ① WebClient를 사용하기 위해서는 WebFlux 의존성을 추가해야 한다.
+
+        ```html
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        ```
+
+    * ② 컨트롤러 작성
+
+        * 코드를 다음과 같이 변경한다.
+
+            ```java
+            @Component
+            public class RestRunner implements ApplicationRunner {
+            
+                @Autowired
+                WebClient.Builder builder;
+            
+                @Override
+                public void run(ApplicationArguments args) throws Exception {
+                    WebClient webClient = builder.build();
+            
+                    // REST API의 시간 측정을 위해 StopWatch 생성
+                    StopWatch stopWatch = new StopWatch();
+                    stopWatch.start();
+            
+                    // TODO /hello
+                    Mono<String> helloMono = webClient.get().uri("http://localhost:8080/hello")
+                            .retrieve()
+                            .bodyToMono(String.class);
+                    helloMono.subscribe(s -> {
+                        System.out.println(s);
+            
+                        if(stopWatch.isRunning()){
+                            stopWatch.stop();
+                        }
+            
+                        System.out.println(stopWatch.prettyPrint());
+                        stopWatch.start();
+                    });
+            
+                    // TODO /world
+                    Mono<String> worldMono = webClient.get().uri("http://localhost:8080/world")
+                            .retrieve()
+                            .bodyToMono(String.class);
+            
+                    worldMono.subscribe(s -> {
+                        System.out.println(s);
+            
+                        if(stopWatch.isRunning()){
+                            stopWatch.stop();
+                        }
+            
+                        System.out.println(stopWatch.prettyPrint());
+                        stopWatch.start();
+                    });
+            
+                    stopWatch.stop();
+                    System.out.println(stopWatch.prettyPrint());
+                }
+            }
+            ```
+          
+#### 28) 스프링 REST 클라이언트 2부 : 커스터마이징
+
+* (1) 지역적 커스터마이징
+
+    ```java
+    @Component
+    public class RestRunner implements ApplicationRunner {
+    
+        @Autowired
+        WebClient.Builder builder;
+    
+        @Override
+        public void run(ApplicationArguments args) throws Exception {
+            WebClient webClient = builder
+                    .baseUrl("http://localhost:8080")
+                    .build();
+    
+            // REST API의 시간 측정을 위해 StopWatch 생성
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+    
+            // TODO /hello
+            Mono<String> helloMono = webClient.get().uri("/hello")
+                    .retrieve()
+                    .bodyToMono(String.class);
+            helloMono.subscribe(s -> {
+                System.out.println(s);
+    
+                if(stopWatch.isRunning()){
+                    stopWatch.stop();
+                }
+    
+                System.out.println(stopWatch.prettyPrint());
+                stopWatch.start();
+            });
+    
+            // TODO /world
+            Mono<String> worldMono = webClient.get().uri("/world")
+                    .retrieve()
+                    .bodyToMono(String.class);
+    
+            worldMono.subscribe(s -> {
+                System.out.println(s);
+    
+                if(stopWatch.isRunning()){
+                    stopWatch.stop();
+                }
+    
+                System.out.println(stopWatch.prettyPrint());
+                stopWatch.start();
+            });
+    
+            stopWatch.stop();
+            System.out.println(stopWatch.prettyPrint());
+        }
+    }
+    ```
+
+* (2) 전역적 커스터마이징
+
+    * 모든 빌더는 baseUrl이 설정된 상태로, 다른 Bean 들에 주입된다. 그래서 빌드만 해서 사용하면 된다.
+    
+        ```java
+        @SpringBootApplication
+        public class SpringbootrestApplication {
+        
+            public static void main(String[] args) {
+                SpringApplication.run(SpringbootrestApplication.class, args);
+            }
+        
+            @Bean
+            public WebClientCustomizer webClientCustomizer(){
+                return webClientBuilder -> webClientBuilder.baseUrl("http://localhost:8080");
+            }
+        
+        }
+        ```
+
+* (3) Apache HttpClient 사용하기
+
+    * HttpClient로 변경해서 사용 할 수 있다.
+    
+        * ① 의존성 추가하기
+        
+            ```html
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+            </dependency>
+            ```
+        
+        * ② 커스터마이징
+            
+            ```html
+            @SpringBootApplication
+            public class SpringbootrestApplication {
+            
+                public static void main(String[] args) {
+                    SpringApplication.run(SpringbootrestApplication.class, args);
+                }
+                
+                @Bean
+                public WebClientCustomizer webClientCustomizer(){
+                    return webClientBuilder -> webClientBuilder.baseUrl("http://localhost:8080");
+                }
+                
+                @Bean
+                public RestTemplateCustomizer restTemplateCustomizer(){
+                    return restTemplate -> restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+                }
+            }
+            ```
