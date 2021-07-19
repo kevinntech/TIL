@@ -1,5 +1,4 @@
 # 자바(Java) 기본 문법 정리
-> 아래 내용은 [자바의 정석](https://book.naver.com/bookdb/book_detail.nhn?bid=10191151 "자바의 정석")을 참고 하였습니다.
 
 ## 1. 변수(Variable)
 
@@ -228,11 +227,11 @@ y = temp;   // temp의 값을 y에 저장
     
     * int로 표현 할 수 있는 값의 범위는 -2<sup>31</sup> ~ 2<sup>31</sup> - 1이다.
     
-        * int의 범위는 약 -20억 ~ 20억 이다.
+        * int의 범위는 약 -21억 ~ 21억 이다.
         
     * long으로 표현 할 수 있는 값의 범위는 -2<sup>63</sup> ~ 2<sup>63</sup> - 1이다.
     
-        * long의 범위는 약 -800경 ~ 800경 이다.
+        * long의 범위는 약 -900경 ~ 900경 이다.
 
 * 기본형의 표현범위 (실수형)
 
@@ -631,6 +630,10 @@ public class TypeTest {
     
     * 왼쪽의 피연산자를 오른쪽 피연산자로 나누고 남은 나머지를 반환한다.
 
+        * 나누는 수가 더 크면 나누어지는 수가 나머지가 된다.
+      
+            * Ex) `7 % 10` = `7`
+
     * 나누는 피연산자는 0이 아닌 정수만 허용하며 부호는 무시된다.
 
         ```java
@@ -644,6 +647,8 @@ public class TypeTest {
             }
         }
         ```
+
+    * 범위를 제한할 때 사용 할 수 있다.
 
 #### 10) 비교 연산자, 문자열의 비교
 
@@ -5477,6 +5482,8 @@ int[][] arr = {
      
     * `boolean contains(Object o)` : 지정된 객체(o)가 Collection에 포함되어 있는지 확인한다.
     
+        * `contains()`는 같은 객체인지 비교할 때, `equals()`와 `hashCode()`를 사용한다.
+    
     * `boolean containsAll(Collection c)` : 지정된 Collection(c)의 객체들이 Collection에 포함되어 있는지 확인한다.
     
     * `boolean remove(Object o)` : 지정된 객체를 삭제한다.
@@ -8280,11 +8287,11 @@ int[][] arr = {
 
     * `main 스레드`는 main 메서드의 코드를 수행하는 스레드다.
     
-    * 스레드는 `사용자 스레드(일반 스레드)`와 `데몬 스레드` 두 종류가 있다.
+    * 스레드의 종류는 `일반 스레드(non-daemon thread)`와 `데몬 스레드`가 있다.
     
-        * main 스레드는 사용자 스레드다.
+        * main 스레드는 일반 스레드다.
         
-    * 실행 중인 사용자 스레드가 하나도 없을 때, 프로그램은 종료된다.
+    * 실행 중인 일반 스레드가 하나도 없을 때, 프로그램은 종료된다.
     
         ```java
         class Ex13_11 {
@@ -8400,9 +8407,9 @@ int[][] arr = {
             
                 * `컨텍스트 스위칭(context switching)` : 프로세스 또는 스레드 간의 작업 전환을 말한다.
         
-            * 나머지 하나는 한 스레드가 화면에 출력하고 있는 동안 다른 스레드는 출력이 끝나기를 기다려야하는데, 이때 발생하는 대기시간 때문이다.
+            * 나머지 하나는 한 스레드가 화면에 출력하고 있는 동안 다른 스레드는 출력이 끝나기를 기다려야하는데, 이때 발생하는 대기 시간 때문이다.
           
-        * 시간이 더 걸리는 멀티 스레드를 사용하는 이유는 무엇일까? 시간은 조금 더 걸리더라도 2가지 작업을 동시에 할 수 있다는 것이 장점이다.
+        * 시간이 더 걸리는 멀티 스레드를 사용하는 이유는 무엇일까? 시간은 조금 더 걸리더라도 2 가지 작업을 동시에 할 수 있다는 것이 장점이다.
           
     * 더 자세한 내용은 자바의 정석 3판 p732~735를 참고하자.
 
@@ -8459,7 +8466,7 @@ int[][] arr = {
 
 #### 5) 스레드의 우선순위(priority of thread), 스레드 그룹(thread group)
 
-* (1) `스레드의 우선순위` : 스레드의 우선순위를 서로 다르게 지정해서 특정 스레드가 더 많은 작업 시간을 갖도록 할 수 있다.
+* (1) 스레드의 우선순위
 
     * `스레드의 우선순위` : 스레드의 우선순위를 서로 다르게 지정해서 특정 스레드가 더 많은 작업 시간을 갖도록 할 수 있다.
 
@@ -8477,7 +8484,7 @@ int[][] arr = {
             
                 * 사실, 스레드의 우선순위는 해당 스레드가 수행하는 작업이 중요하므로 더 우선적으로 수행 되었으면 좋겠다는 희망사항을 OS의 스케줄러에 전달하는 것일뿐이다.
                 
-                * 스레드에 높은 우선순위를 준다고 해서 무조건 더 많은 실행시 간을 갖게 될 것이라고 기대 할 수는 없다.
+                * 스레드에 높은 우선순위를 준다고 해서 무조건 더 많은 실행 시간을 갖게 될 것이라고 기대 할 수는 없다.
                 
                     * 스레드에 높은 우선순위를 주면 더 많은 실행 시간을 갖게 되어 빨리 끝날 확률이 더 높아지긴 함
             
@@ -8521,7 +8528,7 @@ int[][] arr = {
 
 * (2) 스레드 그룹(thread group)
 
-    * `스레드 그룹`은 서로 관련된 스레드를 그룹으로 묶어서 다루기 위한 것이다.
+    * `스레드 그룹`은 서로 관련된 스레드를 묶어서 다루기 위한 것이다.
     
         * 모든 스레드는 반드시 하나의 스레드 그룹에 포함되어 있어야 한다.
         
@@ -8611,11 +8618,13 @@ int[][] arr = {
             
             * 데몬 스레드이면 true를 반환한다.
         
-        * `void setDaemon(boolean on)` : 스레드를 데몬 스레드 또는 사용자 스레드로 변경한다.
+        * `void setDaemon(boolean on)` : 스레드를 데몬 스레드 또는 일반 스레드로 변경한다.
             
             * 매개변수 on을 true로 지정하면 데몬 스레드가 된다.
             
-            * `setDaemon()`은 반드시 `start()`를 호출하기 전에 실행 되어야 한다. 그렇지 않으면 예외(`IllegalThreadStateException`)가 발생한다. 
+            * `setDaemon()`은 반드시 `start()`를 호출하기 전에 실행 되어야 한다. 
+              
+                * 그렇지 않으면 예외(`IllegalThreadStateException`)가 발생한다. 
 
     * 실습하기
     
@@ -8626,17 +8635,18 @@ int[][] arr = {
         	// main 스레드(일반 스레드) 
         	public static void main(String[] args) {
         		Thread t = new Thread(new Ex13_7());
-        		t.setDaemon(true); // 해당 스레드를 데몬 스레드로 만든다.
-        		// 이 부분이 없으면 종료되지 않는다. (데몬 스레드로 만들어서 일반 스레드가 종료되면 데몬 스레드도 같이 종료된다.)
+        		t.setDaemon(true); // 해당 스레드를 데몬 스레드로 만든다. "이 부분이 없으면 종료되지 않는다. (데몬 스레드로 만들어서 일반 스레드가 종료되면 데몬 스레드도 같이 종료된다.)"
         		t.start();
-        
+        		
+        		// 1초 마다 카운트 다운을 하다가 5초가 되면 autoSave를 true로 변경한다.
         		for(int i = 1; i <= 10; i++) {
         			try{
         				Thread.sleep(1000);
         			} catch(InterruptedException e) {}
+      
         			System.out.println(i);
         
-        			if(i==5) autoSave = true; // 5초 이후 부터 출력 되도록 함
+        			if(i==5) autoSave = true;
         		}
         
         		System.out.println("프로그램을 종료합니다.");
@@ -8647,7 +8657,7 @@ int[][] arr = {
         	public void run() {
         		while(true) {
         			try { 
-        				Thread.sleep(3 * 1000); // 3초마다
+        				Thread.sleep(3 * 1000); // 3초 마다
         			} catch(InterruptedException e) {}
         
         			// autoSave의 값이 true이면 autoSave()를 호출한다.
@@ -8667,21 +8677,17 @@ int[][] arr = {
     
     * 스레드의 상태 
     
-        * 생성(`NEW`) : 스레드가 생성되고 아직 `start()`가 호출되지 않은 상태
+        * ① `NEW` : 스레드가 생성되고 아직 `start()`가 호출되지 않은 상태
         
-        * 실행 대기(`RUNNABLE`) : 실행 가능한 상태
+        * ② `RUNNABLE` : 실행 가능한 상태 (실행 대기 상태)
         
-        * 일시 정지
+        * ③ `BLOCKED` : 사용하고자 하는 객체의 lock이 풀릴 때까지 기다리는 상태
         
-            * `BLOCKED` : 동기화 블럭에 의해서 일시 정지된 상태
+        * ④ `WAITING` : 다른 스레드가 통지할 때까지 기다리는 상태 
             
-                * 사용하고자 하는 객체의 lock이 풀릴 때까지 기다리는 상태
+        * ⑤ `TIMED_WAITING` : 주어진 시간 동안 기다리는 상태 
         
-            * `WAITING` : 다른 스레드가 통지할 때까지 기다리는 상태 
-            
-            * `TIMED_WAITING` : 주어진 시간 동안 기다리는 상태 
-        
-        * 소멸(`TERMINATED`) : 스레드의 작업이 종료된 상태
+        * ⑥ `TERMINATED` : 실행을 마친 상태
         
             * 더 자세한 내용은 자바의 정석 3판 p749를 참고하자.
             
@@ -8689,7 +8695,7 @@ int[][] arr = {
 
         ![image 36](images/img36.png)
         
-        * ① 스레드를 생성하고 `start()`를 호출하면 실행 대기 상태가 된다.  
+        * ① 스레드를 생성하고 `start()`를 호출하면 실행 대기 상태가 된다. 
         
         * ② 실행 대기 상태에 있다가 자신의 차례가 되면 실행 상태가 된다. 
 
@@ -8753,28 +8759,30 @@ int[][] arr = {
 
 * (1) sleep()
 
-    * `sleep()`는 현재 스레드를 지정된 시간 동안 멈추게 한다.
-    
-        ```java
-        static void sleep(long millis) // 천분의 일초 단위
-        static void sleep(long millis, int nanos) // 천분의 일초 + 나노초
-        ```
-      
-    * `sleep()`을 호출할 때는 예외 처리를 해야 한다. (`InterruptedException`이 발생하면 깨어난다.)
+    * sleep() 란?
 
-        ```java
-        try{
-          Thread.sleep(1, 500000); // 스레드를 0.0015초 동안 멈추게 한다. (밀리초 , 나노초)
-        }catch(InterruptedException e){} // Exception의 자손이며 예외 처리가 필수이다. 
-        ```
-      
-        * `interrupt()`가 `InterruptedException`를 발생시킨다. 
-
-    * `sleep()`에 의해 일시 정지 상태가 된 스레드는 지정된 시간이 다 되거나 `interrupt()`가 호출되면 잠에서 깨어나 실행 대기 상태가 된다.
+        * `sleep()`는 현재 스레드를 지정된 시간 동안 멈추게 한다.
+        
+            ```java
+            static void sleep(long millis) // 천분의 일초 단위
+            static void sleep(long millis, int nanos) // 천분의 일초 + 나노초
+            ```
+          
+        * `sleep()`을 호출할 때는 예외 처리를 해야 한다. (`InterruptedException`이 발생하면 깨어난다.)
     
-    * 특정 스레드를 지정해서 멈추게 하는 것은 불가능하다.
+            ```java
+            try{
+              Thread.sleep(1, 500000); // 스레드를 0.0015초 동안 멈추게 한다. (밀리초 , 나노초)
+            }catch(InterruptedException e){} // Exception의 자손이며 예외 처리가 필수이다. 
+            ```
+          
+            * `interrupt()`가 `InterruptedException`를 발생시킨다. 
     
-        * `th1.sleep(2000);`가 아닌 `Thread.sleep(2000);`으로 작성해야 한다. (에러가 발생하지는 않지만 오해 할 수 있음)
+        * `sleep()`에 의해 일시 정지 상태가 된 스레드는 지정된 시간이 다 되거나 `interrupt()`가 호출되면 잠에서 깨어나 실행 대기 상태가 된다.
+        
+        * 특정 스레드를 지정해서 멈추게 하는 것은 불가능하다.
+        
+            * `th1.sleep(2000);`가 아닌 `Thread.sleep(2000);`으로 작성해야 한다. (에러가 발생하지는 않지만 오해 할 수 있음)
 
     * 실습하기
     
@@ -8834,7 +8842,7 @@ int[][] arr = {
                 th1.interrupt();  // interrupt()를 호출하면, interrupted 상태가 true가 된다.
                 System.out.println("isInterrupted():"+ th1.isInterrupted()); // true
         
-                // main 스레드가 interrupt 되었는지 확인
+                // main 스레드가 interrupt 되었는지 확인한다.
                 //System.out.println("interrupted(): " + Thread.interrupted());
             }
         }
@@ -8846,7 +8854,12 @@ int[][] arr = {
                 // i가 0이 아니고 Interrupt 된 적이 없는 동안에는 반복한다.
                 while(i != 0 && !isInterrupted()) {
                     System.out.println(i--);
-                    for(long x = 0; x < 2500000000L; x++); // 시간 지연
+        
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        interrupt();
+                    }
                 }
         
                 System.out.println("카운트가 종료되었습니다.");
@@ -8854,7 +8867,9 @@ int[][] arr = {
         }
         ```
 
-    * `sleep()`에 의해 스레드가 잠시 멈춰있을 때, `interrupt()`를 호출하면 `InterruptedException`이 발생되고 스레드의 interrupted 상태는 false로 자동 초기화 된다. 
+        * `sleep()`에 의해 스레드가 잠시 멈춰 있을 때, `interrupt()`를 호출하면 `InterruptedException`이 발생되고 스레드의 interrupted 상태는 false로 자동 초기화 된다. 
+
+        * 이럴 때는 catch 블럭에 `interrupt()`를 추가해서 스레드의 interrupted 상태는 true로 다시 바꿔야 한다.
 
 #### 8) suspend(), resume(), stop()
 
@@ -8946,86 +8961,51 @@ int[][] arr = {
     * 다른 스레드의 작업이 먼저 수행 되어야 할 때, `join()`를 사용한다.
         
         ```java
-         void join() : 작업이 모두 끝날 때까지 기다린다.
-         void join(long millis) : 1000분의 1초 동안 기다린다.
-         void join(long millis, int nanos) : 1000분의 1초 + 나노 초 동안 기다린다. 
+         void join()                        // 작업이 모두 끝날 때까지 기다린다.
+         void join(long millis)             // 1000분의 1초 동안 기다린다.
+         void join(long millis, int nanos)  // 1000분의 1초 + 나노 초 동안 기다린다. 
         ```
 
     * `join()`는 `interrupt()`에 의해 일시 정지 상태에서 벗어날 수 있으며 `join()`를 호출하는 부분을 예외 처리 해야 한다.
 
         ```java
-        public class ThreadEx20 {
+        public class Ex13_11 {
+            static long startTime = 0;
+        
             public static void main(String args[]) {
-                ThreadEx20_1 gc = new ThreadEx20_1();
-                gc.setDaemon(true);
-                gc.start();
+                ThreadEx11_1 th1 = new ThreadEx11_1();
+                ThreadEx11_2 th2 = new ThreadEx11_2();
+                th1.start();
+                th2.start();
+                startTime = System.currentTimeMillis();
         
-                int requiredMemory = 0;
+                try {
+                    th1.join();	// main 스레드가 th1의 작업이 끝날 때까지 기다린다.
+                    th2.join();	// main 스레드가 th2의 작업이 끝날 때까지 기다린다.
+                } catch(InterruptedException e) {}
         
-                for(int i = 0; i < 20; i++) {
-                    requiredMemory = (int) (Math.random() * 10) * 20;
-        
-                    /*
-                    * 사용 할 수 있는 메모리(freeMemory)가 필요한 메모리 보다 작거나
-                    * 남은 메모리가 전체 메모리의 40% 미만인 경우, GC를 깨운다.
-                    * */
-                    if(gc.freeMemory() < requiredMemory || gc.freeMemory() < gc.totalMemory() * 0.4) {
-                        gc.interrupt();	// 메모리가 부족하므로 잠자고 있는 스레드 t1을 깨운다.
-        
-                        try {
-                            gc.join(100); // join()를 사용해서 스레드 gc가 사용하지 않는 객체를 제거할 시간(0.1초)을 준다. 그래야 메모리가 확보된다.
-                        } catch (InterruptedException e) {}
-                    }
-        
-                    gc.usedMemory += requiredMemory; // 필요한 메모리를 사용한다.
-                    System.out.println("usedMemory:" + gc.usedMemory);
-                }
-            }
+                System.out.print("소요시간:" + (System.currentTimeMillis() - Ex13_11.startTime));
+            } // main
         }
         
-        // Garbage Collector를 흉내 내어 작성한 코드
-        class ThreadEx20_1 extends Thread {
-            final static int MAX_MEMORY = 1000;
-            int usedMemory = 0;
-        
+        class ThreadEx11_1 extends Thread {
             public void run() {
-                while(true) {
-                    /*
-                    * 10초 마다 한 번씩 가비지 컬렉션을 수행한다.
-                    * */
-                    try {
-                        Thread.sleep(10 * 1000); // 10초를 기다린다.
-                    } catch(InterruptedException e) {
-                        System.out.println("Awaken by interrupt().");
-                    }
-        
-                    /*
-                    * garbage collection을 수행한다.
-                    * garbage collection : 사용하지 않는 객체를 제거한다.
-                    * */
-                    gc();
-        
-                    System.out.println("Garbage Collected. Free Memory :" + freeMemory());
+                for(int i=0; i < 300; i++) {
+                    System.out.print(new String("-"));
                 }
-            }
-        
-            public void gc() {
-                usedMemory -= 300;
-        
-                if(usedMemory < 0)
-                    usedMemory = 0;
-            }
-        
-            public int totalMemory() {
-                return MAX_MEMORY;
-            }
-        
-            public int freeMemory() {
-                return MAX_MEMORY - usedMemory;
-            }
-        
+            } // run()
         }
-        ```    
+        
+        class ThreadEx11_2 extends Thread {
+            public void run() {
+                for(int i=0; i < 300; i++) {
+                    System.out.print(new String("|"));
+                }
+            } // run()
+        }
+        ```
+      
+        * `join()`는 InterruptedException이 발생하면 작업을 다시 시작한다.
 
 * (2) yield()
 
@@ -9122,7 +9102,7 @@ int[][] arr = {
     
     * 한 스레드가 진행 중인 작업이 다른 스레드에게 간섭 받지 않게 하려면 `동기화(synchronization)`가 필요하다.
     
-        * `스레드의 동기화` : 한 스레드가 진행중인 작업을 다른 스레드가 간섭하지 못하게 막는 것을 말한다.
+        * `스레드의 동기화` : 공유 자원에 단 하나의 스레드만 접근 할 수 있도록 하는 것이다. 
     
     * 동기화를 하려면 다른 스레드에게 간섭 받지 않아야 하는 문장들을 `임계 영역(critical section)`으로 설정한다.
     
@@ -9546,6 +9526,14 @@ int[][] arr = {
     * 람다식(익명 객체)를 다루기 위한 참조변수가 필요하다. 그런데 참조변수의 타입은 어떻게 지정해야 할까? `함수형 인터페이스`
     
         * `타입 obj = (a, b) -> a > b ? a : b;`
+    
+* (4) 변수 캡처 (Variable Capture)
+
+    * 람다식에서 사용되는 변수는 `final` 이거나 `effective final` 인 경우에만 참조할 수 있다.
+      
+        * `effective final` : (final 키워드를 붙이진 않았지만) 사실상 final인 변수를 말한다.
+    
+    * 그렇지 않을 경우 concurrency 문제가 생길 수 있어서 컴파일러가 방지한다.
 
 #### 2) 함수형 인터페이스
         
@@ -10246,7 +10234,9 @@ int[][] arr = {
 
 * (1) 스트림(Stream)
 
-    * `스트림(Stream)`은 컬렉션, 배열 등의 저장 요소를 하나씩 참조해서 람다식으로 처리 할 수 있도록 해주는 기능이다. 
+    * `스트림(Stream)`은 컬렉션, 배열 등의 저장 요소들을 하나씩 참조해서 람다식으로 처리 할 수 있도록 해주는 기능이다. 
+    
+        * 다양한 데이터 소스를 표준화된 방법으로 다루기 위한 것이다.  
         
     * 스트림으로 작업하는 과정은 다음과 같다.
     
@@ -10487,7 +10477,7 @@ int[][] arr = {
         intStream2.forEach(System.out::println);
         ```
       
-* (4) 스트림 만들기 - 람다식으로 스트림을 만드는 `iterate()`, `generate()`
+* (5) 스트림 만들기 - 람다식으로 스트림을 만드는 `iterate()`, `generate()`
 
     * 람다식을 소스로 하는 스트림 생성하기 (무한 스트림)
     
@@ -10520,7 +10510,7 @@ int[][] arr = {
         Stream<Integer> oneStream = Stream.generate(() -> 1);
         ```
     
-* (5) 스트림 만들기 - 파일과 빈 스트림
+* (6) 스트림 만들기 - 파일과 빈 스트림
 
     * 파일을 소스로 하는 스트림 생성하기
     
@@ -10796,7 +10786,52 @@ int[][] arr = {
         * `null` 체크를 직접 하지 않아도 된다. `Optional`에 정의된 메소드를 사용하면 된다. 
         
         * 해당 변수가 `null` 일 수도 있다는 것을 명시적으로 표현할 수 있다.
+    
+            * 클라이언트에게 코드에 명시적으로 빈 값 일 수도 있다는 것을 알려주고, 빈 값인 경우에 대한 처리를 강제한다.
 
+    * 주의사항
+
+        * 리턴 타입으로만 사용하는 것을 권장한다.
+  
+            * 문법적으로는 필드, 메소드 매개변수 타입, 컬렉션의 요소 타입 등으로 사용 할 수 있다.
+
+                ```java
+                public class OnlineClass {
+                
+                    private Integer id;
+                
+                    private String title;
+                
+                    private boolean closed;
+                
+                    private Progress progress;
+                    
+                    public void setProgress(Optional<Progress> progress) {
+                        if(progress != null) // null 체크에 Optional에 값이 있는지도 체크해야 한다. 비효율적이다.
+                            progress.ifPresent(p -> this.progress = p);
+                    }
+                }
+                
+                public class App {
+                    public static void main(String[] args) {
+                        OnlineClass spring_boot = new OnlineClass(1, "spring boot", true);
+                        spring_boot.setProgress(null); // 메소드 매개변수에 직접 null을 지정하는 것은 막을 수 없다.
+                    }
+                }
+                ```
+
+        * Optional을 리턴하는 메소드에서는 null을 리턴하지 말자. 리턴할 데이터가 없다면 `Optional.empty()`를 사용하자.
+
+            ```java
+            public Optional<Progress> getProgress() {
+                return null; // X
+            }
+            ```
+    
+        * Optional에 담을 값이 기본형 타입(int, long, double)이면 Boxing과 Unboxing이 발생하지 않는 기본형 타입용 Optional을 사용하자.
+
+        * Collection, Map, Stream, Array, Optional은 Optional로 두번 감싸지 말자.
+    
 * (2) Optional 객체 생성하기
 
     * ① `Optional.of(value)` : null이 아닌 객체를 담고 있는 Optional 객체를 생성한다. 
@@ -10842,7 +10877,17 @@ int[][] arr = {
         String str1 = optVal1.get();      // optVal1에 있는 값을 반환한다. null이면 예외 발생
         String str2 = optVal2.orElse(""); // optVal2에 값이 있다면 가져오고 없다면 ""를 반환
         ```
-          
+
+        * `orElse(new ...)` 대신 `orElseGet(() -> new ...)`를 사용하자.      
+
+            * `orElse(...)`에서 `...`는 Optional에 값이 있든 없든 무조건 실행된다. 
+
+                * `Optional`에 값이 있으면 `orElse()`의 인자로서 실행된 값이 무시되고 버려진다.
+                
+                * 따라서 `...`가 새로운 객체를 생성하거나 새로운 연산을 수행하는 경우에는 `orElse()` 대신 `orElseGet()`을 사용해야 한다.
+                
+            * `orElse(...)`는 `...`가 이미 생성되었거나 이미 계산된 값일 때만 사용해야 한다.
+    
     * ③ `orElseGet()` : Optional에 값이 있다면 가져오고 없다면 인자로 전달한 람다식의 결과 값을 반환한다.
       
         * 값이 null이면 인자로 전달된 람다식의 결과 값을 반환한다.
@@ -10854,21 +10899,25 @@ int[][] arr = {
         String str4 = optVal2.orElseThrow(NullPointerException::new); // 널이면 예외 발생
         ```
           
-    * ⑤ `isPresent()` : Optional의 값이 있다면 true, 없다면 false를 반환한다.
+    * ⑤ `isPresent()` : Optional에 값이 있다면 true, 없다면 false를 반환한다.
               
         ```java
         if(Optional.ofNullable(str).isPresent()){
             System.out.println(str);
         }
         ```
-      
-    * ⑥ `ifPresent(Consumer<T> block)` : Optional의 값이 있다면 인자로 전달한 람다식을 실행하고 없다면 아무 일도 하지 않는다.
+    
+    * ⑥ `ifPresent(Consumer<T> block)` : Optional에 값이 있다면 인자로 전달한 람다식을 실행하고 없다면 아무 일도 하지 않는다.
               
         ```java
         Optional.ofNullable(str).ifPresent(System.out::println);
         ```
-      
-    * ⑦ `Optional filter(Predicate)` : Optional에서 조건(Predicate)에 맞는 요소만 걸러낸다.
+
+    * ⑦ `isEmpty()` : Optional에 값이 없다면 true, 있다면 false를 반환한다.
+    
+        * java 11 부터 제공
+
+    * ⑧ `Optional filter(Predicate)` : Optional에서 조건(Predicate)에 맞는 요소만 걸러낸다.
         
         * 인자로 전달한 람다식의 결과가 false이면 비어있는 Optional을 반환한다.
         
@@ -10880,11 +10929,17 @@ int[][] arr = {
                             .map(Integer::parseInt).orElse(-1);
             ```
              
-    * ⑧ Optional에 들어있는 값을 변환하기 
+    * ⑨ Optional에 들어있는 값을 변환하기 
     
         * `Optional map(Function)` : Optional에 들어있는 값을 변환한다.
     
         * `Optional flatMap(Function)` : Optional 안에 들어있는 인스턴스가 Optional인 경우에 사용하면 편리하다.
+
+            ```java
+            // OnlineClass의 getProgress()는 Optional<Progress>를 반환 하도록 되어 있다.
+            Optional<Optional<Progress>> map = optional.map(OnlineClass::getProgress);
+            Optional<Progress> flatMap = optional.flatMap(OnlineClass::getProgress);
+            ```
 
 * (4) OptionalInt, OptionalLong, OptionalDouble
 
@@ -10918,8 +10973,10 @@ int[][] arr = {
 
     * `forEachOrdered()`는 스트림의 모든 요소를 반복할 때 사용한다.
     
-        * 병렬 스트림인 경우에도 순서가 보장된다.
-
+        * 병렬 스트림인 경우에도 스트림 요소의 순서가 보장된다.
+    
+            * `병렬` : 여러 쓰레드가 나눠서 작업을 처리한다. (순서가 보장되지 않음)
+    
 * (2) 조건 검사
 
     * 문법
@@ -11012,7 +11069,7 @@ int[][] arr = {
 
 * (4) 리듀싱 - reduce()
 
-    * `reduce()` : 스트림의 요소를 하나씩 줄여가며 연산을 한 다음, 최종 결과를 반환한다.
+    * `reduce()` : 스트림의 요소를 하나씩 줄여가며 누적 연산을 한 다음, 최종 결과를 반환한다.
 
         * `Optional<T> reduce (BinaryOperator<T> accumulator)`
         
@@ -11022,7 +11079,7 @@ int[][] arr = {
 
         * `T reduce(T identity, BinaryOperator<T> accumulator)`
         
-            * 초기 값에 스트림의 모든 요소를 하나씩 꺼내 연산을 한다.
+            * 초기 값에 스트림의 모든 요소를 하나씩 꺼내 누적 연산을 한다.
         
         * `U reduce(U identity, BiFunction<U, T, U> accumulator, BinaryOperator<U> combiner)`
 
@@ -11065,11 +11122,11 @@ int[][] arr = {
             
             * 잘 사용되지 않음
                 
-    * `reduce()`과 `Collectors.reducing()`의 차이점 
+    * `reduce()`과 `collect()`의 차이점 
 
         * `reduce()` : 전체 집계를 한다.
         
-        * `reducing()` : 전체 집계 또는 그룹별 집계를 한다.
+        * `collect()` : 전체 집계 또는 그룹별 집계를 한다.
                     
     * `Collector`는 수집(`collect()`)에 필요한 메서드를 정의해 놓은 인터페이스다.
 
@@ -11094,7 +11151,7 @@ int[][] arr = {
         
         * `characteristics()` : 컬렉터가 수행하는 작업의 속성에 대한 정보를 제공한다.
 
-    * `Collectors` 클래스는 Collector 인터페이스의 구현체를 static 메서드로 제공한다.
+    * **`Collectors` 클래스는 Collector 인터페이스의 구현체를 static 메서드로 제공한다.**
 
         * 변환 - `mapping()`, `toList()`, `toSet()`, `toMap()`, `toCollection()` ...
         
@@ -11784,6 +11841,15 @@ int[][] arr = {
             ```
 
 ## 14. 입출력(I/O)
+
+## 참고 자료
+
+* [자바의 정석](https://book.naver.com/bookdb/book_detail.nhn?bid=10191151 "자바의 정석")
+
+* [더 자바, Java 8](https://www.inflearn.com/course/the-java-java8 "더 자바, Java 8")
+
+* [Java Optional 바르게 쓰기](http://homoefficio.github.io/2019/10/03/Java-Optional-%EB%B0%94%EB%A5%B4%EA%B2%8C-%EC%93%B0%EA%B8%B0/ "Java Optional 바르게 쓰기")
+
 
 
 
