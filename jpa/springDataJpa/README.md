@@ -8,30 +8,7 @@
 * H2 데이터베이스 설치
 
     * Mac을 사용하는 경우, `chmod 755 h2.sh`로 권한을 부여해야 된다.
-
-* 모든 로그 출력은 가급적 로거를 통해 남겨야 한다.
-
-    * `show_sql` 옵션은 `System.out`에 하이버네이트 실행 SQL을 남긴다.
     
-    * `org.hibernate.SQL` 옵션은 `로거(logger)`를 통해 하이버네이트 실행 SQL을 남긴다.
-    
-         ```
-        spring:
-          ...
-        
-          jpa:
-            hibernate:
-              ddl-auto: create
-            properties:
-              hibernate:
-                #show_sql: true
-                format_sql: true
-        
-        logging.level:
-          org.hibernate.SQL: debug
-          #org.hibernate.type: trace
-         ```
-
 * 스프링 데이터 JPA 동작 확인
 
     * `@PersistenceContext`: EntityManager를 주입 받을 때 사용한다.
@@ -63,8 +40,58 @@
         * 스프링 부트를 사용하면 해당 라이브러리만 추가하면 된다.
         
             * `implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.7'`
+    
+* 자주 사용되는 설정
+
+    * `spring.jpa.hibernate.ddl-auto` : DDL 자동 생성 기능
+    
+        ```
+        spring.jpa.hibernate.ddl-auto = create
+        ```
         
-        * 참고: 쿼리 파라미터를 로그로 남기는 외부 라이브러리는 시스템 자원을 사용하므로, 개발 단계에서는 편하게 사용해도 된다. 하지만 운영시스템에 적용하려면 꼭 성능테스트를 하고 사용하는 것이 좋다.
+    * `spring.jpa.properties.hibernate.show_sql` : 하이버네이트가 실행한 SQL을 System.out에 출력한다.
+
+        ```
+        spring.jpa.properties.hibernate.show_sql=true
+        ```
+      
+    * `spring.jpa.properties.hibernate.format_sql` : 하이버네이트가 실행한 SQL을 가독성 있게 표현한다.
+
+        ```
+        spring.jpa.properties.hibernate.format_sql=true
+        ```
+      
+    * `logging.level.org.hibernate.SQL` : 하이버네이트가 실행한 SQL을 로거를 통해 출력한다.
+
+        ```
+        logging.level.org.hibernate.SQL=debug
+        ```
+
+        * 모든 로그 출력은 로거를 통해 남겨야 한다.
+
+    * 쿼리 파라미터를 로그로 출력하기
+    
+        * ① `logging.level.org.hibernate.type.descriptor.sql` : 쿼리 파라미터를 로그로 출력한다.
+    
+            ```
+            logging.level.org.hibernate.type.descriptor.sql=trace
+            ```
+
+            * 하이버네이트가 실행한 SQL에서 물음표(`?`)로 표기된 부분을 쿼리 파라미터라고 한다.
+
+        * ② 외부 라이브러리 사용하기 (`p6spy`)
+    
+            * 스프링 부트를 사용하면 이 라이브러리만 추가하면 된다.
+            
+                ```
+                implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.7'
+                ```
+
+                * 쿼리 파라미터를 로그로 남기는 외부 라이브러리는 시스템 자원을 사용하므로, 개발 단계에서는 편하게 사용해도 된다. 
+                  
+                * 하지만 운영 시스템에 적용하려면 꼭 성능 테스트를 하고 사용하는 것이 좋다.
+
+            * [참고] https://github.com/gavlyukovskiy/spring-boot-data-source-decorator
     
 ## 2. 예제 도메인 모델
 
@@ -501,7 +528,7 @@
 
 * `스프링 데이터 JPA`는 쿼리 메소드에 `페이징`과 `정렬` 기능을 사용 할 수 있도록 **2 가지 파라미터**를 제공한다.
 
-    * `org.springframework.data.domain.Sort` : 정렬 기능
+    * ① `org.springframework.data.domain.Sort` : 정렬 기능
 
         ```java
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
@@ -509,19 +536,19 @@
         String sortProperty = sort.toString().contains("id") ? "id" : "updatedDate";
         ```
 
-    * `org.springframework.data.domain.Pageable` : 페이징 기능 (내부에 Sort 포함)
+    * ② `org.springframework.data.domain.Pageable` : 페이징 기능 (내부에 Sort 포함)
 
 * 파라미터에 `Pageable`을 사용하면 다음과 같은 `특별한 반환 타입`을 사용 할 수 있다. 
 
-    * `org.springframework.data.domain.Page` : 추가 count 쿼리를 호출하는 페이징 결과를 반환한다.
+    * ① `org.springframework.data.domain.Page` : 추가 count 쿼리를 호출하는 페이징 결과를 반환한다.
     
         * `Page` 인덱스는 0 부터 시작이다. 
     
-    * `org.springframework.data.domain.Slice` : 추가 count 쿼리를 호출하지 않는 페이징 결과를 반환한다.
+    * ② `org.springframework.data.domain.Slice` : 추가 count 쿼리를 호출하지 않는 페이징 결과를 반환한다.
         
         * 다음 페이지 존재 여부를 확인 할 수 있다. (내부적으로 limit + 1 조회)
     
-    * 자바 컬렉션 (`List` ...): 추가 count 쿼리 없이 결과만 반환한다.
+    * ③ `자바 컬렉션` (`List` ...) : 추가 count 쿼리 없이 결과만 반환한다.
     
         * 예를 들어, 데이터를 10개만 끊어서 가져올 때 사용 할 수 있다.
     
@@ -638,7 +665,7 @@
             Page<Member> findByAge(int age, Pageable pageable);
             ```
 
-            * value 속성은 컨텐츠를 가져오는 쿼리를 작성하고 contQuery는 카운트 쿼리를 작성한다.
+            * value 속성은 컨텐츠를 가져오는 쿼리를 작성하고 countQuery는 카운트 쿼리를 작성한다.
 
             * 정렬 조건이 복잡해지면 `Sort`로 해결하기 어렵다. 
             
@@ -688,10 +715,10 @@
     * `@Modifying(clearAutomatically = true)`로 설정하면 벌크성 쿼리를 실행하고 나서 영속성 컨텍스트를 초기화한다.
     
         * 해당 옵션을 사용하지 않고 회원을 `findByUsername()`로 다시 조회하면 영속성 컨텍스트에 과거 값이 남아서 문제가 될 수 있다.
-         
+
+            * **벌크 연산은 영속성 컨텍스트를 무시하고 실행하기 때문에, 영속성 컨텍스트에 있는 엔티티의 상태와 DB에 있는 엔티티 상태가 달라질 수 있다.**
+
         * 만약 다시 조회해야 하면 꼭 영속성 컨텍스트를 초기화 하자.
-        
-    * **벌크 연산은 영속성 컨텍스트를 무시하고 실행하기 때문에, 영속성 컨텍스트에 있는 엔티티의 상태와 DB에 있는 엔티티 상태가 달라질 수 있다.**
 
 * 벌크성 수정 쿼리에 대한 테스트 코드
 
@@ -812,7 +839,7 @@
           
 * 엔티티를 조회할 때 연관된 엔티티들을 함께 조회하는 방법
 
-    * `JPQL`에서 `페치 조인`을 사용한다.
+    * `JPQL`의 `페치 조인`을 사용한다.
 
         ```java
         @Query("select m from Member m left join fetch m.team")
@@ -847,7 +874,7 @@
 
     * `@NamedEntityGraph`
     
-        * `@NamedEntityGraph`는 Named 엔티티 그래프를 정의할 때 사용한다.
+        * ① `@NamedEntityGraph`는 Named 엔티티 그래프를 정의할 때 사용한다.
                 
             ```java
             @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
@@ -863,11 +890,13 @@
               
                 * 이때, `@NamedAttributeNode`를 사용하고 그 값으로 함께 조회할 속성을 선택하면 된다.
 
-        * `@EntityGraph`으로 Named 엔티티 그래프를 사용한다.
+        * ② `@EntityGraph`으로 Named 엔티티 그래프를 사용한다.
                 
             ```java
-            @EntityGraph("Member.all") 
-            List<Member> findMemberEntityGraph();
+            public interface MemberRepository extends JpaRepository<Member, Long> {
+                @EntityGraph("Member.all") 
+                List<Member> findMemberEntityGraph();  
+            }
             ```
           
             * Named 엔티티 그래프는 잘 사용하지 않는 기능으로 보인다.
@@ -916,7 +945,7 @@
  
     * 스프링 데이터 JPA가 제공하는 인터페이스를 직접 구현하게 되면 구현해야 하는 기능이 너무 많다.
  
-    * 다음과 같은 다양한 이유로 인터페이스의 메서드를 직접 구현하고 싶다면 `사용자 정의 인터페이스`를 정의한다.
+    * 다음과 같은 다양한 이유로 인터페이스의 메서드를 직접 구현하고 싶다면 `사용자 정의 인터페이스`를 작성한다.
 
         * ① JPA 직접 사용(`EntityManager`)
           
@@ -970,7 +999,7 @@
                 }
                 ```
     
-                * 예를 들어, `MemberRepositoryImpl` 대신에 `MemberRepositoryCustomImpl` 같이 작성해도 된다.
+                * 예를 들어, `MemberRepositoryImpl` 대신에 `MemberRepositoryCustomImpl`과 같이 작성해도 된다.
                 
                 * 해당 방식이 사용자 정의 인터페이스 이름과 구현 클래스 이름이 비슷하므로 더 직관적이므로 해당 방식을 사용하는 것을 권장한다.
 
@@ -1071,7 +1100,7 @@
 
                 * `@PrePersist` : `persist()` 하기 전에 호출된다.
 
-                * `@PreUpdate` : `update()` 하기 전에 호출된다.
+                * `@PreUpdate` : 수정하기 전에 호출된다.
                 
                 * ...
 
@@ -1513,17 +1542,17 @@
 
 * 새로운 엔티티를 판단하는 기본 전략
 
-    * 식별자가 객체일 때는 `null`이면 새로운 엔티티로 판단한다.
+    * ① 식별자가 객체일 때는 `null`이면 새로운 엔티티로 판단한다.
     
         * `em.persist()`를 호출한 이후, 식별자가 설정된다.
     
-    * 식별자가 자바 기본 타입일 때는 `0`이면 새로운 엔티티로 판단한다. 
+    * ② 식별자가 자바 기본 타입일 때는 `0`이면 새로운 엔티티로 판단한다. 
     
         * `Persistable` 인터페이스를 구현해서 판단 로직을 변경 할 수 있다.
 
 * 직접 식별자를 할당해야되는 경우
 
-    * JPA 식별자 생성 전략이 `@GenerateValue`면 `save()` 호출 시점에 식별자가 없으므로 새로운 엔티티로 인식해서 정상적으로 동작한다. 
+    * JPA 식별자 생성 전략이 `@GeneratedValue`면 `save()` 호출 시점에 식별자가 없으므로 새로운 엔티티로 인식해서 정상적으로 동작한다. 
     
     * 그런데 `@Id`만 사용해서 직접 식별자를 할당하게 되면 이미 식별자 값이 있는 상태로 `save()`를 호출하게 된다. 
     

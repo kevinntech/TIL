@@ -508,6 +508,28 @@
         
             * `@Table`을 생략하면 엔티티 이름을 테이블 이름으로 매핑한다.
 
+            * uniqueConstraints 속성은 DDL 생성 시에 유니크 제약조건을 만든다.
+
+                ```java            
+                @Entity
+                @Table( name = "MEMBER", 
+                        uniqueConstraints = {@UniqueConstraint(name = "NAME_AGE_UNIQUE", columnNames = {"NAME", "AGE"})}
+                )
+                public class Member {
+                
+                    @Id @GeneratedValue
+                    @Column(name = "ID")
+                    private String id;
+                
+                    @Column(name = "NAME")
+                    private String userName;
+                
+                    private int age;
+                }
+                ```
+    
+                * 2개 이상의 복합 유니크 제약조건도 만들 수 있다.
+
     * (3) 데이터베이스 스키마 자동 생성
     
         * JPA는 애플리케이션 실행 시점에 DDL을 자동으로 생성하는 기능을 제공한다.
@@ -537,6 +559,22 @@
             * name 속성은 필드와 매핑할 테이블의 컬럼 이름을 지정한다.
 
             * nullable 속성은 null 값의 허용 여부를 지정한다.
+    
+            * unique 속성은 하나의 컬럼에 간단히 유니크 제약조건을 걸 때 사용한다.
+
+                ```java            
+                @Column(unique = true)
+                private String username;
+                ```
+              
+                * 두 개 이상의 컬럼에 유니크 제약조건을 걸 때는 클래스 레벨에서 `@Table.uniqueConstraints`를 사용해야 한다. 
+    
+            * length 속성은 문자 길이 제약조건을 지정할 때 사용한다.
+
+                ```java            
+                @Column(length = 100)
+                private String data;
+                ```
 
     * (2) @Enumerated
     
