@@ -444,38 +444,68 @@
 
     * 예시
     
-        ```html
-        <table border="1">
-          <tr>
-            <th>count</th>
-            <th>username</th>
-            <th>age</th>
-            <th>etc</th>
-          </tr>
-            
-          <tr th:each="user : ${users}">
-            <td th:text="${userStat.count}">username</td>
-            <td th:text="${user.username}">username</td>
-            <td th:text="${user.age}">0</td>
-            <td>
-              index = <span th:text="${userStat.index}"></span>
-              count = <span th:text="${userStat.count}"></span>
-              size = <span th:text="${userStat.size}"></span>
-              even? = <span th:text="${userStat.even}"></span>
-              odd? = <span th:text="${userStat.odd}"></span>
-              first? = <span th:text="${userStat.first}"></span>
-              last? = <span th:text="${userStat.last}"></span>
-              current = <span th:text="${userStat.current}"></span>
-            </td>
-          </tr>
-        </table>
-        ```
+        * 1번
+    
+            ```html
+            <table border="1">
+              <tr>
+                <th>count</th>
+                <th>username</th>
+                <th>age</th>
+                <th>etc</th>
+              </tr>
+                
+              <tr th:each="user : ${users}">
+                <td th:text="${userStat.count}">username</td>
+                <td th:text="${user.username}">username</td>
+                <td th:text="${user.age}">0</td>
+                <td>
+                  index = <span th:text="${userStat.index}"></span>
+                  count = <span th:text="${userStat.count}"></span>
+                  size = <span th:text="${userStat.size}"></span>
+                  even? = <span th:text="${userStat.even}"></span>
+                  odd? = <span th:text="${userStat.odd}"></span>
+                  first? = <span th:text="${userStat.first}"></span>
+                  last? = <span th:text="${userStat.last}"></span>
+                  current = <span th:text="${userStat.current}"></span>
+                </td>
+              </tr>
+            </table>
+            ```
+    
+            * 반복의 두 번째 파라미터를 설정해서 반복의 상태를 확인 할 수 있다.
+        
+                * Ex) `<tr th:each="user, userStat : ${users}">`
+        
+                    * 두 번째 파라미터는 생략 할 수 있는데, 생략하면 지정한 변수명(`user`) + `Stat`이 된다.
 
-        * 반복의 두 번째 파라미터를 설정해서 반복의 상태를 확인 할 수 있다.
+        * 2번
+
+            ```html
+            <ul>
+                <li th:each="i : ${#numbers.sequence(1, 5)}">
+                    <a th:text="${i}"></a>
+                </li>
+            </ul>
+            ```
+            
+            * `#numbers.sequence(from, to)` : 지정한 범위 만큼의 정수 배열을 생성한다.
     
-            * Ex) `<tr th:each="user, userStat : ${users}">`
-    
-                * 두 번째 파라미터는 생략 할 수 있는데, 생략하면 지정한 변수명(`user`) + `Stat`이 된다.
+                * Ex) `#numbers.sequence(1, 5)` : 1에서 5까지의 범위에 해당하는 정수 배열을 생성한다.
+
+            * 위의 코드를 실행 했을 때의 결과는 다음과 같다.
+              
+                ```html
+                <ul>
+                    <li>
+                        <a>1</a>
+                        <a>2</a>
+                        <a>3</a>
+                        <a>4</a>
+                        <a>5</a>
+                    </li>
+                </ul>
+                ```
 
 * (10) 조건부 평가
 
