@@ -30,10 +30,12 @@
     * `JPA(Java Persistence API)`는 자바 진영의 ORM 기술 표준이다.
 
     * JPA는 애플리케이션과 JDBC 사이에서 동작한다.
-    
-        * JAVA 애플리케이션에서 JPA에게 명령을 하면, JPA는 JDBC API를 사용해서 SQL을 만든 다음, 
+
+        ![image 19](images/img19.png)
+
+        * JAVA 애플리케이션에서 JPA에게 명령을 하면, JPA는 JDBC API를 사용해서 SQL을 만든 다음, DB에 전달한다. 
         
-        * DB에 전달한다. 그리고 DB로 부터 그 결과를 받는다.
+        * 그리고 DB로 부터 그 결과를 받는다.
         
     * JPA는 패러다임의 불일치를 해결한다.
 
