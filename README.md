@@ -17,6 +17,8 @@
 * [스프링 프레임워크 핵심 기술](https://github.com/kevinntech/TIL/tree/main/spring/spring-core "스프링 프레임워크 핵심 기술")
 * [스프링 부트 개념과 활용](https://github.com/kevinntech/TIL/tree/main/spring/spring-boot "스프링 부트 개념과 활용")
 * [스프링 웹 MVC](https://github.com/kevinntech/TIL/tree/main/spring/spring-mvc "스프링 웹 MVC")
+  * [타임리프(Thymeleaf)](https://github.com/kevinntech/TIL/blob/main/thymeleaf/README.md "타임리프(Thymeleaf)")
+  * [페이징 처리](https://github.com/kevinntech/TIL/blob/main/spring/spring-mvc/PAGING.md "페이징 처리")
 * [스프링과 JPA 기반 웹 애플리케이션 개발](https://github.com/kevinntech/TIL/tree/main/spring/spring-jpa-webapp "스프링과 JPA 기반 웹 애플리케이션 개발")
 
 ## JPA
