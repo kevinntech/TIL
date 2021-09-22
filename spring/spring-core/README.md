@@ -353,8 +353,8 @@
 
 * `@Autowired`는 생성자, 세터(setter), 필드(field)에 사용 할 수 있다.
 
-    * 생성자
-    
+    * `생성자 주입` : 생성자를 통해서 의존 관계를 주입 받는 방법이다.
+
         ```java
         @Service
         public class BookService {
@@ -367,26 +367,50 @@
             }
         }
         ```
-      
+    
+        * 스프링 빈으로 등록하면서 의존 관계 주입도 한번에 처리한다.
+    
         * 생성자가 하나인 경우에는 `@Autowired`를 생략 할 수 있다. (스프링 4.3 부터) 
-      
-    * 세터(setter)
+
+        * 생성자 주입을 권장하는 이유는 다음과 같다.
+
+            * 생성자 주입은 객체를 생성할 때, 딱 1번만 호출되므로 이후에 호출되는 일이 없다. 따라서 불변하게 설계할 수 있다.
+
+                * 대부분의 의존관계 주입은 한번 일어나면 애플리케이션 종료 시점까지 의존관계를 변경할 일이 거의 없다.
+
+                * 수정자 주입을 사용하면, setXxx 메서드를 public으로 열어두어야 한다. 누군가 실수로 변경할 수도 있다.
+
+            * 생성자 주입을 사용하면 필드에 final 키워드를 사용할 수 있으며 생성자에서 값이 설정되지 않는 오류를 컴파일 시점에 막아준다.
+
+                * 수정자(setter) 주입을 포함한 나머지 주입 방식은 모두 생성자 이후에 호출되므로, 필드에 final 키워드를 사용할 수 없다.
+                  
+                * [참고] final 키워드를 사용하면 해당 필드는 필수 값이 된다.
+    
+      * `수정자(setter) 주입` : 필드의 값을 변경하는 수정자(setter) 메서드를 통해서 의존 관계를 주입하는 방법이다.
   
-      ```java
-      @Service
-      public class BookService {
-      
-        BookRepository bookRepository;
-      
-        @Autowired
-         public void setBookRepository(BookRepository bookRepository) {
+        ```java
+        @Service
+        public class BookService {
+        
+            BookRepository bookRepository;
+            
+            @Autowired
+            public void setBookRepository(BookRepository bookRepository) {
                 this.bookRepository = bookRepository;
+            }
+        
         }
-      
-      }
-      ```
+        ```
+    
+        * 선택, 변경 가능성이 있는 의존관계에 사용한다.
+        
+            * `선택` : 의존 관계에 있는 객체가 스프링 빈으로 등록되지 않았을 때도 의존 관계를 주입 하고자 할 때 사용 할 수 있다는 것을 의미한다.
+            
+            * `변경` : 중간에 의존 관계에 있는 객체를 다른 빈으로 변경 하고자 할 때 사용 할 수 있다는 것을 의미한다.
+        
+        * 자바 빈 프로퍼티 규약의 수정자 메서드 방식을 사용하는 방법이다.
    
-    * 필드(field)
+    * `필드(field) 주입` : 필드에 바로 주입하는 방법이다.
 
         ```java
         @Service
@@ -396,7 +420,51 @@
             BookRepository bookRepository;
         }
         ```
+    
+        * 외부에서 변경이 불가능해서 테스트 하기가 힘들다는 치명적인 단점이 있다.
+        
+        * DI 프레임워크가 없으면 아무것도 할 수 없다.
+        
+        * 필드 주입은 사용하지 말자!
+        
+            * 애플리케이션의 실제 코드와 관계 없는 테스트 코드에서는 사용해도 된다.
+            
+            * 스프링 설정을 목적으로 하는 @Configuration 같은 곳에서만 특별한 용도로 사용해도 된다.
+
+* 의존관계 주입을 하는 순서
+
+    * `필드, setter 주입`은 먼저 스프링 빈으로 등록한 다음, 의존 관계 주입을 한다.
+
+        ```java
+        @Service
+        public class BookService {              // 1) BookService가 스프링 빈으로 등록된다.
+        
+            @Autowired
+            BookRepository bookRepository;      // 2) BookService의 생성자 호출 이후에 BookRepository에 대한 의존 관계 주입을 한다.
+        }
+        ```
       
+        * 생성자 주입을 제외한 나머지 의존 관계 주입은 생성자 호출 이후에 이루어진다.
+    
+    * `생성자 주입`은 스프링 빈으로 등록하면서 의존 관계 주입도 한번에 처리한다.
+
+        * 스프링 빈 저장소는 스프링 빈이 등록되기 전에 본인이 필요한 의존관계 그래프를 내부에서 모두 만든다.
+
+            ```java
+            @Service
+            public class MemberService {
+                private final MemberRepository memberRepository;
+            
+                public MemberService(MemberRepository memberRepository) {
+                    this.memberRepository = memberRepository;
+                }
+            } 
+            ```
+
+        * 따라서 MemberService를 빈으로 등록하려고 하는데 의존 관계에 있는 빈(MemberRepository)이 없으면 먼저 MemberRepository를 빈으로 등록한다.
+
+        * 그리고 스프링 빈 저장소에서 MemberRepository를 꺼내서 생성자를 통해 주입하여 MemberService를 스프링 빈으로 등록하는 것을 마무리한다.
+
 #### 4) @Autowired에서 발생 할 수 있는 경우의 수
 
 * 해당 타입의 빈이 없는 경우, 실패 
@@ -480,9 +548,9 @@
         
     * 스프링 빈의 이벤트 라이프 사이클
     
-        * `스프링 컨테이너 생성` -> `스프링 빈 생성` -> `의존 관계 주입` -> `초기화 콜백` -> `사용` -> `소멸전 콜백` -> `스프링 컨테이너 종료`    
+        * `스프링 컨테이너 생성` -> `스프링 빈 생성` -> `의존관계 주입` -> `초기화 콜백` -> `빈(Bean) 사용` -> `소멸전 콜백` -> `스프링 컨테이너 종료`    
 
-            * **생성자 주입**의 경우, 생성자를 호출하면서 의존 관계 주입도 한번에 처리된다. 
+            * **생성자 주입**의 경우, 생성자를 호출하면서 의존관계 주입도 한번에 처리된다. 
             
             * `초기화 콜백`: 빈이 생성되고, 빈의 의존관계 주입이 완료된 이후에 호출된다.
             
@@ -535,7 +603,7 @@
                 }
                 ```
 
-        * ③ `@PostConstruct`, `@PreDestory` 애노테이션
+        * ③ `@PostConstruct`, `@PreDestroy` 애노테이션
         
             * `@PostConstruct` : 빈이 생성되고, 의존관계 주입이 완료된 이후에 호출될 초기화 메소드에 적용한다.
         
@@ -556,9 +624,12 @@
 * `@ComponentScan`는 `@Component` 애노테이션이 붙어 있는 클래스들을 스캔하여 빈으로 등록한다.
 
     * `BasePackages`는 입력된 패키지의 경로를 기준으로 스캔을 시작한다. 
+      
         * 패키지의 경로를 문자열로 입력 받기 때문에 type-safe 하지 않음
 
     * `BasePackageClasses`는 입력된 클래스가 위치한 패키지를 기준으로 스캔을 시작한다.
+    
+    * 만약 해당 애노테이션에 값을 지정하지 않으면 `@ComponentScan`이 붙어 있는 클래스가 위치한 패키지가 시작 위치가 된다.
     
 * 스프링 부트에서는 `@SpringBootApplication`이 붙어 있는 클래스가 컴포넌트 스캔의 시작 지점이다.
 
@@ -1496,7 +1567,7 @@ public class MyEventHandler{
 
         * 즉, 리소스를 읽어 올 때 웹 애플리케이션 루트에서 상대 경로로 리소스를 찾는다.
 
-* **`ApplicationContext`의 타입에 상관없이 리소스 타입을 강제하려면 `java.net.URL` 접두어와 `classpath:` 중 하나를 사용할 수 있다.**
+* **`ApplicationContext`의 타입에 상관없이 리소스 타입을 강제하려면 `java.net.URL` (+ `classpath:`) 접두어 중 하나를 사용하면 된다.**
 
     * 접두어를 사용하는 방법을 권장하며 그 이유는 명시적이기 때문이다.
     
@@ -1506,7 +1577,7 @@ public class MyEventHandler{
 
 * 예시
     
-    * 스프링 부트에서 `@Autowired`으로 `ApplicationContext`를 주입 받는 경우, `WebApplicationContext` 구현체 중 하나를 주입 받게 된다.
+    * 스프링 부트에서 Web 의존성을 추가하고 `@Autowired`으로 `ApplicationContext`를 주입 받는 경우, `WebApplicationContext` 구현체 중 하나를 주입 받게 된다.
     
     * 그리고 `ApplicationContext`가 `WebApplicationContext` 타입이면 `getResource()`로 얻는 Resource 구현체의 타입은 `ServletContextResource`이다.
     
@@ -1550,7 +1621,7 @@ public class MyEventHandler{
 
 * Validator 인터페이스를 구현하는 클래스는 아래의 메서드를 구현해야 한다.
 
-    * `boolean supports(Class clazz)` : 파라미터로 전달되는 클래스 타입이 해당 Validator가 검증 할 수 있는지를 확인할 때, 사용한다.
+    * `boolean supports(Class clazz)` : 해당 Validator가 파라미터로 전달되는 클래스 타입을 검증 할 수 있는지 확인한다.
     
     * `void validate(Object target, Errors error)` : 실제 검증 작업을 한다.
 
@@ -1776,7 +1847,7 @@ public class MyEventHandler{
 
     * `PropertyEditor`는 스프링 3.0 이전까지 `DataBinder`가 변환 작업에 사용한 인터페이스이다.
     
-        * 상태 정보을 저장 하고 있어서 쓰레드-세이프 하지 않다. 
+        * 상태 정보를 저장 하고 있어서 쓰레드-세이프 하지 않다. 
           
             * PropertyEditor가 가지고 있는 value가 서로 다른 쓰레드에게 공유된다.
     
@@ -1984,7 +2055,7 @@ public class MyEventHandler{
 
     * `Formatter`는 Object와 String 간의 변환을 담당한다. (PropertyEditor 대체재)
     
-    * 문자열을 Locale에 따라 다국화 하는 기능도 제공한다.
+        * 문자열을 Locale에 따라 국제화 하는 기능도 제공한다.
 
     * `FormatterRegistry`에 등록해서 사용한다.
     
@@ -2136,11 +2207,11 @@ public class MyEventHandler{
 
 #### 4) SpEL가 사용되는 곳 
 
-* `@Value` 애노테이션
+* ① `@Value` 애노테이션
 
-* `@ConditionalOnExpression` 애노테이션
+* ② `@ConditionalOnExpression` 애노테이션
 
-* 스프링 시큐리티
+* ③ 스프링 시큐리티
 
     * 메소드 시큐리티, `@PreAuthorize`, `@PostAuthorize`, `@PreFilter`, `@PostFilter`
 
@@ -2148,7 +2219,7 @@ public class MyEventHandler{
 
     * ...
     
-* 스프링 데이터 
+* ④ 스프링 데이터 
     
     * @Query 애노테이션
     
@@ -2158,7 +2229,7 @@ public class MyEventHandler{
 
             * `@Query("select u from User u where u.emailAddress = ?#{principal.emailAddress}")`
 
-* Thymeleaf
+* ⑤ Thymeleaf
 
 ## 6. 스프링 AOP : 개념 소개
 
@@ -2190,35 +2261,29 @@ public class MyEventHandler{
 
 #### 2) AOP 관련 용어 
 
-* `Aspect` 
- 
-    * **부가 기능을 모듈화한 것**을 말한다.
+* ① `Aspect` : **부가 기능을 모듈화한 것**을 말한다.
 
     * `Aspect`는 부가 기능을 정의한 `Advice`와 `Advice`를 어디에 적용할지를 결정하는 `PointCut`을 함께 가지고 있다.
 
-* `Target`
+* ② `Target` : **부가 기능을 적용할 대상**을 말한다. 
 
-    * **부가 기능을 적용할 대상**을 말한다. 
-    
-    * `Target`은 핵심 기능을 담고 있는 모듈을 말하며 `Aspect`가 적용되는 곳이다. 
-
-* `Advice` 
-
-    * **실질적으로 부가 기능을 담은 구현체**를 말한다. (해야 할 일) 
+* ③ `Advice` : **실질적으로 부가 기능을 담은 구현체**를 말한다.
 
     * `Advice`는 `Aspect`가 **무엇**을 **언제** 할지를 정의하고 있다.
 
-* `JoinPoint` 
-
-    * **Advice가 적용될 수 있는 위치**를 말한다.
+* ④ `JoinPoint` : **Advice가 Target에 적용 될 수 있는 시점**을 말한다.
    
-    * 메소드 호출 시점, 생성자 호출 시점 등이 `JoinPoint`에 해당한다. (여러 가지 끼어들 수 있는 지점을 의미함)
+    * Ex) 메소드 호출 시점, 생성자 호출 시점 등
     
-        * 스프링에서는 메소드 `JoinPoint`만 제공한다.
+        * 스프링에서는 메소드 JoinPoint만 제공한다.
 
-* `PointCut` 
+* ⑤ `PointCut` : 어떤 `JoinPoint`에 `Advice`가 적용되어야 하는지를 정의한다.
 
-    * 어떤 `JoinPoint`에 `Advice`가 적용되어야 하는지를 정의한다.
+    * `Joint Point`의 상세 스펙을 정의한 것이다.
+
+* ⑥ `프록시 (Proxy)` : 타겟을 감싸서 타겟의 요청을 대신 받아주는 랩핑(Wrapping) 오브젝트를 말한다.
+
+    * 호출자(클라이언트)가 타겟을 호출하게 되면 타겟을 감싸고 있는 프록시(Proxy)가 호출되어 어드바이스에 등록된 기능을 수행 후 타겟 메소드를 호출한다.
             
 #### 3) Java의 AOP 구현체
 
@@ -2240,7 +2305,7 @@ public class MyEventHandler{
     
     * (3) `런타임 시점` - Spring AOP
     
-        * 런타임 시에 위빙이 이루어지는 방식이다.
+        * 런타임 시에 메소드를 호출할 때, 위빙이 이루어지는 방식이다.
 
 ## 7. 스프링 AOP : 프록시 기반 AOP
 
@@ -2258,11 +2323,11 @@ public class MyEventHandler{
 
     ![image 1](images/img1.png)
 
-    * `프록시 패턴`에서 `클라이언트(Client)`는 `해당 인터페이스 타입(Subject)`으로 `프록시 객체(Proxy)`를 사용하게 된다.
+    * `프록시 패턴`에서 `클라이언트(Client)`는 `인터페이스 타입(Subject)`으로 `프록시 객체(Proxy)`를 사용하게 된다.
     
     * 그리고 `프록시 객체`는 `타겟 객체(Real Subject)`를 참조하고 있다.
     
-    * `프록시 객체`가 원래 해야 할 일을 가지고 있는 `타겟 객체`를 감싸서 `클라이언트`의 요청을 처리하게 된다.
+        * `프록시 객체`가 원래 해야 할 일을 가지고 있는 `타겟 객체`를 감싸서 `클라이언트`의 요청을 처리하게 된다.
 
 #### 3) 예제
 
@@ -2462,27 +2527,27 @@ public class MyEventHandler{
 
     * 프록시는 `Real Subject`에게 일을 대신 처리 하도록 위임을 한 다음, 부가 기능(성능을 측정하는 코드)를 수행한다.
 
-    * 그러면 `Client`에 해당하는 `AppRunner`는 `@Autowired`로 `EventService`를 주입 받는데 
-    
-    * `@Primary`로 지정한 `ProxySimpleEventService` 빈이 주입된다.
+    * 그러면 `Client`에 해당하는 `AppRunner`는 `@Autowired`로 `EventService`를 주입 받는데 `@Primary`로 지정한 `ProxySimpleEventService` 빈이 주입된다.
 
 * 앞서 Proxy 클래스를 만들어서 모든 문제가 해결된 것처럼 보이지만 아직도 문제점이 존재한다.
  
     * 매번 Proxy 클래스를 작성해야 되며 이를 여러 클래스와 메소드에 적용해야 한다면 상당히 번거롭다고 느끼게 될 것이다.
       
-    * 이러한 이유로 등장하게 된 것이 `스프링 AOP`이다.
+    * 이러한 이유로 등장하게 된 것이 바로 `스프링 AOP`다.
     
 #### 4) 동적 프록시 (Dynamic Proxy)
 
 * 스프링 IoC 컨테이너가 제공하는 기반 시설과 동적 프록시를 사용하여 여러 복잡한 문제를 해결한 것이 바로 스프링 AOP이다.
   
-  * `동적 프록시 (Dynamic Proxy)` : 애플리케이션이 실행되고 있는 도중에 프록시 객체를 생성하는 방법을 말한다. 
-  
-  * `스프링 IoC 컨테이너`는 특정 클래스가 빈으로 등록될 때, 해당 Bean을 대체하는 동적 프록시 빈을 만들어 등록시켜 준다.
-
-      * 이때, 사용되는 것이 AbstractAutoProxyCreator이다.
-      
-      * AbstractAutoProxyCreator는 BeanPostProcessor의 구현체이다.
+    * `동적 프록시 (Dynamic Proxy)` : 애플리케이션이 실행되고 있는 도중에 프록시 객체를 생성하는 방법을 말한다. 
+    
+    * `스프링 IoC 컨테이너`는 특정 클래스가 빈으로 등록될 때, 해당 Bean을 대체하는 동적 프록시 빈을 만들어 등록시켜 준다.
+    
+        * 이때, 사용되는 것이 `AbstractAutoProxyCreator`이다.
+        
+        * `AbstractAutoProxyCreator`는 `BeanPostProcessor`의 구현체이다.
+        
+            * `BeanPostProcessor` : 새로운 빈(Bean) 인스턴스를 조작 할 수 있는 기능을 제공한다.
 
 ## 8. 스프링 AOP : @AOP
 
@@ -2497,17 +2562,7 @@ public class MyEventHandler{
     </dependency>
     ```
   
-* (2) `@Aspect`를 붙인 Aspect 클래스를 작성한 다음, 빈(Bean)으로 등록한다.
-  
-    ```java
-    @Component
-    @Aspect
-    public class PerfAspect {
-        
-    }
-    ```
-
-* (3) `ProceedingJoinPoint`의 `proceed()`로 타겟 메서드를 호출하고 그 결과 값을 전달 받는다.
+* (2) `@Aspect`를 붙인 Aspect 클래스를 작성한 다음, 빈(Bean)으로 등록한다. 그리고 `ProceedingJoinPoint`의 `proceed()`로 타겟 메서드를 호출한 다음, 그 결과 값을 전달 받는다.
 
     ```java
     @Component
@@ -2532,20 +2587,34 @@ public class MyEventHandler{
     
     }
     ```
-  
-    * `@Around` : 타겟 메소드를 호출하기 전과 후에 어드바이스 기능을 수행한다.
+
+    * `@Aspect` : Aspect 역할을 하는 클래스를 선언할 때 사용한다.
+    
+        * `Aspect`는 부가 기능을 정의한 `Advice`와 `Advice`를 어디에 적용할지를 결정하는 `PointCut`을 함께 가지고 있다.  
+
+    * `@Around` : 어드바이스를 의미한다. 
+
+        * 어드바이스는 `Aspect`가 **무엇**을 **언제** 할지를 정의하고 있다.
+
+            * 무엇은 어드바이스 메소드(`logPerf()`)를 말한다.
               
-    * `logPerf()`는 어드바이스 메소드이다.
+            * 언제는 `@Around`를 말한다.
+              
+                * `@Around` : 타겟 메소드를 호출하기 전과 후에 어드바이스 기능을 수행한다.
+    
+        * 주의사항
 
-    * 그리고 파라미터로 지정된 `ProceedingJoinPoint`는 해당 Advice가 적용되는 대상을 의미한다.
-
-    * 여기서 주의할 점은 `@Around`의 경우, 반드시 `proceed()`가 호출되어야 한다는 것이다.
-
-    * `proceed()`는 타겟 메서드를 의미하며 `proceed()`를 호출 해야 타겟 메소드가 실행된다.
-
+            * 어드바이스 메소드의 파라미터(`ProceedingJoinPoint`)는 해당 Advice가 적용되는 대상을 의미한다.
+            
+            * 여기서 주의할 점은 `@Around`의 경우, 반드시 `proceed()`가 호출되어야 한다는 것이다.
+            
+            * `proceed()`는 타겟 메서드를 의미하며 `proceed()`를 호출해야 타겟 메소드가 실행된다.
+        
+    * `"execution(* me.whiteship..*.EventService.*(..))"` : 포인트컷 표현식을 의미한다.
+    
 #### 2) 특정 메소드에만 AOP를 적용하기
 
-* 앞서 살펴본 예제에서 deleteEvent()는 적용 대상에서 제외를 해야 된다면 어떻게 해야 될까? 애노테이션을 직접 정의하는 방법으로 해결 가능하다. 
+* ① 앞서 살펴본 예제에서 deleteEvent()는 적용 대상에서 제외를 해야 된다면 어떻게 해야 될까? 애노테이션을 직접 정의하는 방법으로 해결 가능하다. 
 
     ```java
     /*
@@ -2577,7 +2646,7 @@ public class MyEventHandler{
         
             * 애플리케이션 실행 중에도 애노테이션 정보가 유지된다. 
             
-* 스프링 AOP를 적용하고 싶은 메소드에 앞서 정의한 애노테이션을 붙여준다.
+* ② 스프링 AOP를 적용하고 싶은 메소드에 앞서 정의한 애노테이션을 붙여준다.
 
     ```java
     @Service
@@ -2611,7 +2680,7 @@ public class MyEventHandler{
     }
     ```
 
-* 포인트컷 표현식이 아닌 애노테이션 표현식으로 변경한다.
+* ③ 포인트컷 표현식이 아닌 애노테이션 표현식으로 변경한다.
 
     ```java
     @Component
@@ -2636,7 +2705,7 @@ public class MyEventHandler{
 
 #### 1) Null 관련 애노테이션
 
-* 스프링 5에서 (IDE의 지원을 받아) 컴파일 시점에 최대한 NullPointerException을 방지하기 위해 아래와 같은 애노테이션이 추가 되었다. 
+* 스프링 5에서 (IDE의 지원을 받아) 컴파일 시점에 최대한 `NullPointerException`을 방지하기 위해 아래와 같은 애노테이션이 추가 되었다. 
  
     * `@NonNull` : Null을 허용 하지 않음
       
@@ -2646,9 +2715,9 @@ public class MyEventHandler{
       
     * `@NonNullFields` : 해당 패키지의 모든 필드는 Null을 허용하지 않음
     
-#### 2) Null-Safety - 예시
+#### 2) 예시
 
-* EventService 클래스를 작성할 때 createEvent() 메서드의 파라미터도 Null을 허용하지 않고 리턴 값도 Null을 허용하지 않도록 한다.
+* ① EventService 클래스를 작성할 때 createEvent() 메서드의 파라미터도 Null을 허용하지 않고 리턴 값도 Null을 허용하지 않도록 한다.
 
     ```java
     @Service
@@ -2661,7 +2730,7 @@ public class MyEventHandler{
     }
     ```
 
-* 그리고 AppRunner 클래스를 작성한 다음, createEvent() 메서드로 null을 전달한다
+* ② 그리고 AppRunner 클래스를 작성한 다음, createEvent() 메서드로 null을 전달한다
 
     ```java
     @Component
@@ -2677,21 +2746,23 @@ public class MyEventHandler{
     }
     ```
 
-* 우리는 1번 과정에서 IDE의 경고 메시지의 도움을 받아 Null을 방지하기 위해 @NonNull 애노테이션을 붙였다. 
+* ③ 우리는 1번 과정에서 IDE의 경고 메시지의 도움을 받아 Null을 방지하기 위해 @NonNull 애노테이션을 붙였다. 
 
-  아래 메서드 호출 시 매개변수로 Null을 전달하고 있기 때문에 IDE에서 경고 메시지를 표시해주어야 하는데 어떠한 경고 메시지도 나타나지 않는다.
+* 아래 메서드 호출 시 매개변수로 Null을 전달하고 있기 때문에 IDE에서 경고 메시지를 표시해주어야 하는데 어떠한 경고 메시지도 나타나지 않는다.
   
     ```java
     eventService.createEvent(null);
     ```
   
-  그래서 IDE의 경고 메시지를 통해 Null을 방지하기 위해 인텔리제이의 설정을 변경 해야 하는데 해당 강좌를 참고하도록 하자.
+* 그래서 IDE의 경고 메시지를 통해 Null을 방지하려면 인텔리제이의 설정을 변경해야 한다.
+  
+    * 이 내용은 해당 강좌를 참고하도록 하자.
 
 ## 10. PSA
 
-* `PSA (Portable Service Abstraction)` : 환경의 변화와 관계없이 일관된 방식의 기술 접근 환경을 제공하려는 추상화 구조를 말한다.
+* (1) `PSA (Portable Service Abstraction)` : 환경의 변화와 관계없이 일관된 방식의 기술 접근 환경을 제공하려는 추상화 구조를 말한다.
 
-* 추상화 계층을 사용하는 이유
+* (2) 추상화 계층을 사용하는 이유
 
     * `편의성` : 우리는 Spring이 제공하는 추상화 계층을 사용함으로써 `Servlet`과 같은 Row 레벨로 코드를 작성하지 않아도 된다.
     
@@ -2705,7 +2776,7 @@ public class MyEventHandler{
         
             * ② 톰캣, 제티, 언더토우와 같은 서버를 변경 할 수도 있다.
 
-* 예시
+* (3) 예시
 
     * ① 스프링 웹 MVC
 

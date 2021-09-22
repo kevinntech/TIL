@@ -3958,7 +3958,7 @@
         
         * ② 커스터마이징
             
-            ```html
+            ```java
             @SpringBootApplication
             public class SpringbootrestApplication {
             
@@ -3977,3 +3977,175 @@
                 }
             }
             ```
+
+## 4. 스프링 부트 운영
+
+#### 1) 스프링 Actuator 1부 : 소개
+
+* (1) 개요
+  
+    * 스프링 부트는 애플리케이션 운영 환경에서 유용한 기능을 제공한다.
+    
+    * 스프링 부트가 제공하는 엔드포인트와 메트릭스 그리고 그 데이터를 활용하는 모니터링 기능에 대해 학습한다.
+    
+* (2) Actuator
+
+    * `액추에이터(Actuator)` : 스프링 부트의 모듈이며 실행중인 애플리케이션의 상태를 확인할 수 있는 엔드포인트(Endpoint)를 제공한다.
+    
+        * `엔드 포인트(Endpoint)` : 최종 사용자가 네트워크에 접속하는 지점을 의미한다.
+        
+            * 본문에서는 정보를 얻을 수 있는 특정 URL를 의미한다.
+    
+    * Actuator의 특징
+    
+        * 다양한 엔드포인트를 제공한다.
+    
+        * JMX 또는 HTTP를 통해 접근이 가능하다.
+    
+        * shutdown을 제외한 모든 Endpoint는 기본적으로 활성화 상태다.
+    
+        * health와 info를 제외한 대부분의 Endpoint는 기본적으로 비공개 상태다.
+    
+            * 활성화와 공개 여부는 따로 관리된다.
+
+                * 활성화 여부 조정하기
+                    
+                    ```
+                    management.endpoints.enabled-by-default=false           -- 기본적으로 활성화되는 Endpoint가 적용되지 않도록 한다.
+                    management.endpoint.info.enabled=true                   -- info Endpoint를 활성화한다.
+                    ```
+                
+                * 공개 여부 조정하기
+                
+                    ```
+                    management.endpoints.web.exposure.include=*             -- 모든 Endpoint를 공개한다.
+                    management.endpoints.web.exposure.exclude=env,beans     -- env, beans Endpoint는 공개하지 않는다.
+                    ```
+
+    * 실습하기
+
+        * ① 스프링 부트 프로젝트를 새로 생성한다.
+        
+        * ② 메인 애플리케이션 코드를 다음과 같이 변경한다.
+        
+            ```java
+            @SpringBootApplication
+            @RestController
+            public class Application {
+            
+                @GetMapping("/hello")
+                public String hello(){
+                    return "hello";
+                }
+            
+                public static void main(String[] args) {
+                    SpringApplication.run(Application.class, args);
+                }
+            
+            }
+            ```
+        
+        * ③ 의존성을 추가한다.
+        
+            ```html
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+            </dependency>
+            ```
+        
+        * ④ 엔드 포인트를 이용하여 애플리케이션을 모니터링 할 수 있다.
+
+            * http://localhost:8080/actuator 로 접속하면 결과는 다음과 같이 HATEOAS 형식의 문서로 이루어져있다.
+            
+                ![image 17](images/img17.png)
+                
+                * HATEOAS : 현재 리소스와 연관되어 있는 링크 정보를 만들어주는 것을 말한다.
+    
+#### 2) 스프링 Actuator 2부
+
+* (1) JConsole 사용하기
+
+    * ① 인텔리제이 터미널에서 jconsole를 입력한다.
+    
+        ![image 18](images/img18.png)
+
+    * ② 로컬 프로세스에서 내가 실행한 스프링 부트 애플리케이션을 선택한 다음, [Connect]를 클릭한다.
+
+        ![image 19](images/img19.png)
+    
+    * ③ Heap memory 사용량, thread 개수, 로딩한 class 개수, CPU 사용량 등을 보여준다.
+
+        ![image 20](images/img20.png)
+    
+        * JMX로 엔드 포인트 정보를 볼 수 있지만, 보는 것이 매우 불편하다.
+
+* (2) VisualVM 사용하기
+
+    * https://visualvm.github.io/download.html
+
+#### 3) 스프링 부트 Admin
+
+* (1) 스프링 부트 Admin
+
+    * 스프링 진영에서 제공하는 것이 아닌 제 3자가 제공하는 애플리케이션이다.
+    
+    * 스프링 부트 Actuator 정보를 UI에서 확인 할 수 있는 툴(애플리케이션)이다.
+
+* (2) 어드민 서버 설정
+
+    * ① 서버 역할을 하는 새로운 프로젝트를 생성한다.
+    
+    * ② 의존성을 추가한다.
+
+        ```html
+        <dependency>
+            <groupId>de.codecentric</groupId>
+            <artifactId>spring-boot-admin-starter-server</artifactId>
+            <version>2.1.6</version>
+        </dependency>
+        ```
+
+    * ③ 메인 애플리케이션 클래스에 @EnableAdminServer를 추가한다.
+
+        ```java
+        @SpringBootApplication
+        @EnableAdminServer
+        public class SpringbootmonitorApplication {
+        
+            public static void main(String[] args) {
+                SpringApplication.run(SpringbootmonitorApplication.class, args);
+            }
+        
+        }
+        ```
+
+* (3) 클라이언트 설정
+
+    * ① 클라이언트 역할을 하는 새로운 프로젝트를 생성한다.
+    
+    * ② 의존성을 추가한다.
+
+        ```html
+        <dependency>
+            <groupId>de.codecentric</groupId>
+            <artifactId>spring-boot-admin-starter-client</artifactId>
+            <version>2.1.6</version>
+        </dependency>
+        ```
+
+    * ③ application.properties에 클라이언트 애플리케이션이 접속할 admin 서버의 주소를 지정한다.
+
+        * 그리고 서버 역할을 하는 프로젝트가 8080 포트를 사용하므로 클라이언트의 포트를 18080으로 변경한다.
+
+            ```
+            management.endpoints.web.exposure.include=* 
+            spring.boot.admin.client.url=http://localhost:8080
+            server.port=18080
+            ```
+
+    * ④ 웹 브라우저에서 다음과 같은 결과를 확인 할 수 있다.
+
+        ![image 21](images/img21.png)
+
+    

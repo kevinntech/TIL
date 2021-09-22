@@ -1545,10 +1545,13 @@
 
     * ① 스프링 부트에서는 `application.properties`를 사용해서 스프링 MVC를 커스터마이징 할 수 있다.
 
-        * 예를 들어, `WebMvcAutoConfiguration`의 내부 코드를 살펴보면 `Preperties`들이 사용되는 것을 확인 할 수 있다.
-    
-        * 그 중 `ResourceProperties`의 내부 코드를 살펴보면 prefix (`prefix = "spring.resources"`)가 있으며 `application.properties`에서 prefix에 해당하는 설정 값들을 읽어온다. 
-    
+        ```
+        spring.thymeleaf.prefix=classpath:/templates/
+        spring.thymeleaf.suffix=.html
+        ```
+      
+        * 위에서 설정한 prefix와 suffix는 이미 설정되어 있는 기본 값이며 `ThymeleafProperties`에서 확인 할 수 있다.
+
     * ② `@Configuration` + `implements WebMvcConfigurer`
     
         * 스프링 부트의 스프링 MVC 자동 설정을 그대로 사용하면서 추가적인 설정을 한다.
@@ -3086,9 +3089,9 @@
 
     * ⑤ `@DeleteMapping`
     
-* (6) 클래스에 `@RequestMapping`를 지정
+* (6) 클래스 레벨에 `@RequestMapping`를 지정
 
-    * 다음과 같이 클래스에 `@RequestMapping`를 지정하면 해당 컨트롤러의 모든 핸들러는 GET 요청만 처리한다. 
+    * 다음과 같이 클래스 레벨에 `@RequestMapping`를 지정하면 해당 컨트롤러의 모든 핸들러는 GET 요청만 처리한다. 
     
         ```java
         @Controller
@@ -3421,6 +3424,14 @@
             * `RFD Attack`이라는 보안 이슈가 있다.
         
             * URI 변수, Path 매개변수, URI 인코딩을 사용할 때 불명확해진다.
+    
+        * 따라서 다음과 같이 해결하는 것을 권장한다.
+    
+            * Content-Type를 사용한다.
+    
+            * 또는 요청 파라미터를 사용한다.
+    
+                * Ex) `/url?type=xml`
       
 #### 4) HTTP 요청 맵핑하기 3부: 미디어 타입 맵핑
 
@@ -3849,7 +3860,7 @@
          }
          ```
 
-     * ② 순서에 상관 없이 ALLOW 헤더에 해당 HTTP 메서드가 있는지 확인하는 테스트 코드를 작성한다.
+     * ② HTTP 헤더에 지정한 값이 있는지 순서에 상관 없이 확인하는 테스트 코드를 작성한다.
            
          ```java
          @RunWith(SpringRunner.class)
@@ -3875,6 +3886,8 @@
              }
          }
          ```
+       
+         * ALLOW 헤더에 지정한 HTTP 메서드가 있는지 확인한다.
        
 #### 7) HTTP 요청 맵핑하기 6부 : 커스텀 애노테이션
 
@@ -3955,7 +3968,7 @@
     
 * (4) `@Retention`
       
-    * `@Retention`는 애노테이션이 유지되는 기간을 지정하는데 사용된다.
+    * `@Retention`는 애노테이션 정보가 유지되는 기간을 지정하는데 사용된다.
 
         * Source
         
@@ -3971,9 +3984,11 @@
     
         * Runtime
         
-            * 런타임까지 유지된다. 
-            
-                * 애플리케이션 구동 중에도 애노테이션 정보가 유지되도록 할 때 사용한다.
+            * 런타임까지 유지된다.
+
+                * 런타임 시, 클래스를 메모리로 읽어왔을 때까지 유지한다.
+                  
+                * 즉, 애플리케이션 구동 중에도 애노테이션 정보가 유지되도록 할 때 사용한다.
     
             * 실행 시에 리플렉션을 통해 클래스 파일에 저장된 애노테이션의 정보를 읽어서 처리 할 수 있다.
             
@@ -6318,6 +6333,8 @@
         
         }
         ```
+      
+        * `@DateTimeFormat(pattern = "yyyy-MM-dd")`처럼 지정 할 수도 있다.
 
     * ② `form-name.html`에서 날짜(StartDate)를 입력 할 수 있도록 수정한다.
        
@@ -6387,8 +6404,12 @@
 * (1) `@ExceptionHandler`는 특정 예외를 처리하는 핸들러를 정의한다.
 
     * 지원하는 메소드 아규먼트 (해당 예외 객체, 핸들러 객체, ...)
-    
+
+        * https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-exceptionhandler-args
+
     * 지원하는 리턴 값
+    
+        * https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-exceptionhandler-return-values
     
     * `REST API`의 경우 응답 본문에 에러에 대한 정보를 담아주고, 상태 코드를 설정하려면 `ResponseEntity`를 주로 사용한다.
 
