@@ -43,7 +43,17 @@
     
 * 자주 사용되는 설정
 
-    * `spring.jpa.hibernate.ddl-auto` : DDL 자동 생성 기능
+    * 데이터 소스 설정하기
+
+        * `spring.datasource.url` : 데이터베이스의 JDBC URL를 의미한다.
+
+        * `spring.datasource.username` : 데이터베이스에 접속할 때 사용하는 username를 의미한다.
+    
+        * `spring.datasource.password` : 데이터베이스에 접속할 때 사용하는 password를 의미한다.
+    
+        * `spring.datasource.driver-class-name` : 패키지 명을 포함한 JDBC 드라이버 이름을 의미한다.
+    
+    * `spring.jpa.hibernate.ddl-auto` : DDL 자동 생성 기능을 지정한다.
     
         ```
         spring.jpa.hibernate.ddl-auto = create
@@ -54,13 +64,7 @@
         ```
         spring.jpa.properties.hibernate.show_sql=true
         ```
-      
-    * `spring.jpa.properties.hibernate.format_sql` : 하이버네이트가 실행한 SQL을 가독성 있게 표현한다.
-
-        ```
-        spring.jpa.properties.hibernate.format_sql=true
-        ```
-      
+    
     * `logging.level.org.hibernate.SQL` : 하이버네이트가 실행한 SQL을 로거를 통해 출력한다.
 
         ```
@@ -69,15 +73,23 @@
 
         * 모든 로그 출력은 로거를 통해 남겨야 한다.
 
-    * 쿼리 파라미터를 로그로 출력하기
+    * `spring.jpa.properties.hibernate.format_sql` : 하이버네이트가 실행한 SQL을 가독성 있게 표현한다.
     
-        * ① `logging.level.org.hibernate.type.descriptor.sql` : 쿼리 파라미터를 로그로 출력한다.
+        ```
+        spring.jpa.properties.hibernate.format_sql=true
+        ```
+    
+    * 바인드 파라미터(Bind Parameter)를 로그로 출력하기
+    
+        * ① `logging.level.org.hibernate.type.descriptor.sql` : 바인드 파라미터를 로그로 출력한다.
     
             ```
             logging.level.org.hibernate.type.descriptor.sql=trace
             ```
 
-            * 하이버네이트가 실행한 SQL에서 물음표(`?`)로 표기된 부분을 쿼리 파라미터라고 한다.
+            * 하이버네이트가 실행한 SQL에서 물음표(`?`)로 표기된 부분을 바인드 파라미터라고 한다.
+    
+            * 바인드 파라미터에 어떤 값이 전달되는지 확인할 때 사용하는 옵션이다.
 
         * ② 외부 라이브러리 사용하기 (`p6spy`)
     
@@ -92,7 +104,19 @@
                 * 하지만 운영 시스템에 적용하려면 꼭 성능 테스트를 하고 사용하는 것이 좋다.
 
             * [참고] https://github.com/gavlyukovskiy/spring-boot-data-source-decorator
+
+    * `spring.jpa.properties.hibernate.use_sql_comments` : SQL문 이외에 추가적인 정보를 출력한다.
     
+        ```
+        spring.jpa.properties.hibernate.use_sql_comments=true
+        ```
+
+    * `spring.jpa.properties.hibernate.dialect` : 데이터베이스 방언을 지정한다.
+
+        ```
+        spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
+        ```
+
 ## 2. 예제 도메인 모델
 
 * 실무에서는 가급적 `@Setter`를 사용하지 않고 비즈니스 메소드를 따로 만드는 것이 좋다.
@@ -125,7 +149,7 @@
     @Getter @Setter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @ToString(of = {"id", "username", "age"})
-    public class Member{
+    public class Member {
     
         @Id @GeneratedValue
         @Column(name = "member_id")
@@ -143,9 +167,32 @@
             this.username = username;
         }
     
-        public void changeTeam(Team team){
+        public void changeTeam(Team team) {
             this.team = team;
             team.getMembers().add(this);
+        }
+    
+    }
+    ```
+
+    ```java
+    @Entity
+    @Getter @Setter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @ToString(of = {"id", "name"})
+    public class Team {
+    
+        @Id @GeneratedValue
+        @Column(name = "team_id")
+        private Long id;
+    
+        private String name;
+    
+        @OneToMany(mappedBy = "team")
+        private List<Member> members = new ArrayList<>();
+    
+        public Team(String name) {
+            this.name = name;
         }
     
     }
@@ -169,9 +216,7 @@
 
 * 스프링 데이터 JPA를 사용할 때, 인터페이스만 작성해도 동작한 이유
 
-    * `스프링 데이터 JPA`는 애플리케이션을 실행할 때, `JpaRepository`를 상속 받은 리포지토리 인터페이스들을 찾아서
-    
-    * 해당 인터페이스의 구현체를 생성해서 주입해준다.
+    * `스프링 데이터 JPA`는 애플리케이션을 실행할 때, `JpaRepository`를 상속 받은 리포지토리 인터페이스들을 찾아서 해당 인터페이스의 구현체를 생성해서 주입해준다.
 
         * 따라서 개발자가 직접 구현 클래스를 만들지 않아도 된다.
 
@@ -230,13 +275,13 @@
 
 ## 4. 쿼리 메소드 기능
 
-* 스프링 데이터 JPA가 제공하는 `쿼리 메소드 기능` 3가지
+#### 스프링 데이터 JPA가 제공하는 `쿼리 메소드 기능` 3가지
 
-    * ① 메소드 이름으로 쿼리 생성
-    
-    * ② 메소드 이름으로 JPA NamedQuery 호출
-    
-    * ③ `@Query`를 사용해서 리포지토리 메소드에 직접 쿼리를 정의
+* ① 메소드 이름으로 쿼리 생성
+
+* ② 메소드 이름으로 JPA NamedQuery 호출
+
+* ③ `@Query`를 사용해서 리포지토리 메소드에 직접 쿼리를 정의
 
 #### 1) 메소드 이름으로 쿼리 생성
 
@@ -245,8 +290,10 @@
     ```java
     public interface MemberRepository extends JpaRepository<Member, Long> {
     
+      List<Member> findByUsernameAndAge(String name, int age);
+  
       List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
-    
+      
     }
     ```
 
@@ -255,18 +302,24 @@
     * `AgeGreaterThan` : age가 ~ 보다 크면
     
 * 위의 메소드는 다음과 같은 JPQL을 생성한다.
+  
+    * `findByUsernameAndAge()`
 
-    ```java
-    select m 
-    from Member m 
-    where m.username = :username and m.age > :age
-    ```
+        ```java
+        select m 
+        from Member m 
+        where m.username = :username and m.age = :age
+        ```
+      
+    * `findByUsernameAndAgeGreaterThan()`
 
-* 메소드 이름으로 사용 할 수 있는 키워드는 다음과 같다.
-
-    * [스프링 데이터 JPA 공식 문서](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods "") 참고
-
-* 스프링 데이터 JPA가 제공하는 쿼리 메소드 기능
+        ```java
+        select m 
+        from Member m 
+        where m.username = :username and m.age > :age
+        ```
+      
+* 메소드 이름으로 쿼리를 생성할 때, 자주 사용되는 키워드는 다음과 같다.
 
     * 조회 : `find...By` , `read...By` , `query...By`, `get...By`
     
@@ -300,6 +353,10 @@
     
     * LIMIT : `findFirst3`, `findFirst`, `findTop`, `findTop3` 
 
+* 메소드 이름으로 쿼리를 생성할 때 사용되는 키워드를 좀 더 살펴보고 싶다면 다음 링크를 확인하자.
+
+    * [스프링 데이터 JPA 공식 문서 - Supported keywords inside method names](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods.query-creation "")
+    
 * 참고사항
 
     * `메소드 이름으로 쿼리 생성 방식`은 엔티티의 필드명이 변경되면 인터페이스에 정의한 메서드 이름도 꼭 함께 변경해야 한다. 
@@ -323,8 +380,8 @@
          ```java
         @Entity
         @NamedQuery(
-                name="Member.findByUsername",
-                query="select m from Member m where m.username = :username")
+                name = "Member.findByUsername",
+                query = "select m from Member m where m.username = :username")
         public class Member {
             //...
         }
@@ -338,15 +395,7 @@
             List<Member> findByUsername(@Param("username") String username);
         }
         ```
-
-        * 쿼리 메소드 기능의 실행 순서
-
-            * ① 스프링 데이터 JPA는 선언한 `엔티티 이름 + .(점) + 메서드 이름`으로 Named 쿼리를 찾아서 실행한다.
-            
-            * ② 만약 실행할 Named 쿼리가 없으면 `메소드 이름으로 쿼리 생성` 방식을 사용한다.
-                
-                * 필요하면 전략을 변경할 수 있지만 권장하지 않는다.
-                
+    
         * `Named 쿼리`는 애플리케이션을 시작하는 시점에 문법 오류를 발견 할 수 있다.
         
         * `@Param` : 이름 기반 파라미터를 바인딩 할 때 사용한다.
@@ -366,7 +415,21 @@
 
     * 실행할 메서드에 정적 쿼리를 직접 작성하므로 `이름 없는 Named 쿼리`라 할 수 있다.
     
-    * `@Query`는 애플리케이션을 시작하는 시점에 문법 오류를 발견 할 수 있다는 장점이 있다. 
+    * `@Query`에 직접 쿼리를 정의하는 것은 애플리케이션을 시작하는 시점에 문법 오류를 발견 할 수 있다는 장점이 있다. 
+
+    * 쿼리 메소드 기능의 실행 순서는 다음과 같다.
+
+        * ① 스프링 데이터 JPA는 `@Query`에 정의한 쿼리를 먼저 실행한다.
+
+            * ⓐ `@Query`에 직접 쿼리를 정의 했다면 해당 쿼리를 먼저 실행한다.
+
+            * ⓑ `@Query`에 name 속성으로 선언한 Named 쿼리를 찾아서 먼저 실행한다.
+
+            * ⓒ `@Query`이 없다면 `엔티티 이름 + .(점) + 메서드 이름`으로 Named 쿼리를 찾아서 먼저 실행한다.
+
+        * ② 만약 실행할 쿼리가 없으면 `메소드 이름으로 쿼리 생성` 방식을 사용한다.
+
+            * 필요하면 전략을 변경할 수 있지만 권장하지 않는다.
 
 #### 4) @Query, 값과 DTO 조회하기
 
@@ -389,7 +452,7 @@
         
             ```java
             @Data
-            public class MemberDTO {
+            public class MemberDto {
             
                 private Long id;
                 
@@ -397,14 +460,24 @@
                 
                 private String teamName;
                 
-                public MemberDTO(Long id, String username, String teamName) {
+                public MemberDto(Long id, String username, String teamName) {
                     this.id = id;
                     this.username = username;
                     this.teamName = teamName;
                 }
             }
             ```
-           
+    
+            * new 키워드 다음에 패키지 명을 포함한 전체 클래스명을 입력해야 한다.
+
+                * 현재 `MemberDto`는 아래 경로에 존재한다고 가정한다.
+    
+                    * `src/main/java/study/datajpa/dto/MemberDto.java`
+
+                * 소스코드 루트 (`src/main/java/`) 아래에서 부터 패키지 명을 작성하면 된다.
+
+                    * `study.datajpa.dto.MemberDto(m.id, m.username, t.name)`
+
         * ② DTO로 직접 조회하려면 `new` 명령어를 사용한다. 그리고 DTO에 일치하는 생성자가 있어야 한다.
         
             ```java
@@ -465,16 +538,20 @@
         Member findMemberByUsername(String username);               // 단건
         Optional<Member> findOptionalByUsername(String username);   // 단건 Optional
         ```
-     
+
+    * 쿼리 메소드를 작성할 때 사용 될 수 있는 리턴 타입은 다음 링크를 확인하자.
+
+        * [스프링 데이터 JPA 공식 문서 - Supported Query Return Types](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#appendix.query.return.types "")
+    
 * **조회 결과가 많거나 없으면 어떻게 될까?**
 
-    * ① 컬렉션 조회인 경우
+    * ① 컬렉션 조회인 경우 (반환 타입 : 컬렉션)
     
         * 조회 결과가 없으면 비어있는 컬렉션을 반환한다.
         
-            * `null` 체크를 하지 않아도 됨
+            * `null` 체크를 하지 않아도 된다.
     
-    * ② 단건 조회인 경우
+    * ② 단건 조회인 경우 (반환 타입 : 엔티티 타입) 
     
         * 조회 결과가 없으면 `null`을 반환한다.
         
@@ -536,17 +613,23 @@
         String sortProperty = sort.toString().contains("id") ? "id" : "updatedDate";
         ```
 
-    * ② `org.springframework.data.domain.Pageable` : 페이징 기능 (내부에 Sort 포함)
+    * ② `org.springframework.data.domain.Pageable` : 페이징 기능 (+ 정렬 기능)
+    
+        * 내부에 `Sort`를 포함하고 있다.
 
-* 파라미터에 `Pageable`을 사용하면 다음과 같은 `특별한 반환 타입`을 사용 할 수 있다. 
+* 파라미터에 `Pageable`을 사용하면 다음과 같은 특별한 **반환 타입**을 사용 할 수 있다. 
 
     * ① `org.springframework.data.domain.Page` : 추가 count 쿼리를 호출하는 페이징 결과를 반환한다.
     
-        * `Page` 인덱스는 0 부터 시작이다. 
+        * `Page`의 인덱스는 0 부터 시작한다. 
     
     * ② `org.springframework.data.domain.Slice` : 추가 count 쿼리를 호출하지 않는 페이징 결과를 반환한다.
         
-        * 다음 페이지 존재 여부를 확인 할 수 있다. (내부적으로 limit + 1 조회)
+        * 다음 페이지 존재 여부를 확인 할 수 있다. (내부적으로 limit + 1로 조회한다.)
+    
+            * 즉, `limit + 1`는 한 페이지에 조회할 데이터 수 + 1을 limit으로 지정한다는 의미다.
+    
+        * 더보기 기능을 구현할 때 사용한다.
     
     * ③ `자바 컬렉션` (`List` ...) : 추가 count 쿼리 없이 결과만 반환한다.
     
@@ -583,8 +666,10 @@
             //when
             // 0 페이지에서 3개를 가져온다. 그리고 username으로 내림차순 정렬한다.
             PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username")); 
-            Page<Member> page = memberRepository.findByAge(10, pageRequest);
-    
+            Page<Member> page = memberRepository.findByAge(10, pageRequest);        // 0 페이지에서 3개를 가져온다.
+            // Slice<Member> page = memberRepository.findByAge(age, pageRequest);   // 0 페이지에서 3 + 1개를 가져온다.
+                                                                                   // 여기서 3은 한 페이지에 조회할 데이터 수를 의미한다.
+      
             //then
             List<Member> content = page.getContent();
             assertThat(content.size()).isEqualTo(3);
@@ -606,9 +691,9 @@
         
         * `PageRequest.of()`
         
-            * **첫 번째 파라미터**에는 **현재 페이지**를, **두 번째 파라미터**에는 **조회할 데이터 수**를 전달한다.
+            * **첫 번째 파라미터**(`page`)에는 **현재 페이지**를, **두 번째 파라미터**(`size`)에는 **조회할 데이터 수**를 전달한다.
          
-            * 여기에 추가로 **정렬 정보**도 파라미터로 전달 할 수 있다. 참고로 페이지는 0 부터 시작한다.
+            * 여기에 추가로 **정렬 정보**(`sort`)도 파라미터로 전달 할 수 있다. 참고로 페이지는 0 부터 시작한다.
     
                 * `PageRequest.of(int page, int size, Sort sort)`
 
@@ -620,11 +705,11 @@
 	
             ```java
             public interface Page<T> extends Slice<T> {
-              int getTotalPages(); //전체 페이지 수
+              int getTotalPages();      // 전체 페이지 수를 반환한다.
           
-              long getTotalElements(); //전체 데이터 수
+              long getTotalElements();  // 전체 데이터 수를 반환한다.
           
-              <U> Page<U> map(Function<? super T, ? extends U> converter); //변환기
+              <U> Page<U> map(Function<? super T, ? extends U> converter); // Page 내의 요소를 다른 요소로 변환한다.
             }
             ```
 
@@ -634,20 +719,20 @@
 
         ```java
         public interface Slice<T> extends Streamable<T> {
-            int getNumber();                  // 현재 페이지
-            int getSize();                    // 페이지 크기 (한 페이지에 표시할 데이터 수)
-            int getNumberOfElements();        // 현재 페이지에 나올 데이터 수
-            List<T> getContent();             // 조회된 데이터
-            boolean hasContent();             // 조회된 데이터 존재 여부
-            Sort getSort();                   // 정렬 정보
-            boolean isFirst();                // 현재 페이지가 첫 페이지 인지 여부
-            boolean isLast();                 // 현재 페이지가 마지막 페이지 인지 여부
-            boolean hasNext();                // 다음 페이지 여부
-            boolean hasPrevious();            // 이전 페이지 여부
-            Pageable getPageable();           // 페이지 요청 정보
-            Pageable nextPageable();          // 다음 페이지 객체
-            Pageable previousPageable();      // 이전 페이지 객체
-            <U> Slice<U> map(Function<? super T, ? extends U> converter); //변환기
+            int getNumber();                  // 현재 페이지 번호를 반환한다.
+            int getSize();                    // 페이지 크기 (한 페이지에 표시할 데이터 수)를 반환한다.
+            int getNumberOfElements();        // 현재 페이지에 조회된 데이터 개수를 반환한다.
+            List<T> getContent();             // 현재 페이지에 조회된 데이터를 반환한다.
+            boolean hasContent();             // 현재 페이지에 조회된 데이터가 존재하는지를 반환한다.
+            Sort getSort();                   // 정렬 정보를 반환한다.
+            boolean isFirst();                // 현재 페이지가 첫 페이지 인지를 반환한다.
+            boolean isLast();                 // 현재 페이지가 마지막 페이지 인지를 반환한다.
+            boolean hasNext();                // 다음 페이지가 존재하는지를 반환한다.
+            boolean hasPrevious();            // 이전 페이지가 존재하는지를 반환한다.
+            Pageable getPageable();           // 페이지 요청 정보를 반환한다.
+            Pageable nextPageable();          // 다음 페이지 객체를 반환한다.
+            Pageable previousPageable();      // 이전 페이지 객체를 반환한다.
+            <U> Slice<U> map(Function<? super T, ? extends U> converter); // Slice 내의 요소를 다른 요소로 변환한다.
         }
         ```
 
@@ -657,7 +742,7 @@
 
     * count 쿼리를 분리하기
     
-        * count 쿼리에는 `left join` 조인을 하는 것이 의미 없기 때문에 이러한 경우에 사용 할 수 있다.
+        * count 쿼리에는 `left join` 조인을 하는 것이 의미가 없기 때문에 이럴 때 사용 할 수 있다.
     
             ```java
             @Query(value = "select m from Member m left join m.team t",
@@ -665,7 +750,7 @@
             Page<Member> findByAge(int age, Pageable pageable);
             ```
 
-            * value 속성은 컨텐츠를 가져오는 쿼리를 작성하고 countQuery는 카운트 쿼리를 작성한다.
+            * value 속성은 컨텐츠를 가져오는 쿼리를 작성하고 countQuery 속성은 카운트 쿼리를 작성한다.
 
             * 정렬 조건이 복잡해지면 `Sort`로 해결하기 어렵다. 
             
@@ -712,7 +797,7 @@
     
         * 사용하지 않으면 `QueryExecutionRequestException` 예외가 발생한다.
     
-    * `@Modifying(clearAutomatically = true)`로 설정하면 벌크성 쿼리를 실행하고 나서 영속성 컨텍스트를 초기화한다.
+    * `clearAutomatically = true`로 설정하면 벌크성 쿼리를 실행하고 나서 영속성 컨텍스트를 초기화한다.
     
         * 해당 옵션을 사용하지 않고 회원을 `findByUsername()`로 다시 조회하면 영속성 컨텍스트에 과거 값이 남아서 문제가 될 수 있다.
 
@@ -739,7 +824,7 @@
         * */
     
         // when
-        int resultCount = memberRepository.bulkAgePlus(20); // 해당 JPQL 실행 시, 플러시 동작
+        int resultCount = memberRepository.bulkAgePlus(20); // 해당 JPQL를 실행하기 전에 플러시가 동작하여 영속성 컨텍스트의 변경사항이 DB에 반영된다.
         //em.clear(); // 순수 JPA 사용 시 해결방법
   
         List<Member> result = memberRepository.findByUsername("member5");
@@ -750,10 +835,20 @@
         assertThat(resultCount).isEqualTo(3);
     }
     ```
+  
+    * JPQL을 실행할 때, 모든 내용을 플러시 하는 것이 아니라, 해당 JPQL과 관련 있는 엔티티만 플러시한다.
+    
+        * 이 상태에서 `clearAutomatically`가 실행되면 플러시 되지 않은 내용에서 문제가 발생할 수 있다.
+
+        * 하이버네이트에서 JPQL 실행 시 강제로 플러시가 되지 않도록 설정하는 경우에도 문제가 발생할 수 있다.
+
+    * 이러한 이유로 `flushAutomatically` 속성이 추가된 것이다.
+    
+        * 해당 옵션은 JPQL을 실행하기 전에 영속성 컨텍스트의 모든 내용을 플러시 해서 `clearAutomatically`로 인한 문제를 방지한다.
 
 #### 10) @EntityGraph
 
-* `N+1` 문제가 발생하는 경우
+* `N + 1` 문제가 발생하는 경우
 
     ```java
     @Test
@@ -772,18 +867,17 @@
     
         em.flush();
         em.clear();
-    
-        /*  */
+        
         List<Member> members = memberRepository.findAll();
     
         for (Member member : members) {
             System.out.println("member = " + member.getUsername());
-            System.out.println("member.team = " + member.getTeam().getName());
+            System.out.println("member.team = " + member.getTeam().getName()); // N + 1 문제 발생
         }
     }
     ```
         
-    * Member와 연괸된 Team은 지연 로딩(LAZY)으로 설정되어 있다.
+    * Member와 연관된 Team은 지연 로딩(LAZY)으로 설정되어 있다.
     
         * Member를 조회할 때, Team 필드에는 프록시 객체를 넣어둔다.
         
@@ -791,9 +885,9 @@
         
         * 그러나 `member.getTeam().getName()`를 하는 순간, 데이터베이스를 조회한다.
         
-            * `Team`의 필드를 건드릴 때, 위와 같이 동작한다.
+            * 즉, `Team`의 필드를 건드릴 때 위와 같이 동작한다.
     
-    * 위의 코드는 `N+1` 문제가 발생한다.
+    * 위의 코드는 `N + 1` 문제가 발생한다.
 
         * 먼저, Member를 조회하는 쿼리가 발생한다. (`1`)
 
@@ -839,18 +933,18 @@
           
 * 엔티티를 조회할 때 연관된 엔티티들을 함께 조회하는 방법
 
-    * `JPQL`의 `페치 조인`을 사용한다.
+    * ① `JPQL`의 `페치 조인`을 사용한다.
 
         ```java
         @Query("select m from Member m left join fetch m.team")
         List<Member> findMemberFetchJoin();
         ```
       
-    * `@EntityGraph` : 엔티티를 조회하는 시점에 연관된 엔티티를 함께 조회하는 기능이다.
+    * ② `@EntityGraph` : 어떤 엔티티를 조회하는 시점에 연관된 엔티티를 함께 조회하는 기능이다.
     
         * 사실상 페치 조인(FETCH JOIN)의 간편 버전이다.
         
-        * 기본적으로 LEFT OUTER JOIN을 사용한다.
+        * 기본적으로 LEFT OUTER JOIN만 지원한다.
     
            ```java
            // 공통 메서드를 오버라이딩
@@ -859,12 +953,12 @@
            List<Member> findAll();
            
            // JPQL + 엔티티 그래프
-           // 쿼리는 작성 했는데 페치 조인만 적용하고 싶은 경우에 엔티티 그래프를 사용 할 수 있다.
+           // JPQL는 작성 했는데 페치 조인만 적용하고 싶은 경우에도 엔티티 그래프를 사용 할 수 있다.
            @EntityGraph(attributePaths = {"team"})
            @Query("select m from Member m") 
            List<Member> findMemberEntityGraph();
            
-           // 메소드 이름으로 쿼리를 생성하는 경우에 사용하면 특히 편리하다.
+           // 메소드 이름으로 쿼리를 생성하는 경우에도 엔티티 그래프를 사용 할 수 있다.
            // 회원 엔티티를 조회할 때, 연관된 팀 엔티티도 함께 조회한다.
            @EntityGraph(attributePaths = {"team"})
            List<Member> findEntityGraphByUsername(@Param("username") String username);
@@ -872,9 +966,9 @@
           
             * `attributePaths` : 쿼리 수행 시, 즉시 로딩(EAGER LOADING)으로 함께 조회할 필드명을 지정한다
 
-    * `@NamedEntityGraph`
+    * ③ `@NamedEntityGraph`
     
-        * ① `@NamedEntityGraph`는 Named 엔티티 그래프를 정의할 때 사용한다.
+        * ⓐ `@NamedEntityGraph`는 Named 엔티티 그래프를 정의할 때 사용한다.
                 
             ```java
             @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
@@ -890,7 +984,7 @@
               
                 * 이때, `@NamedAttributeNode`를 사용하고 그 값으로 함께 조회할 속성을 선택하면 된다.
 
-        * ② `@EntityGraph`으로 Named 엔티티 그래프를 사용한다.
+        * ⓑ `@EntityGraph`으로 Named 엔티티 그래프를 사용한다.
                 
             ```java
             public interface MemberRepository extends JpaRepository<Member, Long> {
