@@ -405,7 +405,7 @@
             //엔티티 매니저는 데이터 변경 시 트랜잭션을 시작해야 한다.
             transaction.begin(); // [트랜잭션] 시작
             
-            em.persist(memberA);
+            em.persist(memberA); // em.persist()를 하면 해당 엔티티의 PK 값이 설정되고 난 다음에 영속 상태가 된다.
             //여기까지 INSERT SQL을 데이터베이스에 보내지 않는다.
             
             //커밋하는 순간, 데이터베이스에 INSERT SQL을 보낸다.
@@ -536,7 +536,7 @@
                 }
                 ```
     
-                * 2개 이상의 복합 유니크 제약조건도 만들 수 있다.
+                * 2개 이상의 복합 유니크 제약 조건도 만들 수 있다.
 
     * (3) 데이터베이스 스키마 자동 생성
     
@@ -727,7 +727,36 @@
                 * `@TableGenerator`이 필요하다.
     
             * ④ `AUTO` : 선택한 데이터베이스 방언에 따라 자동으로 지정한다. (기본 값)
+    
+        * 기본 키를 UUID로 자동 생성하기
+
+            ```java
+            @Entity
+            @Table(name = "ORDERS")
+            public class Order {
             
+              @Id
+              @GeneratedValue(generator = "uuid2")
+              @GenericGenerator(name = "uuid2", strategy = "uuid2")
+              @Column(columnDefinition = "BINARY(16)")
+              private UUID id;
+            
+              // ...
+            }
+            ```
+          
+            * `UUID (Universally Unique IDentifier, 범용 고유 식별자)` : 어디 곳에서도 고유한 ID를 의미한다.
+    
+                * `@GenericGenerator`의 strategy 속성에서 uuid2로 설정하면 `org.hibernate.id.UUIDGenerator`를 이용해서 키 값을 생성하게 된다.
+
+                * `UUIDGenerator`는 5개의 영역으로 UUID를 생성한다.
+
+                    ```
+                    2e66aa13-9c65-4935-a900-de0cb1d89e9b
+                    ```
+
+                    * [UUID의 각 영역에 대한 설명](https://github.com/hibernate/hibernate-orm/blob/9b00aaf9a55f9879a512b34c13dd25425264494b/hibernate-core/src/main/java/org/hibernate/id/UUIDGenerationStrategy.java#L21-L28 "UUID의 각 영역에 대한 설명")
+    
     * (3) 권장하는 식별자 전략
     
         * **데이터베이스 기본 키는 다음 3가지 조건을 모두 만족해야 한다.**
@@ -756,19 +785,84 @@
 
 ## 5. 연관관계 매핑 기초
 
+* 객체를 테이블에 맞추어 모델링 (객체 연관관계 사용 X)
+
+    * 예시
+    
+        ```java
+        @Entity
+        public class Member {
+        
+            @Id @GeneratedValue
+            @Column(name = "MEMBER_ID")
+            private Long id;
+        
+            @Column(name = "USERNAME")
+            private String username;
+        
+            // 외래 키
+            @Column(name = "TEAM_ID")
+            private Long teamId;
+            
+            //...
+        }
+        
+        @Entity
+        public class Team {
+        
+            @Id @GeneratedValue
+            @Column(name = "TEAM_ID")
+            private Long id;
+        
+            private String name;
+            
+            //...
+        }
+        ```
+
+    * 문제점 
+
+        * 외래 키를 직접 다루기 때문에 객체 지향적인 방법이 아니다.
+
+            ```java
+            // 팀 저장
+            Team team = new Team();
+            team.setName("TeamA");
+            em.persist(team);
+            
+            // 회원 저장
+            Member member = new Member();
+            member.setUsername("member1");
+            member.setTeamId(team.getId());
+            em.persist(member);
+            ```
+
+        * 식별자로 다시 조회해야되는 경우가 발생할 수 있다.
+
+            ```java
+            // 회원 조회
+            Member findMember = em.find(Member.class, member.getId());
+            
+            // 연관관계가 없기 때문에 teamId로 DB를 조회해야 한다.
+            Long findTeamId = findMember.getTeamId();
+            em.find(Team.class, findTeamId);
+            ```
+          
+            * 예를 들어, 어떤 회원을 조회한 다음, 해당 회원이 어느 팀에 소속되어 있는지 알고 싶다면 DB에서 식별자로 다시 조회해야 한다.
+
 * 연관관계가 필요한 이유
 
     * 객체를 테이블에 맞추어 데이터 중심으로 모델링하면, 객체들의 협력 관계를 만들 수 없다.
 
-    * 테이블과 객체 사이에는 다음과 같은 차이가 있다.
-    
-        * 테이블은 외래 키로 조인을 사용해서 연관된 테이블을 찾는다.
-    
-        * 객체는 참조를 사용해서 연관된 객체를 찾는다.
-         
+    * **테이블과 객체 사이에는 다음과 같은 차이가 있다.**
+
+        * **테이블은 외래 키로 조인을 사용해서 연관된 테이블을 찾는다.**
+
+        * **객체는 참조(reference)를 사용해서 연관된 객체를 찾는다.**
+
 * 단방향 연관관계
 
-    * (1) 객체 지향 모델링 (객체 연관관계 사용)
+    * (1) 객체 지향적인 모델링 (객체 연관관계 사용)
     
         ![image 1](images/img1.png) 
     
@@ -786,25 +880,25 @@
 
             * 회원 테이블과 팀 테이블은 양방향 관계다. 
             
-            * 회원 테이블의 `TEAM_ID` 외래 키를 통해서 회원과 팀을 조인 할 수 있고 반대로 팀과 회원도 조인할 수 있다.
+                * 회원 테이블의 `TEAM_ID` 외래 키를 통해서 회원과 팀을 조인 할 수 있고 반대로 팀과 회원도 조인할 수 있다.
 
-                ```sql            
-                 SELECT *
-                 FROM MEMBER M JOIN TEAM T ON M.TEAM_ID = T.TEAM_ID
-              
-                 SELECT *
-                 FROM TEAM T JOIN MEMBER M ON T.TEAM_ID = M.TEAM_ID
-                ```
+                    ```sql            
+                     SELECT *
+                     FROM MEMBER M JOIN TEAM T ON M.TEAM_ID = T.TEAM_ID
+                  
+                     SELECT *
+                     FROM TEAM T JOIN MEMBER M ON T.TEAM_ID = M.TEAM_ID
+                    ```
           
     * (2) 객체의 참조와 테이블의 외래 키를 매핑한다.
     
         * `연관관계 매핑`은 객체의 참조(`Member.team`)와 테이블의 외래 키(`MEMBER.TEAM_ID`)를 매핑하는 것이다.
           
-        * `연관관계 매핑`은 어떤 연관관계 인지(`@ManyToOne`) 그리고 연관 관계를 매핑 할 때, 사용 할 외래 키(`@JoinColumn`)를 지정한다.
+        * `연관관계 매핑`은 어떤 연관관계 인지(`@ManyToOne`) 그리고 연관관계를 매핑할 때, 사용할 외래 키(`@JoinColumn`)를 지정한다.
 
             ```java            
             @Entity
-            public class Member{
+            public class Member {
                 @Id @GeneratedValue
                 @Column(name = "MEMBER_ID")
                 private Long id;
@@ -820,7 +914,7 @@
 
             ```java            
             @Entity
-            public class Team{
+            public class Team {
                 @Id @GeneratedValue
                 @Column(name = "TEAM_ID")
                 private Long id;
@@ -833,15 +927,37 @@
               
                 * 회원과 팀은 다대일 관계다.
             
-            * `@JoinColumn` : 해당 연관관계를 조인하기 위해 사용할 컬럼을 지정한다.
+            * `@JoinColumn` : 해당 연관관계를 조인할 때, 사용할 외래 키 컬럼을 지정한다. 
               
-                * 그리고 객체와 테이블의 연관관계를 매핑할 때, 사용할 외래 키를 지정한다.
+                * 즉, 객체와 테이블의 연관관계를 매핑할 때, 사용할 외래 키를 지정한다.
             
-                    * name 속성에는 매핑할 외래 키 이름을 지정한다.
+                    * name 속성 : 매핑할 외래 키 이름을 지정한다.
                     
-                        * 회원과 팀 테이블은 `TEAM_ID` 외래 키로 연관관계를 맺으므로 이 값을 지정하면 된다.
-                    
-                        * 해당 애노테이션은 생략 할 수 있다.
+                        * 예를 들어, 회원과 팀 테이블은 `TEAM_ID` 외래 키로 연관관계를 맺으므로 이 값을 지정하면 된다.
+    
+                    * foreignKey 속성 : 외래 키 제약조건을 직접 지정한다. (DDL을 자동 생성할 때만 사용됨)
+    
+                        ```java
+                        // Member 클래스
+                        @ManyToOne
+                        @JoinColumn(name = "TEAM_ID", foreignKey = @ForeignKey(name = "FK__MEMBER__TEAM"))
+                        private Team team;
+                        ```
+
+                * 해당 애노테이션은 생략 할 수 있다.
+    
+                    * `@JoinColumn` 애노테이션을 생략하면 외래 키를 찾을 때, 기본 전략을 사용한다.
+
+                        ```java
+                        @ManyToOne
+                        private Team team;
+                        ```
+
+                        * 기본 전략 : 필드명 + _ + 참조하는 테이블의 컬럼명
+    
+                            * Ex) team_TEAM_ID 외래 키를 사용한다.
+    
+                                * 필드명(team) + _ + 참조하는 테이블의 컬럼명(TEAM_ID)
 
     * (3) 객체–관계 매핑 (ORM)
     
@@ -855,7 +971,7 @@
         // 팀 저장            
         Team team = new Team();
         team.setName("TeamA");
-        em.persist(team);
+        em.persist(team); // em.persist()를 하면 해당 엔티티의 PK 값이 설정되고 난 다음에 영속 상태가 된다.
         
         // 회원 저장
         Member member = new Member();
@@ -864,7 +980,7 @@
         em.persist(member); // 저장
         ```
         
-        * 회원 엔티티가 팀 엔티티를 참조하도록 하고 회원 엔티티를 영속성 컨텍스트에 저장 했다.
+        * 회원 엔티티가 팀 엔티티를 참조하도록 하고 회원 엔티티를 영속성 컨텍스트에 저장했다.
         
         * JPA는 회원이 참조하는 팀의 식별자(`Team.id`)를 외래 키로 사용해서 적절한 등록 쿼리를 생성한다.
 
@@ -874,7 +990,7 @@
             INSERT INTO MEMBER (MEMBER_ID, USERNAME, TEAM_ID) VALUES (2, ‘member1’, 1);
             ```
         
-    * (5) 연관 관계가 있는 엔티티를 조회한다.
+    * (5) 연관관계가 있는 엔티티를 조회한다.
     
         ```java
         // 조회
@@ -906,7 +1022,7 @@
 
         ![image 3](images/img3.png) 
         
-        * ① 양방향 객체 연관관계
+        * ① 객체 연관관계
           
             * 회원에서 팀으로 접근하고 반대 방향인 팀에서도 회원으로 접근 할 수 있는 양방향 연관관계로 매핑한다.
               
@@ -986,21 +1102,21 @@
     
                 * 엔티티를 양방향 연관관계로 설정하면 객체의 참조는 둘인데 외래 키는 하나다. 따라서 둘 사이에 차이가 발생한다.
     
-                * ① 객체 연관관계
-    
-                    * **객체의 양방향 연관관계는** 사실 양방향 관계가 아니라 **서로 다른 단방향 연관관계 2개**다.
+                    * ① 객체 연관관계
         
-                        * 회원 → 팀 연관관계 1개 (단방향)
+                        * **객체의 양방향 연관관계는** 사실 양방향 관계가 아니라 **서로 다른 단방향 연관관계 2개**다.
             
-                        * 팀 → 회원 연관관계 1개 (단방향)
+                            * 회원 → 팀 연관관계 1개 (단방향)
+                
+                            * 팀 → 회원 연관관계 1개 (단방향)
+        
+                    * ② 테이블 연관관계
     
-                * ② 테이블 연관관계
-
-                    * **테이블의 양방향 연관관계는 1개**다.
-                      
-                    * **테이블은 외래 키 하나로 두 테이블의 연관관계를 관리**한다.
-    
-                        * 회원 ↔ 팀의 연관관계 1개 (양방향)
+                        * **테이블의 양방향 연관관계는 1개**다.
+                          
+                            * **테이블은 외래 키 하나로 두 테이블의 연관관계를 관리**한다.
+            
+                                * 회원 ↔ 팀의 연관관계 1개 (양방향)
                         
             * **즉, 객체의 참조 필드 2개 중에서 하나로 외래 키를 관리해야 한다.**
     
@@ -1010,11 +1126,11 @@
                     
                 * 즉, 2개의 참조 필드 중에서 `Member.team` 값을 바꿨을 때, 외래 키(`TEAM_ID`)가 수정 되도록 해야될까?
                   
-                * `Team.members` 값을 바꿨을 때, 외래 키(`TEAM_ID`)가 수정 되도록 해야될까?
+                * 아니면 `Team.members` 값을 바꿨을 때, 외래 키(`TEAM_ID`)가 수정 되도록 해야될까?
 
                     * **연관관계의 주인은 테이블에 외래 키가 있는 곳으로 정해야 한다.**
     
-                        * 즉, 테이블의 연관관계에서 `N`인 쪽을 연관관계의 주인으로 정해야 한다.
+                        * 즉, **테이블의 연관관계에서 `N`인 쪽을 연관관계의 주인으로 정해야 한다.**
                           
                             * 그 이유는 JPA를 사용하는데 있어서 헷갈리지 않도록 하기 위해서다.
                     
@@ -1036,11 +1152,11 @@
 
                     * **연관관계의 주인은 테이블에 외래 키가 있는 곳으로 정해야 한다.**
     
-                    * 여기서는 회원 테이블이 외래 키를 가지고 있으므로 `Member.team`이 연관관계의 주인이 된다.
-    
-                    * 주인이 아닌 `Team.members`에는 `mappedBy="team"` 속성을 사용해서 주인이 아님을 지정한다.
-    
-                    * mappedBy 속성의 값으로는 연관관계의 주인인 team을 지정한다.
+                        * 여기서는 회원 테이블이 외래 키를 가지고 있으므로 `Member.team`이 연관관계의 주인이 된다.
+        
+                        * 주인이 아닌 `Team.members`에는 `mappedBy="team"` 속성을 사용해서 주인이 아님을 지정한다.
+        
+                        * mappedBy 속성의 값으로는 연관관계의 주인인 team을 지정한다.
                     
                 * [참고]
                 
@@ -1050,11 +1166,11 @@
 
     * (4) 양방향 연관관계의 주의점
 
-        * ① 양방향 매핑 시 가장 많이 하는 실수
+        * ① 양방향 연관관계 매핑 시 가장 많이하는 실수
         
             * **연관관계의 주인에는 값을 입력하지 않고, 주인이 아닌 방향(역방향)만 값을 입력하는 실수를 한다.**
             
-            * **순수한 객체 상태를 고려해서 항상 양쪽에 값을 설정해야 한다.** (객체 지향적인 관점)  
+            * **순수한 객체 관계를 고려해서 항상 양쪽에 값을 설정해야 한다.** (객체 지향적인 관점)  
             
                 ```java
                 Team team = new Team();
@@ -1087,7 +1203,7 @@
                     em.persist(member);
                     ```
       
-                * `flush()`와 `clear()`를 한 다음, DB에서 다시 조회한다면 정상적으로 동작한다.
+                * `flush()`와 `clear()`를 한 다음, 조회한다면 DB에서 다시 조회를 하기 때문에 정상적으로 동작한다.
 
                     ```java
                     em.flush();
@@ -1107,7 +1223,7 @@
 
                 * 하지만 이 상황에서 문제가 발생 할 수 있는 경우는 다음 2 가지가 있다.    
 
-                    * `flush()`와 `clear()`를 하지 않고 DB에서 다시 조회한다면 1차 캐시에서 조회하기 때문에 문제가 발생한다.
+                    * `flush()`와 `clear()`를 하지 않고 조회한다면 1차 캐시에서 조회하기 때문에 문제가 발생한다.
                     
                     * 또한 JPA 없이 순수한 자바 코드를 대상으로 테스트하는 경우에도 문제가 될 수 있다.
 
@@ -1117,7 +1233,7 @@
         
             * `member.setTeam(team)`과 `team.getMembers().add(member)`를 각각 호출하다 보면 실수로 둘 중 하나만 호출해서 양방향이 깨질 수 있다.
     
-            * 그래서 `Member`에 `changeTeam()` 메소드 하나로 양방향 관계를 모두 설정 하도록 변경했다.
+            * 그래서 `Member`에 `changeTeam()` 메소드 하나로 양방향 연관관계를 모두 설정하도록 변경했다.
 
                 ```java
                 @Entity
@@ -1152,81 +1268,87 @@
                 em.persist(member);
                 ```
               
-                * 반대편(Team)에서 연관관계 편의 메소드를 만들어서 사용하는 것도 가능하다. 둘 중 한 곳에만 작성하면 된다.
+            * 반대편(Team)에서 연관관계 편의 메소드를 만들어서 사용하는 것도 가능하다. 둘 중 한 곳에만 작성하면 된다.
 
-                    ```java
-                    @Entity
-                    public class Team {
+                ```java
+                @Entity
+                public class Team {
+                
+                    @Id @GeneratedValue
+                    @Column(name = "TEAM_ID")
+                    private Long id;
+                
+                    private String name;
                     
-                        @Id @GeneratedValue
-                        @Column(name = "TEAM_ID")
-                        private Long id;
-                    
-                        private String name;
-                        
-                        @OneToMany(mappedBy = "team")
-                        private List<Member> members = new ArrayList<>();
-                    
-                        // 반대편(Team)에서 연관관계 편의 메소드
-                        public void addMember(Member member) {
-                            member.setTeam(this);
-                            members.add(member);
-                        }
-                        
+                    @OneToMany(mappedBy = "team")
+                    private List<Member> members = new ArrayList<>();
+                
+                    // 반대편(Team)에서 연관관계 편의 메소드
+                    public void addMember(Member member) {
+                        member.setTeam(this);
+                        members.add(member);
                     }
-                    ```
+                    
+                }
+                ```
 
-        * ③ **양방향 매핑 시에 무한 루프를 조심하자**
+        * ③ **양방향 연관관계 매핑 시에 무한 루프를 조심하자**
 
-            * `toString()` , 롬복(Lombok)
-              
-                * `toString()`를 만들 때, 참조 타입은 제외하자.
+            * `toString()`
+
+                * 양방향 연관관계에 있는 엔티티에 `toString()`가 있다면 양쪽으로 서로 호출하면서 무한 루프에 빠질 수 있다.
+                  
+                * 따라서 `toString()`를 만들 때는 참조(reference) 타입은 제외하자.
 
             * `JSON 생성 라이브러리`
             
-                * 양방향 매핑 관계의 엔티티를 JSON으로 직렬화 하면 무한 루프에 빠지게 된다.
+                * **양방향 연관관계에 있는 엔티티를 JSON으로 직렬화 하면 무한 루프에 빠지게 된다.**
             
-                * 컨트롤러에서는 절대 엔티티를 반환하지 않는다. 
+                * 따라서 **컨트롤러에서는 절대 엔티티를 반환하지 않는다.** 
                 
                     * 컨트롤러에서 엔티티를 반환하는 상황에서 엔티티를 변경하면 API 스펙 자체가 변경되는 문제점이 있다. 
                      
-                    * 따라서 단순 값만 있는 DTO로 변환해서 반환하자. 그러면 `JSON 생성 라이브러리`로 인한 문제는 발생하지 않는다.
+                    * **단순 값만 있는 DTO로 변환해서 반환하자.** 그러면 `JSON 생성 라이브러리`로 인한 문제는 발생하지 않는다.
+
+                * 무한 루프에 빠지지 않도록 하는 애노테이션으로 해결할 수도 있다.                    
+
+                    * JSON 생성 라이브러리들은 무한 루프에 빠지지 않도록 하는 애노테이션을 제공한다.
                     
-                * JSON 생성 라이브러리들은 무한 루프에 빠지지 않도록 하는 애노테이션을 제공한다.
-                
-                    * Jackson 2.0 버전 이전 : `@JsonManagedReference`, `@JsonBackReference`
-                    
-                    * Jackson 2.0 버전 이상 : `@JsonIdentityInfo`
+                        * Jackson 2.0 버전 이전 : `@JsonManagedReference`, `@JsonBackReference`
+                        
+                        * Jackson 2.0 버전 이상 : `@JsonIdentityInfo`
 
-    * (5) 양방향 매핑 정리
+    * (5) 양방향 매핑 정리하기
 
-        * **단방향 매핑만으로도 객체와 테이블의 연관관계 매핑은 이미 완료된 것이다.**
+        * **단방향 연관관계 매핑만으로도 객체와 테이블의 연관관계 매핑은 이미 완료된 것이다.**
 
-        * 단방향을 양방향으로 만드는 것은 반대 방향으로 객체 그래프 탐색 기능이 추가된 것 뿐이다.
+            * 단방향을 양방향으로 만드는 것은 반대 방향으로 조회(객체 그래프 탐색) 기능이 추가된 것 뿐이다.
+
+            * JPQL에서 역방향으로 탐색해야 되는 경우가 있다면 양방향으로 만들면 된다.
 
         * **JPA 모델링 시, 처음에는 단방향 매핑으로 설계를 완료하고 양방향은 필요할 때 추가하면 된다.**
 
-        * 나중에 추가해도 되는 이유는 테이블에 영향을 주지 않기 때문이다.
-
-        * **단방향은 항상 외래 키가 있는 곳(多)을 기준으로 매핑하면 된다.**
+            * 나중에 추가해도 되는 이유는 테이블에 영향을 주지 않기 때문이다.
+    
+        * **단방향 연관관계는 항상 외래 키가 있는 곳(多)을 기준으로 매핑하면 된다.**
 
 ## 6. 다양한 연관관계 매핑
 
 * 연관관계 매핑 시 고려사항 3가지
 
-    * **다중성**
+    * (1) **다중성**
       
-        * ① 다대일: `@ManyToOne`
+        * ① 일대일: `@OneToOne`
           
         * ② 일대다: `@OneToMany`
           
-        * ③ 일대일: `@OneToOne`
+        * ③ 다대일: `@ManyToOne`
           
         * ④ 다대다: `@ManyToMany`
            
             * 사실, 다대다는 실무에서 사용하면 안 된다. 
             
-    * **단방향, 양방향**
+    * (2) **단방향, 양방향**
       
         * ① 테이블
 
@@ -1238,13 +1360,13 @@
 
             * 참조용 필드가 있는 쪽으로만 참조 할 수 있다.
 
-            * 한쪽만 참조하면 단방향
-
-            * 양쪽이 서로 참조하면 양방향
-
-                * 사실은 단방향이 2개인 것이다.
+                * 한쪽만 참조하면 단방향이다.
+    
+                * 양쪽이 서로 참조하면 양방향이다.
+    
+                    * 사실은 단방향이 2개인 것이다.
             
-    * 양방향인 경우, **연관관계의 주인**를 정해야 한다.
+    * (3) 양방향인 경우, **연관관계의 주인**를 정해야 한다.
 
         * 객체의 양방향 관계는 참조가 2개 있는데 둘 중 테이블의 외래 키를 관리할 참조를 지정해야 한다.
 
@@ -1281,22 +1403,28 @@
     * 일대다 [1:N]
     
         * ① 일대다 단방향
+    
+            * ERD
         
-            ![image 8](images/img8.png)
-
-            * 하나의 팀은 여러 회원을 참조 할 수 있는데 이런 관계를 일대다 관계라 한다. (Team이 연관관계의 주인이 된 구조)
-
-            * 그리고 팀은 회원들을 참조하지만 반대로 회원은 팀을 참조하지 않으면 둘의 관계는 단방향이다.
-
-            * **일대다 단방향 관계**는 **반대편 테이블의 외래 키를 관리하는 특이한 구조**가 된다.
+                ![image 8](images/img8.png)
     
-            * 즉, Team 엔티티의 members의 값을 변경하면 반대편 테이블(MEMBER)의 외래 키를 수정(UPDATE)하게 된다.
+                * **일대다 단방향 관계는 일(1)이 연관관계의 주인이다.** 
+    
+                    * 하나의 팀은 여러 회원을 참조 할 수 있는데 이런 관계를 일대다 관계라 한다. (Team이 연관관계의 주인이 된 구조)
+        
+                        * 그리고 팀은 회원들을 참조하지만 반대로 회원은 팀을 참조하지 않으면 둘의 관계는 단방향이다.
+    
+                * **테이블의 일대다 관계는 항상 다(N) 쪽에 외래 키가 있다.**
+    
+                * **일대다 단방향 관계**는 **반대편 테이블의 외래 키를 관리하는 특이한 구조**가 된다.
+        
+                    * 즉, Team 엔티티의 members의 값을 변경하면 반대편 테이블(MEMBER)의 외래 키를 수정(UPDATE)하게 된다.
+                    
+                        * 다 쪽인 Member 엔티티에는 외래 키를 매핑 할 수 있는 참조 필드가 없다.
             
-                * 다 쪽인 Member 엔티티에는 외래 키를 매핑 할 수 있는 참조 필드가 없다.
-    
-                * 대신에 반대 쪽인 Team 엔티티에만 외래 키를 매핑 할 수 있는 참조 필드인 members가 있기 때문이다.
+                        * 대신에 반대 쪽인 Team 엔티티에만 외래 키를 매핑 할 수 있는 참조 필드인 members가 있기 때문이다.
                 
-            * 예시 - 일대다 단방향으로 매핑하기
+            * 소스코드
 
                 * 회원(Member) 엔티티
 
@@ -1339,9 +1467,7 @@
                     }   
                     ```
                   
-                    * **일대다 단방향은 일대다(1:N)에서 일(1)이 연관관계의 주인이다.**
-    
-                    * **일대다 단방향은** `@JoinColumn`**을 꼭 사용해야 한다.**
+                    * **일대다 단방향 관계는** `@JoinColumn`**을 꼭 사용해야 한다.**
     
                         * **그렇지 않으면 조인 테이블 방식을 사용해서 중간에 테이블을 하나 추가한다.**
                     
@@ -1350,12 +1476,16 @@
                         * 사실 다대일 단방향과 양방향만 알면 일대다에 대해서는 몰라도 된다.
 
         * ② 일대다 양방향
+    
+            * ERD
         
-            ![image 9](images/img9.png)
-
-            * 일대다 양방향 매핑은 공식적으로 존재하지는 않는다. 
-            
-            * 일대다 단방향 매핑 반대편에 같은 외래 키를 사용하는 다대일 단방향 매핑을 읽기 전용으로 하나 추가하면 된다.
+                ![image 9](images/img9.png)
+    
+                * 일대다 양방향 매핑은 공식적으로 존재하지는 않는다. 
+                
+                * 일대다 단방향 매핑 반대편에 같은 외래 키를 사용하는 다대일 단방향 매핑을 읽기 전용으로 하나 추가하면 된다.
+    
+            * 소스코드 
     
                 ```java
                 @Entity
@@ -1363,14 +1493,14 @@
                 
                     //...
                 
-                    // 다대일 단방향 매핑을 읽기 전용으로 추가
+                    // 다대일 단방향 매핑을 읽기 전용으로 추가한다.
                     @ManyToOne
                     @JoinColumn(name = "TEAM_ID", insertable = false, updatable = false)
                     private Team team;
                 }
                 ```
 
-            * **일대다 양방향 매핑보다는 다대일 양방향 매핑을 사용하자**
+                * **일대다 양방향 매핑보다는 다대일 양방향 매핑을 사용하자**
             
     * 일대일 [1:1]
 
@@ -1378,23 +1508,27 @@
     
             * 일대일 관계는 그 반대도 일대일 관계다.
         
-            * 주 테이블이나 대상 테이블 중에 누가 외래 키를 가질지 선택 할 수 있다.
+            * 주 테이블이나 대상 테이블 중에 누가 외래 키를 가질지 선택할 수 있다.
 
                 * `주 테이블` : 많이 접근(Access)하는 테이블을 말한다.
         
-            * 데이터베이스에서 외래 키에 유니크(UNI) 제약조건을 추가하는 것이 좋다.
+            * 외래 키(FK)에 유니크(UNI) 제약조건을 추가해야 한다.
     
                 * `@JoinColumn(name = "LOCKER_ID", unique = true)`
         
         * 예시
 
             * ① 주 테이블에 외래 키가 있는 일대일 단방향 관계
+
+                * ERD
+                
+                    ![image 10](images/img10.png)
+        
+                    * `MEMBER`가 주 테이블이고 `LOCKER`는 대상 테이블이다.
+        
+                    * `@OneToOne`으로 일대일 단방향 관계를 매핑하고 `@JoinColumn`를 지정한다. (다대일 단방향과 거의 비슷함)
     
-                ![image 10](images/img10.png)
-    
-                * `MEMBER`가 주 테이블이고 `LOCKER`는 대상 테이블이다.
-    
-                * `@OneToOne`으로 일대일 단방향 관계를 매핑하고 `@JoinColumn`를 지정한다. (다대일 단방향과 거의 비슷함)
+                * 소스코드
                 
                     ```java
                     @Entity
@@ -1424,11 +1558,15 @@
                   
             * ② 주 테이블에 외래 키가 있는 일대일 양방향 관계
     
-                ![image 11](images/img11.png)
+                * ERD
     
-                * 일대일 **양방향** 관계이므로 **연관관계의 주인**을 정해야 한다.
-                
-                * 다대일 양방향 매핑처럼 **외래 키가 있는 곳이 연관관계의 주인**이며 **반대편은 mappedBy 속성**을 사용한다.
+                    ![image 11](images/img11.png)
+        
+                    * 일대일 **양방향** 관계이므로 **연관관계의 주인**을 정해야 한다.
+                    
+                    * 다대일 양방향 매핑처럼 **외래 키가 있는 곳이 연관관계의 주인**이며 **반대편은 mappedBy 속성**을 사용한다.
+    
+                * 소스코드
 
                     ```java
                     @Entity
@@ -1443,9 +1581,9 @@
                     }   
                     ```
 
-                    *  MEMBER 테이블이 외래 키를 가지고 있으므로 Member 엔티티에 있는 `Member.locker`가 연관관계의 주인이다. 
+                    * MEMBER 테이블이 외래 키를 가지고 있으므로 Member 엔티티에 있는 `Member.locker`가 연관관계의 주인이다. 
                     
-                    *  따라서 반대 매핑인 `Locker.member`는 `mappedBy` 속성을 사용해서 연관관계의 주인이 아니라고 설정했다.
+                    * 따라서 반대 매핑인 `Locker.member`는 `mappedBy` 속성을 사용해서 연관관계의 주인이 아니라고 설정했다.
 
             * ③ 대상 테이블에 외래 키가 있는 일대일 단방향 관계
     
@@ -1459,11 +1597,15 @@
                       
             * ④ 대상 테이블에 외래 키가 있는 일대일 양방향 관계
     
-                ![image 13](images/img13.png)
+                * ERD
     
-                * 주 엔티티인 Member 엔티티 대신에 **대상 엔티티인 Locker를 연관관계의 주인으로 만들어서 LOCKER 테이블의 외래 키를 관리하도록 한다.**
-
-                * 사실, 주 테이블에 외래 키가 있는 일대일 양방향 관계와 매핑 방법이 같다.
+                    ![image 13](images/img13.png)
+        
+                    * 주 엔티티인 Member 엔티티 대신에 **대상 엔티티인 Locker를 연관관계의 주인으로 만들어서 LOCKER 테이블의 외래 키를 관리하도록 한다.**
+    
+                    * 사실, 주 테이블에 외래 키가 있는 일대일 양방향 관계와 매핑 방법이 같다.
+    
+                * 소스코드
                     
                     ```java
                     @Entity
@@ -1496,17 +1638,17 @@
     
         * 정리하기
 
-            * 주 테이블에 외래 키가 있는 일대일 관계
+            * ① 주 테이블에 외래 키가 있는 일대일 관계 - 객체지향 개발자가 선호하는 방식 
             
                 * 장점 : 주 테이블만 조회해도 대상 테이블에 데이터가 있는지 확인 가능하다.
                 
                 * 단점 : 값이 없으면 외래 키에 null을 허용한다.
             
-            * 대상 테이블에 외래 키가 있는 일대일 관계
+            * ② 대상 테이블에 외래 키가 있는 일대일 관계 - DBA가 선호하는 방식
             
                 * 장점 : 주 테이블과 대상 테이블을 일대일에서 일대다 관계로 변경할 때 테이블 구조가 유지된다.
                 
-                * 단점 : 프록시 기능의 한계로 지연 로딩으로 설정해도 항상 즉시 로딩 된다.
+                * 단점 : 프록시 기능의 한계로 지연 로딩으로 설정해도 항상 즉시 로딩된다.
                 
                     * 지연 로딩으로 설정 했을 때, 연관된 엔티티가 있으면 프록시 객체가 들어가고 연관된 엔티티가 없으면 null이 들어간다.
                     
@@ -1518,35 +1660,39 @@
 
     * 다대다 [N:M]
     
-        * ① 다대다
+        * (1) 다대다
           
             * 관계형 데이터베이스는 정규화된 테이블 2개로 다대다 관계를 표현 할 수 없다.
               
                 * **다대다 관계는 연결 테이블을 추가해서 일대다, 다대일 관계로 풀어내야 한다.**
 
-            * 객체는 컬렉션을 사용해서 객체 2개로 다대다 관계를 표현 할 수 있다.       
+            * 객체는 컬렉션을 사용해서 객체 2개로 다대다 관계를 표현 할 수 있다.
+    
+                * 회원(Member)은 상품(Product)을 리스트로 가질 수 있다.
 
-        * ② 다대다 매핑의 한계
+                * 상품(Product)은 회원(Member)을 리스트로 가질 수 있다.
+    
+        * (2) 다대다 매핑의 한계
 
-            * 다대다 매핑은 편리해 보이지만 실무에서 사용할 수 없다.
+            * **다대다 매핑은 편리해 보이지만 실무에서 사용할 수 없다.**
             
-            * 연결 테이블이 보통 연결만 하고 끝나지 않는다.
+            * **연결 테이블이 보통 연결만 하고 끝나지 않는다.**
 
                 * 연결 테이블에 주문 시간, 수량 같은 컬럼이 더 필요한 경우가 많다.
     
-                * 하지만 연결 테이블에 컬럼을 추가하면 더 이상 `@ManyToMany`를 사용 할 수 없다. 
+                * 하지만 연결 테이블에 컬럼을 추가하면 더 이상 `@ManyToMany`를 사용할 수 없다. 
                 
-        * ③ 다대다 매핑의 한계를 극복
+        * (3) 다대다 매핑의 한계를 극복하기
 
-            * **연결 테이블용 엔티티를 추가한다.** (연결 테이블을 엔티티로 승격)
+            * ① **연결 테이블용 엔티티를 추가한다.** (즉, 연결 테이블을 엔티티로 승격한다.)
     
-            * 그리고 `@ManyToMany`를 `@OneToMany`, `@ManyToOne`로 변경한다.
+            * ② 그리고 `@ManyToMany`를 `@OneToMany`, `@ManyToOne`로 변경한다.
             
                 ![image 14](images/img14.png)
                 
                 * 연결 테이블(`Order`)에 새로운 기본 키(`ORDER_ID`)를 추가하고 다른 식별자는 외래 키로 사용한다.
                     
-        * ④ 예시 - 다대다 매핑을 일대다 다대일로 변경
+        * (4) 예시 - 다대다 매핑을 일대다 다대일로 변경하기
 
             * 회원과 회원상품을 양방향 관계로 만든다. 회원 상품 엔티티 쪽이 외래 키를 가지고 있으므로 연관관계의 주인이다.
                 
@@ -1631,19 +1777,23 @@
   
     * 관계형 데이터베이스는 상속 관계가 없다.
     
-    * 관계형 데이터베이스의 슈퍼타입 서브타입 관계라는 모델링 기법이 객체의 상속 관계와 유사하다.
+    * 관계형 데이터베이스의 슈퍼타입 서브타입 관계라는 모델링 기법이 객체의 상속 관계와 가장 유사하다.
     
     * ORM에서 이야기 하는 **`상속관계 매핑`은 객체의 상속 구조와 DB의 슈퍼타입 서브타입 관계를 매핑하는 것이다.**
 
 * (2) 상속관계 매핑 전략
 
-    * ① `조인 전략 (Joined Strategy)` : 엔티티 각각을 모두 테이블로 만들고 조회할 때 조인을 사용한다. (정석적인 방법)
+    * ① `조인 전략 (Joined Strategy)` : 엔티티 각각을 모두 테이블로 만들고 조회할 때 조인을 사용한다.
+    
+        * 정석적인 방법이다.
     
     * ② `단일 테이블 전략 (Single-Table Strategy)` : 테이블을 하나만 사용해서 통합한다. (기본 값)
     
         * 구분 컬럼(DTYPE)으로 어떤 자식 데이터가 저장되었는지 구분한다.
     
-    * ③ `구현 클래스 마다 테이블 전략 (Table-per-Concrete-Class Strategy)` : 자식 엔티티 마다 하나의 테이블을 만든다. (잘 사용하지 않음)
+    * ③ `구현 클래스 마다 테이블 전략 (Table-per-Concrete-Class Strategy)` : 자식 엔티티 마다 하나의 테이블을 만든다. 
+      
+        * 잘 사용하지 않는다.
     
 * (3) 상속관계 매핑 전략을 자세하게 살펴보기
 
@@ -1677,13 +1827,15 @@
               
                 * 상속 관계 매핑은 부모 엔티티에 `@Inheritance`를 사용해야 한다. 그리고 상속관계 매핑 전략을 지정해야 하는데 여기서는 조인 전략을 사용한다.
                 
-                * `@DiscriminatorColumn`는 부모 엔티티에 구분 컬럼을 지정한다. 해당 컬럼으로 저장된 자식 테이블을 구분 할 수 있다.
+                * `@DiscriminatorColumn`는 부모 엔티티에 구분 컬럼을 지정한다. 
+                  
+                    * DB에서 테이블만 보더라도 해당 컬럼으로 저장된 자식 테이블을 구분할 수 있다.
+    
+                        * name 속성 : 구분 컬럼의 이름을 지정한다.
+
+                            * 구분 컬럼의 기본 이름은 DTYPE이다.
                 
-                    * 구분 컬럼의 기본 이름은 DTYPE이다.
-    
-                    * name 옵션으로 구분 컬럼의 이름을 변경 할 수 있다.
-    
-            * 자식 엔티티를 저장할 때, 구분 컬럼에 입력할 값을 지정 할 수도 있다.
+            * 자식 엔티티를 저장할 때, 구분 컬럼에 입력할 값을 직접 지정할 수 있다.
             
                 ```java
                 @Entity
@@ -1747,7 +1899,7 @@
             }   
             ```
                  
-            * 단일 테이블 전략은 `@DiscriminatorColumn`을 지정하지 않아도 `DTYPE`이 추가된다.
+            * 단일 테이블 전략은 기본적으로 `@DiscriminatorColumn`을 지정하지 않더라도 `DTYPE`이 추가된다.
     
             * 그리고 데이터를 조회할 때, 조인을 사용하지 않아도 된다. 
     
@@ -1759,7 +1911,7 @@
     
             * 그리고 자식 테이블 각각에 필요한 컬럼이 모두 있다.
               
-            * 여러 자식 테이블을 함께 조회 할 때 성능이 느리다. (부모 엔티티 타입으로 조회 시) 
+            * 여러 자식 테이블을 함께 조회 할 때 성능이 느리다. (즉, 부모 엔티티 타입으로 조회 시) 
         
                 * Ex) `Item item = em.find(Item.class, movie.getId());`
             
@@ -1792,41 +1944,58 @@
 
     * `@MappedSuperclass` : 자식 클래스에게 공통 매핑 정보를 제공하는 부모 클래스를 작성할 때 사용한다.
     
-        * `@MappedSuperclass`로 지정한 클래스는 엔티티가 아니므로 `em.find()` 나 JPQL에서 사용 할 수 없다.
+        * `@MappedSuperclass`로 지정한 클래스는 엔티티가 아니므로 `em.find()` 나 JPQL에서 사용할 수 없다.
         
         * 해당 클래스를 직접 생성해서 사용할 일은 거의 없으므로 추상 클래스로 만드는 것을 권장한다.
         
         * 주로 등록일, 수정일, 등록자, 수정자와 같은 전체 엔티티에서 공통으로 적용하는 정보를 모을 때 사용한다.
     
+            * [참고사항] @Entity 클래스는 @Entity 또는 @MappedSuperclass로 지정한 클래스만 상속 받을 수 있다.
+    
 * (2) 예시
 
-    ```java
-    @MappedSuperclass
-    public abstract class BaseEntity{
-      // @Column는 없어도 됨. @Column를 사용 할 수 있다는 것을 보여주기 위함
-      @Column(name = "INSERT_MEMBER") 
-      private String createdBy;
-  
-      private LocalDateTime createdDate;
-  
-      @Column(name = "UPDATE_MEMBER")
-      private String lastModifiedBy;
-  
-      private LocalDateTime lastModifiedDate;
-    }   
-    ```
-  
-    ```java
-    @Entity
-    public class Member extends BaseEntity{
-      @Id @GeneratedValue
-      @Column(name = "MEMBER_ID")
-      private Long id;
-  
-      @Column(name = "USER_NAME")
-      private String username;
-    }   
-    ```
+    * BaseEntity를 작성하고 해당 클래스를 상속받도록 한다.
+
+        ```java
+        @MappedSuperclass
+        public abstract class BaseEntity {
+          // @Column는 없어도 됨. @Column를 사용할 수 있다는 것을 보여주기 위함
+          @Column(name = "INSERT_MEMBER") 
+          private String createdBy;
+      
+          private LocalDateTime createdDate;
+      
+          @Column(name = "UPDATE_MEMBER")
+          private String lastModifiedBy;
+      
+          private LocalDateTime lastModifiedDate;
+      
+          // Getter, Setter
+        }   
+        ```
+      
+        ```java
+        @Entity
+        public class Member extends BaseEntity {
+          @Id @GeneratedValue
+          @Column(name = "MEMBER_ID")
+          private Long id;
+      
+          @Column(name = "USER_NAME")
+          private String username;
+        }   
+        ```
+      
+    * 엔티티를 만들어서 저장한다.
+
+        ```java
+        Member member = new Member();
+        member.setUsername("user1");
+        member.setCreatedBy("kim");
+        member.setCreatedDate(LocalDateTime.now());
+        
+        em.persist(member);
+        ```
 
 ## 8. 프록시와 연관관계 관리
 
@@ -1838,11 +2007,13 @@
 
     * `em.find()` : 데이터베이스를 통해서 실제 엔티티 객체를 조회한다.
     
-    * `em.getReference()` : 데이터베이스 조회를 미루는 가짜(프록시) 엔티티 객체를 반환한다.
+    * `em.getReference()` : 데이터베이스 조회를 미루는 가짜(프록시) 엔티티 객체를 조회한다.
 
 * 프록시 특징
 
-    * 프록시 객체는 실제 객체의 참조(target)를 보관한다.
+    * 프록시 클래스는 실제 클래스를 상속 받아서 만들어진다. 
+
+    * 프록시 객체는 실제 객체에 대한 참조(target)를 보관한다.
 
     * 프록시 객체의 메소드를 호출하면 프록시 객체는 실제 객체의 메소드를 호출한다.
     
@@ -1869,7 +2040,7 @@
     
             * 이 시점에는 프록시 객체의 target에 값이 없다.
           
-        * ② 프록시 객체는 실제 엔티티 객체가 생성되어 있지 않으면 영속성 컨텍스트에 실제 엔티티 객체 생성을 요청하는데 이것을 초기화라 한다.
+        * ② 프록시 객체는 실제 엔티티 객체가 생성되어 있지 않으면 영속성 컨텍스트에 실제 엔티티 객체 생성을 요청한다. 이것을 프록시의 초기화라 한다.
           
         * ③ 영속성 컨텍스트는 데이터베이스를 조회해서 실제 엔티티 객체를 생성한다.
           
@@ -1881,17 +2052,17 @@
         
 * 프록시 정리
 
-    * 프록시 객체는 처음 사용할 때 한 번만 초기화된다.
+    * ① 프록시 객체는 처음 사용할 때 한 번만 초기화된다.
 
-    * 프록시 객체를 초기화 할 때, 프록시 객체가 실제 엔티티로 바뀌는 것이 아니다. 
+    * ② 프록시 객체를 초기화 할 때, 프록시 객체가 실제 엔티티로 바뀌는 것이 아니다. 
 
         * 프록시 객체가 초기화되면 프록시 객체를 통해서 실제 엔티티에 접근 할 수 있게 되는 것이다.
 
-    * 프록시 객체는 원본 엔티티를 상속받은 객체이므로 타입 체크 시, 주의해야 한다. 
+    * ③ 프록시 객체는 원본 엔티티를 상속받은 객체이므로 타입 체크 시, 주의해야 한다. 
 
         * `==` 비교 대신에 `instanceof`를 사용해야 한다.
 
-    * 영속성 컨텍스트에 찾는 엔티티가 이미 있으면 데이터베이스를 조회할 필요가 없으므로 `em.getReference()`를 호출해도 프록시가 아닌 실제 엔티티를 반환한다.
+    * ④ 영속성 컨텍스트에 찾는 엔티티가 이미 있으면 데이터베이스를 조회할 필요가 없으므로 `em.getReference()`를 호출해도 프록시가 아닌 실제 엔티티를 반환한다.
 
         ```java
         Member m1 = em.find(Member.class, member1.getId());
@@ -1905,9 +2076,9 @@
     
             * 즉, JPA에서 실제 엔티티, 프록시 객체 중 무엇이던간에 `==` 비교는 `true`를 반환해야 한다.
 
-    * 영속성 컨텍스트에 찾는 엔티티가 이미 프록시로 있다면 `em.find()`를 호출해도 프록시를 반환한다. 
+    * ⑤ 영속성 컨텍스트에 찾는 엔티티가 이미 프록시로 있다면 `em.find()`를 호출해도 프록시를 반환한다. 
   
-    * 영속성 컨텍스트의 도움을 받을 수 없는 준영속 상태일 때, 프록시를 초기화 하면 문제가 발생한다.
+    * ⑥ 영속성 컨텍스트의 도움을 받을 수 없는 준영속 상태일 때, 프록시를 초기화 하면 문제가 발생한다.
 
         ```java
         try{
@@ -1938,12 +2109,25 @@
         * 하이버네이트는 `org.hibernate.LazyInitializationException` 예외를 발생시킨다.
 
         * 문제가 발생하는 이유는 프록시의 초기화 요청은 영속성 컨텍스트를 통해 이루어지기 때문이다. 
+    
+* 프록시 관련 유틸리티 메소드
+
+    * `isLoaded(Object entity)` : 프록시 인스턴스의 초기화 여부를 확인한다.
+
+        ```java
+        PersistenceUnitUtil persistenceUnitUtil = emf.getPersistenceUnitUtil();
+        persistenceUnitUtil.isLoaded(refMember);
+        ```
+    
+    * `Hibernate.initialize(entity)` : 프록시를 강제로 초기화한다.
+    
+        * JPA 표준에서는 강제 초기화 기능이 없으므로 member.getName()과 같은 방식으로 초기화를 해야 한다. 
         
 ### 2. 즉시 로딩과 지연 로딩
 
 * JPA는 개발자가 연관된 엔티티의 조회 시점을 선택 할 수 있도록 두 가지 방법을 제공한다.
 
-    * ① `즉시 로딩(EAGER LOADING)` : 연관된 엔티티를 함께 조회하는 방식이다.
+    * ① `즉시 로딩(EAGER LOADING)` : 엔티티를 조회할 때, 연관된 엔티티도 함께 조회하는 방식이다.
     
         * 예시 : `em.find(Member.class, "member1")` 처럼 호출할 때, 회원 엔티티와 연관된 팀 엔티티도 함께 조회한다.
     
@@ -1951,9 +2135,9 @@
     
         * 설정 방법 : `@ManyToOne(fetch = FetchType.EAGER)`
     
-    * ② `지연 로딩(LAZY LOADING)`: 연관된 엔티티를 실제 사용할 때까지 데이터베이스 조회를 지연하는 방식이다.
+    * ② `지연 로딩(LAZY LOADING)`: 연관된 엔티티를 실제 사용할 때 조회하는 방식이다.
     
-        * 연관된 엔티티를 프록시 객체로 가져온다. 프록시를 실제 사용할 때, 초기화하면서 데이터베이스를 조회한다.
+        * 연관된 엔티티를 프록시 객체로 조회한다. 그리고 프록시 객체를 실제 사용할 때, 초기화하면서 데이터베이스를 조회한다.
     
         * 예시 : `em.find(Member.class, "member1")` 처럼 호출할 때, 회원(member1)을 조회하고 회원의 team 멤버 변수에 프록시 객체를 넣어둔다.
             
@@ -1968,58 +2152,154 @@
     * **실무에서는 모든 연관관계에 `지연 로딩(LAZY LOADING)`을 사용해야 한다.**
 
     * `즉시 로딩(EAGER LOADING)`을 적용하면 예상하지 못한 쿼리가 발생한다.
-
+    
     * `즉시 로딩`은 JPQL에서 `N+1` 문제를 일으킨다.
-
-        ```java
-        Team teamA = new Team();
-        teamA.setName("teamA");
-        em.persist(teamA);
-        
-        Team teamB = new Team();
-        teamB.setName("teamB");
-        em.persist(teamB);
-        
-        Member member1 = new Member();
-        member1.setUsername("member1");
-        member1.setTeam(teamA);
-        em.persist(member1);
-        
-        Member member2 = new Member();
-        member2.setUsername("member2");
-        member2.setTeam(teamB);
-        em.persist(member2);
-        
-        em.flush();
-        em.clear();
-        
-        List<Member> members = em.createQuery("select m from Member m", Member.class)
-                .getResultList();
-        ```
-
-        * 소스코드 동작 과정
-
-            * 일단, `select * from Member`로 Member의 데이터를 가져온다.
-        
-            * Member 클래스를 보면 연관된 엔티티인 Team이 EAGER로 설정되어 있다. 
     
-            * 그러면 즉시, `select * from Team where TEAM_ID = xxx`라는 쿼리를 실행해서 Team의 데이터를 가져온다. 
-              
-                * 이 상황에서는 EAGER로 설정되어 있기 때문에 N+1 문제가 발생한다.      
+        * `N+1 문제` : 처음에 쿼리 1개를 실행 했을 때, 얻은 결과의 개수(`N 개`)만큼 추가 쿼리가 발생하는 문제를 말한다.
 
-                * 이때, LAZY로 설정되어 있었다면 프록시 객체를 넣게 된다. 또한 N+1 문제도 발생하지 않는다.
+            * N+1 문제의 발생 케이스와 해결책
 
-        * `N+1 문제` : 처음에 쿼리 1개를 실행 했을 때, 얻은 결과의 개수(`N개`)만큼 추가 쿼리가 발생하는 문제를 말한다.
+                * 예제로 사용할 엔티티
+
+                    * 회원 (Member)
+
+                        ```java
+                        @Entity
+                        public class Member {
+                          @Id @GeneratedValue
+                          @Column(name = "MEMBER_ID")
+                          private Long id;
+                        
+                          @Column(name = "USER_NAME")
+                          private String username;
+                        
+                          @ManyToOne
+                          @JoinColumn(name = "TEAM_ID", fetch = FetchType.EAGER)
+                          private Team team;
+                        
+                          // 연관관계 편의 메소드
+                          public void changeTeam(Team team) {
+                              this.team = team;
+                              team.getMembers().add(this);
+                          } 
+                        }   
+                        ```
+
+                    * 팀 (Team)
+
+                        ```java
+                        @Entity
+                        public class Team {
+                          @Id @GeneratedValue
+                          @Column(name = "TEAM_ID")
+                          private Long id;
+                      
+                          private String name;
+                          
+                          @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
+                          private List<Member> members = new ArrayList<>();
+                        }   
+                        ```
+    
+                * N+1 문제의 발생 케이스
+                      
+                    * ① 특정 엔티티의 연관된 엔티티를 즉시 로딩(EAGER)으로 설정하고 JPQL로 특정 엔티티를 조회하는 경우에 `N+1` 문제가 발생한다.
+
+                        ```java
+                        // 초기 데이터 설정
+                        Team teamA = new Team();
+                        teamA.setName("teamA");
+                        em.persist(teamA);
+                        
+                        Team teamB = new Team();
+                        teamB.setName("teamB");
+                        em.persist(teamB);
+                        
+                        Member member1 = new Member();
+                        member1.setUsername("member1");
+                        member1.setTeam(teamA);
+                        em.persist(member1);
+                        
+                        Member member2 = new Member();
+                        member2.setUsername("member2");
+                        member2.setTeam(teamB);
+                        em.persist(member2);
+                        
+                        em.flush();
+                        em.clear();
+                        
+                        // [N + 1 문제 발생] Member 클래스에서 연관된 엔티티(Team)를 즉시 로딩으로 설정했다고 가정한다.
+                        List<Member> members = em.createQuery("select m from Member m", Member.class)
+                                .getResultList();
+                        ```
+                      
+                        * 일단, JPQL(`select * from Member`)로 회원(Member) 엔티티를 조회한다.
             
-            * 지연 로딩을 사용하더라도 Loop를 이용하면 N+1 문제가 발생 할 수 있다.
+                            * Member 클래스를 보면 연관된 엔티티인 Team이 즉시 로딩(EAGER)으로 설정되어 있다.
             
-            * 해결 방안은 다음과 같다.
+                        * 그러면 즉시, `select * from Team where TEAM_ID = xxx`라는 쿼리를 실행해서 연관된 엔티티인 Team을 조회한다.
+            
+                            * [해결책] 만약 연관된 엔티티인 Team을 LAZY로 설정하면 프록시 객체를 넣게 되며 N+1 문제도 발생하지 않는다.
     
-                * ① JPQL의 fetch 조인을 이용한다.
+                        * 정리 하자면, JPQL(`select * from Member`)로 회원(Member)만 조회하더라도 조회한 회원의 결과 개수(`N`)만큼 연관된 엔티티인 팀(Team)을 조회하는 추가 쿼리가 발생한다. 
     
-                * ② `@EntityGraph`를 이용한다.
+                    * ② 특정 엔티티의 연관된 엔티티(`@OneToMany`)를 지연 로딩(LAZY)으로 설정하더라도 Loop를 이용해서 조회하면 N+1 문제가 발생한다.    
+
+                        ```java
+                        // 초기 데이터 설정
+                        Team teamA = new Team();
+                        teamA.setName("teamA");
+                        em.persist(teamA);
+                        
+                        Team teamB = new Team();
+                        teamB.setName("teamB");
+                        em.persist(teamB);
+                        
+                        Member member1 = new Member();
+                        member1.setUsername("member1");
+                        member1.setTeam(teamA);
+                        em.persist(member1);
+                        
+                        Member member2 = new Member();
+                        member2.setUsername("member2");
+                        member2.setTeam(teamB);
+                        em.persist(member2);
+                        
+                        em.flush();
+                        em.clear();
+                        
+                        // [N + 1 문제 발생] Team 클래스에서 연관된 엔티티(Member)를 지연 로딩으로 설정했다고 가정한다.
+                        List<Team> teams = em.createQuery("select t from Team t", Team.class)
+                                .getResultList();
+                        
+                        for (Team team : teams) {
+                            System.out.println("team.getMembers() = " + team.getMembers());
+                        } 
+                        ```
+
+                        * 일단, JPQL(`select t from Team t`)로 팀(Team) 엔티티를 조회한다.
+
+                            * Team 클래스를 보면 연관된 엔티티인 Member가 지연 로딩(LAZY)으로 설정되어 있다.
+
+                        * 그러면 Team 엔티티에서 연관된 엔티티인 List<Member>에 프록시 객체를 넣어두게 되며 N+1 문제는 발생하지 않는다.
+    
+                        * 하지만 앞서 조회한 List<Team>를 Loop로 반복하며 팀(Team)과 연관된 엔티티 필드를 사용하면 프록시 초기화를 위한 쿼리가 발생하며 결과적으로 N+1 문제가 발생한다. 
+
+                            * [해결책] 팀(Team) 엔티티를 조회할 때, 연관된 엔티티인 Member를 함께 조회하도록 Fetch 조인을 사용하면 된다. 
+
+                                ```java
+                                // 일대다 조인은 일(1)의 기준에서는 데이터가 더 많아질 수 있기 때문에 distinct를 사용했다. 
+                                List<Team> teams = em.createQuery("select distinct t from Team t join fetch t.members", Team.class)
+                                        .getResultList();
+                                ```
+
+                * N+1 문제에 대한 해결책
                 
-                * ③ `@BatchSize`를 이용한다.
+                    * ① JPQL의 fetch 조인을 이용한다.
+                    
+                    * ② `@EntityGraph`를 이용한다.
+                    
+                    * ③ `@BatchSize`를 이용한다.
                 
     * `@ManyToOne`, `@OneToOne`의 기본 값은 즉시(EAGER) 로딩이므로 `LAZY`로 설정해야 한다.
     
@@ -2031,7 +2311,7 @@
     
     * `CASCADE`는 해당 엔티티의 상태 변화를 연관된 엔티티에 전파시킨다.
     
-        * 예를 들어, 부모만 영속 상태로 만들면 연관된 자식 엔티티까지 함께 영속화해서 저장한다.
+        * 예를 들어, 부모만 영속 상태로 만들면 연관된 자식 엔티티까지 함께 영속 상태로 만들어 저장하고 싶다면 CASCADE를 사용한다.
         
             * `@OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)`
 
@@ -2055,7 +2335,11 @@
         
         * 단지 엔티티를 영속화할 때 연관된 엔티티도 함께 영속화하는 편리함을 제공할 뿐이다.
         
-        * 하나의 부모 엔티티만 자식 엔티티들을 관리한다면 CASCADE 속성을 사용 할 수 있다.
+        * **특정 엔티티가 개인 소유(혼자서 참조)하는 엔티티에만 CASCADE 속성을 사용해야 한다.**
+    
+            * 즉, Parent 엔티티만 Child 엔티티를 참조하는 경우에만 사용해야 한다는 의미다.
+    
+            * 만약 Parent 이외에도 Member도 Child를 참조한다면 CASCADE를 사용해서는 안 된다.
 
 * 실습하기
     
@@ -2063,7 +2347,7 @@
     
         ```java
         @Entity
-        public class Parent{
+        public class Parent {
           @Id @GeneratedValue
           private Long id;
 
@@ -2071,7 +2355,8 @@
           @OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST)
           private List<Child> children = new ArrayList<>();
       
-          public void addChild(Child child){
+          // 연관관계 편의 메소드
+          public void addChild(Child child) {
               children.add(child);
               child.setParent(this);
           }
@@ -2082,7 +2367,7 @@
     
         ```java
         @Entity
-        public class Child{
+        public class Child {
           @Id @GeneratedValue
           private Long id;
           
@@ -2107,7 +2392,7 @@
     
 ### 4. 고아 객체
 
-* `고아 객체(ORPHAN) 제거`는 부모 엔티티와 연관관계가 끊어진 자식 엔티티를 자동으로 삭제하는 기능이다.
+* `고아 객체 제거 (Orphan Removal)`는 부모 엔티티와 연관관계가 끊어진 자식 엔티티를 자동으로 삭제하는 기능이다.
 
     * `@OneToMany(orphanRemoval = true)`
 
@@ -2117,14 +2402,14 @@
     
         ```java
         @Entity
-        public class Parent{
+        public class Parent {
           @Id @GeneratedValue
           private Long id;
           
           @OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST, orphanRemoval = true)
           private List<Child> children = new ArrayList<>();
       
-          public void addChild(Child child){
+          public void addChild(Child child) {
               children.add(child);
               child.setParent(this);
           }
@@ -2135,12 +2420,12 @@
 
         ```java
         Parent findParent = em.find(Parent.class, parent.getId());
-        findParent.getChildren().remove(0);
+        findParent.getChildren().remove(0); // delete from Child where id=? 과 같은 쿼리가 발생한다.
         ```
 
 * 주의사항
 
-    * **특정 엔티티가 개인 소유하는 엔티티에만 고아 객체 제거 기능을 사용해야 한다.**
+    * **특정 엔티티가 개인 소유(혼자서 참조)하는 엔티티에만 고아 객체 제거 기능을 사용해야 한다.**
 
     * `orphanRemoval`는 `@OneToOne`, `@OneToMany`에만 사용할 수 있다.
 
@@ -2153,6 +2438,10 @@
     * `CascadeType.ALL + orphanRemovel=true` : 두 옵션을 모두 활성화 하면 부모 엔티티를 통해서 자식의 생명주기를 관리할 수 있다.
 
         * 도메인 주도 설계(DDD)의 `Aggregate Root` 개념을 구현할 때, 유용하다.
+    
+            * 부모 엔티티의 데이터를 삭제하면 자식 엔티티의 데이터도 함께 삭제된다. - CASCADE
+    
+            * 자식 엔티티를 부모 엔티티와 연관관계를 끊으면 자식 테이블에서 자식 데이터가 삭제된다. - orphanRemovel 
 
 ## 9. 값 타입
 
@@ -2226,7 +2515,7 @@
     
         * `임베디드 타입(embedded type)`은 다른 타입들을 포함하고 있는 타입을 말한다.
         
-            * 주로 기본 값 타입을 모아서 만들기 때문에 `복합 값 타입`이라고도 한다.
+            * 주로 기본 값 타입을 모아서 만들기 때문에 `복합 값 타입(Composite Value Type)`이라고도 한다.
             
             * 임베디드 타입도 `int`, `String`과 같은 **값 타입**이다.
 
@@ -2302,7 +2591,7 @@
                     }
                     ```
     
-                    * 임베디드 타입은 기본 생성자가 필수다. 
+                    * **임베디드 타입은 기본 생성자가 필수다.** 
     
                 * `@Embedded` : 임베디드 타입을 사용하는 곳에 붙여준다.
                 
@@ -2340,7 +2629,9 @@
                 ```
 
             * 정리하기
-    
+
+                ![image 23](images/img23.png)    
+
                 * 임베디드 타입은 엔티티의 값일 뿐이다.
     
                 * **임베디드 타입을 사용하기 전과 후에 매핑하는 테이블은 같다.**
@@ -2372,7 +2663,7 @@
                     }
                     ```
                   
-        * @AttributeOverrides 속성 재정의 - 같은 값 타입을 여러 개 선언하기
+        * 하나의 엔티티 내에서 같은 값 타입을 여러 개 선언하기
 
             * `@AttributeOverrides` : 임베디드 타입에 정의한 매핑 정보를 재정의한다. 
 
@@ -2675,8 +2966,8 @@
         
         // 회원 1의 address 값을 복사해서 새로운 copyAddress 값을 생성한 다음, 그 주소로 변경한다.
         Address copyAddress = new Address(address.getCity(),
-                address.getStreet(),
-                address.getZipcode());
+                                          address.getStreet(),
+                                          address.getZipcode());
         
         // 회원 2
         Member member2 = new Member();
@@ -2693,34 +2984,36 @@
     * 항상 값을 복사해서 사용하면 공유 참조로 인해 발생하는 부작용을 피할 수 있다.
 
     * 임베디드 타입처럼 **직접 정의한 `값 타입`은 자바의 기본 타입(primitive)이 아니라 객체 타입이다.**
-     
-    * 자바의 기본 타입은 값을 복사해서 전달한다.
-
-        ```java
-        int a = 10;
-        int b = a;
-        b = 4;
-        ```
-      
-    * 자바의 객체 타입은 참조 값을 복사해서 전달한다.
-
-        ```java
-        Address a = new Address("Old");
-        Address b = a;
-        b.setCity("New");
-        ```
-      
-        * a와 b는 같은 Address 인스턴스를 가리킨다.
 
     * 객체 타입은 복사를 하지 않고 원본의 참조 값을 직접 대입하는 것을 막을 방법이 없다.
     
-    * 즉, 객체의 공유 참조는 피할 수 없다.
-
+        * 즉, **객체의 공유 참조는 피할 수 없다.**
+    
+            * 자바의 기본 타입은 값을 복사해서 전달한다.
+        
+                ```java
+                int a = 10;
+                int b = a;  // 기본 타입은 값을 복사
+                b = 4;
+                ```
+              
+            * 자바의 객체 타입은 참조 값을 복사해서 전달한다.
+        
+                ```java
+                Address a = new Address("Old");
+                Address b = a;  // 객체 타입은 참조를 전달
+                b.setCity("New");
+                ```
+              
+                * a와 b는 같은 Address 인스턴스를 가리킨다.
+            
+                * 따라서 b의 값을 변경하면 a도 변경된다.
+    
 * (5) 불변 객체
 
     * 값 타입은 부작용 걱정 없이 사용 할 수 있어야 한다. 부작용이 일어나면 값 타입이라 할 수 없다.
 
-    * 객체 타입을 수정 할 수 없게 만들면 부작용을 원천 차단 할 수 있다.
+    * **객체 타입을 변경할 수 없게 만들면 부작용을 원천 차단할 수 있다.**
 
     * 따라서 **값 타입은 불변 객체(Immutable Object)로 설계해야 한다.**
 
@@ -2732,7 +3025,7 @@
     
             * [참고] `Integer`, `String`은 자바가 제공하는 대표적인 불변 객체다.
     
-    * 값 타입을 수정할 때는 값 타입 인스턴스 자체를 대체해야 한다. (newAddress로 대체하기)
+    * 값 타입을 변경할 때는 값 타입 인스턴스 자체를 대체해야 한다. (newAddress로 대체하기)
 
         ```java
         Address address = new Address("city", "street", "10000");
