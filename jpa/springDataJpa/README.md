@@ -221,11 +221,11 @@
         * 따라서 개발자가 직접 구현 클래스를 만들지 않아도 된다.
 
             * `@Repository`를 생략 할 수 있다.
-            
-                * `JpaRepository` 인터페이스를 상속 받으면 컴포넌트 스캔의 대상이 된다.
-                
-                * JPA 예외를 스프링 예외로 변환한다. 
 
+                * JPA 예외를 스프링 예외로 변환한다.
+
+            * `JpaRepository` 인터페이스를 상속 받으면 컴포넌트 스캔의 대상이 된다.
+    
 #### 2) 공통 인터페이스 적용
 
 * `JpaRepository`의 제네릭을 보면 `T`는 엔티티 타입, `ID`는 식별자 타입(PK)을 의미한다.
@@ -323,12 +323,16 @@
 
     * 조회 : `find...By` , `read...By` , `query...By`, `get...By`
     
-        * Ex) `findHelloBy`처럼 `...`에 식별하기 위한 내용이 들어가도 된다.
+        * `...`는 아무 내용이나 입력해도 된다. 
+          
+            * Ex) `findHelloBy`
+
+        * `By` 키워드 다음에는 where 조건을 지정한다.
     
-            * `By` 키워드 다음에는 where 조건을 지정한다.
-    
-                * `findHelloBy`처럼 where 조건을 지정하지 않으면 전체 조회가 된다.
-    
+            * `By` 키워드 다음에 where 조건을 지정하지 않으면 전체 조회가 된다.
+            
+                * Ex) `findHelloBy()`    
+
     * AND : `And`
     
         * where 절에 and가 추가된다.
@@ -347,7 +351,7 @@
 
     * 삭제 : `delete...By`, `remove...By`
     
-        * 반환 타입 : `long`
+        * 반환 타입 : `void` 또는 `long` (삭제 횟수)
         
     * DISTINCT : `findDistinct`, `findMemberDistinctBy`
     
@@ -396,9 +400,11 @@
         }
         ```
     
-        * `Named 쿼리`는 애플리케이션을 시작하는 시점에 문법 오류를 발견 할 수 있다.
+        * `Named 쿼리`는 애플리케이션을 시작하는 시점에 JPQL 문법 오류를 발견 할 수 있다.
         
         * `@Param` : 이름 기반 파라미터를 바인딩 할 때 사용한다.
+    
+            * JPQL에서 이름 기반 파라미터를 명확하게 작성했을 때 `@Param`를 사용한다.
 
 #### 3) @Query, 리포지토리 메소드에 직접 쿼리 정의하기
 
@@ -415,7 +421,7 @@
 
     * 실행할 메서드에 정적 쿼리를 직접 작성하므로 `이름 없는 Named 쿼리`라 할 수 있다.
     
-    * `@Query`에 직접 쿼리를 정의하는 것은 애플리케이션을 시작하는 시점에 문법 오류를 발견 할 수 있다는 장점이 있다. 
+    * `@Query`에 직접 쿼리를 정의하는 것은 애플리케이션을 시작하는 시점에 JPQL 문법 오류를 발견 할 수 있다는 장점이 있다. 
 
     * 쿼리 메소드 기능의 실행 순서는 다음과 같다.
 
@@ -423,9 +429,9 @@
 
             * ⓐ `@Query`에 직접 쿼리를 정의 했다면 해당 쿼리를 먼저 실행한다.
 
-            * ⓑ `@Query`에 name 속성으로 선언한 Named 쿼리를 찾아서 먼저 실행한다.
+            * ⓑ 또는 `@Query`에 name 속성으로 선언한 Named 쿼리를 찾아서 먼저 실행한다.
 
-            * ⓒ `@Query`이 없다면 `엔티티 이름 + .(점) + 메서드 이름`으로 Named 쿼리를 찾아서 먼저 실행한다.
+            * ⓒ 또는 `@Query`이 없다면 `엔티티 이름 + .(점) + 메서드 이름`으로 Named 쿼리를 찾아서 먼저 실행한다.
 
         * ② 만약 실행할 쿼리가 없으면 `메소드 이름으로 쿼리 생성` 방식을 사용한다.
 
@@ -498,7 +504,16 @@
         select m from Member m where m.username = :name //이름 기반
         ```
         
-        * 코드 가독성과 유지보수를 위해 `이름 기반 파라미터 바인딩`을 사용하자.
+    * 코드 가독성과 유지보수를 위해 `이름 기반 파라미터 바인딩`을 사용하자.
+    
+        ```java
+        public interface MemberRepository extends JpaRepository<Member, Long> {
+            
+            // 이름 기반 파라미터 바인딩
+            @Query("select m from Member m where m.username = :username")
+            List<Member> findMembers(@Param("username") String username);
+        }
+        ```
 
 * 컬렉션 파라미터 바인딩
 
@@ -655,7 +670,7 @@
     
         ```java
         @Test
-        public void page() throws Exception {
+        public void paging() throws Exception {
             //given
             memberRepository.save(new Member("member1", 10)); 
             memberRepository.save(new Member("member2", 10)); 
@@ -665,10 +680,9 @@
     
             //when
             // 0 페이지에서 3개를 가져온다. 그리고 username으로 내림차순 정렬한다.
-            PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username")); 
+            PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username")); // 0 페이지를 조회하며 한 페이지에 조회할 데이터 수는 3개이며 정렬 기준도 설정해서 PageRequest를 만든다. 
             Page<Member> page = memberRepository.findByAge(10, pageRequest);        // 0 페이지에서 3개를 가져온다.
             // Slice<Member> page = memberRepository.findByAge(age, pageRequest);   // 0 페이지에서 3 + 1개를 가져온다.
-                                                                                   // 여기서 3은 한 페이지에 조회할 데이터 수를 의미한다.
       
             //then
             List<Member> content = page.getContent();
@@ -738,7 +752,7 @@
 
     * 더보기 기능을 구현할 때, 사용 할 수 있다.
 
-* 추가적인 내용
+* 더 나아가기
 
     * count 쿼리를 분리하기
     
@@ -940,8 +954,8 @@
         List<Member> findMemberFetchJoin();
         ```
       
-    * ② `@EntityGraph` : 어떤 엔티티를 조회하는 시점에 연관된 엔티티를 함께 조회하는 기능이다.
-    
+    * ② `@EntityGraph` : 어떤 엔티티를 조회하는 시점에 **연관된 엔티티들을 SQL 한 번에 함께 조회하는 기능**이다.
+
         * 사실상 페치 조인(FETCH JOIN)의 간편 버전이다.
         
         * 기본적으로 LEFT OUTER JOIN만 지원한다.
@@ -965,6 +979,8 @@
            ```
           
             * `attributePaths` : 쿼리 수행 시, 즉시 로딩(EAGER LOADING)으로 함께 조회할 필드명을 지정한다
+
+        * 페치 조인(엔티티 그래프)을 수행하면 특정 엔티티의 연관된 엔티티를 프록시 객체가 아닌 실제 엔티티 객체로 조회한다.
 
     * ③ `@NamedEntityGraph`
     
@@ -1033,11 +1049,9 @@
 
 #### 1) 사용자 정의 리포지토리 구현
 
-* 사용자 정의 리포지토리를 구현하는 이유
+* (1) 사용자 정의 리포지토리를 구현하는 이유
 
-    * 스프링 데이터 JPA 리포지토리는 인터페이스만 정의하고 구현체는 스프링이 자동으로 생성하기 때문에
- 
-    * 스프링 데이터 JPA가 제공하는 인터페이스를 직접 구현하게 되면 구현해야 하는 기능이 너무 많다.
+    * 스프링 데이터 JPA 리포지토리는 인터페이스만 정의하고 구현체는 스프링이 자동으로 생성하기 때문에 스프링 데이터 JPA가 제공하는 인터페이스를 직접 구현하게 되면 구현해야 하는 기능이 너무 많다.
  
     * 다음과 같은 다양한 이유로 인터페이스의 메서드를 직접 구현하고 싶다면 `사용자 정의 인터페이스`를 작성한다.
 
@@ -1053,7 +1067,7 @@
     
             * 복잡한 동적 쿼리를 작성하는 경우
 
-* 사용자 정의 리포지토리를 구현하는 방법
+* (2) 사용자 정의 리포지토리를 작성하는 방법
 
     * ① 사용자 정의 인터페이스를 작성한다.
     
@@ -1064,11 +1078,11 @@
         ```
       
     * ② 사용자 정의 인터페이스를 구현한 클래스를 작성한다.
-    
+
         ```java
         @RequiredArgsConstructor
-        public class MemberRepositoryImpl implements MemberRepositoryCustom{
-        
+        public class MemberRepositoryCustomImpl implements MemberRepositoryCustom { 
+            
             // JPA 직접 사용
             private final EntityManager em;
         
@@ -1077,27 +1091,23 @@
                 return em.createQuery("select m from Member m")
                         .getResultList();
             }
+            
         }
         ```
 
-        * 클래스 이름을 짓는 규칙은 `리포지토리 인터페이스명 + Impl` 이다.
-    
-        * 이렇게 하면 스프링 데이터 JPA가 인식해서 스프링 빈으로 등록한다.
+        * 클래스 이름을 짓는 규칙을 따르면 스프링 데이터 JPA가 사용자 정의 구현 클래스로 인식한다.
+
+            * 클래스 이름을 짓는 규칙은 기본적으로 `리포지토리 인터페이스명 + Impl` 이다.
+        
+                * Ex) `MemberRepositoryImpl`
         
             * **스프링 데이터 2.x 부터**는 클래스 이름을 짓는 규칙을 `사용자 정의 인터페이스명 + Impl`로 하는 것이 가능하다.
     
-                ```java
-                @RequiredArgsConstructor
-                public class MemberRepositoryCustomImpl implements MemberRepositoryCustom{
-                    //...
-                }
-                ```
+                * Ex) `MemberRepositoryCustomImpl`    
     
-                * 예를 들어, `MemberRepositoryImpl` 대신에 `MemberRepositoryCustomImpl`과 같이 작성해도 된다.
-                
-                * 해당 방식이 사용자 정의 인터페이스 이름과 구현 클래스 이름이 비슷하므로 더 직관적이므로 해당 방식을 사용하는 것을 권장한다.
-
-        * `@RequiredArgsConstructor` : final 필드 만을 가지고 생성자를 만들어준다.
+                    * 해당 방식이 사용자 정의 인터페이스명과 구현 클래스명이 비슷하면서 더 직관적이므로 해당 방식을 사용하는 것을 권장한다.
+    
+        * `@RequiredArgsConstructor` : final 필드만을 가지고 생성자를 만들어준다.
         
             * 스프링은 생성자가 하나인 경우에 `@Autowired`가 없더라도 자동으로 의존성을 주입한다.
             
@@ -1105,7 +1115,7 @@
             
             * 그래서 위의 코드처럼 생성자 주입으로 작성 할 수 있다.
         
-    * ③ 사용자 정의 인터페이스를 상속 받는다.
+    * ③ 특정 리포지토리 인터페이스에 사용자 정의 인터페이스를 상속 받도록 한다.
     
         ```java
         public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
@@ -1118,19 +1128,24 @@
         List<Member> result = memberRepository.findMemberCustom();
         ```
 
-* Impl 대신 다른 이름으로 변경하고 싶으면 ? 
+* (3) 사용자 정의 구현 클래스 이름 끝에 Impl 대신 다른 이름으로 변경하기 
   
-    * 해당 강좌를 참고하자.
-
-    * 왠만하면 관례를 따르도록 하자.
+    * 자바 설정 파일에 아래 내용처럼 적용하면 변경할 수 있다.
     
-* 참고 사항
+        ```java
+        @EnableJpaRepositories(basePackages = "study.datajpa.repository",
+                               repositoryImplementationPostfix = "Impl")
+        ```
 
-    * 항상 사용자 정의 리포지토리가 필요한 것은 아니다. 
-      
-    * 그냥 임의의 리포지토리를 만들어도 된다. 
-      
-        * 예를 들어 MemberQueryRepository를 인터페이스가 아닌 클래스로 만들고 스프링 빈으로 등록해서 그냥 직접 사용해도 된다. 
+    * 하지만 왠만하면 관례를 따르도록 하자.
+    
+* (4) 참고사항
+
+    * 항상 사용자 정의 리포지토리가 필요한 것은 아니다. 그냥 임의의 리포지토리를 만들어도 된다. 
+
+        * 핵심 비즈니스 로직이 있는 리포지토리와 화면에 맞춘 통계 쿼리가 있는 리포지토리는 분리해야 한다.
+
+        * 예를 들어 MemberQueryRepository를 인터페이스가 아닌 클래스로 작성하고 스프링 빈으로 등록한 다음, 직접 사용해도 된다. 
 
             ```java
             @Repository
@@ -1146,22 +1161,22 @@
             
             }
             ```
-          
-            * 핵심 비즈니스 로직이 있는 리포지토리와 화면에 맞춘 통계 쿼리가 있는 리포지토리를 분리해야 한다. 
-
-        * 물론 이 경우 스프링 데이터 JPA와는 아무런 관계 없이 별도로 동작한다. 
+    
+            * 물론 이 경우에는 스프링 데이터 JPA 와는 아무런 관계 없이 별도로 동작한다. 
 
 #### 2) Auditing
 
-* `Auditing` : 엔티티를 변경하는 시점에 언제, 누가 변경 했는지에 대한 정보를 기록하는 기능이다.
-        
-    * Ex) 등록일, 수정일, 등록자, 수정자
+* (1) Auditing ?
+
+    * `Auditing` : 엔티티를 변경하는 시점에 언제, 누가 변경 했는지에 대한 정보를 기록하는 기능이다.
+            
+        * Ex) 등록일, 수정일, 등록자, 수정자
  
-* Auditing 구현
+* (2) 실습하기
   
-    * (1) 순수 JPA 사용
+    * 순수 JPA를 사용한 Auditing 구현
     
-        * ① 등록일, 수정일을 적용한 클래스 작성
+        * ① 공통 매핑 정보를 제공하는 JpaBaseEntity 클래스를 작성한다.
     
             ```java
             @MappedSuperclass
@@ -1175,7 +1190,7 @@
             
                 // persist() 하기 전에 이벤트가 발생
                 @PrePersist
-                public void prePersist(){
+                public void prePersist() {
                     LocalDateTime now = LocalDateTime.now();
                     createdDate = now;
                     updatedDate = now;
@@ -1183,30 +1198,30 @@
             
                 // update() 하기 전에 이벤트가 발생
                 @PreUpdate
-                public void preUpdate(){
+                public void preUpdate() {
                     updatedDate = LocalDateTime.now();
                 }
                 
             }
             ```
           
-            * JPA 주요 이벤트 애노테이션 : `@PrePersist`, `@PostPersist`, `@PreUpdate`, `@PostUpdate`
+            * JPA는 주요 이벤트 애노테이션을 제공한다. (`@PrePersist`, `@PostPersist`, `@PreUpdate`, `@PostUpdate`)
 
-                * `@PrePersist` : `persist()` 하기 전에 호출된다.
+                * `@PrePersist` : `persist()`를 하기 전에 호출된다.
 
                 * `@PreUpdate` : 수정하기 전에 호출된다.
                 
                 * ...
 
-        * ② 앞서 작성한 클래스를 상속 받는다.
+        * ② 특정 엔티티가 JpaBaseEntity 클래스를 상속 받도록 한다.
         
             ```java
             public class Member extends JpaBaseEntity {}
             ```   
 
-    * (2) 스프링 데이터 JPA 사용
+    * 스프링 데이터 JPA를 사용한 Auditing 구현
     
-        * ① 스프링 부트 설정 클래스(`DataJpaApplication`)에 `@EnableJpaAuditing`를 적용한다.
+        * ① 스프링 부트의 메인 클래스(`DataJpaApplication`)에 `@EnableJpaAuditing`를 적용한다.
         
             ```java
             @EnableJpaAuditing
@@ -1220,59 +1235,48 @@
             }
             ```
           
-            * `@EnableJpaAuditing` : JPA Auditing을 활성화한다.
+            * `@EnableJpaAuditing` : Auditing 기능을 활성화한다.
 
         * ② `BaseEntity` 클래스를 작성한다.
-        
-        * ③ `BaseEntity` 클래스에 다음 내용을 적용한다.
-
-            * `@EntityListeners`, `@MappedSuperclass`를 적용한다.
-
-                ```java
-                @EntityListeners(AuditingEntityListener.class)
-                @MappedSuperclass
-                @Getter
-                public class BaseEntity {
-                    // ...
-                }
-                ```
-
-                * `@EntityListeners(AuditingEntityListener.class)` : 해당 클래스에 Auditing 기능을 포함시킨다.
-
-                * `@MappedSuperclass` : `BaseEntity`를 상속받는 Entity 클래스가 `BaseEntity`의 필드를 컬럼으로 인식하도록 한다.
-
-                    * `BaseEntity`의 필드라는 것은 createdDate, lastModifiedDate 등을 말한다.
+         
+            ```java
+            @EntityListeners(AuditingEntityListener.class)
+            @MappedSuperclass
+            @Getter
+            public class BaseEntity {
             
-            * 그리고 다음 애노테이션을 사용한다.
+                // 등록일
+                @CreatedDate
+                @Column(updatable = false)
+                private LocalDateTime createdDate;
             
-                ```java
-                @EntityListeners(AuditingEntityListener.class)
-                @MappedSuperclass
-                @Getter
-                public class BaseEntity {
-                
-                    // 등록일
-                    @CreatedDate
-                    @Column(updatable = false)
-                    private LocalDateTime createdDate;
-                
-                    // 수정일
-                    @LastModifiedDate
-                    private LocalDateTime lastModifiedDate;
-                
-                    /* 등록되거나 수정될 때 마다, auditorProvider()를 호출한 결과를 자동으로 채워 넣는다. */
-                    // 등록자
-                    @CreatedBy
-                    @Column(updatable = false)
-                    private String createdBy;
-                
-                    // 수정자
-                    @LastModifiedBy
-                    private String lastModifiedBy;
-                
-                }
-                ```
+                // 수정일
+                @LastModifiedDate
+                private LocalDateTime lastModifiedDate;
+            
+                /* 등록되거나 수정될 때 마다, auditorProvider()를 호출한 결과를 자동으로 채워 넣는다. */
+                // 등록자
+                @CreatedBy
+                @Column(updatable = false)
+                private String createdBy;
+            
+                // 수정자
+                @LastModifiedBy
+                private String lastModifiedBy;
+            
+            }
+            ```
 
+            * `@EntityListeners(AuditingEntityListener.class)` : 해당 클래스에 Auditing 기능을 포함시킨다.
+            
+            * `@MappedSuperclass` : 자식 클래스에게 공통 매핑 정보를 제공하는 부모 클래스를 작성할 때 사용한다.
+            
+                * 여기서 공통 매핑 정보는 createdDate, lastModifiedDate, createdBy, lastModifiedBy를 말한다.
+
+            * `@Column(updatable = false)` : 해당 컬럼의 값은 처음 값을 지정한 이후, 수정하지 못하도록 한다.
+
+            * 등록일, 수정일, 등록자, 수정자 관련 애노테이션
+              
                 * `@CreatedDate` : 엔티티가 생성되어 저장될 때, 시간이 자동 저장된다.
                 
                 * `@LastModifiedDate` : 조회한 엔티티의 값을 변경할 때, 시간이 자동 저장된다. 
@@ -1280,22 +1284,29 @@
                 * `@CreatedBy` : 엔티티가 생성되어 저장될 때, 생성자가 자동 저장된다.
                 
                 * `@LastModifiedBy` : 조회한 엔티티의 값을 변경할 때, 수정자가 자동 저장된다. 
-    
-                * `@Column(updatable = false)`는 등록 시간, 등록자는 처음 값을 지정한 이후, 수정하지 못하도록 한다.
 
-            * (등록자, 수정자 필드가 있는 경우) 등록자, 수정자를 처리해주는 `AuditorAware` 스프링 빈을 등록한다.
+        * ③ 자바 설정 파일에서 등록자, 수정자를 처리해주는 `AuditorAware` 스프링 빈을 등록한다. (등록자, 수정자 필드에 Auditing 기능을 적용하는 경우에만 작성함)
 
-                ```java
+            ```java
+            @EnableJpaAuditing
+            @SpringBootApplication
+            public class DataJpaApplication {
+            
+                public static void main(String[] args) {
+                    SpringApplication.run(DataJpaApplication.class, args);
+                }
+            
                 @Bean
                 public AuditorAware<String> auditorProvider(){
                     // 랜덤 UUID 생성
                     return () -> Optional.of(UUID.randomUUID().toString());
                 }
-                ```
-
-                * 위의 코드에서는 랜덤한 UUID를 생성해서 지정하였다.
-
-                * 하지만 실무에서는 세션 정보나, 스프링 시큐리티 로그인 정보에서 유저 ID를 지정한다.
+            }
+            ```
+            
+            * 위의 코드에서는 랜덤한 UUID를 생성해서 지정하였다.
+            
+            * 하지만 실무에서는 세션 정보나, 스프링 시큐리티 로그인 정보에서 유저 ID를 가져와서 지정한다.
 
         * ④ BaseEntity 클래스를 상속 받는다.
             
@@ -1303,7 +1314,53 @@
             public class Member extends BaseEntity {}
             ```
 
-    * (3) 등록 시간, 수정 시간과 등록자, 수정자를 분리하기
+        * ⑤ 앞서 작성한 내용을 확인하는 테스트 코드를 작성한다.
+        
+            ```java
+            import me.kevinntech.springdatajpa.repository.MemberRepository;
+            import org.junit.jupiter.api.Test;
+            import org.springframework.beans.factory.annotation.Autowired;
+            import org.springframework.boot.test.context.SpringBootTest;
+            
+            import javax.persistence.EntityManager;
+            import javax.persistence.PersistenceContext;
+            import javax.transaction.Transactional;
+            
+            @SpringBootTest
+            @Transactional
+            class MemberTest {
+            
+                @PersistenceContext
+                EntityManager em;
+            
+                @Autowired
+                MemberRepository memberRepository;
+            
+                @Test
+                public void JpaEventBaseEntity() throws InterruptedException {
+                    // given
+                    Member member = new Member("member1");
+                    memberRepository.save(member); // @PrePersist
+            
+                    Thread.sleep(100);
+                    member.setUsername("member2");
+            
+                    em.flush();
+                    em.clear();
+            
+                    // when
+                    Member findMember = memberRepository.findById(member.getId()).get();
+            
+                    // then
+                    System.out.println("findMember.createdDate = " + findMember.getCreatedDate());
+                    System.out.println("findMember.updatedDate = " + findMember.getLastModifiedDate());
+                    System.out.println("findMember.createdBy = " + findMember.getCreatedBy());
+                    System.out.println("findMember.lastModifiedBy = " + findMember.getLastModifiedBy());
+                }
+            }
+            ```
+
+    * 등록 시간, 수정 시간과 등록자, 수정자를 분리하기
     
         ```java
         @EntityListeners(AuditingEntityListener.class)
@@ -1318,8 +1375,6 @@
             private LocalDateTime lastModifiedDate;
         }
         
-        @EntityListeners(AuditingEntityListener.class)
-        @MappedSuperclass
         @Getter
         public class BaseEntity extends BaseTimeEntity {
             @CreatedBy
@@ -1331,24 +1386,18 @@
         }
         ```
 
-        * 실무에서 대부분의 엔티티는 등록 시간, 수정 시간이 필요하지만, 등록자, 수정자는 필요 없는 경우가 있다.
+        * 실무에서 대부분의 엔티티는 등록 시간과 수정 시간이 필요하지만, 등록자와 수정자는 필요없는 경우가 있다.
       
-        * 그래서 위와 같이 Base 타입을 분리하고, 원하는 타입을 선택해서 상속한다.
+        * 그래서 위와 같이 Base 타입을 분리한 다음, 원하는 타입을 선택해서 상속할 수 있도록 한다.
         
-            * 등록, 수정 시간만 필요하다면 `BaseTimeEntity`를 상속하고 둘다 필요하다면 `BaseEntity`를 상속한다. 
-
-    * (4) Auditing를 전체 적용하기
-
-        * XML 파일을 만들어서 `스프링 데이터 JPA`가 제공하는 이벤트를 엔티티 전체에 적용 할 수 있다.
-        
-            * 자세한 내용은 해당 강좌를 참고하자.
+            * 예를 들어, 등록 시간과 수정 시간만 필요하다면 `BaseTimeEntity`를 상속하고 둘 다 필요하다면 `BaseEntity`를 상속한다. 
     
 #### 3) Web 확장
 
-* `도메인 클래스 컨버터`는 HTTP 요청으로 전달받은 엔티티의 ID로 엔티티 객체를 찾아서 바인딩한다.
-  
-    * 예시
+* (1) 도메인 클래스 컨버터
 
+    * `도메인 클래스 컨버터`는 HTTP 요청으로 전달받은 엔티티의 ID로 엔티티 객체를 찾아서 바인딩한다.
+    
         ```java
         @RestController
         @RequiredArgsConstructor
@@ -1378,15 +1427,13 @@
         }
         ```
       
-        * 주의사항 
-          
-            * 도메인 클래스 컨버터로 엔티티를 파라미터로 받으면, 이 엔티티는 단순 조회용으로만 사용해야 한다. 
-            
-            * 트랜잭션이 없는 범위에서 엔티티를 조회했으므로, 엔티티를 변경해도 DB에 반영되지 않는다.
+        * 도메인 클래스 컨버터로 엔티티를 파라미터로 받으면, 이 엔티티는 단순 조회용으로만 사용해야 한다. 
+        
+        * 트랜잭션이 없는 범위에서 엔티티를 조회했으므로, 엔티티를 변경해도 DB에 반영되지 않는다.
 
-* 페이징과 정렬
+* (2) 페이징과 정렬
 
-    * 스프링 MVC에서 스프링 데이터의 페이징과 정렬 사용하기
+    * 스프링 MVC에서 스프링 데이터가 제공하는 페이징과 정렬 사용하기
       
         ```java
         @RestController
@@ -1396,7 +1443,7 @@
             private final MemberRepository memberRepository;
                   
             @GetMapping("/members")
-            public Page<Member> list(Pageable pageable){
+            public Page<Member> list(Pageable pageable) {
                 Page<Member> page = memberRepository.findAll(pageable);
                 return page;
             }
@@ -1412,54 +1459,62 @@
         
             * Ex) `/members?page=0&size=3&sort=id,desc&sort=username,desc`
                      
-                * `page` : 현재 페이지, 0 부터 시작한다.
+                * `page` : 현재 페이지를 의미한다. (0 부터 시작함)
                 
-                * `size` : 한 페이지에 표시할 데이터 수
+                * `size` : 한 페이지에 표시할 데이터 수를 의미한다.
                 
-                * `sort` : 정렬 조건을 정의한다. (ASC | DESC)
+                * `sort` : 정렬 조건을 의미한다. (ASC | DESC)
                 
                     * ASC는 기본 값이므로 생략 가능하다.
+    
+                        * Ex) `sort=username`
 
-            * 사용자가 웹 브라우저에서 요청 파라미터 정보를 입력하면 `PageRequest` 객체를 생성해서 주입한다.
+            * 사용자가 웹 브라우저에서 요청 파라미터 정보를 입력하면 `PageRequest` 객체를 생성해서 컨트롤러의 메소드 파라미터로 전달한다.
 
-    * Pageable 기본 값 변경
+    * Pageable 기본 값을 변경하기
 
-        * 글로벌 설정 : 스프링 부트
+        * 글로벌 설정 (스프링 부트)
         
-            ```java
-            spring.data.web.pageable.default-page-size=20 /# 기본 페이지 사이즈/ 
-            spring.data.web.pageable.max-page-size=2000 /# 최대 페이지 사이즈/
+            ```
+            # 기본 페이지 사이즈
+            spring.data.web.pageable.default-page-size=20
+            # 최대 페이지 사이즈
+            spring.data.web.pageable.max-page-size=2000
             ```
           
-        * 개별 설정 : `@PageableDefault` 애노테이션을 사용한다.
-        
-            ```java
-            @GetMapping("/members")
-            public Page<Member> list(@PageableDefault(size = 5, sort = "username") Pageable pageable){
-                Page<Member> page = memberRepository.findAll(pageable);
-                return page;
-            }
-            ```
+            * 여기서 `page-size`는 한 페이지에 표시할 데이터 수를 의미한다.
           
-            * 개별 설정은 글로벌 설정 보다 우선적으로 적용된다.
+        * 개별 설정
+          
+            * `@PageableDefault` 애노테이션을 사용한다.
+            
+                ```java
+                @GetMapping("/members")
+                public Page<Member> list(@PageableDefault(size = 5, sort = "username") Pageable pageable){
+                    Page<Member> page = memberRepository.findAll(pageable);
+                    return page;
+                }
+                ```
+              
+                * 개별 설정은 글로벌 설정 보다 우선적으로 적용된다.
           
     * 접두사        
 
         * 사용해야 할 페이징 정보가 둘 이상이면 접두사로 구분한다.
         
-            * `@Qualifier`에 접두사명을 추가한다. "{접두사명}_xxx”
-            
-                * Ex) `/members?member_page=0&order_page=1`
+        * `@Qualifier`에 접두사명을 추가한다. `"{접두사명}_xxx”`
         
-                    ```java
-                    public String list(
-                            @Qualifier("member") Pageable memberPageable, 
-                            @Qualifier("order") Pageable orderPageable, ...
-                    ```
+            * Ex) `/members?member_page=0&order_page=1`
+    
+                ```java
+                public String list(
+                        @Qualifier("member") Pageable memberPageable, 
+                        @Qualifier("order") Pageable orderPageable, ...
+                ```
                       
     * Page의 내용을 DTO로 변환하기       
 
-        * 엔티티를 외부 API로 노출하면 다양한 문제가 발생한다. 그래서 엔티티를 꼭 DTO로 변환해서 반환해야 한다.
+        * 엔티티를 외부 API로 노출하면 다양한 문제가 발생한다. 그래서 엔티티는 꼭 DTO로 변환해서 반환해야 한다.
      
             * 외부 API로 반환할 때는 컨트롤러의 리턴 타입을 `Page<Member>`가 아닌 `Page<MemberDto>`로 사용해야 한다.
      
@@ -1474,7 +1529,7 @@
                 
                     private String username;
                     
-                    public MemberDto(Member member){
+                    public MemberDto(Member member) {
                         this.id = member.getId();
                         this.username = member.getUsername();
                     }
@@ -1487,29 +1542,35 @@
             
                 ```java
                 @GetMapping("/members")
-                public Page<MemberDto> list(@PageableDefault(size = 5) Pageable pageable){
+                public Page<MemberDto> list(@PageableDefault(size = 5) Pageable pageable) {
                     return memberRepository.findAll(pageable)
                       .map(MemberDto::new);
                 }
                 ```
+              
+                * Page 타입은 컨트롤러에서 반환해도 된다.
 
     * Page를 1 부터 시작하기      
 
-        * 스프링 데이터는 Page를 0부터 시작한다. 만약 1부터 시작하려면 어떻게 해야 될까?
+        * 스프링 데이터는 Page를 0 부터 시작한다. 만약 1 부터 시작하려면 어떻게 해야 될까?
         
-            * 첫 번째 방법 - 실질적인 해결책
+            * 첫 번째 방법 (실질적인 해결책)
             
-                * `Pageable`, `Page`를 파라미터와 응답 값으로 사용하지 않고, 직접 클래스를 만들어서 처리한다. 
+                * ① `Pageable`과 `Page`를 컨트롤러 메소드의 파라미터와 리턴 값으로 사용하지 않는다.
+                  
+                * ② 페이징을 요청하는 클래스를 직접 만들어서 컨트롤러 메소드의 파라미터로 사용한다. 
                 
-                * 그리고 직접 `PageRequest`(Pageable 구현체)를 생성한 다음, 리포지토리에 전달한다. 
+                    * 리포지토리에 전달할 `PageRequest`(Pageable 구현체)를 직접 만든다. 
+    
+                    * 리포지토리에서 조회할 때, 앞서 만든 PageRequest를 전달한다.
                 
-                * 물론 응답 값도 Page 대신에 직접 만들어서 제공해야 한다.
+                * ③ 컨트롤러 메소드의 리턴 값도 Page를 대신하는 클래스를 만들어서 제공한다.
                 
             * 두 번째 방법
             
                 * `application.properties`에서 `spring.data.web.pageable.one-indexed-parameters`를 `true`로 설정한다. 
                                 
-                    * Ex) `http://localhost:8080/members?page=1` 처럼 페이지 1을 요청한다. 
+                    * 예를 들어, 클라이언트가 `http://localhost:8080/members?page=1` 처럼 1번 페이지를 요청한다. 
                     
                         ```json
                         {
@@ -1568,9 +1629,9 @@
                         }
                         ```
                         
-                        * 그런데 이 방법은 web에서 page 파라미터를 -1 처리 할 뿐이다.
+                        * 그런데 이 방법은 web에서 page 파라미터를 -1 처리를 할 뿐이다.
                         
-                        * 따라서 응답 값인 Page에 모두 0 페이지 인덱스를 사용하는 한계가 있다.
+                        * 따라서 응답 값인 Page에서 페이지의 인덱스가 모두 0 부터 시작하는 한계가 있다.
 
         * 가급적 권장하는 것은 페이지 인덱스를 0 부터 처리하자.
         
@@ -1578,59 +1639,63 @@
 
 #### 1) 스프링 데이터 JPA 구현체 분석
 
-* 스프링 데이터 JPA가 제공하는 공통 인터페이스의 구현체 (`SimpleJpaRepository`)
+* 스프링 데이터 JPA가 제공하는 공통 인터페이스의 구현체는 `SimpleJpaRepository`다.
 
     * `org.springframework.data.jpa.repository.support.SimpleJpaRepository`
     
-    * `SimpleJpaRepository`의 코드를 살펴보기
+* `SimpleJpaRepository`의 코드를 살펴보기
+
+    * ① 클래스 레벨에 `@Repository` 적용
     
-        * ① `@Repository` 적용
+        * 컴포넌트 스캔의 대상이 되어 스프링 빈으로 등록된다.
         
-            * 컴포넌트 스캔의 대상이 되어 스프링 빈으로 등록된다.
-            
-            * JPA 예외를 스프링이 추상화한 예외로 변환한다.
+        * 하부 기술의 예외를 스프링이 추상화한 예외로 변환한다.
+
+            * 하부 기술을 JDBC에서 JPA로 변경 하더라도 예외를 처리하는 메커니즘이 동일하다는 장점이 있다.
+
+    * ② 클래스 레벨에 `@Transactional(readOnly = true)` 적용
     
-                * 하부 기술을 JDBC에서 JPA로 변경 하더라도 예외를 처리하는 메커니즘이 동일하다는 장점이 있다.
-            
-        * ② `@Transactional` 적용
-            
-            * JPA의 모든 변경은 트랜잭션 안에서 이루어져야 한다.
-                
-                * `스프링 데이터 JPA`는 변경(등록, 수정, 삭제) 메소드를 트랜잭션 안에서 처리해야 한다. (그렇지 않으면 예외가 발생함)
-                
-                    ```java
-                    @Transactional
-                    @Override
-                    public <S extends T> S save(S entity) {
-                
-                        if (entityInformation.isNew(entity)) {
-                            em.persist(entity);
-                            return entity;
-                        } else {
-                            return em.merge(entity);
-                        }
-                    }
-                    ```
-                    
-                    * 스프링 데이터 JPA에서 등록, 삭제 메소드는 `@Transactional`로 트랜잭션 처리가 되어 있다.
-
-                * 서비스 계층에서 트랜잭션을 시작하면 리포지토리는 해당 트랜잭션을 전파 받아서 사용한다.
-             
-                * 서비스 계층에서 트랜잭션을 시작하지 않으면 리포지토리에서 트랜잭션을 시작한다.
-                
-                * 그래서 스프링 데이터 JPA를 사용할 때 트랜잭션이 없어도 데이터 등록, 변경이 가능했던 것이다. 
-                  
-                    * 사실은 트랜잭션이 리포지토리 계층에 이미 걸려있는 것임
-
-        * ③ `@Transactional(readOnly = true)`
-            
-            * 데이터를 조회만 하고 변경하지 않는 트랜잭션에서는 `readOnly = true` 옵션을 사용하면 플러시를 생략해서 약간의 성능 향상을 얻을 수 있음
-
+        * 기본적으로 읽기 전용으로 트랜잭션을 처리하도록 클래스 레벨에 애노테이션이 지정되어 있다.
+        
+            * 저장, 변경, 삭제를 하는 메소드 보다 조회하는 메소드가 더 많기 때문이다.
+        
+        * 데이터를 조회만 하고 변경하지 않는 트랜잭션에서는 `readOnly = true` 옵션을 사용하면 플러시를 생략해서 약간의 성능 향상을 얻을 수 있다.
+        
             * 즉, `readOnly = true`는 플러시를 생략한다.
 
-        * ④ `save()` 메소드
+    * ③ 메소드 레벨에 `@Transactional` 적용
+        
+        * JPA의 모든 변경은 트랜잭션 안에서 이루어져야 한다.
             
-            * 새로운 엔티티면 저장(`persist`)하고 새로운 엔티티가 아니면 병합(`merge`)한다.
+            * `스프링 데이터 JPA`에서 변경(등록, 수정, 삭제) 메소드는 트랜잭션 안에서 처리해야 한다. (그렇지 않으면 예외가 발생함)
+            
+                ```java
+                @Transactional
+                @Override
+                public <S extends T> S save(S entity) {
+            
+                    if (entityInformation.isNew(entity)) {
+                        em.persist(entity);
+                        return entity;
+                    } else {
+                        return em.merge(entity);
+                    }
+                }
+                ```
+                
+                * 스프링 데이터 JPA에서 등록, 삭제 메소드는 `@Transactional`로 트랜잭션 처리가 되어 있다.
+
+            * 서비스 계층에서 트랜잭션을 시작하면 리포지토리는 해당 트랜잭션을 전파 받아서 사용한다.
+         
+            * 서비스 계층에서 트랜잭션을 시작하지 않으면 리포지토리에서 트랜잭션을 시작한다.
+            
+            * 그래서 스프링 데이터 JPA를 사용할 때 트랜잭션이 없어도 데이터 등록, 변경이 가능했던 것이다. 
+              
+                * 사실은 트랜잭션이 리포지토리 계층에 이미 걸려있는 것이다.
+    
+    * ④ `save()` 메소드
+        
+        * 새로운 엔티티면 저장(`persist`)하고 새로운 엔티티가 아니면 병합(`merge`)한다.
 
 #### 2) 새로운 엔티티를 구별하는 방법
 
@@ -1644,21 +1709,27 @@
     
         * `Persistable` 인터페이스를 구현해서 판단 로직을 변경 할 수 있다.
 
-* 직접 식별자를 할당해야되는 경우
+* 직접 식별자를 할당해야 되는 경우
 
-    * JPA 식별자 생성 전략이 `@GeneratedValue`면 `save()` 호출 시점에 식별자가 없으므로 새로운 엔티티로 인식해서 정상적으로 동작한다. 
+    * JPA 식별자 생성 전략이 `@Id + @GeneratedValue`면 `save()`를 호출하는 시점에 식별자가 없으므로 새로운 엔티티로 인식해서 정상적으로 동작한다. 
+
+        * 식별자가 없기 때문에 새로운 엔티티를 판단하는 if 문 내부로 진입한다.
     
+        * `em.persist()`를 호출해서 식별자를 할당받는다.
+
+            * [참고] `@GeneratedValue`를 사용하면 `em.persist()`를 호출하는 시점에 식별자를 조회해서 할당한다.   
+
     * 그런데 `@Id`만 사용해서 직접 식별자를 할당하게 되면 이미 식별자 값이 있는 상태로 `save()`를 호출하게 된다. 
     
-    * 따라서 이 경우에는 `merge()`가 호출되며 `merge()`는 우선 DB에서 값을 조회하고, DB에 값이 없으면 새로운 엔티티로 인지하므로 매우 비효율적이다.
+    * 이 경우에는 `merge()`가 호출되며 `merge()`는 우선 DB에서 값을 조회하고, DB에 값이 없으면 새로운 엔티티로 인지하므로 매우 비효율적이다.
     
-    * 그래서 **`Persistable` 인터페이스를 구현해서 새로운 엔티티를 판단하는 로직을 직접 작성한다.**
+    * 따라서 **`Persistable` 인터페이스를 구현해서 새로운 엔티티를 판단하는 로직을 직접 작성한다.**
     
         ```java
         @Entity
         @EntityListeners(AuditingEntityListener.class)
         @NoArgsConstructor(access = AccessLevel.PROTECTED)
-        public class Item implements Persistable<String> {
+        public class Item implements Persistable<String> { // Persistable<식별자 타입>
         
             @Id
             private String id;
@@ -1677,10 +1748,12 @@
             }
             
             /*
-            * @CreatedDate는 persist()가 되기 전에 호출된다.   
-            * 그래서 판단 로직을 다음과 같이 구성한다.
-            * createdDate가 null이면 새로운 객체로 판단한다.
-            * createdDate의 값이 있다면 새로운 객체가 아니다.
+            * @CreatedDate는 persist()가 호출되어 엔티티를 저장할 때 시간이 자동 저장된다.   
+            * save()가 호출되면 내부에서 isNew()로 새로운 엔티티 여부를 판단하는 if 문을 만나게 된다.
+            * 여기서 true가 되면 persist()를 호출하면서 엔티티를 저장한다.  
+            * 따라서 새로운 엔티티 여부를 판단하는 isNew()의 로직은 다음과 같이 작성한다.
+            * -> createdDate가 null이면 새로운 엔티티로 판단한다.
+            * -> createdDate의 값이 있다면 새로운 엔티티가 아닌 것으로 판단한다.
             * */        
             @Override
             public boolean isNew() {

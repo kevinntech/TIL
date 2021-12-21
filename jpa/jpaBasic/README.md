@@ -745,7 +745,7 @@
             }
             ```
           
-            * `UUID (Universally Unique IDentifier, 범용 고유 식별자)` : 어디 곳에서도 고유한 ID를 의미한다.
+            * `UUID (Universally Unique IDentifier, 범용 고유 식별자)` : 어느 곳에서나 고유한 ID를 의미한다.
     
                 * `@GenericGenerator`의 strategy 속성에서 uuid2로 설정하면 `org.hibernate.id.UUIDGenerator`를 이용해서 키 값을 생성하게 된다.
 
