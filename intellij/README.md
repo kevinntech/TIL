@@ -50,6 +50,8 @@
     * 리팩토링
     
         * `Command + Option + V` : 변수로 추출하기
+    
+        * `Command + Option + C` : 상수로 추출하기
         
         * `Command + Option + M` : 메소드로 추출하기
         

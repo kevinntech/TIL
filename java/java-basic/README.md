@@ -649,6 +649,14 @@ public class TypeTest {
         ```
 
     * 범위를 제한할 때 사용 할 수 있다.
+    
+        * 어떤 수를 3으로 나누면 나머지 값은 0, 1, 2만 나온다.
+    
+            * Ex) `2 % 3` = `2`
+    
+        * 예를 들어, x라는 변수에 들어있는 값을 0에서 2 사이의 값으로 변경하고 싶다면 `x % 3`라는 수식을 사용하면 된다.
+    
+            * Ex) `x % 3`
 
 #### 10) 비교 연산자, 문자열의 비교
 
@@ -1470,9 +1478,7 @@ int[][] arr = {
 
 * (5) 객체 배열
 
-    * 객체를 배열로 생성 할 수도 있다.
-
-    * 객체 배열은 참조 변수 배열이다.
+    * `객체 배열`은 여러 개의 참조변수들을 하나로 묶은 **참조변수 배열**이다.
 
         ```java
         Tv[] tvArr = new Tv[3]; // 참조변수 배열(객체 배열)을 생성
@@ -1483,7 +1489,7 @@ int[][] arr = {
         tvArr[2] = new Tv();
         ```
       
-    * 즉, 객체 배열을 생성하는 것은 참조 변수들이 만들어진 것일 뿐 객체 배열의 각 요소에 객체를 생성해서 저장해야 한다.
+    * 즉, 객체 배열을 생성하는 것은 객체를 다루기 위한 참조 변수들이 만들어진 것일 뿐 객체 배열의 각 요소에 객체를 생성해서 저장해야 한다.
 
         ```java
         class TvTest4 {
@@ -1759,9 +1765,7 @@ int[][] arr = {
                 
                     * 인자의 개수와 순서는 호출된 메서드에 선언된 매개변수와 일치해야 한다.
                     
-                * `인자`는 메서드가 호출되면서 매개변수에 대입되므로, 인자의 타입은 매개변수의 타입과 일치하거나
-                
-                    * 자동 형 변환이 가능한 것이어야 한다.
+                * `인자`는 메서드가 호출되면서 매개변수에 대입되므로, 인자의 타입은 매개변수의 타입과 일치하거나 자동 형 변환이 가능한 것이어야 한다.
 
 * (6) return문
 
@@ -1804,9 +1808,9 @@ int[][] arr = {
     
     * 힙(Heap)
     
-        * 메서드의 작업 공간
+        * 인스턴스가 생성되는 공간
         
-        * 메서드가 호출되면 메서드 수행에 필요한 메모리를 할당 받고, 메서드가 종료되면 사용하던 메모리를 반환한다.
+        * new 연산자에 의해서 생성되는 배열과 객체는 모두 여기에 생성된다. (인스턴스 변수 포함)
 
 * (8) 호출스택의 특징
 
@@ -4179,7 +4183,8 @@ int[][] arr = {
                     static final int CONST = 100;   // static final은 상수이므로 허용한다.
                 }
             
-                // 내부 클래스가 static이 아니면 객체를 생성해야 사용 할 수 있다는 의미가 되며 내부 클래스에 static 멤버를 선언하는 것은 서로 모순된다.
+                /* 아래의 내부 클래스가 static이 아니라고 생각해보자. 그러면 해당 내부 클래스는 객체를 생성해야 사용 할 수 있다는 의미가 된다.
+                   이 상황에서 내부 클래스의 멤버에 static 멤버를 선언하면 이 멤버는 객체를 생성하지 않고도 사용 할 수 있어야 한다. 따라서 서로 모순된다. */
                 static class StaticInner {
                     int iv = 200;
                     static int cv = 200;    // 내부 클래스에 static 멤버를 선언해야 된다면 static 내부 클래스여야 한다.
@@ -4308,14 +4313,22 @@ int[][] arr = {
     * 예시 
 
         ```java
-        class InnerEx6 {
-            Object iv = new Object(){ void method(){} };		// 익명클래스
-            static Object cv = new Object(){ void method(){} };	// 익명클래스
+        public class AnonymousClassEx {
+            public static void main(String[] args) {
+                Hello hello = new Hello() {
+                    public void hello() {
+                        System.out.println("hello!");
+                    }
+                };
         
-            void myMethod() {
-                Object lv = new Object(){ void method(){} };	// 익명클래스
+                hello.hello();
             }
         }
+        
+        abstract class Hello {
+            public abstract void hello();
+        }
+        
         ```
 
 ## 7. 예외처리(Exception Handling)
@@ -5081,7 +5094,7 @@ int[][] arr = {
         
             * `오토 박싱(autoboxing)` : 기본 자료형의 값을 래퍼 클래스 객체로 자동 변환하는 것을 말한다.
             
-            * `언박싱(unboxing)` : 래퍼 클래스 객체를 기본 자료형의 값으로 자동 변환하는 것을 말한다. 
+            * `오토 언박싱(unboxing)` : 래퍼 클래스 객체를 기본 자료형의 값으로 자동 변환하는 것을 말한다. 
             
                 ```java
                 ArrayList<Integer> list = new ArrayList<>();
@@ -5089,86 +5102,276 @@ int[][] arr = {
                 int value = list.get(0);    // [언박싱] new Integer(10) -> 10
                 ```
 
+        * 래퍼 클래스의 연산 
+
+            * 자바에서 래퍼 클래스로 연산을 시도하면 오토 언박싱으로 기본 자료형으로 변환한 다음, 연산을 수행한다.
+        
+                ```java
+                Integer num1 = new Integer(20);
+                Integer num2 = new Integer(30);
+                
+                Integer sum = num1 + num2; // [결과] 50
+                ```
+              
+                * 래퍼 클래스와 기본 자료형 간의 연산도 동일하게 동작한다. 
+              
+            * 래퍼 클래스와 래퍼 클래스 간의 `==` 연산은 주의해야 한다.
+
+                ```java
+                Integer num1 = new Integer(20);
+                Integer num2 = new Integer(20);
+                
+                if (num1 == num2)
+                    System.out.println("같다");
+                else
+                    System.out.println("다르다");
+                ```
+          
+                * `==` 연산은 참조 값을 비교하는 연산이다.
+    
+                    * num1과 num2는 참조 값이 다른 객체이므로 "다르다"가 출력된다.
+    
+                    * 값이 같은지 확인하려면 equals()를 사용해야 한다.  
+
 ## 9. 날짜와 시간 & 형식화
 
-#### 1) java.time 패키지란?
+#### 1) 자바 8에 새로운 날짜와 시간 API가 생긴 이유
+
+* ① 이전까지 사용하던 `java.util.Date` 클래스는 mutable 하기 때문에 thread-safe 하지 않다.
+
+    * 예시 
+      
+        * 예를 들어, 쓰레드 T1과 T2가 Date 객체를 서로 참조해서 사용한다고 가정한다.
+    
+            * 만약 synchronized로 쓰레드의 동기화 처리를 했다면 어떤 쓰레드가 작업을 하는 동안에 다른 쓰레드는 공유 자원에 접근 할 수 없으므로 thread-safe 하다.
+    
+            * 여기서는 쓰레드의 동기화 처리를 하지 않고 mutable 한 객체를 사용한다고 가정한다.
+    
+            * 쓰레드 T1는 일자를 1일 증가하며 쓰레드 T2는 일자를 1일 감소한다. 
+
+        * 정상적인 경우이면 쓰레드 T1이 작업을 한 이후에는 일자가 1일 증가되어 있어야 한다.
+        
+        * 쓰레드 T1이 일자를 1일 증가하고 쓰레드 T2가 중간에 끼어 들어서 일자를 1일 감소 할 수 있기 때문에 결과가 처음 그대로 될 수도 있다. 즉, mutable한 객체는 thread-safe 하지 않다.
+
+            ![image 42](images/img42.png)    
+
+    * mutable / immutable
+
+        * `mutable` : 객체의 상태를 변경할 수 있다는 것을 의미한다. 
+    
+        * `immutable` : 객체의 상태를 변경할 수 없다는 것을 의미한다.
+        
+            * 연산을 하면 새로운 객체가 생성된다.
+    
+* ② 클래스 이름이 명확하지 않다. 
+  
+    * Ex) 클래스 이름이 Date인데 시간까지 다룬다.
+
+* ③ 버그가 발생할 여지가 많다. 
+  
+    * 타입 안정성이 없고 (type-safe 하지 않음), 월(month)이 0 부터 시작하기 때문에 실수할 여지가 있다.
+    
+        * `GregorianCalendar(int year, int month, int dayOfMonth)`
+    
+            * 매개변수 month의 타입이 int이므로 잘못된 값이 들어올 수도 있다. 따라서 type-safe 하지 않다.
+    
+            * 만약 type-safe 하도록 변경한다면 Month라는 enum 타입을 받도록 변경하면 된다. 
+
+#### 2) java.time 패키지란?
 
 * java.time 패키지
 
-    * `Date`, `Calendar`의 단점을 보완하기 위해 JDK 1.8 부터 추가된 패키지
+    * time 패키지는 `Date`, `Calendar`의 단점을 보완하기 위해 JDK 1.8 부터 추가된 패키지다.
     
     * 해당 패키지에 속한 클래스들은 모두 `불변(immutable)`이다.
 
-#### 2) java.time 패키지의 핵심 클래스
+#### 3) java.time 패키지의 핵심 클래스
 
-* `LocalDate`는 날짜를 표현할 때 사용한다.
+* 기계용 시간(machine time)과 인류용 시간(human time)으로 나눌 수 있다.
 
-* `LocalTime`는 시간을 표현할 때 사용한다.
+    * 기계용 시간은 EPOCH TIME (1970년 1월 1일 0시 0분 0초) 부터 현재까지 경과된 시간을 초 단위로 표현한다.
 
-* `LocalDateTime`는 날짜와 시간을 같이 표현할 때 사용한다.
-
-    * `LocalDate`와 `LocalTime`을 합쳐놓은 것이다.
-
-* `ZonedDateTime`는 날짜와 시간, 그리고 시간대까지 표현할 때 사용한다.
-
-    * `LocalDateTime`에 시간대(time zone)를 추가한 것이다.
-
-* `Period`는 날짜간의 차이를 표현할 때 사용하며 `Duration`은 시간의 차이를 표현할 때 사용한다.
-
-* `Temporal`과 `TemporalAmount`
-
-    * 날짜와 시간을 표현하기 위한 클래스들은 (LocalDate, LocalTime, LocalDateTime, ZonedDateTime, Instant 등) 모두 Temporal, TemporalAccessor, TemporalAdjuster 인터페이스를 구현했다.
+        * `Instant` : EPOCH TIME 부터 현재까지 경과된 시간을 초 단위로 표현한다. 
     
-    * Period과 Duration는 `TemporalAmount`를 구현했다.
-    
-    * `Temporal`로 시작하는 인터페이스들은 매개변수 타입으로 많이 사용되며 `TemporalAmount`인지 아닌지만 구별하면 된다.
-    
-* `TemporalUnit`과 `TemporalField`
+            * 예를 들어, 메서드의 실행 시간을 잴 때 사용한다.
 
-    * `TemporalUnit`는 날짜와 시간의 단위를 정의해 놓은 인터페이스이다.
+    * 인류용 시간은 우리가 흔히 사용하는 연, 월, 일, 시, 분, 초 등을 표현한다.
+
+        * `LocalDate`는 날짜를 표현할 때 사용한다.
+        
+        * `LocalTime`는 시간을 표현할 때 사용한다.
+        
+        * `LocalDateTime`는 날짜와 시간을 같이 표현할 때 사용한다.
+        
+            * `LocalDate`와 `LocalTime`을 합쳐놓은 것이다.
+        
+        * `ZonedDateTime`는 날짜와 시간, 그리고 시간대까지 표현할 때 사용한다.
+        
+            * `LocalDateTime`에 시간대(time zone)를 추가한 것이다.
     
-    * `TemporalField`는 날짜와 시간의 필드(년, 월, 일 등)를 정의해 놓은 인터페이스이다.
+            * 협정 세계시(UTC: Universal Time Coordinated) 또는 그리니치 표준시(GMT: Greenwich Mean Time)를 기준으로 시간대를 표현한다.
     
-    * `ChronoUnit`은 `TemporalUnit`을, `ChronoField`는 `TemporalField`를 구현한 열거형이다.
+                * 한국은 UTC 보다 9 시간이 빠르므로 `UTC+09:00`으로 표기한다.
+              
+                * 뉴욕은 UTC 보다 5 시간이 느리므로 `UTC-05:00`으로 표기한다.
+    
+* `Period`는 날짜 간의 차이를 표현할 때 사용하며 `Duration`은 시간의 차이를 표현할 때 사용한다.
 
-        ```java
-        LocalDate today = LocalDate.now(); // 오늘 날짜
-        LocalDate tomorrow = today.plus(1, ChronoUnit.DAYS); // 오늘 날짜에 1일을 더함
-        //LocalDate tomorrow = today.plusDays(1); // 위의 문장과 동일
+* `DateTimeFormatter` : 날짜나 시간에 대한 형식(패턴)을 지정할 때 사용한다.
 
-        LocalTime now = LocalTime.now(); // 현재 시간
-        int minute = now.getMinute();  // 현재 시간에서 분(minute)만 뽑아낸다.
-        //int minute2 = now.get(ChronoField.MINUTE_OF_HOUR); // 위의 문장과 동일
-        ```
+    * `format()` : 날짜나 시간을 특정 형식에 해당하는 문자열로 만든다.
 
-#### 3) LocalDate와 LocalTime
+        * LocalDateTime, LocalDate, LocalTime 등에서 인스턴스 메소드로 제공한다.    
+
+    * `parse()` : 날짜나 시간을 표현하는 문자열을 파싱해서 날짜나 시간 객체로 만든다.
+    
+        * LocalDateTime, LocalDate, LocalTime 등에서 static 메소드로 제공한다.
+    
+* 다음과 같은 내용을 추가적으로 알아두면 좋다. 
+
+    * Temporal과 TemporalAmount
+    
+        * `Temporal`, `TemporalAccessor`, `TemporalAdjuster` 인터페이스를 구현한 클래스는 다음과 같다.
+
+            * LocalDate, LocalTime, LocalDateTime, ZonedDateTime, Instant 등        
+
+        * `TemporalAmount`를 구현한 클래스는 다음과 같다.
+          
+            * Period과 Duration
+    
+    * TemporalUnit과 TemporalField
+    
+        * 인터페이스 
+    
+            * `TemporalUnit`는 날짜와 시간의 단위를 정의해 놓은 인터페이스다.
+            
+            * `TemporalField`는 날짜와 시간의 필드(년, 월, 일 등)를 정의해 놓은 인터페이스다.
+    
+                * 메소드의 매개변수 타입이 `TemporalUnit`이면 `ChronoUnit`를, `TemporalField`이면 `ChronoField`를 사용하자.
+    
+        * 구현체 
+        
+            * `ChronoUnit`은 `TemporalUnit`을 구현한 열거형이다. 
+    
+                * ChronoUnit의 종류
+        
+                    * `YEARS` : 년
+        
+                    * `MONTHS` : 월
+        
+                    * `WEEKS` : 주
+    
+                    * `DAYS` : 일    
+    
+                    * `HOURS` : 시
+        
+                    * `MINUTES` : 분
+    
+                    * `SECONDS` : 초
+    
+                * ChronoUnit은 날짜와 시간에 값을 더하거나 뺄 때, 적용할 단위를 지정할 때 사용한다.
+    
+                    ```java
+                    LocalDate today = LocalDate.now(); // 오늘 날짜
+                    LocalDate tomorrow = today.plus(1, ChronoUnit.DAYS); // 오늘 날짜에 1일을 더함
+                    //LocalDate tomorrow = today.plusDays(1); // 위의 문장과 동일
+                    ```
+                  
+                * ChronoUnit은 지정한 단위를 기준으로 두 날짜나 시간 간의 차이를 구할 수 있도록 `between()`를 제공한다.
+    
+                    ```java
+                    LocalDateTime startDateTime = LocalDateTime.of(2021, 8, 7, 8, 35, 35);
+                    LocalDateTime endDateTime = LocalDateTime.of(2021, 11, 8, 11, 0, 50);
+                    
+                    System.out.println("종료까지 남은 년 : " + ChronoUnit.YEARS.between(startDateTime, endDateTime));
+                    System.out.println("종료까지 남은 월 : " + ChronoUnit.MONTHS.between(startDateTime, endDateTime));
+                    System.out.println("종료까지 남은 일 : " + ChronoUnit.DAYS.between(startDateTime, endDateTime));   // D-DAY 계산
+                    System.out.println("종료까지 남은 시 : " + ChronoUnit.HOURS.between(startDateTime, endDateTime));
+                    System.out.println("종료까지 남은 분 : " + ChronoUnit.MINUTES.between(startDateTime, endDateTime));
+                    System.out.println("종료까지 남은 초 : " + ChronoUnit.SECONDS.between(startDateTime, endDateTime));
+                    ```
+    
+            * `ChronoField`는 `TemporalField`를 구현한 열거형이다.
+    
+                * ChronoField의 종류
+                  
+                    * `YEAR` : 년
+            
+                    * `MONTH_OF_YEAR` : 월
+            
+                    * `DAY_OF_WEEK` : 요일 (1: 월요일, 2: 화요일, ... 7: 일요일)
+            
+                    * `DAY_OF_MONTH` : 일
+        
+                    * `AMPM_OF_DAY` : 오전/오후
+        
+                    * `HOUR_OF_DAY` : 시간 (0 ~ 23)
+    
+                    * `CLOCK_HOUR_OF_DAY` : 시간 (1 ~ 24)
+        
+                    * `HOUR_OF_AMPM` : 시간 (0 ~ 11)
+                      
+                    * `CLOCK_HOUR_OF_AMPM` : 시간 (1 ~ 12)
+        
+                    * `MINUTE_OF_HOUR` : 분
+            
+                    * `SECOND_OF_MINUTE` : 초
+    
+                * ChronoField는 날짜와 시간에서 값을 얻으려고 하는 특정 필드를 지정할 때 사용한다.
+                
+                    ```java
+                    LocalTime now = LocalTime.now(); // 현재 시간
+                    int minute = now.get(ChronoField.MINUTE_OF_HOUR); // 현재 시간에서 분(minute)만 가져온다. 
+                    //int minute = now.getMinute();  // 위의 문장과 동일
+                    ```
+
+#### 4) LocalDate와 LocalTime
 
 * LocalDate와 LocalTime 객체 생성하기
 
-    * `now()`는 현재 날짜와 시간을 저장하는 객체를 생성한다.
+    * LocalDate
 
-        ```java
-        LocalDate today = LocalDate.now(); // 오늘 날짜
-        LocalTime now = LocalTime.now(); // 현재 시간
-        ```
+        * `LocalDate.now()`는 현재 날짜를 저장한 객체를 생성한다.
     
-    * `of()`는 지정된 날짜와 시간을 저장하는 객체를 생성한다.
+            ```java
+            LocalDate today = LocalDate.now(); // 오늘 날짜
+            ```
+        
+        * `LocalDate.of()`는 지정한 날짜를 저장한 객체를 생성한다.
+        
+            ```java
+            LocalDate birthDate = LocalDate.of(2021, Month.JANUARY, 1);
+            ```
     
-        ```java
-        LocalDate today = LocalDate.now(); // 오늘 날짜
-        LocalTime now = LocalTime.now(); // 현재 시간
-        ```
+        * 일 단위로 지정 할 수도 있다.
+        
+            ```java
+            LocalDate localDate = LocalDate.ofYearDay(2020, 365); // 2020년의 365번째 날 == 2020년 12월 30일
+            ```
 
-    * 일 단위나 초 단위로도 지정 할 수 있다. (1일은 24 * 60 * 60 = 86400 초)
-    
-        ```java
-        LocalDate birthDate = LocalDate.ofYearDay(2020, 365); // 2020년의 365번째 날 == 2020년 12월 30일
-        LocalTime birthTime = LocalTime.ofSecondOfDay(86399); // 그 날의 0시 0분 0초 부터 86399초가 지난 시간 == 23시 59분 59초
-        ```
+    * LocalTime
+
+        * `LocalTime.now()`는 현재 시간을 저장한 객체를 생성한다.
+        
+            ```java
+            LocalTime now = LocalTime.now(); // 현재 시간
+            ```
+        
+        * `LocalTime.of()`는 지정한 시간을 저장한 객체를 생성한다.
+        
+            ```java
+            LocalTime localTime = LocalTime.of(3, 20, 10);
+            ```
+        
+        * 초 단위로 지정 할 수도 있다. (1 일은 24 * 60 * 60 = 86400 초)
+        
+            ```java
+            LocalTime localTime = LocalTime.ofSecondOfDay(86399); // 그 날의 0시 0분 0초 부터 86399초가 지난 시간 == 23시 59분 59초
+            ```
 
 * 특정 필드의 값 가져오기 
 
-    * LocalDate와 LocalTime 객체에서 특정 필드의 값을 가져올 때는 get() 또는 getXXX()를 사용한다.
+    * `get()` / `getXXX()` : 날짜나 시간에서 특정 필드의 값을 가져온다.
     
         * 대부분의 필드는 int 타입의 범위에 속하지만, 몇몇 필드는 int 타입의 범위를 넘을 수 있으므로 그럴 때는 getLong()를 사용해야 한다.
     
@@ -5188,35 +5391,38 @@ int[][] arr = {
 
 * 특정 필드의 값 변경하기
 
-    * `with()`, `plus()`, `minus()`로 특정 필드의 값을 변경 할 수 있다.
-    
-        * 필드를 변경하는 메서드들은 항상 새로운 객체를 생성해서 반환하므로 대입 연산자를 같이 사용해야한다.
-        
-            ```java
-            LocalDate date = LocalDate.of(2000, 1, 1); // 2000년 1월 1일
-            LocalTime time = LocalTime.of(12, 0, 0); // 12시 0분 0초
-    
-            date = date.withYear(2020); // 2020년 1월 1일
-            time = time.withHour(13); // 13시 0분 0초
-            date = date.plusDays(1); // 2020년 1월 2일
-    
-            System.out.println(date);
-            System.out.println(time);
-            ```
-
-* 날짜와 시간 비교
-
-    * `isAfter()`, `isBefore()`, `isEqual()`로 날짜와 시간을 비교 할 수 있다.
-    
-    * `compareTo()`로도 비교 할 수 있다.
+    * `with()` : 특정 필드의 값을 변경한 새로운 객체를 반환한다. 
 
         ```java
-        int result = date1.compareTo(date2); // 같으면 0, date1이 이전이면 -1, 이후면 1
-        ```
+        LocalDate date = LocalDate.of(2000, 1, 1); // 2000년 1월 1일
+        LocalTime time = LocalTime.of(12, 0, 0); // 12시 0분 0초
 
-    * 대부분의 경우, `isEqual()` 대신 `equals()`를 사용해도 된다.
+        date = date.withYear(2020); // 2020년 1월 1일
+        time = time.withHour(13); // 13시 0분 0초
+
+        System.out.println(date);
+        System.out.println(time);
+        ```
+      
+        * `with()`, `plus()`, `minus()` 처럼 필드를 변경하는 메서드는 항상 새로운 객체를 생성해서 반환하므로 대입 연산자를 같이 사용해야 한다.
+
+    * `plus()` : 특정 필드에 값을 더한 새로운 객체를 반환한다.
+
+        ```java
+        date = date.plusDays(1); // 2020년 1월 2일
+
+        System.out.println(date);
+        ```
+      
+    * `minus()` : 특정 필드에 값을 뺀 새로운 객체를 반환한다.    
     
-        * equals()는 모든 필드가 일치해야 하지만 isEqual()은 날짜만 비교한다. 
+* 날짜와 시간 비교하기
+
+    * `isBefore()` : 인자 보다 과거일 때 true를 반환한다.
+      
+    * `isAfter()` : 인자 보다 미래일 때 true를 반환한다. 
+    
+    * `isEqual()` : 인자와 같은 날짜인지 비교한다. (LocalDate 클래스에서만 제공)
 
         ```java
         LocalDate kDate = LocalDate.of(1999, 12, 31);
@@ -5225,214 +5431,341 @@ int[][] arr = {
         System.out.println(kDate.equals(jDate)); // 결과 : false (연대가 다름)
         System.out.println(kDate.isEqual(jDate)); // 결과 : true
         ```
+      
+        * `equals()`는 모든 필드가 일치해야 하지만 `isEqual()`은 날짜만 비교한다.
 
-#### 4) Instant
+#### 5) Instant
 
-* `Instant`는 에포크 타임(EPOCH TIME, 1970년 1월 1일 0시 0분 0초) 부터 경과된 시간을 나노초 단위로 표현한다.
+* `Instant`는 에포크 타임(EPOCH TIME, 1970년 1월 1일 0시 0분 0초) 부터 현재까지 경과된 시간을 초 단위로 표현한다.
 
     * `Instant`는 기계용 시간이다.
+    
+    * `Instant.now()` : 현재 UTC를 기준으로 한 Instant 객체를 만들어 반환한다.
 
         ```java
-        Instant now = Instant.now();
-        long epochSecond = now.getEpochSecond();
-        int nano = now.getNano();
-        
+        Instant instant = Instant.now(); // UTC를 기준으로 한 타임스탬프를 반환한다.
+        long epochSecond = instant.getEpochSecond();
+        int nano = instant.getNano();
         System.out.println(epochSecond);
         System.out.println(nano);
+        
+        ZoneId zoneId = ZoneId.of("Asia/Seoul");
+        System.out.println(zoneId);
+        ZonedDateTime zonedDateTime = instant.atZone(zoneId);
+        System.out.println(zonedDateTime);
         ```
 
-    * `Instant`는 항상 UTC(Universal Time Coordinated)를 기준으로 하기 때문에 `LocalTime`과 차이가 있을 수 있다. 
-    
-    * 나노초 단위가 아닌 밀리초 단위의 에포크 타임이 필요할 때는 `toEpochMilli()`를 사용한다.
+        * `Instant`는 항상 UTC(Universal Time Coordinated)를 기준으로 하기 때문에 `LocalTime`과 차이가 있을 수 있다.
 
-#### 5) LocalDateTime과 ZonedDateTime
+    * `atZone()` : 시간대 정보를 지정해서 ZonedDateTime 객체로 만들어서 반환한다.
+
+        ```java
+        Instant instant = Instant.now(); // UTC를 기준으로 한 타임스탬프를 반환한다.
+        
+        ZoneId zoneId = ZoneId.of("Asia/Seoul");
+        System.out.println(zoneId);
+        ZonedDateTime zonedDateTime = instant.atZone(zoneId);
+        System.out.println(zonedDateTime);
+        ```
+
+#### 6) LocalDateTime과 ZonedDateTime
 
 * `LocalDateTime`과 `ZonedDateTime` 객체 생성하기
 
-    * `now()` 또는 `of()`를 사용하여 생성한다.
-
-        ```java
-        LocalDateTime localDateTime = LocalDateTime.of(2015, 12, 31, 12, 34, 56);
-        ZonedDateTime zonedDateTime = ZonedDateTime.now();
-
-        System.out.println(localDateTime);
-        System.out.println(zonedDateTime);
-        ```
-
-    * `LocalDateTime`을 `LocalDate` 또는 `LocalTime`으로 변환하기
-
-        ```java
-        LocalDateTime dt = LocalDateTime.of(2015, 12, 31, 12, 34, 56);
-        LocalDate date = dt.toLocalDate();
-        LocalTime time = dt.toLocalTime();
-        ```  
-
-    * `LocalDateTime`으로 `ZonedDateTime` 만들기
+    * LocalDateTime
     
-        * `LocalDateTime`에 `atZone()`으로 시간대 정보를 추가하면 `ZonedDateTime`을 얻을 수 있다.
-
-        ```java
-        LocalDateTime dateTime = LocalDateTime.now();
-        ZoneId zid = ZoneId.of("Asia/Seoul");
-        ZonedDateTime zonedDateTime = dateTime.atZone(zid);
-        System.out.println(zonedDateTime);
-        ```  
-
-    * 현재 특정 시간대(예를 들어, 뉴욕)의 시간을 알고 싶다면 다음과 같이 한다.
+        * `LocalDateTime.now()`는 현재 날짜와 시간을 저장한 객체를 생성한다. 
     
-        ```java
-        ZoneId newYorkZoneId = ZoneId.of("America/New_York");
-        ZonedDateTime newYorkTime = ZonedDateTime.now().withZoneSameInstant(newYorkZoneId);
+            ```java
+            LocalDateTime localDateTime = LocalDateTime.now();
+            System.out.println(localDateTime);
+            ```
 
-        System.out.println(newYorkTime);
-        ```
+        * `LocalDateTime.of()`는 지정한 날짜와 시간을 저장한 객체를 생성한다.
+        
+            ```java
+            LocalDateTime localDateTime = LocalDateTime.of(2015, 12, 31, 12, 34, 56);
+            System.out.println(localDateTime);
+            ```
+          
+        * `LocalDateTime`을 `LocalDate` 또는 `LocalTime`으로 변환하기
+        
+            ```java
+            LocalDateTime now = LocalDateTime.now();
+            LocalDate localDate = now.toLocalDate();
+            LocalTime localTime = now.toLocalTime();
+            ```
+
+        * `atZone()` : 시간대 정보를 지정해서 ZonedDateTime 객체로 만들어서 반환한다.
+
+            ```java
+            LocalDateTime dateTime = LocalDateTime.now();
+            ZoneId zid = ZoneId.of("Asia/Seoul");
+            ZonedDateTime zonedDateTime = dateTime.atZone(zid);
+            System.out.println(zonedDateTime);
+            ```
+
+    * ZonedDateTime
+
+        * `ZonedDateTime.now()`는 현재 날짜와 시간, 시간대를 저장한 객체를 생성한다.
+
+            ```java
+            ZonedDateTime zonedDateTime = ZonedDateTime.now();
+            System.out.println(zonedDateTime);
+            ```
+
+        * `ZonedDateTime.of()`는 지정한 날짜와 시간, 시간대를 저장한 객체를 생성한다.
+
+            ```java
+            ZonedDateTime zonedDateTime = ZonedDateTime.of(2021, 1, 1, 10, 30, 10, 0, ZoneId.of("Asia/Seoul"));
+            System.out.println(zonedDateTime);
+            ```
+          
+        * 특정 시간대(예를 들어, 뉴욕)의 현재 시간을 알고 싶다면 다음과 같이 한다.
+        
+            ```java
+            ZoneId newYorkZoneId = ZoneId.of("America/New_York");
+            ZonedDateTime newYorkTime = ZonedDateTime.now().withZoneSameInstant(newYorkZoneId);
+            
+            System.out.println(newYorkTime);
+            ```
   
-    * ZonedDateTime의 변환
-    
-        * ZonedDateTime을 변환하는데 사용되는 메서드는 다음과 같다.
-        
-            * LocalDate **toLocalDate**()
-            * LocalTime **toLocalTime**()
-            * LocalDateTime **toLocalDateTime**()
-            * OffsetDateTime **toOffsetDateTime**()
-            * long **toEpochSecond**()
-            * Instant **toInstant**()
+        * ZonedDateTime를 날짜와 시간에 관련된 다른 클래스로 변환한다.
+
+            * `toLocalDate()` : LocalDate로 변환한다.
             
-        * ZonedDateTime을 GregorianCalendar(Calendar)로 변환하는 방법
-        
-            * 자바의 정석 3판 p563를 참고하자.
+            * `toLocalTime()` : LocalTime으로 변환한다.
             
-#### 6) ZoneOffset과 OffsetDateTime
-
-* `ZoneOffset`은 협정 세계시(UTC)와 차이 나는 시간(시차)을 표현할 때 사용한다. 
-
-    * 예를 들어, 한국은 UTC+9 이다. 즉, UTC 보다 9시간이 빠르다.
+            * `toLocalDateTime()` : LocalDateTime로 변환한다.
+            
+            * `toOffsetDateTime()` : OffsetDateTime로 변환한다.
+            
+            * `toEpochSecond()` : EpochSecond로 변환한다. 
+            
+            * `toInstant()` : Instant로 변환한다.
     
-        ```java
-        // 현재 위치(서울)의 ZoneOffset을 얻은 다음, offset을 초 단위로 구한다.
-        ZoneOffset krOffset = ZonedDateTime.now().getOffset();
-        int krOffsetInSec = krOffset.get(ChronoField.OFFSET_SECONDS); // 32400초 (9 시간)
+#### 7) ZoneOffset과 OffsetDateTime
 
-        System.out.println(krOffsetInSec);
-        ```
+* `ZoneOffset`은 협정 세계시(UTC)와 차이나는 시간(시차)을 표현할 때 사용한다. 
+
+    ```java
+    // 현재 위치(서울)의 ZoneOffset을 얻은 다음, offset을 초 단위로 구한다.
+    ZoneOffset krOffset = ZonedDateTime.now().getOffset();
+    int krOffsetInSec = krOffset.get(ChronoField.OFFSET_SECONDS); // 32400초 (9 시간)
+
+    System.out.println(krOffsetInSec);
+    ```
+
+    * 예를 들어, 한국은 UTC+9 이다. 즉, UTC 보다 9 시간이 빠르다.
       
-* `OffsetDateTime`은 `ZoneOffset`으로 시간대를 표현한다.
+* `OffsetDateTime`은 `ZoneId`가 아닌 `ZoneOffset`으로 시간대를 표현한다.
 
-* `ZonedDateTime`은 `ZoneId`로 시간대를 표현한다.
+    * `ZoneOffset` : 시간대를 시간의 차이로만 구분한다. 
     
-* `OffsetDateTime`은 서로 다른 시간대에 존재하는 컴퓨터 간의 통신에 유용하다.
+    * `OffsetDateTime`은 서로 다른 시간대에 존재하는 컴퓨터 간의 통신에 유용하다.
 
-    ```java
-    ZonedDateTime zonedDateTime = ZonedDateTime.now();
-    OffsetDateTime offsetDateTime = zonedDateTime.toOffsetDateTime(); // ZonedDateTime를 OffsetDateTime로 변경
+        ```java
+        ZonedDateTime zonedDateTime = ZonedDateTime.now();
+        OffsetDateTime offsetDateTime = zonedDateTime.toOffsetDateTime(); // ZonedDateTime를 OffsetDateTime로 변경
+        
+        System.out.println(offsetDateTime);
+        ```
 
-    System.out.println(offsetDateTime);
-    ```
+#### 8) TemporalAdjusters
 
-#### 7) TemporalAdjusters
+* `TemporalAdjusters`는 자주 사용되는 날짜 계산을 처리해주는 메서드를 정의 해놓은 클래스다.
 
-* `TemporalAdjusters`는 자주 쓰일만한 날짜 계산들을 대신 해주는 메서드를 정의해놓은 클래스이다.
+    * TemporalAdjusters의 팩토리 메서드 
 
-* 자세한 내용은 자바의 정석 3판 p565를 참고하자.
-
-#### 8) Period와 Duration
-
-* 두 날짜 또는 시간의 차이를 구할 때는 `between()`를 사용한다.
-
-    ```java
-    // 두 날짜의 차이를 구하기
-    LocalDate date1 = LocalDate.of(2014, 1, 1);
-    LocalDate date2 = LocalDate.of(2015, 12, 31);
-
-    Period period = Period.between(date1, date2);
+        * `firstDayOfNextYear()` : 내년의 첫 날
+        
+        * `firstDayOfNextMonth()` : 다음 달의 첫 날
+        
+        * `firstDayOfYear()` : 올 해의 첫 날
+        
+        * `firstDayOfMonth()` : 이번 달의 첫 날 
+        
+        * `lastDayOfYear()` : 올 해의 마지막 날
+        
+        * `lastDayOfMonth()` : 이번 달의 마지막 날
+        
+        * `firstInMonth(DayOfWeek)` : 이번 달의 첫 번째 ?요일
+        
+        * `lastInMonth(DayOfWeek)` : 이번 달의 마지막 ?요일 
+        
+        * `previous(DayOfWeek)` : 지난 ?요일 (당일 미포함)
+        
+        * `previousOrSame(DayOfWeek)` : 지난 ?요일 (당일 포함)
     
-    // 두 시각의 차이를 구하기
-    LocalTime time1 = LocalTime.of(00, 00, 00);
-    LocalTime time2 = LocalTime.of(12, 34, 56);
+        * `next(DayOfWeek)` : 다음 ?요일 (당일 미포함)
+        
+        * `nextOrSame(DayOfWeek)` : 다음 ?요일 (당일 포함)
     
-    Duration duration = Duration.between(time1, time2);
-    ```
-  
-* `Period`와 `Duration`에서 특정 필드의 값을 얻을 때는 `get()`를 사용한다.
+        * `dayOfWeekInMonth(int ordinal, DayOfWeek dayOfWeek)` : 이번 달의 n번째 ?요일 
 
-    ```java
-    // Period에서 특정 필드 값 얻기
-    long year = period.get(ChronoUnit.YEARS);
-    long month = period.get(ChronoUnit.MONTHS);
-    long day = period.get(ChronoUnit.DAYS);
+    * 예시
 
-    // Duration에서 특정 필드 값 얻기
-    long sec = duration.get(ChronoUnit.SECONDS);
-    long nano = duration.get(ChronoUnit.NANOS);
-    ```
+        ```java
+        LocalDate today = LocalDate.now();
+        LocalDate nextMonth = today.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+        ```
+    
+#### 9) Period와 Duration
 
-* getUnits()라는 메서드로 get()에 사용 할 수 있는 ChronoUnit의 종류를 알 수 있다.
+* Period
+
+    * `Period`는 날짜 간의 차이를 표현할 때 사용한다.
+
+    * `Period.between()`는 두 날짜 간의 차이를 계산한다.
+    
+        ```java
+        // 두 날짜의 차이를 구하기
+        LocalDate date1 = LocalDate.of(2014, 1, 1);
+        LocalDate date2 = LocalDate.of(2015, 12, 31);
+    
+        Period period = Period.between(date1, date2);
+        ```  
+
+    * `Period.of()` / `Period.ofXXX()`는 Period 객체를 생성할 때 사용한다.
+
+        ```java
+        Period period = Period.of(1, 12, 31); // 1년 12개월 31일
+        ```
+
+    * `get()`는 Period에서 특정 필드의 값을 가져온다.
+
+        ```java
+        // Period에서 특정 필드 값 얻기
+        long year = period.get(ChronoUnit.YEARS);
+        long month = period.get(ChronoUnit.MONTHS);
+        long day = period.get(ChronoUnit.DAYS);
+        ```
+
+    * `with()`는 특정 필드의 값을 변경한 새로운 객체를 반환한다.
+
+        ```java
+        Period newPeriod = period.withYears(2); // 2년으로 변경
+        ```
+
+    * 다른 단위로 변환하기
+    
+        * `toTotalMonths()` : 년월일을 월 단위로 변환해서 반환한다. (일 단위는 무시)
+
+* Duration
+
+    * `Duration`은 시간의 차이를 표현할 때 사용한다.
+
+    * `Duration.between()`은 두 개의 시간의 차이를 계산한다.
+    
+        ```java
+        // 두 시각의 차이를 구하기
+        LocalTime time1 = LocalTime.of(00, 00, 00);
+        LocalTime time2 = LocalTime.of(12, 34, 56);
+        
+        Duration duration = Duration.between(time1, time2);
+        ```
+
+    * `Duration.of()` / `Duration.ofXXX()`는 Duration 객체를 생성할 때 사용한다.  
+
+        ```java
+        Duration duration = Duration.of(60, ChronoUnit.SECONDS); // 60초
+        ```
+
+    * `get()`는 Duration에서 특정 필드의 값을 가져온다.
+    
+        ```java
+        // Duration에서 특정 필드 값 얻기
+        long sec = duration.get(ChronoUnit.SECONDS);
+        long nano = duration.get(ChronoUnit.NANOS);
+        ```
+
+    * `with()`는 특정 필드의 값을 변경한 새로운 객체를 반환한다.
+
+        ```java
+        duration.withSeconds(120); // 120초로 변경 
+        ```
+
+    * 다른 단위로 변환하기
+    
+        * `toDays()` : 일 단위로 변환해서 반환한다.
+    
+        * `toHours()` : 시간 단위로 변환해서 반환한다. 
+    
+        * `toMinutes()` : 분 단위로 변환해서 반환한다.
+    
+        * `toMillis()` : 천분의 일 초 단위로 변환해서 반환한다. 
+    
+        * `toNanos()` : 나노 초 단위로 변환해서 반환한다. 
+    
+* `getUnits()`는 `get()`에 사용 할 수 있는 ChronoUnit의 종류를 알려준다.
 
     ```java
     System.out.println(period.getUnits());
     System.out.println(duration.getUnits());
     ```
 
-* 시분초를 구할 때는 `Duration`을 `LocalTime`으로 변환하는 것이 편리하다.
+#### 10) 파싱과 포매팅
 
-* of(), ofXXX()를 사용 할 수 있으며 with(), withXXX()로 특정 필드의 값을 변경 할 수 있다.
+* 포매팅 (날짜/시간 객체 → 문자열)
 
-* 다른 단위로 변환하고 싶다면 to로 시작하는 메서드를 사용한다.
-
-* 자세한 내용은 자바의 정석 3판 p567~571를 참고하자.
-
-#### 9) 파싱과 포맷
-
-* `java.time.format` 패키지는 형식화와 관련된 클래스를 제공한다.
-
-* `DateTimeFormatter`의 `format()`를 사용해서 날짜와 시간을 형식화한다.
+    * `java.time.format` 패키지는 포매팅(형식화)와 관련된 클래스를 제공한다.
     
-    ```java
-    LocalDate date = LocalDate.of(2016, 1, 2);
-    String yyyymmdd = DateTimeFormatter.ISO_LOCAL_DATE.format(date);
-    String yyyymmdd2 = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
-
-    System.out.println(yyyymmdd);
-    System.out.println(yyyymmdd2);
-    ```
-
-* `ofLocalizedDate()`, `ofLocalizedTime()`, `ofLocalizedDateTime()`은 로케일(Locale)에 종속적인 포매터를 생성한다. 
-
-    ```java
-    DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
-    String shortFormat = formatter.format(LocalDate.now());
-    ```
-
-* `DateTimeFormatter`의 `ofPattern()`으로 원하는 출력 형식을 직접 작성 할 수 있다.
-
-    ```java
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-    ```
-   
-* 문자열을 날짜와 시간으로 파싱하기
-
-    * 파싱(Parsing) : 해석
+        * `DateTimeFormatter` : 날짜나 시간에 대한 형식(패턴)을 지정할 때 사용한다.
+          
+            ```java
+            LocalDate date = LocalDate.of(2016, 1, 2);
+            String yyyymmdd = DateTimeFormatter.ISO_LOCAL_DATE.format(date);
+            String yyyymmdd2 = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        
+            System.out.println(yyyymmdd);
+            System.out.println(yyyymmdd2);
+            ```
+          
+            * `format()` : 날짜나 시간을 특정 형식에 해당하는 문자열로 만든다.
     
-    * 문자열을 날짜 또는 시간으로 변환하려면 `parse()`를 사용한다.
+                * LocalDate 나 LocalTime과 같은 클래스에 존재하는 메소드다.
     
-        ```java
-        LocalDate date = LocalDate.parse("2016-01-02", DateTimeFormatter.ISO_LOCAL_DATE);
-        ```   
+        * `DateTimeFormatter.ofPattern()` : 형식(패턴)을 직접 정의할 때 사용한다.
+        
+            ```java
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            ```
 
-    * 자주 사용되는 형식의 문자열은 `ISO_LOCAL_DATE`와 같은 형식화 상수를 사용하지 않고 파싱이 가능하다.
-    
-        ```java
-		LocalDate     newDate     = LocalDate.parse("2001-01-01");
-		LocalTime     newTime     = LocalTime.parse("23:59:59");
-		LocalDateTime newDateTime = LocalDateTime.parse("2001-01-01T23:59:59");
-        ```
+            * 직접 정의하기 전에 미리 정의된 포매터가 있는지 확인하자. 
 
-    * `ofPattern()`로 파싱 할 수도 있다.
-    
-        ```java
-		DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		LocalDateTime endOfYear   = LocalDateTime.parse("2015-12-31 23:59:59", pattern);
-        ```  
+                * https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html    
+  
+        * `ofLocalizedDate()`, `ofLocalizedTime()`, `ofLocalizedDateTime()`은 로케일(Locale)에 종속적인 포매터를 생성한다. 
+        
+            ```java
+            DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
+            String shortFormat = formatter.format(LocalDate.now());
+            ```
+      
+* 파싱하기 (문자열 → 날짜/시간 객체)
+
+    * `parse()` : 날짜나 시간을 표현하는 문자열을 파싱해서 날짜나 시간 객체로 만든다.
+
+        * DateTimeFormatter에 상수로 정의된 형식을 사용해서 파싱할 수 있다.    
+
+            ```java
+            LocalDate date = LocalDate.parse("2016-01-02", DateTimeFormatter.ISO_LOCAL_DATE); // ISO_LOCAL_DATE를 형식화 상수라고 함
+            ```   
+
+        * 자주 사용되는 형식의 문자열은 형식화 상수를 사용하지 않고 파싱이 가능하다.
+        
+            ```java
+            LocalDate     newDate     = LocalDate.parse("2001-01-01");
+            LocalTime     newTime     = LocalTime.parse("23:59:59");
+            LocalDateTime newDateTime = LocalDateTime.parse("2001-01-01T23:59:59");
+            ```
+
+        * 직접 정의한 형식(`ofPattern()`)으로도 파싱을 할 수 있다.
+        
+            ```java
+            DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime endOfYear   = LocalDateTime.parse("2015-12-31 23:59:59", pattern);
+            ```  
 
 ## 10. 컬렉션 프레임워크
 
@@ -6111,25 +6444,33 @@ int[][] arr = {
         }
         ```
       
-    * `compare()`와 `compareTo()`는 두 객체의 비교 결과를 반환 하도록 구현해야 한다.
+    * `compare()`와 `compareTo()`는 두 객체의 비교 결과를 반환하도록 구현해야 한다.
     
-        * 비교하는 왼쪽이 작으면 `음수`, 같으면 `0`, 왼쪽이 크면 `양수`를 반환한다. 
+        * `오름차순 정렬` : `a.compareTo(b)`이면 왼쪽이 작으면 `음수`, 같으면 `0`, 왼쪽이 크면 `양수`를 리턴한다.
     
-            ```java
-            public final class Integer extends Number implements Comparable {
-              //...
-          
-              public int compareTo(Integer anotherInteger) {
-                int v1 = this.value;
-                int v2 = anotherInteger.value;
-                
-                // 비교하는 왼쪽이 작으면 음수, 두 객체가 같으면 0, 왼쪽이 크면 양수를 반환한다. 
-                return (v1 < v2 ? -1 : (v1==v2 ? 0 : 1));
-              }
-          
-              //...  
-            }
-            ```
+            * a < b이면 `음수`, a == b 이면 `0`, a > b 이면 `양수`를 리턴한다.
+    
+                ```java
+                public final class Integer extends Number implements Comparable {
+                  //...
+              
+                  public int compareTo(Integer anotherInteger) {
+                    int v1 = this.value;
+                    int v2 = anotherInteger.value;
+                    
+                    // 비교하는 왼쪽이 작으면 음수, 두 객체가 같으면 0, 왼쪽이 크면 양수를 반환한다. 
+                    return (v1 < v2 ? -1 : (v1==v2 ? 0 : 1));
+                  }
+              
+                  //...  
+                }
+                ```
+
+        * `내림차순 정렬` : `b.compareTo(a)`이면 왼쪽이 작으면 `음수`, 같으면 `0`, 왼쪽이 크면 `양수`를 리턴한다.
+    
+            * b < a이면 `음수`, b == a 이면 `0`, b > a 이면 `양수`를 리턴한다.
+    
+            * `b.compareTo(a)` 대신 `a.compareTo(b) * -1`도 가능하다.
 
 * 실습하기
 
@@ -6911,7 +7252,7 @@ int[][] arr = {
 
 * 제네릭의 정의
 
-    * `제네릭(Generic)`은 타입을 파라미터화 해서 컴파일 시 구체적인 타입이 결정 되도록 하는 것이다.
+    * `제네릭(Generic)` : 클래스 내부에서 사용할 타입을 외부에서 지정하는 방법이다.
 
         * 컴파일 시 타입을 체크 해 주는 기능이다.
         
@@ -6931,7 +7272,7 @@ int[][] arr = {
 
 * 제네릭의 장점
 
-    * 객체의 타입 안정성을 높인다.
+    * 객체의 타입 안정성(Type safety)을 높인다.
 
         * "타입 안정성을 높인다"는 것은 의도하지 않은 타입의 객체가 저장되는 것을 막고, 저장된 객체를 꺼내올 때
     
@@ -6946,7 +7287,7 @@ int[][] arr = {
     * ① 예를 들어, `ArrayList` 클래스는 다음과 같이 정의 되어 있었다.
 
         ```java
-        public class ArrayList extends AbstractList{
+        public class ArrayList extends AbstractList {
         
             private transient Object[] elementData;
             public boolean add(Object o) { /* 내용 생략 */ }
@@ -6975,17 +7316,17 @@ int[][] arr = {
         
         * `T` : Type
       
-* 제네릭 클래스(`ArrayList<E>`)의 객체를 생성할 때는 타입 매개변수(`E`) 대신에 실제 타입(`String`)을 지정해야 한다.
+* 제네릭 클래스(`ArrayList<E>`)의 객체를 생성할 때는 타입 매개변수(`E`) 대신에 실제 사용할 타입(`String`)을 지정해야 한다.
        
     ```java
-    // 타입 매개변수 E 대신에 실제 타입 Tv를 대입
+    // 타입 매개변수 E 대신에 실제 사용할 타입 Tv를 대입
     ArrayList<Tv> tvList = new ArrayList<Tv>();
     
     tvList.add(new Tv());
     Tv t = tvList.get(0); // 형 변환 생략 가능
     ```
   
-    * 타입 매개변수 대신 실제 타입이 지정되면, 형 변환을 생략 할 수 있다. 
+    * 타입 매개변수 대신 실제 사용할 타입이 지정되면, 형 변환을 생략 할 수 있다. 
 
 #### 3) 제네릭의 용어
 
@@ -7003,21 +7344,21 @@ int[][] arr = {
 
     * `Box<String> b = new Box<String>();`
 
-        * 지정된 타입 `String`을 `매개변수화된 타입`이라 한다. 
+        * 지정된 타입 `String`을 `매개변수화된 타입(Parameterized Type)`이라 한다. 
         
-            * 해당 용어가 좀 길어서, `대입된 타입`이라는 용어를 사용할 것이다.
+            * 해당 용어는 좀 길어서, `대입된 타입`이라는 용어를 대신 사용할 것이다.
 
 #### 4) 제네릭 타입과 다형성
 
-* 참조 변수와 생성자의 대입된 타입은 일치해야 한다.
+* ① 참조 변수와 생성자의 대입된 타입은 일치해야 한다.
 
     ```java
-    ArrayList<Tv> tvList = new ArrayList<Tv>(); // OK. 일치
+    ArrayList<Tv> tvList = new ArrayList<Tv>(); // OK. 일치 (Tv == Tv)
     
-    ArrayList<Product> productList = new ArrayList<Tv>(); // 에러 발생. 불일치
+    ArrayList<Product> productList = new ArrayList<Tv>(); // 에러 발생. 불일치 (Product != Tv)
     ```
 
-* 제네릭 클래스 간의 다형성은 성립한다. 
+* ② 제네릭 클래스 간의 다형성은 성립한다. 
 
     ```java
     List<Tv> list1 = new ArrayList<Tv>();
@@ -7027,7 +7368,7 @@ int[][] arr = {
   
     * 여전히 대입된 타입은 일치해야 한다.
     
-* 매개변수의 다형성도 성립한다.
+* ③ 매개변수의 다형성도 성립한다.
 
     * `ArrayList`에 `Product`를 대입한다.
 
@@ -7038,14 +7379,14 @@ int[][] arr = {
         list.add(new Audio());  // OK
         ```
 
-    * `E`에는 `Product`가 대입된다. 그래서 `add()`의 매개변수로 `Product`와 그 자손 객체가 가능하다. 
+    * 그러면 `E`에는 `Product`가 대입된다. 그래서 `add()`의 매개변수로 `Product`와 그 자손 객체가 가능하다. 
     
         ```java
         // boolean add(E e){ ... }
         boolean add(Product e){ ... }
         ```
 
-* JDK 1.7 부터 타입 추론이 가능한 경우, 생성자의 대입된 타입을 생략 할 수 있다.
+* ④ JDK 1.7 부터 타입 추론이 가능한 경우, 생성자의 대입된 타입을 생략 할 수 있다.
   
     ```java
     ArrayList<Product> list = new ArrayList<>();
@@ -7055,9 +7396,9 @@ int[][] arr = {
     
 #### 5) 제한된 제네릭 클래스
 
-* 제네릭 타입에 `extends`를 사용하면, 대입 할 수 있는 타입을 제한한다. (`<T extends 조상 타입>`)
+* `<T extends 조상 타입>` : 타입 매개변수(`T`)에 `extends`를 사용하면, **타입 매개변수에 대입 할 수 있는 타입을 조상 타입과 그 자손으로 제한한다.**
     
-    * 다음 코드는 대입 할 수 있는 타입을 Fruit과 그 자손으로 제한한다. 
+    * 아래 코드는 타입 매개변수에 대입 할 수 있는 타입을 Fruit과 그 자손으로 제한한다. (Fruit를 상속받은 타입으로 제한) 
     
         ```java
         class FruitBox<T extends Fruit> { // Fruit과 그 자손만 타입으로 지정 가능
@@ -7069,11 +7410,11 @@ int[][] arr = {
     * Fruit의 자손인 Apple은 대입 할 수 있지만 Toy는 대입 할 수 없다. 
     
         ```java
-        FruitBox<Apple> appleBox = new FruitBox<Apple>(); // OK.
-        FruitBox<Toy> toyBox = new FruitBox<Toy>(); // 에러 발생. Toy는 Fruit의 자손이 아니다.
+        FruitBox<Apple> appleBox = new FruitBox<Apple>();   // OK.
+        FruitBox<Toy> toyBox = new FruitBox<Toy>();         // 에러 발생. Toy는 Fruit의 자손이 아니다.
         ```
 
-* 인터페이스를 구현해야 한다는 제약이 필요할 때도 `extends`를 사용한다. 
+* 인터페이스를 구현해야 한다는 제한이 필요한 경우에도 키워드 `extends`를 사용한다. 
 
     ```java
     interface Eatable {}
@@ -7088,6 +7429,8 @@ int[][] arr = {
 * 예시
 
     ```java
+    interface Eatable {}
+  
     class Fruit implements Eatable {
     	public String toString() { return "Fruit";}
     }
@@ -7095,8 +7438,17 @@ int[][] arr = {
     class Grape extends Fruit { public String toString() { return "Grape";}}
     class Toy                 { public String toString() { return "Toy"  ;}}
     
-    interface Eatable {}
-    
+    class Box<T> {
+    	ArrayList<T> list = new ArrayList<T>();
+    	void add(T item) { list.add(item);     }
+    	T get(int i)     { return list.get(i); }
+    	int size()       { return list.size(); }
+    	public String toString() { return list.toString();}
+    }
+   
+    // 타입 매개변수 T에는 Fruit과 그 자손과 Eatable 인터페이스를 클래스만 대입될 수 있다.
+    class FruitBox<T extends Fruit & Eatable> extends Box<T> {}
+  
     class Ex12_3 {
     	public static void main(String[] args) {
     		FruitBox<Fruit> fruitBox = new FruitBox<Fruit>();
@@ -7112,26 +7464,16 @@ int[][] arr = {
     //		appleBox.add(new Grape());  // 에러. Grape는 Apple의 자손이 아님
     		grapeBox.add(new Grape());
     
-    		System.out.println("fruitBox-"+fruitBox);
-    		System.out.println("appleBox-"+appleBox);
-    		System.out.println("grapeBox-"+grapeBox);
+    		System.out.println("fruitBox-" + fruitBox);
+    		System.out.println("appleBox-" + appleBox);
+    		System.out.println("grapeBox-" + grapeBox);
     	}  // main
-    }
-    
-    class FruitBox<T extends Fruit & Eatable> extends Box<T> {}
-    
-    class Box<T> {
-    	ArrayList<T> list = new ArrayList<T>();
-    	void add(T item) { list.add(item);     }
-    	T get(int i)     { return list.get(i); }
-    	int size()       { return list.size(); }
-    	public String toString() { return list.toString();}
     }
     ```
 
 #### 6) 제네릭의 제약
 
-* static 멤버에는 타입 매개변수(`T`)를 사용 할 수 없다. 
+* ① static 멤버에는 타입 매개변수(`T`)를 사용 할 수 없다. 
 
     * 타입 매개변수에 대입하는 것은 인스턴스 마다 다르게 지정 할 수 있다.
 
@@ -7140,18 +7482,18 @@ int[][] arr = {
         Box<Grape> grapeBox = new Box<Grape>(); // OK. Grepe 객체만 저장 가능 
         ```
 
-    * static 멤버는 같은 클래스의 모든 인스턴스들이 공유하는 멤버이기 때문에 타입 매개변수(`T`)를 사용 할 수 없다. 
+    * 따라서 static 멤버는 같은 클래스의 모든 인스턴스들이 공유하는 멤버이기 때문에 타입 매개변수(`T`)를 사용 할 수 없다. 
 
         ```java
         class Box<T> {
-            static T item; // 에러
-            static int compare(T t1, T t2){ ... } // 에러
+            static T item;                         // 에러
+            static int compare(T t1, T t2){ ... }  // 에러
             
             //... 
         }
         ```
 
-* 타입 매개변수(`T`)로 배열을 생성 할 수 없다. (타입 매개변수로 배열을 선언하는 것은 가능)
+* ② 객체 또는 배열을 생성할 때는 타입 매개변수(`T`)를 사용할 수 없다. (타입 매개변수로 배열을 선언하는 것은 가능)
 
     * 즉, new 연산자 뒤에 타입 매개변수(`T`)를 사용 할 수 없다.
 
@@ -7171,19 +7513,20 @@ int[][] arr = {
         }
         ```
       
-* 제네릭 타입의 배열을 생성해야 한다면 Object 배열을 만들고 T 타입의 배열로 형 변환하면 된다.
-  
-    ```java
-    T[] tmpArr = (T[]) new Object[itemArr.length]; // Object 배열을 만들고 T 타입 배열로 형 변환 하면 된다.
-    ```
+    * 제네릭 타입의 배열을 생성해야 한다면 Object 타입의 배열을 만들고 T 타입의 배열로 형 변환하면 된다.
+      
+        ```java
+        T[] tmpArr = (T[]) new Object[itemArr.length];
+        ```
 
 #### 7) 와일드 카드 '?'
 
-* `와일드 카드(?)`는 하나의 참조 변수로 대입된 타입이 서로 다른 객체를 참조 할 수 있도록 한다.
+* `와일드 카드(?)`는 대입된 타입이 서로 다른 객체를 하나의 참조 변수로 참조 할 수 있도록 한다.
 
     ```java
-    ArrayList<? extends Product> list1 = new ArrayList<Tv>(); // OK
-    ArrayList<Product> list2 = new ArrayList<Tv>(); // 에러. 대입된 타입이 다르다. 
+    ArrayList<? extends Product> list1 = new ArrayList<Tv>();     // OK
+    ArrayList<? extends Product> list2 = new ArrayList<Audio>();  // OK
+    ArrayList<Product> list2 = new ArrayList<Tv>();               // 에러. 대입된 타입이 다르다. 
     ```
   
     * 와일드카드는 `?`로 표현하며 와일드 카드는 어떠한 타입도 될 수 있다.
@@ -7194,35 +7537,108 @@ int[][] arr = {
         
         * `<?>` : 제한없음. 모든 타입 가능. `<? extends Object>`와 동일
 
-* 와일드 카드에는 `&`를 사용 할 수 없다.
+    * 와일드 카드에는 `&`를 사용 할 수 없다.
+    
+        * `<? extends T & E>`는 불가능하다.
+    
+    * 메서드의 매개변수에 와일드 카드를 사용 할 수 있다. (클래스를 선언할 때는 사용 X)
+    
+        ```java
+        // <? extends Fruit> : 대입된 타입으로 Fruit과 그 자손들만 가능하다.
+        // <Fruit> : 대입된 타입으로 Fruit만 가능하다.
+        static Juice makeJuice(FruitBox<? extends Fruit> box) {
+            String tmp = "";
+            for(Fruit f: box.getList()) 
+                tmp += f + " ";
+      
+            return new Juice(tmp);
+        }
+        ```
+    
+        ```java
+        System.out.println(Juicer.makeJuice(new FruitBox<Fruit>())); // OK. FruitBox<Fruit>
+        System.out.println(Juicer.makeJuice(new FruitBox<Apple>())); // OK. FruitBox<Apple>
+        ```
+    
+        * 와일드 카드를 사용하면 `makeJuice()`의 매개변수로 `FruitBox<Fruit>` 뿐만 아니라, `FruitBox<Apple>`와 `FruitBox<Grape>`도 가능하다.
+    
+        * `makeJuice()`의 매개변수가 `FruitBox<Fruit>`였다면 대입된 타입이 일치하는 `FruitBox<Fruit>`만 가능하다. 
 
-    * `<? extends T & E>`는 불가능하다.
-
-* 메서드의 매개변수에 와일드 카드를 사용 할 수 있다. (클래스를 선언할 때는 사용 X)
+* 예시
 
     ```java
-    // <? extends Fruit> : 대입된 타입은 Fruit과 그 자손들만 가능하다.
-    static Juice makeJuice(FruitBox<? extends Fruit> box) {
-    	String tmp = "";
-    	for(Fruit f: box.getList()) 
-            tmp += f + " ";
+    import java.util.ArrayList;
+    
+    public class FruitBoxEx {
+        public static void main(String[] args) {
+            FruitBox<Fruit> fruitBox = new FruitBox<Fruit>();
+            FruitBox<Apple> appleBox = new FruitBox<Apple>();
+    
+            fruitBox.add(new Apple());
+            fruitBox.add(new Grape());
+            appleBox.add(new Apple());
+            appleBox.add(new Apple());
+    
+            System.out.println(Juicer.makeJuice(fruitBox));
+            System.out.println(Juicer.makeJuice(appleBox));
+        }
+    }
+    
+    class Fruit { public String toString() { return "Fruit";}}
+    
+    class Apple extends Fruit { public String toString() { return "Apple";}}
+    
+    class Grape extends Fruit { public String toString() { return "Grape";}}
+    
+    class Box<T> {
+        ArrayList<T> list = new ArrayList<T>();
+    
+        void add(T item) {
+            list.add(item);
+        }
+    
+        T get(int i) {
+            return list.get(i);
+        }
+    
+        ArrayList<T> getList() {
+            return list;
+        }
+    
+        int size() {
+            return list.size();
+        }
+    
+        public String toString() {
+            return list.toString();
+        }
+    }
+    
+    class FruitBox<T extends Fruit> extends Box<T> {}
+    
+    class Juice {
+        String name;
+    
+        Juice(String name)	     { this.name = name + "Juice"; }
   
-    	return new Juice(tmp);
+        public String toString() { return name; }
+    }
+    
+    class Juicer {
+        static Juice makeJuice(FruitBox<? extends Fruit> box) {
+            String tmp = "";
+    
+            for (Fruit f : box.getList())
+                tmp += f + " ";
+            
+            return new Juice(tmp);
+        }
     }
     ```
 
-    ```java
-    System.out.println(Juicer.makeJuice(new FruitBox<Fruit>())); // OK. FruitBox<Fruit>
-    System.out.println(Juicer.makeJuice(new FruitBox<Apple>())); // OK. FruitBox<Apple>
-    ```
-
-    * 와일드 카드를 사용하면 `makeJuice()`의 매개변수로 `FruitBox<Fruit>` 뿐만 아니라, `FruitBox<Apple>`와 `FruitBox<Grape>`도 가능하다.
-
-    * `makeJuice()`의 매개변수가 `FruitBox<Fruit>`였다면 대입된 타입이 일치하는 `FruitBox<Fruit>`만 가능하다. 
-
 #### 8) 제네릭 메서드
 
-* `제네릭 메서드`는 반환 타입 앞에 타입 매개변수(`<T>`)를 선언한 메서드이다.
+* `제네릭 메서드`는 메서드의 리턴 타입 앞에 타입 매개변수(`<T>`)를 선언한 메서드다.
   
     ```java
     static <T> void sort(List<T> list, Comparator<? super T> c)
@@ -7239,21 +7655,23 @@ int[][] arr = {
         static <T> void sort(List<T> list, Comparator<? super T> c) {
             //...
         }
+  
     }
     ```
   
     * 제네릭 메서드의 타입 매개변수 `<T>`는 메소드 내에서만 유효하다. 
     
-    * 제네릭 클래스의 타입 매개변수 `<T>` 보다 제네릭 메서드의 타입 매개변수 우선순위가 더 높다. 
+    * 제네릭 클래스의 타입 매개변수 `<T>` 보다 제네릭 메서드의 타입 매개변수의 우선순위가 더 높다. 
 
 * 예시
 
-    * 앞서 살펴본 `makeJuice()`를 제네릭 메서드로 변경하면 다음과 같다.
+    * 앞선 예시에서 살펴본 `makeJuice()`를 제네릭 메서드로 변경하면 다음과 같다.
     
         ```java
         static <T extends Fruit> Juice makeJuice(FruitBox<T> box) { // T는 Fruit과 그 자손들만 가능
           String tmp = "";
-          for(Fruit f: box.getList()) 
+      
+          for (Fruit f : box.getList()) 
             tmp += f + " ";
       
           return new Juice(tmp);
@@ -7284,13 +7702,15 @@ int[][] arr = {
       
 * 제네릭 메서드와 와일드 카드의 차이
 
-    * `와일드 카드`는 하나의 참조변수로 서로 다른 타입이 대입된 여러 제네릭 객체를 다루기 위한 것이다.
+    * `와일드 카드`는 대입된 타입이 서로 다른 객체를 하나의 참조 변수로 참조 할 수 있도록 하기 위한 것이다. 
     
-    * `제네릭 메서드`는 메서드를 호출 할 때 마다 다른 제네릭 타입을 대입 할 수 있도록 하기 위한 것이다.
+    * `제네릭 메서드`는 메서드를 호출 할 때 마다 서로 다른 제네릭 타입을 대입 할 수 있도록 하기 위한 것이다.
+    
+        * 와일드 카드를 사용할 수 없는 경우에 제네릭 메서드를 사용한다.
 
 #### 9) 제네릭 타입의 형 변환
 
-* 제네릭 타입과 원시 타입 간의 형 변환은 가능하지만 경고가 발생한다. 
+* ① 제네릭 타입과 원시 타입 간의 형 변환은 가능하지만 경고가 발생한다. 
 
     ```java
     Box box = null;              // 원시 타입 (Box)
@@ -7299,10 +7719,12 @@ int[][] arr = {
     box = (Box)objBox; // OK. 제네릭 타입 -> 원시 타입 (경고 발생)
     objBox = (Box<Object>)box; // OK. 원시 타입 -> 제네릭 타입 (경고 발생)
     ```
-  
+
     * 제네릭 타입과 원시 타입을 섞어서 사용하지는 말자!
 
-* 대입된 타입이 서로 다른 제네릭 타입 간의 형 변환은 불가능하다.
+    * 원시(raw) 타입 보다는 제네릭 타입을 사용하라!
+
+* ② 대입된 타입이 서로 다른 제네릭 타입 간의 형 변환은 불가능하다.
 
     ```java
     Box<Object> objBox = null;
@@ -7314,32 +7736,32 @@ int[][] arr = {
   
     * 즉, `Box<String> b = new Box<Object>();`는 불가능하다.
 
-* 와일드 카드가 사용된 제네릭 타입으로는 형 변환이 가능하다.
+* ③ 와일드 카드가 사용된 제네릭 타입으로는 형 변환이 가능하다.
 
-    * ① `FruitBox<Apple>` → `FruitBox<? extends Fruit>`
+    * `FruitBox<Apple>` → `FruitBox<? extends Fruit>`
 
         ```java
-        Box<Object> objBox = (Box<Object>) new Box<<String>();                  // 에러. 형변환 불가능
-        Box<? extends Object> wBox = (Box<? extends Object>) new Box<String>(); // OK
-        Box<? extends Object> wBox2 = new Box<String>();                        // 위 문장과 동일 (형변환 생략 가능)
+        Box<Object> objBox = (Box<Object>) new Box<String>();                      // 에러. 형변환 불가능
+        Box<? extends Object> wBox = (Box<? extends Object>) new Box<String>();    // OK
+        Box<? extends Object> wBox2 = new Box<String>();                           // 위 문장과 동일 (형변환 생략 가능)
         ```
      
         ```java
         // 매개변수로 FruitBox<Fruit>, FruitBox<Apple>, FruitBox<Grape> 등이 가능
         static Juice makeJuice(FruitBox<? extends Fruit> box) { ... }
         
-        FruitBox<? extends Fruit> box = new FruitBox<Fruit>(); // OK
+        FruitBox<? extends Fruit> box = new FruitBox<Fruit>();  // OK
         
         // FruitBox<Apple> → FruitBox<? extends Fruit>
-        FruitBox<? extends Fruit> box = new FruitBox<Apple>(); // OK
+        FruitBox<? extends Fruit> box = new FruitBox<Apple>();  // OK
         ```
             
-    * ② `FruitBox<? extends Fruit>` → `FruitBox<Apple>`
+    * `FruitBox<? extends Fruit>` → `FruitBox<Apple>`
       
         ```java
         // FruitBox<? extends Fruit> → FruitBox<Apple> 
         FruitBox<? extends Fruit> box = null;
-        FruitBox<Apple> appleBox = (FruitBox<Apple>) box; // OK. 미확인 타입으로 형 변환 경고 발생
+        FruitBox<Apple> appleBox = (FruitBox<Apple>) box;   // OK. 미확인 타입으로 형 변환 경고 발생
         ```
 
         * 와일드 카드가 사용된 제네릭 타입에서 제네릭 타입으로의 형변환은 가능하지만 "확인되지 않은 형변환"이라는 경고가 발생한다.
@@ -7368,18 +7790,18 @@ int[][] arr = {
 
 * 열거형의 정의
 
-    * `열거형(enum)`은 관련된 상수들을 같이 묶어 놓은 것이다.
+    * `열거형(enum)`은 서로 관련된 상수들을 묶어서 정의해 놓은 것이다.
     
     * Java는 타입에 안전한 열거형을 제공한다.
     
         * "타입에 안전한 열거형"이라는 것은 실제 값이 같아도 타입이 다르면 컴파일 에러가 발생하는 것을 의미한다.
 
-        * 즉, 자바의 열거형은 값과 타입을 모두 체크한다.
+        * 즉, **자바의 열거형(enum)은 값과 타입을 모두 체크한다.**
 
             * 열거형을 사용하지 않고 다음과 같이 상수를 정의한다고 가정한다. 
 
                 ```java
-                class Card{
+                class Card {
                     static final int CLOVER = 0;
                     static final int HEART = 1;
                     static final int DIAMOND = 2;
@@ -7397,18 +7819,18 @@ int[][] arr = {
             * 그러면 다음 코드의 결과는 true이다. 
 
                 ```java
-                if(Card.CLOVER == Card.TWO) // [결과] true
+                if (Card.CLOVER == Card.TWO) // [결과] true
                 ```
               
-                * 결과가 true지만 false여야 의미상 맞다. 
+                * 결과가 true지만 의미상 false여야 맞다. 
 
             * 이번에는 열거형을 사용해서 상수를 정의한다고 가정한다.
 
                 ```java
-                class Card{
+                class Card {
                     //           0       1       2       3
                     enum Kind {CLOVER, HEART, DIAMOND, SPADE} // 열거형 Kind를 정의 
-                    enum Value {TWO, THREE, FOUR} // 열거형 Value를 정의
+                    enum Value {TWO, THREE, FOUR}             // 열거형 Value를 정의
                     
                     final Kind kind;
                     final Value value;
@@ -7418,7 +7840,7 @@ int[][] arr = {
             * 그러면 다음 코드의 결과는 컴파일 에러가 발생한다.
 
                 ```java
-                if(Card.Kind.CLOVER == Card.Value.TWO) // [결과] 컴파일 에러 
+                if (Card.Kind.CLOVER == Card.Value.TWO) // [결과] 컴파일 에러 
                 ```
               
                 * 값은 같지만 타입이 달라서 비교 할 수 없다. 
@@ -7427,7 +7849,7 @@ int[][] arr = {
 
 * 열거형을 정의하는 방법
 
-    * 문법 : `enum 열거형이름 { 상수명1, 상수명2, . . . }`
+    * 문법 : `enum 열거형이름 { 상수명1, 상수명2, ... }`
 
     * 예시 : `enum Direction { EAST, WEST, SOUTH, NORTH }`
 
@@ -7444,7 +7866,7 @@ int[][] arr = {
     ```java
     enum Direction { EAST, WEST, SOUTH, NORTH }
     
-    class Unit{
+    class Unit {
         int x, y;	// 유닛의 초기화
         Direction dir;	// 열거형을 인스턴스 변수로 선언
     
@@ -7455,18 +7877,18 @@ int[][] arr = {
     }
     ```
 
-* 열거형 상수의 비교에 `==`와 `compareTo()`를 사용 할 수 있다.
+* 열거형 상수를 비교할 때는 `==`와 `compareTo()`를 사용할 수 있다.
 
-    * 열거형을 비교할 때는 `compareTo()`를 사용 해야 한다.
+    * 열거형을 비교할 때는 비교 연산자 (`>`, `<`, ...)가 아닌 `compareTo()`를 사용해야 한다.
     
     * `compareTo()`는 열거형 상수가 정의된 순서의 차이를 반환한다.
 
         ```java
-        if(dir == Direction.EAST){
+        if (dir == Direction.EAST) {
             x++;
-        } else if (dir > Direction.WEST){ // 에러. 열거형 상수에 비교 연산자를 사용 할 수 없다. 
+        } else if (dir > Direction.WEST) { // 에러. 열거형 상수에 비교 연산자를 사용 할 수 없다. 
             ...
-        } else if (dir.compareTo(Direction.WEST) > 0){ // compareTo()는 가능
+        } else if (dir.compareTo(Direction.WEST) > 0) { // compareTo()는 가능
             
         }
         ```
@@ -7479,7 +7901,7 @@ int[][] arr = {
 
     * `String name()` : **열거형 상수의 이름을 문자열로 반환한다.**
 
-    * `int ordinal()` : **열거형 상수가 정의된 순서를 반환한다.** (0 부터 시작)
+    * `int ordinal()` : **열거형 상수가 정의된 순서를 반환한다.** (0 부터 시작함)
 
     * `T valueOf(Class<T> enumType, String name)` : **지정된 열거형에서 name과 일치하는 열거형 상수를 반환한다.**
 
@@ -7502,14 +7924,14 @@ int[][] arr = {
             Direction d2 = Direction.valueOf("WEST");
             Direction d3 = Enum.valueOf(Direction.class, "EAST");
     
-            System.out.println("d1="+d1);
-            System.out.println("d2="+d2);
-            System.out.println("d3="+d3);
+            System.out.println("d1=" + d1);
+            System.out.println("d2=" + d2);
+            System.out.println("d3=" + d3);
     
-            System.out.println("d1==d2 ? "+ (d1==d2));              // false
-            System.out.println("d1==d3 ? "+ (d1==d3));              // true
-            System.out.println("d1.equals(d3) ? "+ d1.equals(d3));  // true
-    //		System.out.println("d2 > d3 ? "+ (d1 > d3));            // 열거형 상수는 객체이므로 비교 연산자를 사용 할 수 없다. (에러)
+            System.out.println("d1 == d2 ? "+ (d1 == d2));              // false
+            System.out.println("d1 == d3 ? "+ (d1 == d3));              // true
+            System.out.println("d1.equals(d3) ? "+ d1.equals(d3));      // true
+    //		System.out.println("d2 > d3 ? "+ (d1 > d3));                // 열거형 상수는 객체이므로 비교 연산자를 사용 할 수 없다. (에러)
             System.out.println("d1.compareTo(d3) ? "+ (d1.compareTo(d3))); // 0
             System.out.println("d1.compareTo(d2) ? "+ (d1.compareTo(d2))); // -2
     
@@ -7528,7 +7950,7 @@ int[][] arr = {
     
             Direction[] dArr = Direction.values(); // 열거형의 모든 상수를 배열로 반환한다.
     
-            for(Direction d : dArr)  // for(Direction d : Direction.values())
+            for (Direction d : dArr)  // for(Direction d : Direction.values())
                 System.out.printf("%s=%d%n", d.name(), d.ordinal());
         }
     }
@@ -7536,38 +7958,43 @@ int[][] arr = {
 
 #### 4) 열거형에 멤버 추가하기
 
-* 불연속적인 열거형 상수의 경우, 원하는 값을 괄호 `()` 안에 적는다.
-
-    ```java
-    enum Direction { EAST(1), SOUTH(5), WEST(-1), NORTH(10) } // 괄호 ()는 생성자를 호출하는 것이다.
-    ```
-
-* 괄호 `()`를 사용하려면, 인스턴스 변수와 생성자를 새로 추가해야 한다.
-
-    ```java
-    enum Direction {
-        EAST(1), SOUTH(5), WEST(-1), NORTH(10); // 끝에 ';'를 추가해야 한다.
+* 열거형 상수에 직접 값을 지정하기
+  
+    * 열거형 상수에 값을 지정하려면 상수명 옆에 괄호 `()`를 추가하고 그 안에 값을 지정한다.
     
-        private final int value;                      // 정수를 저장할 필드(인스턴스 변수)를 추가
-        Direction(int value) { this.value = value; } // 생성자를 추가
+        ```java
+        enum Direction { EAST(1), SOUTH(5), WEST(-1), NORTH(10) } // 괄호 ()는 생성자를 호출하는 것이다.
+        ```
     
-        public int getValue() { return value; }
-    }
-    ```
-
-* 열거형의 생성자는 묵시적으로 private 이므로, 외부에서 열거형의 객체를 생성 할 수 없다.
-
-    ```java
-    Direction d = new Direction(1); // 에러. 열거형의 생성자는 외부에서 호출 불가
-    ```
+    * 그리고 **괄호 `()`를 사용하려면, 인스턴스 변수와 생성자를 추가해야 한다.**
+    
+        ```java
+        enum Direction {
+            EAST(1), SOUTH(5), WEST(-1), NORTH(10);     // 끝에 ';'를 추가해야 한다.
+            
+            // 정수를 저장할 필드(인스턴스 변수)를 추가한다.  
+            private final int value;                     
+      
+            // 생성자를 추가한다.
+            Direction(int value) { this.value = value; } 
+        
+            public int getValue() { return value; }
+        }
+        ```
+    
+    * 열거형의 생성자는 항상 private 이므로, 외부에서 열거형의 객체를 생성 할 수 없다.
+    
+        ```java
+        Direction d = new Direction(1); // 에러. 열거형의 생성자는 외부에서 호출 불가
+        ```
 
 * 열거형에 멤버를 추가하는 예시
 
     ```java
     enum Direction {
-        EAST(1, ">"), SOUTH(2,"V"), WEST(3, "<"), NORTH(4,"^");
+        EAST(1, ">"), SOUTH(2, "V"), WEST(3, "<"), NORTH(4, "^");       // 상수에 값(value, symbol)을 여러 개 지정 할 수 있다. 
     
-        private static final Direction[] DIR_ARR = Direction.values(); // 열거형의 모든 상수를 배열에 저장한다.
+        private static final Direction[] DIR_ARR = Direction.values();   // 열거형의 모든 상수를 배열에 저장한다.
         private final int value;
         private final String symbol;
     
@@ -7577,8 +8004,9 @@ int[][] arr = {
         }
     
         public int getValue()     { return value;  }
+  
         public String getSymbol() { return symbol; }
-    
+  
         public static Direction of(int dir) {
             if (dir < 1 || dir > 4)
                 throw new IllegalArgumentException("Invalid value :" + dir);
@@ -7590,9 +8018,9 @@ int[][] arr = {
         public Direction rotate(int num) {
             num = num % 4; // 범위 제한 (0 ~ 3)
     
-            if(num < 0) num +=4; // num이 음수일 때는 시계반대 방향으로 회전 
+            if(num < 0) num += 4; // num이 음수일 때는 시계반대 방향으로 회전 
     
-            return DIR_ARR[(value-1+num) % 4];
+            return DIR_ARR[(value - 1 + num) % 4];
         }
     
         public String toString() {
@@ -7603,7 +8031,7 @@ int[][] arr = {
     
     class EnumEx2 {
         public static void main(String[] args) {
-            for(Direction d : Direction.values())
+            for (Direction d : Direction.values())
                 System.out.printf("%s=%d%n", d.name(), d.getValue());
     
             Direction d1 = Direction.EAST;
@@ -7623,7 +8051,7 @@ int[][] arr = {
 
 #### 5) 열거형의 이해
 
-* 열거형 Direction이 아래와 같이 선언되어 있을 때, 사실은 열거형 상수 하나 하나가 객체이다.
+* 열거형 Direction이 아래와 같이 선언되어 있을 때, 사실은 열거형 상수 하나 하나가 객체다.
 
     ```java
     enum Direction { EAST, SOUTH, WEST, NORTH }
@@ -7640,7 +8068,7 @@ int[][] arr = {
     
         private String name;
     
-        private Direction(String name){
+        private Direction(String name) {
             this.name = name;
         }
     }
@@ -7660,7 +8088,7 @@ int[][] arr = {
 
 * 예시
 
-    * `@Test`는 해당 메서드를 테스트 해야 한다는 것을 JUnit이라는 테스트 프로그램에게 알리는 역할을 할 뿐, 메서드가 포함된 프로그램 자체에는 아무런 영향을 미치지 않는다.
+    * `@Test`는 해당 메서드를 테스트해야 한다는 것을 JUnit이라는 테스트 프로그램에게 알리는 역할을 할 뿐, 메서드가 포함된 프로그램 자체에는 아무런 영향을 미치지 않는다.
 
         ```java
         @Test // 이 메서드가 테스트 대상임을 테스트 프로그램에게 알린다.
@@ -7809,7 +8237,7 @@ int[][] arr = {
 
 * (2) @Target
 
-    * `@Target` : 애노테이션이 적용 가능한 대상을 지정할 때 사용한다.
+    * `@Target` : 해당 애노테이션을 적용할 수 있는 대상을 지정할 때 사용한다.
       
         * 여러 개의 값을 지정할 때는 배열에서 처럼 괄호 {}를 사용해야 한다.
     
@@ -7827,14 +8255,14 @@ int[][] arr = {
             |:----------------|:----------------------------------|
             | ANNOTATION_TYPE | 애노테이션                           |
             | CONSTRUCTOR     | 생성자                              |
-            | FIELD           | 필드(멤버 변수, enum 상수)             |
+            | FIELD           | 필드 (멤버 변수, enum 상수)            |
             | LOCAL_VARIABLE  | 지역변수                             |
             | METHOD          | 메서드                              |
-            | PACKAGE         | 패키지                              |
             | PARAMETER       | 매개변수                             |
             | TYPE            | 타입 (클래스, 인터페이스, enum)         |
-            | TYPE_PARAMETER  | 타입 매개변수(JDK 1.8)                |
+            | TYPE_PARAMETER  | 타입 매개변수 (JDK 1.8)               |
             | TYPE_USE        | 타입이 사용되는 모든 곳 (JDK 1.8)       |
+            | PACKAGE         | 패키지                              |
 
             * `ANNOTATION_TYPE` : 애노테이션을 선언할 때 붙일 수 있다는 의미다.
             
@@ -7846,11 +8274,11 @@ int[][] arr = {
 
             * `TYPE_PARAMETER` : 타입 매개변수를 선언할 때 붙일 수 있다는 의미다.
             
-            * `TYPE_USE` : 타입을 사용할 때 붙일 수 있다는 의미다.
+            * `TYPE_USE` : 타입이 사용되는 모든 곳에 붙일 수 있다는 의미다.
 
 * (3) @Retention
 
-    * `@Retention` : 애노테이션이 유지(retention)되는 기간을 지정할 때 사용한다.
+    * `@Retention` : 해당 애노테이션 정보가 유지(retention)되는 기간을 지정할 때 사용한다.
     
         |     유지 정책     |                    의미                 |
         |:----------------|:---------------------------------------|
@@ -7893,18 +8321,57 @@ int[][] arr = {
     
 * (4) @Documented
 
-    * `@Documented` : 애노테이션에 대한 정보가 javadoc으로 작성한 문서에 포함되도록 한다.
+    * `@Documented` : 해당 애노테이션 정보가 javadoc으로 작성한 문서에 포함되도록 한다.
 
-        ```java
-        @Documented
-        @Retention(RetentionPolicy.RUNTIME)
-        @Target(ElementType.TYPE)
-        public @interface FunctionalInterface {}
-        ```
+    * 실습하기 
+    
+        * ① 애노테이션을 정의한다.
 
+            ```java
+            @Documented
+            @Retention(RetentionPolicy.RUNTIME)
+            @Target(ElementType.METHOD)
+            public @interface DocAnnotation {
+                String value();
+            }
+            ```
+
+            ```java
+            @Retention(RetentionPolicy.RUNTIME)
+            @Target(ElementType.METHOD)
+            public @interface NoDocAnnotation {
+                String value();
+            }
+            ```
+
+        * ② 앞서 정의한 애노테이션을 사용하는 클래스를 작성한다. 
+        
+            ```java
+            public class AnnotationEx {
+                public static void main(String[] args) {
+                    AnnotationEx annotationEx = new AnnotationEx();
+            
+                    annotationEx.method1();
+                    annotationEx.method2();
+                }
+            
+                @DocAnnotation("@Documented test")
+                public void method1() {}
+            
+                @NoDocAnnotation("@Documented test\"")
+                public void method2() {}
+            }
+            ```
+
+        * ③ 인텔리제이에서 [Tools] - [Generate JavaDoc...]를 클릭해서 JavaDoc 문서를 만든다. 
+
+        * ④ `AnnotationEx` 클래스의 JavaDoc 문서를 확인 해보면 `method1()`는 애노테이션 정보가 포함되어 있지만 `method2()`는 포함되어 있지 않다.  
+
+            ![image 43](images/img43.png)
+    
 * (5) @Inherited
 
-    * `@Inherited` : 애노테이션이 자손 클래스에 상속 되도록 한다.
+    * `@Inherited` : 해당 애노테이션이 자손 클래스에 상속 되도록 한다.
     
         * `@Inherited`가 붙은 애노테이션을 조상 클래스에 붙이면, 자손 클래스도 이 애노테이션이 붙은 것과 같이 인식된다.
     
@@ -7926,7 +8393,7 @@ int[][] arr = {
 
             ```java
             // ToDo 애노테이션을 여러 번 반복해서 쓸 수 있게 한다.
-            @Repeatable(ToDos.class) // 괄호 안에 컨테이너 애노테이션을 지정해 줘야한다.
+            @Repeatable(ToDos.class) // 괄호 안에 컨테이너 애노테이션을 지정해줘야 한다.
             @interface ToDo {
                 String value();
             }
@@ -7935,7 +8402,7 @@ int[][] arr = {
         * ② `@Repeatable`인 @ToDo를 하나로 묶을 컨테이너 애노테이션을 정의해야 한다. 
 
             ```java
-            @interface ToDos{ // 여러 개의 ToDo 애노테이션을 담을 컨테이너 애노테이션 ToDos
+            @interface ToDos { // 여러 개의 ToDo 애노테이션을 담을 컨테이너 애노테이션 ToDos
                 ToDo[] value(); // ToDo 애노테이션 배열 타입의 요소를 선언한다. 이름이 반드시 value 이어야 함 
             }
             ```
@@ -7954,7 +8421,7 @@ int[][] arr = {
 
 * (7) @Native
 
-    * `@Native` : native 메서드에 의해 참조되는 상수에 붙이는 애노테이션이다.
+    * `@Native` : native 메서드에 의해 참조되는 상수에 붙인다.
 
         ```java
         @Native public static final long MIN_VALUE = 0x8000000000000000L;
@@ -7971,7 +8438,7 @@ int[][] arr = {
 * (1) 새로운 애노테이션을 정의하는 방법
 
     ```java
-    @interface 애노테이션이름{
+    @interface 애노테이션이름 {
         타입 요소이름(); // 애노테이션의 요소를 선언한다.
         //...
     }
@@ -9539,7 +10006,7 @@ int[][] arr = {
         
 * (1) 함수형 인터페이스(Functional Interface)
 
-    * `함수형 인터페이스`는 하나의 추상 메서드만 선언된 인터페이스이다.
+    * `함수형 인터페이스`는 하나의 추상 메서드만 선언된 인터페이스다.
 
 * (2) 예시 - 함수형 인터페이스
 
@@ -9818,11 +10285,11 @@ int[][] arr = {
     }
     ```
 
-#### 4) Function의 합성, Predicate의 결합, CF와 함수형 인터페이스
+#### 4) Function, Predicate의 결합, CF와 함수형 인터페이스
 
-* (1) Function의 합성
+* (1) Function의 결합
 
-    * `andThen()`, `compose()`로 두 개의 Function를 합성해서 하나의 새로운 함수를 만들 수 있다.
+    * `andThen()`, `compose()`로 두 Function를 하나로 결합할 수 있다.
     
         * 즉, 두 람다식을 합쳐서 새로운 람다식을 만들 수 있다.
       
@@ -9834,11 +10301,11 @@ int[][] arr = {
     
 * (2) Predicate의 결합
 
-    * `and()`, `or()`, `negate()`로 두 Predicate를 하나로 결합 할 수 있다. (default 메서드)
+    * `and()`, `or()`, `negate()`로 두 Predicate를 하나로 결합할 수 있다. (default 메서드)
 
-        * ① `and()` : 두 Predicate가 모두 true를 반환 하면 true를 반환
+        * ① `and()` : 두 Predicate가 모두 true를 반환하면 true를 반환
         
-        * ② `or()` : 두 Predicate 중 하나만 true를 반환 하면 true를 반환
+        * ② `or()` : 두 Predicate 중 하나만 true를 반환하면 true를 반환
         
         * ③ `negate()` : Predicate의 결과가 true이면 false, false이면 true를 반환
 
@@ -9889,7 +10356,7 @@ int[][] arr = {
         System.out.println(f.apply("AAA")); // AAA가 그대로 출력 됨
         ```
 
-* (4) 실습 - Function의 합성, Predicate의 결합
+* (4) 실습 - Function, Predicate의 결합
 
     ```java
     class Ex14_3 {
@@ -10135,7 +10602,7 @@ int[][] arr = {
 
 * (1) 메서드 참조
 
-    * 하나의 메서드만 호출하는 람다식은 `메서드 참조`로 더 간단히 할 수 있다.
+    * `메서드 참조 (method reference)` : 하나의 메서드만 호출하는 람다식을 더 간단히 하는 방법이다.
     
         * `클래스명::메서드명`
     
@@ -10234,10 +10701,8 @@ int[][] arr = {
 
 * (1) 스트림(Stream)
 
-    * `스트림(Stream)`은 컬렉션, 배열 등의 저장 요소들을 하나씩 참조해서 람다식으로 처리 할 수 있도록 해주는 기능이다. 
+    * `스트림(Stream)`은 다양한 데이터 소스(배열, 컬렉션 등)를 표준화된 방법으로 다루기 위한 것이다.
     
-        * 다양한 데이터 소스를 표준화된 방법으로 다루기 위한 것이다.  
-        
     * 스트림으로 작업하는 과정은 다음과 같다.
     
         * ① `스트림 생성`
@@ -10315,11 +10780,12 @@ int[][] arr = {
             }
             ```
           
-        * `forEach()`는 매개변수에 대입된 람다식을 스트림의 모든 요소에 적용한다. (코드가 간결해 짐)
-        
-            ```java
-            stream().forEach(System.out::println);
-            ```          
+            * `forEach()`는 매개변수에 대입된 람다식을 스트림의 모든 요소에 적용한다. (코드가 간결해짐)
+            
+                ```java
+                stream().forEach(System.out::println);
+                ```
+              
     * ⑤ 스트림의 작업을 병렬로 처리 할 수 있다. - 병렬 스트림
     
         * 병렬 스트림은 내부적으로 `fork&join 프레임워크`를 이용해서 자동적으로 연산을 병렬로 수행한다.
@@ -10343,54 +10809,34 @@ int[][] arr = {
 
 #### 7) 스트림 만들기
  
-* (1) 스트림 만들기 - 컬렉션으로 부터 스트림 만들기
+* (1) 컬렉션으로 부터 스트림 만들기
 
-    * `Collection` 인터페이스의 `stream()`로 컬렉션으로 부터 스트림을 생성한다.
+    * `stream()` : 컬렉션으로 부터 스트림을 만들어서 반환한다.
     
-        * `Stream<E> stream()` 
-    
+        * Collection 인터페이스에서 제공한다.
+        
     * 예시
     
         ```java
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
         Stream<Integer> intStream = list.stream(); // list로 부터 새로운 스트림을 생성한다.
-
+        
         /*
         * 스트림의 모든 요소를 출력, forEach()는 최종 연산이므로 스트림이 닫힌다.
         * 즉, stream은 1회용이다. stream에 대해 최종 연산을 수행하면 stream이 닫힌다.
         * */
         intStream.forEach(System.out::print); // 12345
         System.out.println();
-
+        
         intStream = list.stream(); // list로 부터 스트림을 다시 생성
         intStream.forEach(System.out::print);
         ```      
 
-* (2) 스트림 만들기 - 배열로 부터 스트림 만들기
+* (2) 배열로 부터 스트림 만들기
 
-    * 객체 배열로 부터 스트림 생성하기
+    * `Arrays.stream()` : 배열로 부터 스트림을 만들어서 반환한다.
     
-        * `Stream<T> Stream.of(T... values)`
-                
-        * `Stream<T> Stream.of(T[])`
-        
-        * `Stream<T> Arrays.stream(T[])`
-        
-        * `Stream<T> Arrays.stream(T[] array, int startInclusive, int endExclusive)` 
-        
-            * 배열의 일부를 스트림으로 만들 때 사용한다. (마지막 요소는 범위에 포함되지 않음)
-                
-    * 기본형 배열로 부터 스트림 생성하기
-    
-        * `IntStream IntStream.of(int... values)`
-        
-        * `IntStream IntStream.of(int[])`
-        
-        * `IntStream Arrays.stream(int[])`
-        
-        * `IntStream Arrays.stream(int[], int startInclusive, int endExclusive)`
-        
-    * 예시
+    * `Arrays.stream(T[] array, int startInclusive, int endExclusive)` : 배열의 일부를 스트림으로 만들어서 반환한다. (마지막 요소는 범위에 포함되지 않음)
     
         ```java
         // 문자열 스트림 생성
@@ -10417,77 +10863,50 @@ int[][] arr = {
         //System.out.println("count=" + intStream2.count());
         ```  
     
-* (3) 스트림 만들기 - 임의의 수(난수)
+* (3) 임의의 수(난수)를 요소로 갖는 스트림 생성하기
 
-    * 난수를 요소로 갖는 스트림 생성하기
-    
-        * `Random` 클래스의 `ints()`, `longs()`, `doubles()`는 해당 타입의 난수들로 이루어진 스트림을 반환한다.
+    * `Random.ints()` : int 타입의 난수들로 이루어진 스트림을 만들어서 반환한다.
 
-            ```
-            Integer.MIN_VALUE <= ints() <= Integer.MAX_VALUE
-            Long.MIN_VALUE <= longs() <= Long.MAX_VALUE
-            0.0 <= doubles() < 1.0
-            ```
-               
+        * Integer.MIN_VALUE <= ints() <= Integer.MAX_VALUE    
+
+    * `Random.longs()` : long 타입의 난수들로 이루어진 스트림을 만들어서 반환한다.
+
+        * Long.MIN_VALUE <= longs() <= Long.MAX_VALUE    
+
+    * `Random.doubles()` : double 타입의 난수들로 이루어진 스트림을 만들어서 반환한다.
+
+        * 0.0 <= doubles() < 1.0
+     
         * 이 메서드들이 반환하는 스트림은 크기가 정해지지 않은 무한 스트림이므로 `limit()`으로 스트림의 크기를 제한 해주어야 한다.
-                
-            * `limit()`는 스트림의 요소 개수를 제한하는데 사용된다.
     
-                ```java
-                IntStream intStream = new Random().ints(); // 무한 스트림
-                intStream.limit(5).forEach(System.out::println); // 5개의 요소만 출력한다.
-        
-                IntStream intStream2 = new Random().ints(5); // 크기가 5인 난수 스트림을 반환한다.
-                ```
-              
-            * 지정된 범위의 난수를 요소로 갖는 스트림을 생성하는 메서드(`Random` 클래스)
-    
-                ```
-                // begin은 범위에 포함되며 end는 범위에 포함되지 않는다.
-                // 무한 스트림 
-                IntStream ints(int begin, int end)
-                LongStream longs(long begin, long end)
-                DoubleStream doubles(double begin, double end)
-                
-                // 유한 스트림
-                IntStream ints(long streamSize, int begin, int end)
-                LongStream longs(long streamSize, long begin, long end)
-                DoubleStream doubles(long streamSize, double begin, double end)
-                ```
-              
-                * `streamSize`를 지정하면 유한 스트림이 된다.
-        
-* (4) 스트림 만들기 - 특정 범위의 정수
-
-    * 특정 범위의 정수를 요소로 갖는 스트림 생성하기(IntStream, LongStream)
-    
-        * `IntStream IntStream.range(int begin, int end)`
-        
-        * `IntStream IntStream.rangeClosed(int begin, int end)`
-        
-            * `rangeClosed()`는 끝 범위(end)가 포함된다.
-        
     * 예시
     
         ```java
-        IntStream intStream1 = IntStream.range(1, 5);        // 1, 2, 3, 4
-        IntStream intStream2 = IntStream.rangeClosed(1, 5); // 1, 2, 3, 4, 5
+        IntStream intStream = new Random().ints(); // 무한 스트림
+        intStream.limit(5).forEach(System.out::println); // 5개의 요소만 출력한다.
 
-        intStream1.forEach(System.out::println);
-        intStream2.forEach(System.out::println);
+        IntStream intStream2 = new Random().ints(5); // 크기가 5인 난수 스트림을 반환한다.
+        ```
+        
+* (4) 특정 범위의 정수를 요소로 갖는 스트림 생성하기 (IntStream, LongStream)
+
+    * `IntStream.range(int startInclusive, int endExclusive)` : 특정 범위의 정수를 요소로 갖는 스트림을 만들어서 반환한다. (끝 범위를 포함 X)
+      
+    * `IntStream.rangeClosed(int startInclusive, int endInclusive)` : 특정 범위의 정수를 요소로 갖는 스트림을 만들어서 반환한다. (끝 범위를 포함 O)
+
+        ```java
+        int[] prices = {100, 200, 300};
+        
+        int sum = IntStream.range(0, prices.length)
+                .map(i -> prices[i])
+                .sum();
+        
+        System.out.println(sum);
         ```
       
-* (5) 스트림 만들기 - 람다식으로 스트림을 만드는 `iterate()`, `generate()`
+* (5) 람다식으로 스트림을 만들기 
 
-    * 람다식을 소스로 하는 스트림 생성하기 (무한 스트림)
-    
-        * `static <T> Stream<T> iterate(T seed, UnaryOperator<T> f)` : 이전 요소에 종속적
-        
-            * `seed` : 초기 값
-    
-        * `static <T> Stream<T> generate(Supplier<T> s)` : 이전 요소에 독립적
-    
-    * `iterate()`는 이전 요소를 seed로 해서 다음 요소를 계산한다.
+    * `Stream.iterate()`는 이전 요소에 의존해서 다음 요소를 계산한다.
 
         ```java
         // Stream.iterate(초기 값, 람다식)
@@ -10501,7 +10920,7 @@ int[][] arr = {
                 ...     */
         ```
       
-    * `generate()`는 seed를 사용하지 않는다.
+    * `Stream.generate()`는 매번 주어진 계산을 한다. 
     
         ```java
         // Math.random()를 호출한 값을 계속 생성하는 무한 스트림
@@ -10510,40 +10929,58 @@ int[][] arr = {
         Stream<Integer> oneStream = Stream.generate(() -> 1);
         ```
     
-* (6) 스트림 만들기 - 파일과 빈 스트림
-
-    * 파일을 소스로 하는 스트림 생성하기
+* (6) 파일로 부터 스트림 만들기
     
-        * `Stream<Path> Files.list(Path dir)`
+    * `Files.lines(Path path)` : 파일의 한 행(line)을 요소로 하는 스트림을 만들어서 반환한다.
+
+          * `Path`는 파일 또는 디렉토리
+
+    * 예시
+
+        ```java
+        long uniqueWords = 0;
         
-            * `Path`는 파일 또는 디렉토리
-
-        * 아래 메서드들은 파일의 한 행(line)을 요소로 하는 스트림을 생성한다. 
+        try (Stream<String> lines = Files.lines(Paths.get("data.txt"), Charset.defaultCharset())) {
+            uniqueWords = lines.flatMap(line -> Arrays.stream(line.split(" ")))
+                    .distinct()
+                    .count();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        System.out.println(uniqueWords);
+        ```
     
-            ```java
-            Stream<String> Files.lines(Path path)
-            Stream<String> Files.lines(Path path, Charset cs)
-            Stream<String> lines() // BufferedReader 클래스의 메서드
-            ```
-      
-    * 비어있는 스트림 생성하기
+* (7) 비어있는 스트림과 null이 될 수 있는 객체로 스트림 만들기
+
+    * `Stream.empty()` : 비어있는 스트림을 만들어서 반환한다. 
     
         ```java
-        Stream emptyStream = Stream.empty(); // empty()는 비어있는 스트림을 생성해서 반환한다.
+        Stream emptyStream = Stream.empty();
         long count = emptyStream.count(); // count의 값은 0
         ```
+    
+    * `Stream.ofNullable()` : null이 될 수 있는 객체로 스트림을 만들어서 반환한다. (객체가 null이면 빈 스트림을 반환한다.) 
+
+        ```java
+        Map<String, String> properties = new HashMap<>();
+        properties.put("config", "spring");
+        properties.put("home", "seoul");
         
+        Stream.of("config", "home", "user")
+                .flatMap(key -> Stream.ofNullable(properties.get(key)))
+                .forEach(System.out::println);
+        ```
+      
+        * map의 get()는 key에 대응하는 값이 없으면 null을 반환한다. 
+
 #### 8) 스트림의 중간 연산
  
 * (1) 스트림의 요소 자르기 - skip(), limit()
 
-    * 문법
+    * `skip(long n)` : 앞에서 부터 n개를 건너뛴다. 
     
-        * `Stream<T> skip(long n)` : 앞에서 부터 n개를 건너뛴다. 
-        
-        * `Stream<T> limit(long maxSize)` : maxSize 개수만큼 잘라낸다.
-
-    * 예시
+    * `limit(long maxSize)` : 스트림 내의 요소 개수를 제한한다.
     
         ```java
         IntStream intStream = IntStream.rangeClosed(1, 10); // 1 부터 10까지의 int 값을 요소로 갖는 Stream을 생성한다. 12345678910
@@ -10552,23 +10989,19 @@ int[][] arr = {
       
 * (2) 스트림의 요소 걸러내기 - filter(), distinct()
 
-    * 문법
+    * `filter(Predicate<? super T> predicate)` : 조건(predicate)에 맞는 요소만 걸러낸다.
     
-        * `Stream<T> filter(Predicate<? super T> predicate)` : 조건(predicate)에 맞는 요소만 걸러낸다.
-        
-        * `Stream<T> distinct()` : 중복을 제거한다.
-    
-    * 예시
-    
+    * `distinct()` : 중복을 제거한다.
+
         ```java
         IntStream intStream = IntStream.of(1, 2, 2, 3, 3, 3, 4, 5, 5, 6);
         intStream.distinct().forEach(System.out::print);
         System.out.println();
-
+    
         IntStream intStream2 = IntStream.rangeClosed(1, 10); // 12345678910
         intStream2.distinct().forEach(System.out::print); // 246810 (2의 배수만)
         System.out.println();
-
+    
         IntStream intStream3 = IntStream.rangeClosed(1, 10);
         intStream3.filter(i -> i%2 != 0 && i%3 != 0).forEach(System.out::print);
         //intStream3.filter(i -> i%2 != 0).filter(i -> i%3 != 0).forEach(System.out::print);
@@ -10576,15 +11009,15 @@ int[][] arr = {
     
 * (3) 스트림의 요소 정렬하기 - sorted()
 
-    * `sorted()`는 스트림의 요소를 정렬할 때 사용한다.
+    * `sorted()` : 스트림 내의 요소들을 정렬한다.
     
         * 문법
         
-            * `Stream<T> sorted()` : 스트림의 요소를 기본 정렬 기준(Comparable)으로 정렬한다.
+            * `Stream<T> sorted()` : 스트림 내의 요소들을 기본 정렬 기준(Comparable)으로 정렬한다.
             
-            * `Stream<T> sorted(Comparator<? super T> comparator)` : 스트림의 요소를 지정된 `Comparator`로 정렬한다.
+            * `Stream<T> sorted(Comparator<? super T> comparator)` : 스트림 내의 요소들을 지정한 `Comparator`로 정렬한다.
     
-        * 예시 - 문자열 스트림 정렬 방법
+        * 예시
         
             ```java
             Stream<String> strStream1 = Stream.of("CC", "aaa", "b", "cc", "dd");
@@ -10595,16 +11028,16 @@ int[][] arr = {
             System.out.println();
     
             Stream<String> strStream2 = Stream.of("dd", "aaa", "CC", "cc", "b");
-            strStream2.sorted(Comparator.reverseOrder()).forEach(System.out::print); // 기본 정렬 역순
+            strStream2.sorted(Comparator.reverseOrder()).forEach(System.out::print);                        // 기본 정렬 역순
             //strStream2.sorted(Comparator.<String>naturalOrder().reversed()).forEach(System.out::print);
             System.out.println();
     
             Stream<String> strStream3 = Stream.of("dd", "aaa", "CC", "cc", "b");
-            strStream3.sorted(String.CASE_INSENSITIVE_ORDER).forEach(System.out::print); // 대소문자 구분 안함
+            strStream3.sorted(String.CASE_INSENSITIVE_ORDER).forEach(System.out::print);            // 대소문자 구분하지 않고 사전 순 정렬
             System.out.println();
     
             Stream<String> strStream4 = Stream.of("dd", "aaa", "CC", "cc", "b");
-            strStream4.sorted(String.CASE_INSENSITIVE_ORDER.reversed()).forEach(System.out::print);
+            strStream4.sorted(String.CASE_INSENSITIVE_ORDER.reversed()).forEach(System.out::print); // 대소문자 구분하지 않고 역순으로 정렬
             System.out.println();
     
             Stream<String> strStream5 = Stream.of("dd", "aaa", "CC", "cc", "b");
@@ -10616,14 +11049,18 @@ int[][] arr = {
             strStream6.sorted(Comparator.comparing(String::length).reversed()).forEach(System.out::print);
             ```
 
-    * `Comparator`의 `comparing()`으로 정렬 기준을 제공한다.
+    * `Comparator.comparing()` : 정렬 기준을 제공할 때 사용한다.
 
         * 문법
     
             * `comparing(Function<T, U> keyExtractor)`
             
             * `comparing(Function<T, U> keyExtractor, Comparator<U> keyComparator)`
-        
+
+                * `keyExtractor` : 정렬할 때 사용할 필드를 추출할 때 사용한다.
+                
+                * `keyComparator` : 정렬 기준을 제공할 때 사용한다. (오름차순, 내림차순)
+            
         * 예시
         
             * 학생 스트림(studentStream)을 반(ban)별로 정렬하여 출력하려면 다음과 같이 한다.
@@ -10633,7 +11070,7 @@ int[][] arr = {
                           .forEach(System.out::println);
                 ```
           
-    * `Comparator`의 `thenComparing()`으로 추가 정렬 기준을 제공한다. (정렬 기준이 여러 개인 경우에 사용)
+    * `Comparator.thenComparing()` : 추가 정렬 기준을 제공할 때 사용한다. (정렬 기준이 여러 개인 경우에 사용)
     
         * 문법
         
@@ -10641,7 +11078,7 @@ int[][] arr = {
             
             * `thenComparing(Function<T, U> keyExtractor)`
             
-            * `thenComparing(Function<T, U> keyExtractor, Comparator<U> keyComp)`
+            * `thenComparing(Function<T, U> keyExtractor, Comparator<U> keyComparator)`
     
         * 예시
         
@@ -10659,14 +11096,10 @@ int[][] arr = {
                                 new Student("나자바", 3, 290),
                                 new Student("감자바", 3, 180)
                         );
-                
-                        studentStream.sorted(Comparator.comparing(Student::getBan) // 반별 정렬
-                                  .thenComparing(Comparator.naturalOrder()))     	// 기본 정렬
+                        
+                        studentStream.sorted(Comparator.comparing(Student::getBan)                      // 반 별로 정렬
+                                    .thenComparing(Student::getTotalScore, Comparator.reverseOrder()))  // 총점 별 내림차순으로 정렬
                                 .forEach(System.out::println);
-                
-                //        studentStream.sorted(Comparator.comparing(Student::getBan)  // 반 별로 정렬
-                //                    .thenComparing(Student::getTotalScore, Comparator.reverseOrder()))  // 총점 별로 정렬
-                //                .forEach(System.out::println);
                     }
                 }
                 
@@ -10698,34 +11131,34 @@ int[][] arr = {
     
 * (4) map()
 
-    * 문법
+    * `map()` : 스트림 내의 요소를 다른 요소로 변환한 새로운 스트림을 반환한다.
 
-        * `Stream<R> map(Function<? super T, ? extends R> mapper)` : 스트림 내의 요소를 다른 요소로 변환한 새로운 스트림을 반환한다.
-                                                                          
-            * 즉, T Stream을 R Stream으로 변경한다.
+        * 문법
+          
+            * `Stream<R> map(Function<? super T, ? extends R> mapper)`
+                                                                              
+                * 즉, T Stream을 R Stream으로 변경한다.
+                
+                    * `Stream<T>` -> `Stream<R>`
+        
+        * 예시
+        
+            ```java
+            List<String> words = Arrays.asList("자바스크립트", "파이썬", "자바");
             
-                * `Stream<T>` -> `Stream<R>`
-        
-    * 예시
-    
-        ```java
-        List<String> words = Arrays.asList("자바스크립트", "파이썬", "자바");
-        
-        List<Integer> result = words.stream()
-                .map(word -> word.length())
-                .collect(Collectors.toList());
-        
-        // 결과 : [6, 3, 2]
-        System.out.println(result);
-        ```
+            List<Integer> result = words.stream()
+                    .map(word -> word.length())
+                    .collect(Collectors.toList());
+            
+            // 결과 : [6, 3, 2]
+            System.out.println(result);
+            ```
 
 * (5) flatMap()
 
-    * 문법
+    * `flatMap()` : 중첩된 구조를 한 단계 제거하고 단일 요소 스트림으로 변환해서 반환한다. 
     
-        * `flatMap()` : 중첩된 구조를 한 단계 제거하고 단일 요소 스트림으로 반환한다. 
-    
-            * 즉, 스트림의 스트림(`Stream<Stream<String>>`)을 하나의 스트림으로 변환할 때 사용한다. 
+        * 즉, 스트림의 스트림(`Stream<Stream<String>>`)을 하나의 스트림으로 변환할 때 사용한다. 
             
     * 예시
     
@@ -10747,53 +11180,53 @@ int[][] arr = {
         
         * map(word -> word.split(""))
         
-            * `Stream<String>` -> `Stream<String[]>` : 각 단어를 개별 문자열 배열로 변환
+            * `Stream<String>` -> `Stream<String[]>` (각 단어를 개별 문자를 포함하는 배열로 변환한다.)
         
         * flatMap(arr -> Arrays.stream(arr))
         
-            * `Stream<String[]>` -> "Arrays.stream()" -> `Stream<Stream<String>>` : 각 배열을 별도의 스트림으로 변환
+            * **arr -> Arrays.stream(arr)** : `Stream<String[]>` -> `Stream<Stream<String>>` (스트림 내의 각 배열을 별도의 스트림으로 변환한다.) 
             
-            * `Stream<Stream<String>>` -> "flatMap()" -> `Stream<String>` : 중첩된 구조를 제거하고 하나의 스트림으로 만든다. 
+            * **flatMap()** : `Stream<Stream<String>>` -> `Stream<String>` (중첩된 구조를 제거하고 하나의 스트림으로 만든다.) 
 
 * (6) 스트림의 요소를 소비하지 않고 엿보기 - peek()
 
-    * 문법
+    * `peek()` : 스트림의 각 요소를 반복하며 람다식을 적용한다. (스트림을 소비 X)
     
-        * `Stream<T> peek(Consumer<? super T> action)` : 중간 연산에서 요소 전체를 반복할 때 사용한다. (스트림을 소비 X)
+        * 문법
         
-            * 중간 작업 결과를 확인할 때 사용한다.
-        
-        * `void forEach(Consumer<? super T> action)` : 최종 연산에서 요소 전체를 반복할 때 사용한다. (스트림을 소비 O)
-
-    * 예시
+            * `Stream<T> peek(Consumer<? super T> action)`
     
-         ```java
-         .peek(System.out::println)
-         ```
+        * 예시
+        
+             ```java
+             .peek(System.out::println)
+             ```
+          
+            * 보통, 중간 연산 결과를 확인할 때 사용한다.
 
 #### 9) Optional
  
-* (1) Optional<T> 란?
+* (1) Optional ?
 
-    * `Optional<T>`는 T 타입의 객체를 감싸는 래퍼 클래스이다.
-    
-        * 값이 있을 수도 있고 없을 수도 있는 객체(`null` 일 수도 있는 객체)를 감싸고 있는 래퍼 클래스다. 
+    * `Optional` : null 일 수도 있는 객체를 감싸고 있는 래퍼 클래스다.
+
+        * 값이 있을 수도 있고 없을 수도 있는 객체(null 일 수도 있는 객체)를 감싸고 있는 래퍼 클래스다. 
 
     * Optional를 사용하는 이유
     
-        * `NPE`를 발생 시킬 수 있는 `null`을 직접 다루지 않아도 된다.
+        * ① `NPE`를 발생 시킬 수 있는 `null`을 직접 다루지 않아도 된다.
         
-        * `null` 체크를 직접 하지 않아도 된다. `Optional`에 정의된 메소드를 사용하면 된다. 
+        * ② `null` 체크를 직접하지 않아도 된다. `Optional`에 정의된 메소드를 사용하면 된다. 
         
-        * 해당 변수가 `null` 일 수도 있다는 것을 명시적으로 표현할 수 있다.
+        * ③ 해당 변수가 `null` 일 수도 있다는 것을 명시적으로 표현할 수 있다.
     
             * 클라이언트에게 코드에 명시적으로 빈 값 일 수도 있다는 것을 알려주고, 빈 값인 경우에 대한 처리를 강제한다.
 
     * 주의사항
 
-        * 리턴 타입으로만 사용하는 것을 권장한다.
+        * ① 리턴 타입으로만 사용하는 것을 권장한다.
   
-            * 문법적으로는 필드, 메소드 매개변수 타입, 컬렉션의 요소 타입 등으로 사용 할 수 있다.
+            * 문법적으로는 필드, 메소드의 매개변수 타입, 컬렉션의 요소 타입 등으로 사용할 수 있지만 권장하지는 않는다.
 
                 ```java
                 public class OnlineClass {
@@ -10807,7 +11240,7 @@ int[][] arr = {
                     private Progress progress;
                     
                     public void setProgress(Optional<Progress> progress) {
-                        if(progress != null) // null 체크에 Optional에 값이 있는지도 체크해야 한다. 비효율적이다.
+                        if (progress != null) // null 체크와 Optional에 값이 있는지도 체크해야 한다. 비효율적이다.
                             progress.ifPresent(p -> this.progress = p);
                     }
                 }
@@ -10820,7 +11253,7 @@ int[][] arr = {
                 }
                 ```
 
-        * Optional을 리턴하는 메소드에서는 null을 리턴하지 말자. 리턴할 데이터가 없다면 `Optional.empty()`를 사용하자.
+        * ② Optional을 리턴하는 메소드에서는 null을 리턴하지 말자. 리턴할 데이터가 없다면 `Optional.empty()`를 사용하자.
 
             ```java
             public Optional<Progress> getProgress() {
@@ -10828,33 +11261,33 @@ int[][] arr = {
             }
             ```
     
-        * Optional에 담을 값이 기본형 타입(int, long, double)이면 Boxing과 Unboxing이 발생하지 않는 기본형 타입용 Optional을 사용하자.
+        * ③ Optional에 담을 값이 기본 형(int, long, double)이면 Boxing과 Unboxing이 발생하지 않는 기본형을 위한 Optional을 사용하자.
 
-        * Collection, Map, Stream, Array, Optional은 Optional로 두번 감싸지 말자.
+        * ④ Collection, Map, Stream, Array, Optional은 Optional로 두 번 감싸지 말자.
     
 * (2) Optional 객체 생성하기
 
-    * ① `Optional.of(value)` : null이 아닌 객체를 담고 있는 Optional 객체를 생성한다. 
+    * ① `Optional.of(value)` : null이 아닌 객체를 담고 있는 Optional를 생성한다. 
       
-        * value가 null인 경우, NullPointerException이 발생한다.
+        * value가 null인 경우, `NullPointerException`이 발생한다.
 
             ```java
             String str = "abc";
             Optional<String> optVal = Optional.of(str);
             Optional<String> optVal = Optional.of("abc");
-            OPtional<String> optVal = Optional.of(new String("abc");
+            Optional<String> optVal = Optional.of(new String("abc");
             ```
           
-    * ② `Optional.ofNullable(value)` : null이 될 가능성이 있는 객체를 담고 있는 Optional 객체를 생성한다.
+    * ② `Optional.ofNullable(value)` : null이 될 수 있는 객체를 담고 있는 Optional를 생성한다.
       
-        * value가 null인 경우, 비어있는 Optional 객체를 반환한다.
+        * value가 null인 경우, 비어있는 Optional를 반환한다.
       
             ```java
-            Optional<String> optVal = Optional.of(null); // NPE 발생
+            Optional<String> optVal = Optional.of(null);         // NPE 발생
             Optional<String> optVal = Optional.ofNullable(null); // OK
             ```
           
-    * ③ `Optional.empty()` : 비어 있는 Optional 객체를 생성한다. 
+    * ③ `Optional.empty()` : 비어 있는 Optional를 생성한다. 
 
         ```java
         Optional<String> optVal = Optional.empty(); // 빈 객체로 초기화
@@ -10862,13 +11295,13 @@ int[][] arr = {
 
 * (3) Optional 객체의 값 가져오기
 
-    * ① `get()` : Optional에 있는 값을 가져온다. 
+    * ① `get()` : **Optional에 있는 값을 가져온다.** 
 
         * Optional에 저장된 값이 null이면 예외(`NoSuchElementException`)가 발생한다.
     
             * 이러한 이유로 잘 사용되지 않음
 
-    * ② `orElse()` : Optional에 값이 있다면 가져오고 없다면 인자로 전달한 값을 반환한다.
+    * ② `orElse()` : Optional에 **값이 있다면 가져오고 없다면 인자로 전달한 값을 반환한다.**
     
         ```java
         Optional<String> optVal1 = Optional.of("abc");
@@ -10882,24 +11315,24 @@ int[][] arr = {
 
             * `orElse(...)`에서 `...`는 Optional에 값이 있든 없든 무조건 실행된다. 
 
-                * `Optional`에 값이 있으면 `orElse()`의 인자로서 실행된 값이 무시되고 버려진다.
+                * `Optional`에 값이 있으면 `orElse()`의 인자로서 실행된 값은 무시되고 버려진다.
                 
                 * 따라서 `...`가 새로운 객체를 생성하거나 새로운 연산을 수행하는 경우에는 `orElse()` 대신 `orElseGet()`을 사용해야 한다.
                 
-            * `orElse(...)`는 `...`가 이미 생성되었거나 이미 계산된 값일 때만 사용해야 한다.
+            * 즉, `orElse(...)`는 `...`가 이미 생성되었거나 이미 계산된 값일 때만 사용해야 한다.
     
-    * ③ `orElseGet()` : Optional에 값이 있다면 가져오고 없다면 인자로 전달한 람다식의 결과 값을 반환한다.
+    * ③ `orElseGet()` : Optional에 **값이 있다면 가져오고 없다면 인자로 전달한 람다식의 결과 값을 반환한다.**
       
         * 값이 null이면 인자로 전달된 람다식의 결과 값을 반환한다.
 
-    * ④ `orElseThrow()` : Optional에 값이 있다면 가져오고 없다면 인자로 전달한 예외를 발생시킨다.
+    * ④ `orElseThrow()` : Optional에 **값이 있다면 가져오고 없다면 인자로 전달한 예외를 발생시킨다.**
       
         ```java
         String str3 = optVal2.orElseGet(String::new); // () -> new String()와 동일
         String str4 = optVal2.orElseThrow(NullPointerException::new); // 널이면 예외 발생
         ```
           
-    * ⑤ `isPresent()` : Optional에 값이 있다면 true, 없다면 false를 반환한다.
+    * ⑤ `isPresent()` : Optional에 **값이 있다면 true, 없다면 false를 반환한다.**
               
         ```java
         if(Optional.ofNullable(str).isPresent()){
@@ -10907,17 +11340,17 @@ int[][] arr = {
         }
         ```
     
-    * ⑥ `ifPresent(Consumer<T> block)` : Optional에 값이 있다면 인자로 전달한 람다식을 실행하고 없다면 아무 일도 하지 않는다.
+    * ⑥ `ifPresent(Consumer<T> block)` : Optional에 **값이 있다면 인자로 전달한 람다식을 실행하고 없다면 아무 일도 하지 않는다.**
               
         ```java
         Optional.ofNullable(str).ifPresent(System.out::println);
         ```
 
-    * ⑦ `isEmpty()` : Optional에 값이 없다면 true, 있다면 false를 반환한다.
+    * ⑦ `isEmpty()` : Optional에 **값이 없다면 true, 있다면 false를 반환한다.**
     
         * java 11 부터 제공
 
-    * ⑧ `Optional filter(Predicate)` : Optional에서 조건(Predicate)에 맞는 요소만 걸러낸다.
+    * ⑧ `filter(Predicate)` : Optional에서 **조건(Predicate)에 맞는 요소만 걸러낸다.**
         
         * 인자로 전달한 람다식의 결과가 false이면 비어있는 Optional을 반환한다.
         
@@ -10931,7 +11364,7 @@ int[][] arr = {
              
     * ⑨ Optional에 들어있는 값을 변환하기 
     
-        * `Optional map(Function)` : Optional에 들어있는 값을 변환한다.
+        * `Optional map(Function)` : Optional에 들어있는 값을 다른 값으로 변환한다.
     
         * `Optional flatMap(Function)` : Optional 안에 들어있는 인스턴스가 Optional인 경우에 사용하면 편리하다.
 
@@ -10943,11 +11376,11 @@ int[][] arr = {
 
 * (4) OptionalInt, OptionalLong, OptionalDouble
 
-    * `OptionalInt`, `OptionalLong`, `OptionalDouble`는 기본형 값을 감싸는 래퍼 클래스이다.
+    * `OptionalInt`, `OptionalLong`, `OptionalDouble`는 기본형 값을 감싸는 래퍼 클래스다.
 
         * 기본형 Optional에 저장된 값을 가져올 때 사용하는 메서드는 다음과 같다.
     
-            | 기본형 Optional 클래스 | 값을 반환하는 메서드 |
+            | 기본형 Optional 클래스    |   값을 반환하는 메서드    |
             |:----------------------:|:--------------------:|
             | OptionalInt            | int getAsInt()       |
             | OptionalLong           | long getAsLong()     |
@@ -10967,15 +11400,13 @@ int[][] arr = {
  
 * (1) 루핑(looping)
 
-    * `forEach()`는 스트림의 모든 요소를 반복할 때 사용한다.
+    * `forEach()` : 스트림의 각 요소를 반복하며 람다식을 적용한다. (스트림의 요소를 소비 O)
      
         * `void forEach(Consumer<? super T> action)`
 
-    * `forEachOrdered()`는 스트림의 모든 요소를 반복할 때 사용한다.
+    * `forEachOrdered()` : 스트림의 각 요소를 반복하며 람다식을 적용한다
     
         * 병렬 스트림인 경우에도 스트림 요소의 순서가 보장된다.
-    
-            * `병렬` : 여러 쓰레드가 나눠서 작업을 처리한다. (순서가 보장되지 않음)
     
 * (2) 조건 검사
 
@@ -11114,13 +11545,25 @@ int[][] arr = {
  
 * (1) collect()와 Collectors
 
-    * `collect()`는 스트림의 요소를 수집한다. 매개변수로 `Collector`가 필요하다. 
-    
-        * `R collect(Collector <T, A, R> collector)` : T 요소를 A에 누적한 다음, 결과를 R로 변환해서 반환한다.
+    * `collect()`는 스트림을 다른 형식으로 변환한다. 
+      
+        * 매개변수로 `Collector`가 필요하며 아래와 같은 기능들을 제공한다. 
 
-        * `R collect(Supplier supplier, BiConsumer accumulator, BiConsumer combiner)`
-            
-            * 잘 사용되지 않음
+            * 스트림의 요소들을 컬렉션(List, Set, Map)으로 변환하기 
+        
+            * 스트림의 요소들을 결합하기 (joining)
+        
+            * 스트림의 요소들로 통계를 구하기 (최대, 최소, 평균 값)
+        
+            * 스트림의 요소들을 그룹화와 분할하기 
+
+        * 문법
+          
+            * `R collect(Collector <T, A, R> collector)` : T 요소를 A에 누적한 다음, 결과를 R로 변환해서 반환한다.
+    
+            * `R collect(Supplier supplier, BiConsumer accumulator, BiConsumer combiner)`
+                
+                * 잘 사용되지 않음
                 
     * `reduce()`과 `collect()`의 차이점 
 

@@ -1910,7 +1910,7 @@
             when(memberService.findById(1L)).thenReturn(Optional.of(member));
             when(studyRepository.save(study)).thenReturn(study);
     
-            // When : 뭔가를 하면
+            // When : 뭔가를 할 때
             studyService.createNewStudy(1L, study);
     
             // Then : 결과는 이러할 것이다.
