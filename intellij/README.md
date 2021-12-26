@@ -1,5 +1,7 @@
-# 디버깅 및 자주 사용하는 인텔리제이(IntelliJ) 단축키
+# 인텔리제이(IntelliJ)에서 자주 사용하는 기능 및 단축키
 > 아래 내용은 Mac OS를 기준으로 작성 되었습니다.
+
+## 1. 단축키
 
 * (1) 디버깅
 
@@ -135,3 +137,111 @@
     * ② 키보드에서 Shift를 두 번 눌렀을 때 나타나는 검색 창에서 Registry를 입력한다.
     
     * ③ `compiler.automake.allow.when.app.running`을 체크한다.
+
+## 2. HTTP Client 기능 (Ultimate 버전만 지원)
+
+### 1) 실습 준비
+
+* 아래와 같은 위치에 `client` 디렉토리와 `.http` 확장자(HTTP Request)에 해당하는 파일을 작성한다.
+
+    ![image 2](images/img2.png)
+
+* 컨트롤러와 DTO를 작성한다.
+
+    ```java
+    @RestController
+    public class ProductApiController {
+    
+        @GetMapping("/products")
+        public List<String> getProducts() {
+            return Arrays.asList("컴퓨터", "키보드", "마우스");
+        }
+    
+        @PostMapping("/products")
+        public ProductDto createProduct(@RequestBody ProductDto productDto) {
+            return productDto;
+        }
+    
+    }
+    ```
+    
+    ```java
+    @Getter
+    @NoArgsConstructor
+    public class ProductDto {
+    
+        private String code;
+    
+        private String name;
+    
+    }
+    ```
+
+### 2) 사용 방법
+
+* (1) GET 요청
+
+    * `product-api-test.http` 파일에 GET 요청을 하는 내용을 작성한다.
+
+        ```
+        GET localhost:8080/products
+        ```
+      
+        * 파일 내용의 첫 번째 줄에는 HTTP Method와 요청 URL을 입력한다.
+    
+        * GET 요청의 경우에는 보낼 데이터가 없으므로 한 줄만 입력한다.
+    
+        * [Tip] 각 테스트는 `###`으로 구분한다.
+
+* (2) POST 요청
+
+    * 간단한 POST 요청하기
+
+        * `product-api-test.http` 파일에 POST 요청을 하는 내용을 작성한다.
+    
+            ```
+            POST localhost:8080/products
+            Content-Type: application/json
+            
+            {
+              "code": "ITEM-001",
+              "name": "컴퓨터"
+            }
+            ```
+    
+            * 파일 내용의 첫 번째 줄에는 HTTP Method와 요청 URL을 입력한다.
+    
+            * 파일 내용의 두 번째 줄 부터는 요청 헤더를 입력한다.
+    
+            * 요청 헤더를 모두 입력 했다면 요청 본문 내용을 입력한다. 
+    
+    * JSON 파일을 이용한 POST 요청하기
+
+        * `product-api-test.http` 파일에 POST 요청을 하는 내용을 작성한다.
+        
+            ```
+            POST localhost:8080/products
+            Content-Type: application/json
+            
+            < ./post-product.json
+            ```
+          
+            * 요청 본문 내용으로 `< 파일위치`를 지정하면 해당 파일의 내용을 전송한다.
+
+* (3) 요청 헤더 관련
+
+    * 인증
+
+        ```
+        GET localhost:8080/auth
+        Authorization: DEV
+        ```
+
+    * 쿠키
+
+        ```
+        GET localhost:8080/cookie
+        Cookie: user=test
+        ```
+
+      
