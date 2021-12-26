@@ -3124,15 +3124,17 @@
 
 * (1) 프로젝트 생성하기
 
-    * https://start.spring.io/ 에서 프로젝트를 생성한다.
+    * ① https://start.spring.io/ 에서 프로젝트를 생성한다.
 
         * 의존성 추가 : `Spring Web`, `JPA`, `H2`, `Lombok`, `Validation` (최신 버전인 경우)
 
           ![image 1](images/img1.png)
     
-    * `application.yml` 파일을 생성한다.
+    * ② `application.yml` 파일을 생성한다.
 
         ```yaml
+        # src/main/resources/application.yml
+      
         spring:
           jpa:
             hibernate:
@@ -3176,7 +3178,7 @@
         dependencies {
             ...
             
-            //querydsl 추가
+            // querydsl 추가
             implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
             implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
         
