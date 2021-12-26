@@ -3892,7 +3892,7 @@
         * ① 자신이 사용하는 DB 방언(Dialect) 클래스를 상속받은 다음, 사용자 정의 함수를 등록한다.
 
             ```java
-            public class MyH2Dialect extends H2Dialect{
+            public class MyH2Dialect extends H2Dialect {
           
                 public MyH2Dialect(){
                     registerFunction("group_concat", new StandardFunction("group_concat", StandardBasicTypes.STRING));

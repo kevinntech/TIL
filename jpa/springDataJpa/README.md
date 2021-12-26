@@ -30,16 +30,6 @@
         * 그리고 `@Rollback(false)`를 추가하면 롤백을 하지 않고 커밋을 한다.
         
             * 스프링 데이터 JPA를 공부할 때, 사용하면 편리하다.
-            
-* 쿼리 파라미터 로그 남기기
-
-    * `org.hibernate.type` 옵션은 SQL 실행 파라미터를 로그로 남긴다.
-    
-    * 외부 라이브러리 사용
-    
-        * 스프링 부트를 사용하면 해당 라이브러리만 추가하면 된다.
-        
-            * `implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.7'`
     
 * 자주 사용되는 설정
 
@@ -99,7 +89,7 @@
                 implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.7'
                 ```
 
-                * 쿼리 파라미터를 로그로 남기는 외부 라이브러리는 시스템 자원을 사용하므로, 개발 단계에서는 편하게 사용해도 된다. 
+                * 바인드 파라미터를 로그로 남기는 외부 라이브러리는 시스템 자원을 사용하므로, 개발 단계에서는 편하게 사용해도 된다. 
                   
                 * 하지만 운영 시스템에 적용하려면 꼭 성능 테스트를 하고 사용하는 것이 좋다.
 
@@ -405,6 +395,8 @@
         * `@Param` : 이름 기반 파라미터를 바인딩 할 때 사용한다.
     
             * JPQL에서 이름 기반 파라미터를 명확하게 작성했을 때 `@Param`를 사용한다.
+    
+                * Ex) `:파라미터명`
 
 #### 3) @Query, 리포지토리 메소드에 직접 쿼리 정의하기
 
@@ -473,17 +465,7 @@
                 }
             }
             ```
-    
-            * new 키워드 다음에 패키지 명을 포함한 전체 클래스명을 입력해야 한다.
-
-                * 현재 `MemberDto`는 아래 경로에 존재한다고 가정한다.
-    
-                    * `src/main/java/study/datajpa/dto/MemberDto.java`
-
-                * 소스코드 루트 (`src/main/java/`) 아래에서 부터 패키지 명을 작성하면 된다.
-
-                    * `study.datajpa.dto.MemberDto(m.id, m.username, t.name)`
-
+          
         * ② DTO로 직접 조회하려면 `new` 명령어를 사용한다. 그리고 DTO에 일치하는 생성자가 있어야 한다.
         
             ```java
@@ -492,7 +474,17 @@
                 List<MemberDTO> findMemberDto();
             }
             ```
-           
+          
+            * new 키워드 다음에 패키지 명을 포함한 전체 클래스명을 입력해야 한다.
+            
+                * 현재 `MemberDto`는 아래 경로에 존재한다고 가정한다.
+                
+                    * `src/main/java/study/datajpa/dto/MemberDto.java`
+                
+                * 소스코드 루트 (`src/main/java/`) 아래에서 부터 패키지 명을 작성하면 된다.
+                
+                    * `study.datajpa.dto.MemberDto(m.id, m.username, t.name)`          
+ 
 #### 5) 파라미터 바인딩
 
 * 파라미터 바인딩
@@ -518,35 +510,40 @@
 * 컬렉션 파라미터 바인딩
 
     * `Collection` 타입으로 in 절을 지원한다.
-    
-        ```java
-        // 쿼리 메소드 정의
-        @Query("select m from Member m where m.username in :names")
-        List<Member> findByNames(@Param("names") Collection<String> names);
-        ```
-        
-        ```java
-        // 테스트 코드
-        @Test
-        public void findByNames(){
-            Member m1 = new Member("AAA", 10);
-            Member m2 = new Member("BBB", 20);
-            memberRepository.save(m1);
-            memberRepository.save(m2);
-            
-            List<Member> result = memberRepository.findByNames(Arrays.asList("AAA", "BBB"));
-            
-            for (Member member : result) {
-                System.out.println("member = " + member);
+
+        * 소스코드    
+
+            ```java
+            // 쿼리 메소드 정의
+            @Query("select m from Member m where m.username in :names")
+            List<Member> findByNames(@Param("names") Collection<String> names);
+            ```
+          
+            * `List<String> names`도 가능하다.
+
+        * 테스트 코드        
+
+            ```java
+            @Test
+            public void findByNames(){
+                Member m1 = new Member("AAA", 10);
+                Member m2 = new Member("BBB", 20);
+                memberRepository.save(m1);
+                memberRepository.save(m2);
+                
+                List<Member> result = memberRepository.findByNames(Arrays.asList("AAA", "BBB"));
+                
+                for (Member member : result) {
+                    System.out.println("member = " + member);
+                }
             }
-        }
-        ```
+            ```
 
 #### 6) 반환 타입
 
 * 스프링 데이터 JPA는 `유연한 반환 타입`을 지원한다.
    
-   * 결과가 한 건 이상이면 `컬렉션 인터페이스`를 사용하고, 단건이면 반환 타입을 지정한다.
+   * 결과가 한 건 이상이면 반환 타입으로 `컬렉션 인터페이스`를 사용하고, 단건이면 엔티티 타입(또는 Optional)을 사용한다.
    
         ```java
         List<Member> findListByUsername(String username);           // 컬렉션
@@ -584,7 +581,7 @@
       
       * **정렬 조건** : 이름으로 내림차순
       
-      * **페이징 조건** : 첫 번째 페이지, 페이지 당 보여줄 데이터는 3건
+      * **페이징 조건** : 현재 페이지가 첫 번째 페이지며 페이지 당 보여줄 데이터는 3건
 
         ```java
         @Repository
@@ -620,7 +617,7 @@
 
 * `스프링 데이터 JPA`는 쿼리 메소드에 `페이징`과 `정렬` 기능을 사용 할 수 있도록 **2 가지 파라미터**를 제공한다.
 
-    * ① `org.springframework.data.domain.Sort` : 정렬 기능
+    * ① `org.springframework.data.domain.Sort` : 정렬 기능을 지원한다.
 
         ```java
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
@@ -628,7 +625,7 @@
         String sortProperty = sort.toString().contains("id") ? "id" : "updatedDate";
         ```
 
-    * ② `org.springframework.data.domain.Pageable` : 페이징 기능 (+ 정렬 기능)
+    * ② `org.springframework.data.domain.Pageable` : 페이징과 정렬 기능을 지원한다.
     
         * 내부에 `Sort`를 포함하고 있다.
 
@@ -642,7 +639,7 @@
         
         * 다음 페이지 존재 여부를 확인 할 수 있다. (내부적으로 limit + 1로 조회한다.)
     
-            * 즉, `limit + 1`는 한 페이지에 조회할 데이터 수 + 1을 limit으로 지정한다는 의미다.
+            * 즉, `limit + 1`는 한 페이지에 조회할 데이터 수 (limit) + 1로 조회한다는 의미다.
     
         * 더보기 기능을 구현할 때 사용한다.
     
@@ -697,11 +694,11 @@
       
         * `findByAge()`
         
-            * 두 번째 파라미터 `Pageable`은 인터페이스이며 페이징 처리에 필요한 정보를 제공한다.
+            * 두 번째 파라미터 `Pageable`은 인터페이스이며 페이징 처리에 필요한 정보를 제공할 때 사용한다.
         
             * 그리고 파라미터 타입이 `Pageable`이면 해당 인터페이스를 구현한 `PageRequest` 객체를 전달한다.
         
-        * `PageRequest` : Pageable 인터페이스의 구현체이다.
+        * `PageRequest` : Pageable 인터페이스의 구현체다.
         
         * `PageRequest.of()`
         
