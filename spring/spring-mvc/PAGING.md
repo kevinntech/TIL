@@ -210,14 +210,15 @@
             private void createPageData(Pageable pageable) {
                 // 스프링 데이터 JPA에서 페이지 번호는 0 부터 시작하며 1 부터 시작 하도록 하기 위해서 1을 추가한다.
                 this.currentPage = pageable.getPageNumber() + 1;
-                this.pageSize = pageable.getPageSize();
+                this.pageSize = pageable.getPageSize();     // 한 페이지에 출력될 데이터(게시글) 수
+                int displayPageSize = 10;                   // 한 화면에 출력될 페이지 수
         
-                // 현재 페이지 번호를 기준으로 화면에 출력되어야 하는 마지막 페이지 번호를 먼저 계산한다.
-                int tempEndPage = (int) (Math.ceil(currentPage / (double) pageSize)) * pageSize;
-        
+                // 현재 페이지 번호(currentPage)를 기준으로 화면에 출력되어야 하는 마지막 페이지 번호를 먼저 계산한다.
+                int tempEndPage = (int) (Math.ceil(currentPage / (double) displayPageSize)) * displayPageSize;
+                
                 // 화면의 시작 페이지 번호는 다음과 같이 처리한다. Ex) 20 - 9 = 11
-                startPage = tempEndPage - (pageSize - 1);
-        
+                startPage = tempEndPage - (displayPageSize - 1);
+                
                 // 실제 데이터가 부족한 경우를 위해 마지막 페이지 번호는 전체 데이터의 개수를 이용해서 다시 계산한다.
                 endPage = tempEndPage < totalPages ? tempEndPage : totalPages;
         
@@ -243,15 +244,17 @@
 
             ![image 62](images/img62.png)
     
-            * 현재 페이지 번호(`currentPage`)가 13이며 한 페이지에 출력할 데이터 수(`pageSize`)가 10이라고 가정한다. 
+            * 현재 페이지 번호(`currentPage`)가 13이며 한 화면에 출력될 페이지 수(`displayPageSize`)가 10이라고 가정한다. 
 
                 * ① 먼저, 현재 페이지 번호를 기준으로 화면에 출력되어야 하는 마지막 페이지 번호(`tempEndPage`)를 계산한다.
                   
-                    * `int tempEndPage = (int) (Math.ceil(currentPage / (double) pageSize)) * pageSize;`
+                    * `int tempEndPage = (int) (Math.ceil(currentPage / (double) displayPageSize)) * displayPageSize;`
         
                         * currentPage : 현재 페이지 번호를 의미한다.
-        
-                        * pageSize : 하나의 페이지에 출력할 데이터의 수를 의미한다.
+    
+                        * displayPageSize : 한 화면에 출력할 페이지 수를 의미한다.
+    
+                            * [참고] pageSize : 한 페이지에 출력할 데이터 수를 의미한다.
         
                     * Ex) Math.ceil(13 / 10.0) * 10  = Math.ceil(1.3) * 10 = 20
     
@@ -259,15 +262,15 @@
         
                 * ② 그리고 시작 페이지 번호는 다음과 같이 계산한다.
     
-                    * `startPage = tempEndPage - (pageSize - 1);`
+                    * `startPage = tempEndPage - (displayPageSize - 1);`
     
                         * tempEndPage : (임시) 마지막 페이지 번호
     
-                        * pageSize : 하나의 페이지에 출력할 데이터의 수를 의미한다.
+                        * displayPageSize : 한 화면에 출력할 페이지 수를 의미한다.
     
                     * Ex) 20 - (10 - 1) = 11
         
-                * ③ 마지막 페이지 번호(`tempEndPage`)는 전체 데이터 개수가 부족한 경우가 발생 할 수 있기 때문에 다시 계산할 필요가 있다.
+                * ③ 마지막 페이지 번호(`tempEndPage`)는 전체 데이터 개수가 부족한 경우가 발생할 수 있기 때문에 다시 계산할 필요가 있다.
     
                     * `endPage = tempEndPage < totalPages ? tempEndPage : totalPages;`
                       
@@ -295,7 +298,7 @@
 
 * (6) 뷰 작성하기
 
-    * Header 작성하기 (`templates/fragments/header.html`)
+    * ① Header를 작성한다. (`templates/fragments/header.html`)
 
         ```html
         <!DOCTYPE html>
@@ -341,7 +344,7 @@
         </head>
         ```
 
-    * 페이징 화면 작성하기 (`templates/posts/list.html`)
+    * ② 페이징을 처리하는 게시글 목록 뷰를 작성한다. (`templates/posts/list.html`)
 
         ```html
         <!DOCTYPE html>

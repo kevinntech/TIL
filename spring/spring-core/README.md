@@ -910,7 +910,11 @@ public class AppRunner implements ApplicationRunner {
 
     * 프로파일 설정을 완료하고 AppRunner를 다시 실행 하면 getActiveProfiles()가 test로 출력되는 것을 확인 할 수 있다.
 
-* ③ `@ActiveProfiles` : 테스트 시 활성화할 프로파일을 지정한다.
+* ③ `application.properties`에서 설정
+
+    * `spring.profiles.active=프로파일명`
+
+* ④ `@ActiveProfiles` : 테스트 시 활성화할 프로파일을 지정한다.
 
 #### 6) 프로파일 표현식
 

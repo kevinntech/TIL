@@ -306,10 +306,12 @@
         <span th:text="|hello ${data}|"></span>
         ```
       
-        * `<span th:text="|hello ${data}|">` : 리터럴 대체(Literal substitutions)
+        * 리터럴 대체(Literal substitutions)
     
-            * 리터럴 대체 문법을 사용하면 마치 템플릿을 사용하는 것처럼 편리하다.
-
+            * `|...|` : 문자열을 합칠 수 있다.
+          
+                * Ex) `<span th:text="|hello ${data}|">`
+            
 * (7) 연산
 
     * 타임리프 연산은 자바와 크게 다르지 않다.
