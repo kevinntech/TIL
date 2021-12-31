@@ -31,7 +31,7 @@
 
 * (1) 프로젝트 만들기
 
-    * JUnit5를 시작하는 방법은 다음 2가지가 존재한다.
+    * JUnit5를 시작하는 방법은 다음 2 가지가 존재한다.
 
         * ① 스프링 부트 프로젝트 만들기
 
@@ -39,9 +39,15 @@
 
         * ② Gradle 또는 Maven 프로젝트 만들기
 
-            * 프로젝트를 생성한 다음, Maven을 사용한다면 `pom.xml`에 다음 의존성을 추가한다.
+            * 프로젝트를 생성한 다음, Gradle(`build.gradle`) 또는 Maven(`pom.xml`)에 다음 의존성을 추가한다.
             
+                ```groovy
+                // Gradle
+                testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+                ```
+                
                 ```html
+                <!-- Maven  -->
                 <dependency>
                     <groupId>org.junit.jupiter</groupId>
                     <artifactId>junit-jupiter-engine</artifactId>
@@ -49,7 +55,7 @@
                     <scope>test</scope>
                 </dependency>
                 ```
-              
+          
 * (2) 테스트 코드 작성하기
 
     * ① Study 클래스를 생성한다.
@@ -110,13 +116,13 @@
 
     * `@Test` : 테스트 메소드로 선언한다.
 
-    * `@BeforeAll` : 모든 테스트가 시작 되기 전에 단 한번 실행된다.
+    * `@BeforeAll` : 모든 테스트가 시작되기 전에 단 한번만 실행된다.
     
         * 메서드가 static void인 경우만 사용 가능하다. 
         
         * private이면 안된다.
 
-    * `@AfterAll` : 모든 테스트가 끝난 다음에 단 한번 실행된다.
+    * `@AfterAll` : 모든 테스트가 끝난 다음에 단 한번만 실행된다.
     
         * `@BeforeAll`과 조건 동일
     
@@ -144,46 +150,64 @@
 
 #### 3) 테스트 이름 표기하기
 
-* (1) 기본적인 테스트 이름 표기 방식
+* (1) 테스트 이름 표기하기
 
-    * 테스트를 실행하면 그 결과는 기본적으로 테스트 메소드명으로 표시된다.
-
-    * 아래와 같은 방식으로 테스트 이름을 원하는 이름으로 표시할 수 있다.
-
-* (2) `@DisplayNameGeneration`
-
-    * `@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)`
-
-        * 테스트 이름을 _(언더 스코어)에서 공백 문자로 변경한 이름으로 만든다.
-
-        * 클래스에 사용 가능하다. 
-
-            ```java
-            @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-            class StudyTest {
-            	...
-            }
-            ```
-
-    * `@DisplayName`
-
-        * 테스트 이름을 사용자가 정의한 이름으로 만든다.  
-
-        * @Test이 붙어있는 메서드에 사용한다.
-
-        * `@DisplayNameGeneration` 보다 우선 순위가 높다.
-
-            ```java
-            @Test
-            @DisplayName("스터디 만들기")
-            void create_new_study(){
-              Study study = new Study();
-              assertNotNull(study);
-              System.out.println("create");
-            }
-            ```
-
-* (3) 테스트 실행 방법
+    * IDE에서 표시하는 테스트 이름은 기본적으로 테스트 메소드 이름으로 표시된다.
+    
+    * 테스트 이름을 변경하고 싶다면 다음과 같은 방식을 사용할 수 있다.
+    
+        * `@DisplayNameGeneration` : IDE에서 표시하는 테스트 이름에 대한 생성기를 정의할 때 사용한다.
+        
+            * 테스트 메소드명을 언더 스코어(`_`)를 이용해서 작성 했다면 테스트 이름도 동일하게 표시될 것이다.
+    
+                ```java
+                class StudyTest {
+                
+                    @Test
+                    void create_new_study() {
+                        Study study = new Study();
+                        assertNotNull(study);
+                        System.out.println("create");
+                    }
+                    
+                    @Test
+                    void create_new_study_again() {
+                        System.out.println("create1");
+                    }
+                  
+                }
+                ```
+    
+            * `@DisplayNameGeneration`를 이용하면 언더 스코어(`_`)를 공백 문자로 변경해서 테스트 이름으로 표시할 수 있다.
+    
+                ```java
+                @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+                class StudyTest {
+                
+                    // ...
+                
+                }
+                ```
+    
+                * `DisplayNameGenerator.ReplaceUnderscores.class` : 테스트 이름을 _(언더 스코어)에서 공백 문자로 변경한 이름으로 만든다.
+    
+        * `@DisplayName` : IDE에서 표시하는 테스트 이름을 지정한다.
+        
+            * `@Test`이 붙어있는 메서드에 사용한다.
+            
+                ```java
+                @Test
+                @DisplayName("스터디 만들기")
+                void create_new_study() {
+                    Study study = new Study();
+                    assertNotNull(study);
+                    System.out.println("create");
+                }
+                ```
+            
+            * `@DisplayNameGeneration` 보다 우선 순위가 높다.
+    
+* (2) 테스트 실행 방법
 
     * 테스트 메소드에 포커스를 두고 테스트를 실행하면 해당 메소드만 실행한다.
 
@@ -1325,17 +1349,21 @@
 
 #### 1) Mockito 소개
 
-* (1) `Mock` : 진짜 객체와 비슷하게 동작하지만 프로그래머가 직접 그 객체의 행동을 관리하는 객체다.
+* (1) Mock
+  
+    * `Mock` : 진짜 객체와 비슷하게 동작하지만 프로그래머가 직접 그 객체의 행동을 관리하는 객체다.
 
-* (2) `Mockito` : Java Mocking Framework다.
+* (2) Mockito
+  
+    * `Mockito` : Java Mocking Framework다.
 
-    * Mock 객체를 만들고 어떻게 동작해야 하는지를 관리하며 검증할 수 있는 방법을 제공한다.
-    
-    * `Mockito`은 테스트를 작성하는 50% 이상의 자바 개발자가 사용하는 Mock 프레임워크이다.
-    
-        * www.jetbrains.com/lp/devecosystem-2019/java/
+        * Mock 객체를 만들고 어떻게 동작해야 하는지를 관리하며 검증할 수 있는 방법을 제공한다.
         
-    * 대체재: EasyMock , JMock
+        * `Mockito`은 테스트를 작성하는 50% 이상의 자바 개발자가 사용하는 Mock 프레임워크다.
+        
+            * www.jetbrains.com/lp/devecosystem-2019/java/
+            
+        * 대체재 : EasyMock , JMock
 
 * (3) Mockito 사용 이유
 
@@ -1347,17 +1375,23 @@
 
     * 일부 개발자들은 단위 테스트의 단위를 클래스 또는 객체(Object) 하나로 정하는 경우가 있다.
    
-    * "단위 테스트의 단위를 행동으로 보고 행동과 연관된 객체들은 모두 테스트가 되어도 상관이 없다"고 볼 수도 있다.
+    * "단위 테스트의 단위를 행위로 보고 행위와 연관된 객체들은 모두 테스트가 되어도 상관이 없다"고 볼 수도 있다.
     
         * https://martinfowler.com/bliki/UnitTest.html
+
+        * 즉, 컨트롤러 호출을 하나의 행위로 보고 행위와 연관된 객체들도 하나의 단위로 본다.
     
-    * Ex) 컨트롤러 호출을 하나의 행동으로 보고 행동과 연관된 객체들도 하나의 단위로 본다.
+    * 강사님은 "이미 구현되어 있는 클래스는 Mocking을 할 필요가 없으며 내가 컨트롤 할 수 없는 외부 서비스는 Mocking을 하는 것이 좋다"고 하셨음.
+
+        * 예를 들어, 내가 작성한 StudyController, StudyService, StudyRepository가 있는 상황에서 StudyController만 고립시켜서 Unit Test를 하고
+          
+        * 나머지 연관된 객체(StudyService, StudyRepository)를 Mock으로 만드는 것은 부정적이다. (이렇게 해도 상관은 없음)
     
 #### 2) Mockito 시작하기
 
 * (1) 프로젝트 만들기
 
-    * Mockito를 시작하는 방법은 다음 2가지가 존재한다.
+    * Mockito를 시작하는 방법은 다음 2 가지가 존재한다.
 
         * ① 스프링 부트 프로젝트 만들기
 
@@ -1385,7 +1419,7 @@
               
                 * `mockito-core` : Mockito에서 제공하는 기본적인 기능이 들어있다. 
                 
-                * `mockito-junit-jupiter` : JUnit 5에서 Mockito를 연동해서 사용 할 수 있도록 한다. 
+                * `mockito-junit-jupiter` : JUnit 5에서 Mockito를 연동해서 사용할 수 있도록 한다. 
               
 * (2) Mock을 활용한 테스트 작성 방법
 
@@ -1417,7 +1451,7 @@
                 this.repository = repository;
             }
         
-            public Study createNewStudy(Long memberId, Study study){
+            public Study createNewStudy(Long memberId, Study study) {
                 Optional<Member> member = memberService.findById(memberId);
                 study.setOwner(member.orElseThrow(() -> new IllegalArgumentException("Member doesn't exist for id : " + memberId)));
                 return repository.save(study);
@@ -1427,8 +1461,6 @@
         ```
       
     * 이때, StudyService 객체를 만드는 테스트를 작성한다면 아래 주석으로 표시한 부분에서 더 이상 진행 할 수 없다.
-    
-    * 그 이유는 `StudyService` 생성자는 `MemberService`와 `StudyRepository`의 구현체가 필요한데 작성된 구현체가 없기 때문이다.
     
         ```java
         class StudyServiceTest {
@@ -1440,9 +1472,11 @@
         
         }
         ```
-      
-    * 이러한 경우에 `Mock`을 사용 할 수 있다.
-      
+
+        * 그 이유는 `StudyService`의 생성자는 `MemberService`와 `StudyRepository`의 구현체가 필요한데 둘 다 인터페이스만 있으며 작성된 구현체는 없기 때문이다.
+        
+        * 이러한 경우에 `Mock`을 사용할 수 있다.    
+
 * (2) Mock 객체 만들기
 
     * ① `Mockito.mock()` 메소드로 만드는 방법
@@ -1469,7 +1503,7 @@
             @ExtendWith(MockitoExtension.class)
             ```
                 
-        * `@Mock`를 필드, 메소드의 매개변수에 사용한다.
+        * `@Mock`는 필드와 메소드의 매개변수에 사용할 수 있다.
         
             * 필드
             
@@ -1484,7 +1518,7 @@
                     StudyRepository studyRepository;
                 
                     @Test
-                    void createStudyService(){
+                    void createStudyService() {
                         StudyService studyService = new StudyService(memberService, studyRepository);
                 
                         assertNotNull(studyService);
@@ -1517,7 +1551,7 @@
 
         * ① 리턴 값이 있는 메소드를 호출하면 기본적으로 `Null`을 리턴한다.
     
-        * ② 메소드의 리턴 타입이 `Optional` 타입인 경우, 비어있는 Optional(`Optional.empty`)를 리턴한다.
+        * ② 메소드의 리턴 타입이 `Optional`인 경우, 비어있는 Optional(`Optional.empty`)를 리턴한다.
         
             ```java
             @ExtendWith(MockitoExtension.class)
@@ -1529,7 +1563,7 @@
                                         
                     // memberService의 findById()로 id가 1번인 Member를 가져온다.
                     Optional<Member> optional = memberService.findById(1L); 
-                    assertNull(optional);
+                    assertEquals(optional, Optional.empty());
             
                 }
             
@@ -1566,51 +1600,7 @@
             * `when()` : Mock 객체에 대해 특정 조건을 지정할 때 사용한다.
     
                 * 주로, 특정 메소드 호출 시 특정한 값을 반환하도록 지정한다.
-
-                * `Stubbing`을 할 때, 인자 매칭 처리 (Argument matchers)는 다음과 같이 할 수 있다.
-                
-                    * ① `any()` : 인자 값이 임의의 값에 일치하도록 한다.
-                    
-                        * 메소드의 인자 값으로 어떤 값이든 가능하다는 것을 의미한다.
-                
-                            ```java
-                            @ExtendWith(MockitoExtension.class)
-                            class StudyServiceTest {
-                            
-                                @Mock
-                                MemberService memberService;
-                            
-                                @Mock StudyRepository studyRepository;
-                            
-                                @Test
-                                void createNewStudy(@Mock MemberService memberService,
-                                                    @Mock StudyRepository studyRepository){
-                                    StudyService studyService = new StudyService(memberService, studyRepository);
-                                    assertNotNull(studyService);
-                            
-                                    Member member = new Member();
-                                    member.setId(1L);
-                                    member.setEmail("keesun@email.com");
-                            
-                                    /*
-                                    * [Mock 객체에 대한 Stubbing]
-                                    * memberService의 findById()의 인자 값으로 어떤 값을 전달해서 호출하더라도 Optional로 감싼 Member 객체를 리턴해라
-                                    * */
-                                    when(memberService.findById(any())).thenReturn(Optional.of(member));
-                            
-                                    assertEquals("keesun@email.com" , memberService.findById(1L).get().getEmail()); // 테스트가 통과되는 것을 확인 할 수 있다.
-                                    assertEquals("keesun@email.com" , memberService.findById(2L).get().getEmail()); // 테스트가 통과되는 것을 확인 할 수 있다.
-                                }
-                            
-                            }
-                            ```
-                
-                    * ② `anyInt()`, `anyShort()`, `anyLong()`, `anyByte()`, `anyChar()`, `anyDouble()`, `anyFloat()`, `anyBoolean()`
-                
-                        * 인자 값이 어떠한 XXX 값에 일치하도록 함 
-                       
-                        * 예를 들어, `anyInt()`는 메소드의 인자 값으로 어떤 int 값이든 가능하다는 것을 의미한다.
-
+    
             * `thenReturn()` : 특정 메소드 호출 시, 리턴하는 값을 지정한다.
             
                 ```java
@@ -1633,16 +1623,15 @@
                         when(memberService.findById(1L)).thenReturn(Optional.of(member));
                 
                         Study study = new Study(10, "java");
-                
                         Optional<Member> findById = memberService.findById(1L);
                         assertEquals("keesun@email.com" , findById.get().getEmail()); // 테스트가 통과되는 것을 확인 할 수 있다.
-                
+                        //studyService.createNewStudy(1L, study);
                     }
                 
                 }
                 ```
                                          
-            * `thenThrow()` : 특정 메소드 호출 시, 예외를 발생 시킨다. (메소드의 리턴 타입이 있는 경우에 사용 가능)
+            * `thenThrow()` : 리턴 값이 있는 메소드가 호출된 경우 예외를 발생 시킨다.
             
                ```java
                // memberService의 findById()를 호출할 때, 인자로 1L을 전달하면 예외를 발생시킨다.
@@ -1679,8 +1668,8 @@
            
                    /* 다음과 같이 행동 하도록 Stubbing을 한다.
                       findById()가 첫 번째 호출 될 때는 Optional<Member>를 리턴한다.
-                            " "  두 번째 호출 될 때는 RuntimeException 예외를 발생시킨다.   
-                            " "  세 번째 호출 될 때는 Optional.empty를 리턴한다.        */
+                            " "    두 번째 호출 될 때는 RuntimeException 예외를 발생시킨다.   
+                            " "    세 번째 호출 될 때는 Optional.empty를 리턴한다.        */
                    when(memberService.findById(any()))
                            .thenReturn(Optional.of(member))
                            .thenThrow(new RuntimeException())
@@ -1702,7 +1691,53 @@
            
            }
            ```
-          
+
+* (3) 인자 매칭 처리 (Argument matchers)
+
+    * `Stubbing`을 할 때, 인자 매칭 처리를 다음과 같이 할 수 있다.
+    
+        * ① `any()` : 인자 값이 임의의 값에 일치하도록 한다.
+        
+            * 메소드의 인자 값으로 어떤 값이든 가능하다는 것을 의미한다.
+    
+                ```java
+                @ExtendWith(MockitoExtension.class)
+                class StudyServiceTest {
+                
+                    @Mock
+                    MemberService memberService;
+                
+                    @Mock StudyRepository studyRepository;
+                
+                    @Test
+                    void createNewStudy(@Mock MemberService memberService,
+                                        @Mock StudyRepository studyRepository){
+                        StudyService studyService = new StudyService(memberService, studyRepository);
+                        assertNotNull(studyService);
+                
+                        Member member = new Member();
+                        member.setId(1L);
+                        member.setEmail("keesun@email.com");
+                
+                        /*
+                        * [Mock 객체에 대한 Stubbing]
+                        * memberService의 findById()의 인자 값으로 어떤 값을 전달해서 호출하더라도 Optional로 감싼 Member 객체를 리턴해라
+                        * */
+                        when(memberService.findById(any())).thenReturn(Optional.of(member));
+                
+                        assertEquals("keesun@email.com" , memberService.findById(1L).get().getEmail()); // 테스트가 통과되는 것을 확인 할 수 있다.
+                        assertEquals("keesun@email.com" , memberService.findById(2L).get().getEmail()); // 테스트가 통과되는 것을 확인 할 수 있다.
+                    }
+                
+                }
+                ```
+    
+        * ② `anyInt()`, `anyShort()`, `anyLong()`, `anyByte()`, `anyChar()`, `anyDouble()`, `anyFloat()`, `anyBoolean()`
+    
+            * 인자 값이 어떠한 XXX 값에 일치하도록 함 
+           
+            * 예를 들어, `anyInt()`는 메소드의 인자 값으로 어떤 int 값이든 가능하다는 것을 의미한다.          
+
 #### 5) Mock 객체 Stubbing 연습 문제
 
 * TODO에 해당하는 작업을 코딩으로 채워 넣으세요.
@@ -1743,7 +1778,9 @@
 
 * Mock 객체의 행동을 검증한다.
 
-* Mock 객체가 어떻게 사용이 됐는지 확인할 수 있다.
+    * Mock 객체가 어떻게 사용이 됐는지 확인할 수 있다.
+    
+* 예시는 다음과 같다.
    
     * ① 특정 메소드가 특정 매개변수로 몇 번 호출 되었는지 또는 전혀 호출되지 않았는지를 검증한다.
     
@@ -1851,6 +1888,8 @@
         verify(mock, timeout(100)).someMethod();
         verify(mock, timeout(100).times(1)).someMethod();
         ```
+        
+        * JUnit에서 제공하는 API를 사용해도 된다.
      
 #### 7) Mockito BDD 스타일 API
 
@@ -1858,7 +1897,7 @@
    
     * `BDD`는 애플리케이션이 어떻게 "행동"해야 하는지에 대한 공통된 이해를 구성하는 방법이다.
     
-    * `TDD`에서 창안했다.
+    * `TDD`에서 파생된 개발 방법론이다.
     
 * (2) 행동에 대한 스펙
    
@@ -1896,7 +1935,7 @@
     
         @Test
         void createNewStudy(@Mock MemberService memberService,
-                            @Mock StudyRepository studyRepository){
+                            @Mock StudyRepository studyRepository) {
             // Given : 이러한 상황이 주어지면
             StudyService studyService = new StudyService(memberService, studyRepository);
             assertNotNull(studyService);
@@ -1930,21 +1969,21 @@
 
     * `Mockito`는 `BddMockito`라는 클래스를 통해 BDD 스타일의 API를 제공한다. 
     
-    * 앞서 살펴본 코드에서 `when()`, `verify()`는 BDD 스타일에 어울리지 않는다. 그러므로 다음과 같이 변경하자.
-    
-        * ① `when()`를 `given()`으로 변경한다.
+        * 앞서 살펴본 코드에서 `when()`, `verify()`는 BDD 스타일에 어울리지 않는다. 그러므로 다음과 같이 변경하자.
         
-            ```java
-            given(memberService.findById(1L)).willReturn(Optional.of(member));
-            given(studyRepository.save(study)).willReturn(study);
-            ```
-          
-        * ② `verify()`를 `then()`으로 변경한다.
-        
-            ```java
-            then(memberService).should(times(1)).notify(study);
-            then(memberService).shouldHaveNoMoreInteractions();
-            ```
+            * ① `when()`는 `given()`으로 변경한다.
+            
+                ```java
+                given(memberService.findById(1L)).willReturn(Optional.of(member));
+                given(studyRepository.save(study)).willReturn(study);
+                ```
+              
+            * ② `verify()`는 `then()`으로 변경한다.
+            
+                ```java
+                then(memberService).should(times(1)).notify(study);
+                then(memberService).shouldHaveNoMoreInteractions();
+                ```
 
 #### 8) Mockito 연습 문제
 
@@ -2207,7 +2246,30 @@
                       readFile(new File("pom.xml"));
                     }).doesNotThrowAnyException(); 
                     ```
-                  
+
+                * `catchThrowable()` : 예외가 발생할 수 있는 문장을 람다식으로 전달하면 예외를 처리한 다음, 발생한 예외를 Throwable으로 리턴한다.
+                
+                    ```java
+                    @ExtendWith(MockitoExtension.class)
+                    class StudyServiceTest {
+                    
+                        @Test
+                        void createNewStudy(@Mock MemberService memberService,
+                                            @Mock StudyRepository studyRepository) {
+                            // Given
+                            //  - memberService의 findById()를 호출할 때, 인자로 1L을 전달하면 예외를 발생시킨다.
+                            given(memberService.findById(1L)).willThrow(new RuntimeException());
+                    
+                            // When
+                            Throwable thrown = catchThrowable(() -> memberService.findById(1L));
+                    
+                            // Then
+                            assertThat(thrown).isInstanceOf(RuntimeException.class);
+                        }
+                    
+                    }
+                    ```
+
             * 여러 검증을 한 번에 수행하기
             
                 * `SoftAssertions` : 여러 검증을 한 번에 수행할 때 사용한다. (JUnit 5의 `assertAll()`과 유사하다)

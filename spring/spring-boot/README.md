@@ -1998,192 +1998,213 @@
 
     * `@SpringBootTest`
 
-        * `@SpringBootTest`는 Test용 ApplicationContext를 만든 다음, Spring Main Application(@SpringBootApplication)를 기준으로 하위의 모든 Bean을 스캔해서 등록한다.
+        * `@SpringBootTest` : 통합 테스트용 애노테이션이다. 
 
-        * 그리고 `@MockBean`으로 정의된 빈만 Mock 객체로 교체한다.
+            * 특징          
 
-            * 즉, 스프링 부트의 통합 테스트 애노테이션이며 테스트에 필요한 모든 의존성을 제공한다.
+                * `@SpringBootApplication`를 기준으로 하위의 모든 Bean을 스캔해서 테스트용 ApplicationContext에 등록한다.
     
-                * JUnit 4에서는 `@RunWith(SpringRunner.class)`와 같이 사용해야 한다.
-                
-                * JUnit 5에서는 `@SpringBootTest` 안에 `@ExtendWith(SpringExtension.class)`가 포함되어 때문에 생략 가능하다.
-        
-    * `webEnvironment`의 타입
+                    * 그리고 `@MockBean`으로 정의된 빈만 Mock 객체로 교체한다.
     
-        * `MOCK` : 내장 서블릿 컨테이너를 구동 하지 않고 서블릿 컨테이너를 Mocking 한 것을 실행한다. (기본 값)
+                * 참고 사항은 다음과 같다. 
         
-            * `webEnvironment`가 Mock 타입이면 실제 서블릿 컨테이너를 구동 하지 않고 서블릿 컨테이너를 Mocking 한 것을 실행한다.
-
-            * 이 때는 `MockMVC`라는 클라이언트를 사용해야 한다.
-        
-        * `RANDOM_PORT`, `DEFINED_PORT` : 내장 서블릿 컨테이너를 구동한다.
-        
-            * `webEnvironment`가 `RANDOM_PORT` 또는 `DEFINED_PORT` 타입이면 해당 포트로 내장 서블릿 컨테이너를 구동한다.
-            
-            * 이 때는 `MockMvc`가 아닌 `TestRestTemplate` 이나 `WebTestClient`라는 클라이언트를 사용해야 한다.
+                    * JUnit 4에서는 `@RunWith(SpringRunner.class)`와 같이 사용해야 한다.
                     
-        * `NONE` : 서블릿 환경을 제공하지 않는다.
+                    * JUnit 5에서는 `@SpringBootTest` 안에 `@ExtendWith(SpringExtension.class)`가 포함되기 때문에 생략 가능하다.
 
-    * `MockMvc` 사용
-    
-        * `MockMVC` 라는 클라이언트를 사용하려면 `@AutoConfigureMockMvc`를 붙여주고, `MockMVC`를 주입 받으면 된다.          
-    
-            ```java
-            @RunWith(SpringRunner.class)
-            @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-            @AutoConfigureMockMvc
-            public class SampleControllerTest {
-            
-                @Autowired
-                MockMvc mockMvc; // MockMvc를 주입 받는다.
-            
-                @Test
-                public void hello() throws Exception {
-                    mockMvc.perform(get("/hello"))      // MockMvc를 통해 "/hello"로 HTTP GET 요청을 한다.
-                            .andExpect(status().isOk()) // status 코드가 200 OK
-                            .andExpect(content().string("hello kevin")) // 컨텐츠가 hello kevin 이길 바란다.
-                            .andDo(print()); // 요청온 것을 출력한다.
-                }
-            
-            }
-            ```
-          
-            * ① `@RunWith(SpringRunner.class)`
-            
-                * JUnit에서 기본적으로 내장된 Runner가 아닌 스프링 Runner를 사용 하도록 한다.
-        
-            * ② `mockMvc.perform(get("/hello"))`
-            
-                * MockMvc를 통해 해당 주소로 HTTP GET 요청을 한다.
+                    * `@Transactional` : 테스트 코드의 데이터베이스 정보가 자동으로 Rollback 된다.                
 
-            * ③ `.andExpect(status().isOk())`
-            
-                * `mockMvc.perform()`의 결과를 검증한다.
-                
-                * HTTP Header의 상태(Status)가 200 OK 인지 검증한다.
+            * 주요 옵션
         
-            * ④ `.andExpect(content().string("hello kevin"))`
-            
-                * `mockMvc.perform()`의 결과를 검증한다.
-                
-                * 응답 본문의 내용을 검증한다.
-        
-    * `TestRestTemplate` 사용
-     
-        * 다음과 같이 webEnvironment를 RANDOM_PORT 타입으로 지정하고 `TestRestTemplate`를 주입 받아서 사용한다.
-        
-            ```java
-            @RunWith(SpringRunner.class)
-            @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-            public class SampleControllerTest {
-            
-                @Autowired
-                TestRestTemplate testRestTemplate;
-            
-                @Test
-                public void hello() throws Exception {
-                    String result = testRestTemplate.getForObject("/hello", String.class); // 
-                    assertThat(result).isEqualTo("hello kevin");
-                }
-            
-            }
-            ```
-          
-            * 위의 코드는 테스트용 서블릿 컨테이너가 랜덤 포트로 구동된다.
-        
-            * `getForObject(url, responsetype)`는 해당 URL에 HTTP GET 방식으로 요청하여 결과를 `responsetype` 타입으로 받는다.
-         
-        * 만약 `Service` 단까지 가지 않고 `Controller`만 테스트 하고 싶다면 어떻게 해야할까?
-       
-            ```java
-            @RunWith(SpringRunner.class)
-            @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-            public class SampleControllerTest {
-            
-                @Autowired
-                TestRestTemplate testRestTemplate;
-            
-                @MockBean
-                SampleService mockSampleService;
-            
-                @Test
-                public void hello() throws Exception {
-                    when(mockSampleService.getName()).thenReturn("kevin");
-                    String result = testRestTemplate.getForObject("/hello", String.class);
-                    assertThat(result).isEqualTo("hello kevin");
-            
-                }
-            
-            }
-            ```
-          
-          * `@MockBean`으로 컨트롤러가 사용하는 서비스(`SampleService`) 타입의 Mock 객체를 정의한다. (Mocking)
-        
-          * 그러면 `SampleController`가 사용하는 `ApplicationContext`에 있는 `SampleService` 빈을 Mock 객체(`mockSampleService`)로 교체한다.
-        
-          * 그래서 원본이 아닌 Mock 객체를 사용해서 테스트 할 수 있다.
-          
-    * `WebTestClient` 사용
-     
-        * `WebTestClient`를 사용하면 비동기적으로 클라이언트 요청을 할 수 있다.
-        
-            * ① 먼저, `pom.xml`에 `WebFlux` 의존성을 추가한다.
-            
-                ```html
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-webflux</artifactId>
-                </dependency>
-                ```
-              
-            * ② 코드를 다음과 같이 수정한다.
-            
-                ```java
-                @RunWith(SpringRunner.class)
-                @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-                public class SampleControllerTest {
-                
-                    @Autowired
-                    WebTestClient webTestClient;
-                
-                    @MockBean
-                    SampleService mockSampleService;
-                
-                    @Test
-                    public void hello() throws Exception {
-                        when(mockSampleService.getName()).thenReturn("kevin");
-                
-                        webTestClient.get().uri("/hello").exchange() // 요청
-                                .expectStatus().isOk()
-                                .expectBody(String.class).isEqualTo("hello kevin");
-                    }
-                
-                }
-                ```
-              
-                * `@SpringBootTest` 애노테이션은 스프링 메인 애플리케이션(`@SpringBootApplication`)을 찾아가서 
-                
-                * 해당 패키지를 기준으로 하위에 있는 모든 빈(Bean)을 스캔한 다음, 테스트용 `ApplicationContext`를 만들면서 스캔한 모든 빈을 등록해주고, 
-                
-                * `@MockBean`을 찾아서 해당 빈(Bean)만 Mock 객체로 교체한다. 그리고 `@MockBean`는 @Test 마다 자동으로 리셋된다.
-            
-    * 슬라이스 테스트 (단위 테스트)
+                * `webEnvironment`
     
-        * 단위 테스트를 위한 `@JsonTest`, `@WebMvcTest`, `@WebFluxTest`, `@DataJpaTest` 애노테이션을 제공한다.
+                    * 종류
+                
+                        * `MOCK` : 실제 내장 서블릿 컨테이너를 구동하지 않고 서블릿 컨테이너를 Mocking 한 것을 구동한다. (기본 값)
         
-            * 수많은 빈들을 등록하는 것이 아닌 내가 테스트 하고자 하는 빈만 등록하고 싶을 때, 해당 애노테이션을 사용한다.
-            
-            * 즉, 레이어 별로 잘라서 테스트를 하고 싶을 때 사용된다. (레이어 별로 빈이 등록된다.)
-                     
+                            * `MockMVC`라는 클라이언트를 사용해야 한다.
+                        
+                        * `RANDOM_PORT`, `DEFINED_PORT` : 실제 내장 서블릿 컨테이너를 구동한다.
+    
+                            * 즉, RANDOM_PORT이면 랜덤한 포트 번호, DEFINED_PORT이면 직접 지정한 포트 번호로 내장 서블릿 컨테이너를 구동한다.                    
+        
+                            * `TestRestTemplate` 또는 `WebTestClient`라는 클라이언트를 사용해야 한다.
+                                    
+                        * `NONE` : 서블릿 환경을 제공하지 않는다. (웹 사용 X)
+    
+                    * 예시
+
+                        * MockMvc 사용하기
+                        
+                            * 클래스 레벨에 `@AutoConfigureMockMvc`를 붙이고 `MockMVC`를 주입 받아서 사용한다.          
+                        
+                                ```java
+                                @RunWith(SpringRunner.class)
+                                @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+                                @AutoConfigureMockMvc
+                                public class SampleControllerTest {
+                                
+                                    @Autowired
+                                    MockMvc mockMvc; // MockMvc를 주입 받는다.
+                                
+                                    @Test
+                                    public void hello() throws Exception {
+                                        mockMvc.perform(get("/hello"))      // MockMvc를 통해 "/hello"로 HTTP GET 요청을 한다.
+                                                .andExpect(status().isOk()) // status 코드가 200 OK
+                                                .andExpect(content().string("hello kevin")) // 컨텐츠가 hello kevin 이길 바란다.
+                                                .andDo(print()); // 요청온 것을 출력한다.
+                                    }
+                                
+                                }
+                                ```
+                              
+                                * ① `@RunWith(SpringRunner.class)`
+                                
+                                    * JUnit에서 기본적으로 내장된 Runner가 아닌 스프링 Runner를 사용 하도록 한다.
+                            
+                                * ② `mockMvc.perform(get("/hello"))`
+                                
+                                    * MockMvc를 통해 해당 주소로 HTTP GET 요청을 한다.
+                    
+                                * ③ `.andExpect(status().isOk())`
+                                
+                                    * `mockMvc.perform()`의 결과를 검증한다.
+                                    
+                                    * HTTP Header의 상태(Status)가 200 OK 인지 검증한다.
+                            
+                                * ④ `.andExpect(content().string("hello kevin"))`
+                                
+                                    * `mockMvc.perform()`의 결과를 검증한다.
+                                    
+                                    * 응답 본문의 내용을 검증한다.
+                            
+                        * TestRestTemplate 사용하기
+                         
+                            * webEnvironment를 RANDOM_PORT로 지정한 다음, `TestRestTemplate`를 주입 받아서 사용한다.
+                            
+                                ```java
+                                @RunWith(SpringRunner.class)
+                                @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+                                public class SampleControllerTest {
+                                
+                                    @Autowired
+                                    TestRestTemplate testRestTemplate;
+                                
+                                    @Test
+                                    public void hello() throws Exception {
+                                        String result = testRestTemplate.getForObject("/hello", String.class); // 
+                                        assertThat(result).isEqualTo("hello kevin");
+                                    }
+                                
+                                }
+                                ```
+                              
+                                * 위의 코드는 실제 내장 서블릿 컨테이너가 랜덤 포트로 구동된다.
+                            
+                                * `getForObject(url, responsetype)` : 해당 URL에 HTTP GET 방식으로 요청한 다음, 결과를 `responsetype` 타입으로 받는다.
+    
+                                    * 예제에서는 String 타입으로 결과를 받는다.
+                             
+                            * 만약 `Service` 단까지 가지 않고 `Controller`만 테스트 하고 싶다면 어떻게 해야할까?
+                           
+                                ```java
+                                @RunWith(SpringRunner.class)
+                                @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+                                public class SampleControllerTest {
+                                
+                                    @Autowired
+                                    TestRestTemplate testRestTemplate;
+                                
+                                    @MockBean
+                                    SampleService mockSampleService;
+                                
+                                    @Test
+                                    public void hello() throws Exception {
+                                        when(mockSampleService.getName()).thenReturn("kevin");
+                                        String result = testRestTemplate.getForObject("/hello", String.class);
+                                        assertThat(result).isEqualTo("hello kevin");
+                                    }
+                                
+                                }
+                                ```
+
+                                * `@MockBean` : Mock 객체를 만들어서 ApplicationContext에 등록한다.
+                                  
+                                    * 만약 ApplicationContext 내에서 동일한 타입의 Bean이 존재할 경우에는 MockBean으로 교체한다. 
+                                      
+                                    * 그리고 `@MockBean`는 테스트 메소드(@Test) 마다 자동으로 리셋된다.                             
+
+                                    * 위의 예제에서는 컨트롤러가 사용하는 서비스(`SampleService`)를 Mock 객체로 만든 다음, ApplicationContext에 있는 해당 서비스 빈을 Mock 객체(`mockSampleService`)로 교체한다.
+
+                        * WebTestClient 사용하기
+                         
+                            * `WebTestClient`를 사용하면 비동기적으로 클라이언트 요청을 할 수 있다.
+                            
+                                * ① 먼저, `pom.xml`에 `WebFlux` 의존성을 추가한다.
+                                
+                                    ```html
+                                    <dependency>
+                                        <groupId>org.springframework.boot</groupId>
+                                        <artifactId>spring-boot-starter-webflux</artifactId>
+                                    </dependency>
+                                    ```
+                                  
+                                * ② 코드를 다음과 같이 수정한다.
+                                
+                                    ```java
+                                    @RunWith(SpringRunner.class)
+                                    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+                                    public class SampleControllerTest {
+                                    
+                                        @Autowired
+                                        WebTestClient webTestClient;
+                                    
+                                        @MockBean
+                                        SampleService mockSampleService;
+                                    
+                                        @Test
+                                        public void hello() throws Exception {
+                                            when(mockSampleService.getName()).thenReturn("kevin");
+                                    
+                                            webTestClient.get().uri("/hello").exchange() // 요청
+                                                    .expectStatus().isOk()
+                                                    .expectBody(String.class).isEqualTo("hello kevin");
+                                        }
+                                    
+                                    }
+                                    ```
+                                  
+                                    * `@SpringBootTest` 애노테이션은 스프링 메인 애플리케이션(`@SpringBootApplication`)을 찾아가서 
+                                    
+                                    * 해당 패키지를 기준으로 하위에 있는 모든 빈(Bean)을 스캔한 다음, 테스트용 `ApplicationContext`를 만들면서 스캔한 모든 빈을 등록해주고, 
+                                    
+                                    * `@MockBean`을 찾아서 해당 빈(Bean)만 Mock 객체로 교체한다. 그리고 `@MockBean`는 @Test 마다 자동으로 리셋된다.
+                                
+    * 슬라이스 테스트
+    
+        * `슬라이스 테스트 (Slice Test)` : 레이어 별로 잘라서, 레이어를 하나의 단위로 보는 단위 테스트를 말한다.
+    
+            * 특정 레이어에 대한 Bean만 최소한으로 등록한다.
+    
+            * 슬라이스 테스트를 위한 `@JsonTest`, `@WebMvcTest`, `@WebFluxTest`, `@DataJpaTest` 애노테이션을 제공한다.
+
+        * 슬라이스 테스트 애노테이션의 종류
+    
+            * `@WebMvcTest` : Web과 관련된 것만 빈으로 등록한다.
+
+                * @WebMvcTest는 내부에 `@AutoConfigureMockMvc`를 포함하고 있다. 따라서 MockMvc를 바로 주입 받을 수 있다.
+
+                * `@Controller`, `@ControllerAdvice`, `@JsonComponent`, `Converter`, `GenericConverter`, `Filter`, `WebMvcConfigurer`, `HandlerMethodArgumentResolver`는 빈으로 등록한다.
+                
+                * `@Service`, `@Repository`는 Bean으로 등록하지 않는다.
+    
+                    * Web 계층에 해당하는 빈이 다른 계층의 빈을 사용하는 경우에는 다른 계층의 빈을 `@MockBean`으로 등록해야 한다. 
+    
+            * `@DataJpaTest` : Repository과 관련된 것만 빈으로 등록한다.
+    
         * 예시
         
-            * `@WebMvcTest`는 내부에 `@AutoConfigureMockMvc`를 포함하고 있다.
-        
-            * `@WebMvcTest`를 사용하면 하나의 컨트롤러만 테스트 할 수도 있으며 Web과 관련된 것(Controller ...)만 빈(Bean)으로 등록된다. 
-            
-            * 일반적인 컴포넌트(Service, Repository)는 빈으로 등록되지 않기 때문에 `@MockBean`으로 Mock 객체를 정의해야 한다.
-          
-            * 그리고 `@WebMvcTest`는 `MockMvc`로 테스트 해야 한다.
+            * @WebMvcTest 사용하기
         
                 ```java
                 @RunWith(SpringRunner.class)
@@ -2207,9 +2228,9 @@
                 }
                 ```
           
-                * `@WebMvcTest()`에 테스트 하고자 하는 클래스(SampleController.class)를 지정한다.
+                * 특정 컨트롤러만 빈으로 등록할 수도 있다.
                 
-                    * SampleController 하나만 Bean으로 등록 되기 때문에, 훨씬 더 가벼운 테스트가 된다.
+                    * `@WebMvcTest(SampleController.class)` : SampleController 하나만 Bean으로 등록 되기 때문에, 훨씬 더 가벼운 테스트가 된다.
         
 * (3) 테스트 유틸
 
