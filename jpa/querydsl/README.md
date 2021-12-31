@@ -90,6 +90,7 @@
                 //querydsl 추가
                 implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
                 implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
+                implementation "com.querydsl:querydsl-core:${queryDslVersion}"
             
                 ...
             }
@@ -3181,6 +3182,7 @@
             // querydsl 추가
             implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
             implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
+            implementation "com.querydsl:querydsl-core:${queryDslVersion}"
         
             ...
         }
