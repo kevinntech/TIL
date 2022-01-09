@@ -10796,6 +10796,12 @@ int[][] arr = {
                     .mapToInt(s -> s.length()) // 모든 문자열의 길이의 합
                     .sum();
             ```
+
+        * 참고사항          
+
+            * 병렬 스트림은 각각의 스레드에서 처리할 수 있도록 스트림 요소를 여러 청크로 분할한 스트림이다.
+        
+            * 따라서 병렬 스트림을 이용하면 모든 멀티코어 프로세서가 각각의 청크를 처리하도록 할당할 수 있다.
           
     * ⑥ 기본형 스트림을 제공한다. - IntStream, LongStream, DoubleStream
     
@@ -11401,8 +11407,10 @@ int[][] arr = {
 * (1) 루핑(looping)
 
     * `forEach()` : 스트림의 각 요소를 반복하며 람다식을 적용한다. (스트림의 요소를 소비 O)
+    
+        * 병렬 스트림인 경우에 스트림 요소의 순서가 보장되지 않는다. 
      
-        * `void forEach(Consumer<? super T> action)`
+            * `void forEach(Consumer<? super T> action)`
 
     * `forEachOrdered()` : 스트림의 각 요소를 반복하며 람다식을 적용한다
     
@@ -11412,41 +11420,62 @@ int[][] arr = {
 
     * 문법
 
-        * ① `allMatch()` : 모든 요소가 조건(Predicate)을 만족한다면 true다.
+        * ① `allMatch()` : 스트림에서 모든 요소가 주어진 조건(Predicate)을 만족하는지 검사한다. 
 
-        * ② `anyMatch()` : 하나의 요소라도 조건을 만족한다면 true다.
+        * ② `anyMatch()` : 스트림에서 하나의 요소라도 주어진 조건을 만족하는지 검사한다.
 
-        * ③ `noneMatch()` : 모든 요소가 조건을 만족하지 않는다면 true다. 
-      
-            ```java
-            public class MatchExample {
-                public static void main(String[] args) {
-                    int[] intArr = { 2, 4, 6 };
-            
-                    boolean result = Arrays.stream(intArr)
-                                        .allMatch(a -> a % 2 == 0);
-                    System.out.println("스트림의 모든 요소는 2의 배수인가? " + result);
-            
-                    result = Arrays.stream(intArr)
-                                .anyMatch(a -> a % 3 == 0);
-                    System.out.println("스트림의 요소 중 최소 한 개의 요소는 3의 배수인가? " + result);
-            
-                    result = Arrays.stream(intArr)
-                            .noneMatch(a -> a % 3 == 0);
-                    System.out.println("스트림의 모든 요소에서 3의 배수는 없는가? " + result);
-                }
+        * ③ `noneMatch()` : 스트림에서 모든 요소가 주어진 조건을 만족하지 않는지 검사한다. 
+
+    * 예시      
+
+        ```java
+        public class MatchExample {
+            public static void main(String[] args) {
+                int[] intArr = { 2, 4, 6 };
+        
+                boolean result = Arrays.stream(intArr)
+                                    .allMatch(a -> a % 2 == 0);
+                System.out.println("스트림의 모든 요소는 2의 배수인가? " + result);
+        
+                result = Arrays.stream(intArr)
+                            .anyMatch(a -> a % 3 == 0);
+                System.out.println("스트림의 요소 중 최소 한 개의 요소는 3의 배수인가? " + result);
+        
+                result = Arrays.stream(intArr)
+                        .noneMatch(a -> a % 3 == 0);
+                System.out.println("스트림의 모든 요소에서 3의 배수는 없는가? " + result);
             }
-            ```
-          
-        * ④ `findFirst()` : 첫 번째 요소를 Optional 객체로 반환한다.
-       
-        * ⑤ `findAny()` : 아무거나 하나를 Optional 객체로 반환한다.
-          
-            * `findAny()`는 병렬 스트림인 경우, 사용한다.
-            
-            * `findFirst()`, `findAny()`는 `filter()`와 함께 사용한다. 
+        }
+        ```
 
-* (3) 통계 - count(), sum(), average(), max(), min()
+* (3) 조건에 일치하는 요소 찾기
+
+    * 문법          
+
+        * ① `findFirst()` : 스트림에서 첫 번째 요소를 Optional 객체로 반환한다.
+    
+            * 순차 스트림인 경우에 사용한다. 
+    
+            * `filter()`와 함께 사용한다. 
+       
+        * ② `findAny()` : 스트림에서 아무거나 하나를 Optional 객체로 반환한다.
+          
+            * 병렬 스트림인 경우에 `findFirst()` 대신에 사용한다.
+
+            * `filter()`와 함께 사용한다.
+
+    * 예시
+
+        ```java
+        String[] strArr = {
+                "Inheritance", "Java", "Lambda", "stream", "OptionalDouble", "IntStream", "count", "sum"
+        };
+        
+        Stream.of(strArr).filter(s -> s.charAt(0) == 's').findFirst(); // 스트림 요소 중에서 첫 글자가 s이면서 첫 번째 요소를 찾는다.
+        Stream.of(strArr).filter(s -> s.charAt(0) == 's').parallel().findAny();
+        ```
+
+* (4) 통계 - count(), sum(), average(), max(), min()
 
     * 기본형 스트림(`IntStream` ...)은 스트림의 요소들에 대한 통계 정보를 얻을 수 있는 메서드를 제공한다.
 
@@ -11498,9 +11527,9 @@ int[][] arr = {
         }
         ```
 
-* (4) 리듀싱 - reduce()
+* (5) 리듀싱 - reduce()
 
-    * `reduce()` : 스트림의 요소를 하나씩 줄여가며 누적 연산을 한 다음, 최종 결과를 반환한다.
+    * `reduce()` : 스트림의 요소를 소비해서 최종 결과를 도출한다. 
 
         * `Optional<T> reduce (BinaryOperator<T> accumulator)`
         
@@ -11516,9 +11545,9 @@ int[][] arr = {
 
             * `identity` : **초기 값**
             
-            * `accumulator` : 이전 연산 결과와 스트림의 요소에 **수행 할 연산** 
+            * `accumulator` : 이전 연산 결과와 스트림의 요소에 **수행할 연산** 
             
-            * `combiner` : 병렬 처리 된 결과를 합치는데 사용 할 연산 (병렬 스트림)
+            * `combiner` : 병렬 처리 된 결과를 합치는데 사용할 연산 (병렬 스트림)
 
     * 예시
     
@@ -11530,14 +11559,14 @@ int[][] arr = {
         IntStream intStream3 = IntStream.of(arr);
         IntStream intStream4 = IntStream.of(arr);
         
-        int count = intStream1.reduce(0, (a, b) -> a + 1);
-        int sum = intStream2.reduce(0, (a, b) -> a + b);
-        OptionalInt max = intStream3.reduce(Math::max); // (a, b) -> Math.max(a, b)
-        OptionalInt min = intStream4.reduce(Math::min);
+        int count = intStream1.reduce(0, (a, b) -> a + 1);  // 요소 개수 구하기
+        int sum = intStream2.reduce(0, (a, b) -> a + b);    // 합계 구하기 
+        OptionalInt max = intStream3.reduce(Math::max);     // 최대 값 구하기 (a, b) -> Math.max(a, b)
+        OptionalInt min = intStream4.reduce(Math::min);     // 최소 값 구하기
         
         System.out.println(count);
         System.out.println(sum);
-        System.out.println(max.orElse(0)); // getAsInt()는 Optional에 값이 없다면 예외가 발생한다. 
+        System.out.println(max.orElse(0)); // getAsInt()는 Optional에 값이 없다면 예외가 발생한다. 따라서 orElse()를 사용한다.
         System.out.println(min.orElse(0));
         ```
 
@@ -11545,17 +11574,21 @@ int[][] arr = {
  
 * (1) collect()와 Collectors
 
-    * `collect()`는 스트림을 다른 형식으로 변환한다. 
-      
-        * 매개변수로 `Collector`가 필요하며 아래와 같은 기능들을 제공한다. 
+    * `collect()` : 스트림의 요소를 소비해서 최종 결과를 도출한다. 
+    
+        * 특징 
+          
+            * collect()의 매개변수로 Collector 인터페이스의 구현체를 전달한다.
 
-            * 스트림의 요소들을 컬렉션(List, Set, Map)으로 변환하기 
-        
-            * 스트림의 요소들을 결합하기 (joining)
-        
-            * 스트림의 요소들로 통계를 구하기 (최대, 최소, 평균 값)
-        
-            * 스트림의 요소들을 그룹화와 분할하기 
+            * Collector 인터페이스의 구현체는 스트림의 요소를 어떤 식으로 도출할지 지정한다. 아래와 같은 기능들을 제공한다.
+
+                * ① 스트림의 요소들을 컬렉션(List, Set, Map)으로 변환하기
+                
+                * ② 스트림의 요소들을 결합하기 (joining)
+                
+                * ③ 스트림의 요소들로 통계를 구하기 (최대, 최소, 평균 값)
+                
+                * ④ 스트림의 요소들을 그룹화와 분할하기 
 
         * 문법
           
@@ -11567,16 +11600,18 @@ int[][] arr = {
                 
     * `reduce()`과 `collect()`의 차이점 
 
-        * `reduce()` : 전체 집계를 한다.
+        * `reduce()` : 전체 리듀싱을 할 수 있다.
         
-        * `collect()` : 전체 집계 또는 그룹별 집계를 한다.
+        * `collect()` : 전체 또는 그룹별 리듀싱을 할 수 있다. 
+    
+            * 리듀싱 : 모든 스트림의 요소를 처리해서 하나의 값으로 도출하는 것을 말한다.
                     
     * `Collector`는 수집(`collect()`)에 필요한 메서드를 정의해 놓은 인터페이스다.
 
         ```java
          public interface Collector<T, A, R> {        // T(요소)를 A에 누적한 다음, 결과를 R로 변환해서 반환 
             Supplier<A>          supplier();          // StringBuilder::new            누적할 곳 ★★★
-            BiConsumer<A, T>     accumulator();       // (sb, s) -> sb.append(s)       누적방법 ★★★
+            BiConsumer<A, T>     accumulator();       // (sb, s) -> sb.append(s)       누적방법  ★★★
             BinaryOperator<A>    combiner();          // (sb1, sb2) -> sb1.append(sb2) 결합방법 (병렬)
             Function<A, R>       finisher();           // sb -> sb.toString()           최종변환
             Set<Characteristics> characteristics();   // 컬렉터의 특성이 담긴 Set을 반환
@@ -11595,7 +11630,7 @@ int[][] arr = {
         * `characteristics()` : 컬렉터가 수행하는 작업의 속성에 대한 정보를 제공한다.
 
     * **`Collectors` 클래스는 Collector 인터페이스의 구현체를 static 메서드로 제공한다.**
-
+    
         * 변환 - `mapping()`, `toList()`, `toSet()`, `toMap()`, `toCollection()` ...
         
         * 통계 - `counting()`, `summingInt()`, `averagingInt()`, `maxBy()`, `minBy()`, `summarizingInt()` ...
@@ -11608,59 +11643,46 @@ int[][] arr = {
 
 * (2) Collectors에 대해 상세하게 살펴보기
 
-    * 앞으로 예제에서 사용할 Student 코드는 다음과 같다. 
+    * 이번 예제에서 사용할 코드는 다음과 같다. 
     
         ```java
         class Student {
-            String id;
             String name;
-            boolean isMale; // 성별
-            int hak;        // 학년
-            int ban;        // 반
-            int score;
+            int ban;
+            int totalScore;
         
-            public Student(String id, String name, boolean isMale, int hak, int ban, int score) {
-                this.id = id;
+            Student(String name, int ban, int totalScore) {
                 this.name = name;
-                this.isMale = isMale;
-                this.hak = hak;
                 this.ban = ban;
-                this.score = score;
+                this.totalScore = totalScore;
             }
-        
-            public String   getId()      { return id; }
-            public String	getName()    { return name;	}
-            public boolean  isMale()     { return isMale; }
-            public int      getHak()     { return hak;	}
-            public int      getBan()     { return ban;	}
-            public int      getScore()   { return score; }
-            public Student  getStudent() { return this; }
         
             public String toString() {
-                return String.format("[%s, %s, %d학년 %d반, %3d점]",
-                        name, isMale ? "남":"여", hak, ban, score);
+                return String.format("[%s, %d, %d]", name, ban, totalScore);
             }
         
+            String  getName()     { return name;}
+            int     getBan()         { return ban;}
+            int     getTotalScore()  { return totalScore;}
         }
         
         public class StreamEx {
             public static void main(String[] args) {
                 Student[] stuArr = {
-                        new Student("1", "나자바", true,  1, 1, 300),
-                        new Student("2",  "김지미", false, 1, 1, 250),
-                        new Student("3",  "김자바", true,  1, 1, 200),
-                        new Student("4",  "이지미", false, 1, 2, 150),
-                        new Student("5",  "남자바", true,  1, 2, 100),
-                        new Student("6",  "안지미", false, 1, 2,  50),
-                        new Student("7",  "황지미", false, 1, 3, 100),
-                        new Student("8",  "강지미", false, 1, 3, 150),
-                        new Student("9",  "이자바", true,  1, 3, 200),
-                        new Student("10",  "나자바", true,  2, 1, 300)
+                        new Student("나자바", 1, 300),
+                        new Student("김지미", 1, 250),
+                        new Student("김자바",  1, 200),
+                        new Student("이지미", 2, 150),
+                        new Student("남자바", 2, 100),
+                        new Student("안지미", 2,  50),
+                        new Student("황지미", 3, 100),
+                        new Student("강지미", 3, 150),
+                        new Student("이자바", 3, 200),
+                        new Student( "나자바",1, 300)
                 };
         
-                // Student 스트림 생성 
+                // Student 스트림 생성
                 Stream<Student> stuStream = Arrays.stream(stuArr);
-        
             }
         }
         ```
@@ -11784,7 +11806,7 @@ int[][] arr = {
 
     * 스트림의 리듀싱
 
-        * `reducing()` : 스트림의 요소를 하나씩 줄여가며 연산을 한 다음, 최종 결과를 반환한다. (`전체 집계` 또는 `그룹별 집계`)
+        * `reducing()` : 리듀싱을 한다.
         
             * 문법
             
@@ -11807,8 +11829,8 @@ int[][] arr = {
                     ```java
                     IntStream intStream = new Random().ints(1, 46).distinct().limit(6);
                     
-                    OptionalInt max = intStream.reduce(Integer::max); // 전체 리듀싱
-                    Optional<Integer> max = intStream.boxed().collect(reducing(Integer::max)); // 그룹별 리듀싱 가능
+                    OptionalInt max = intStream.reduce(Integer::max);
+                    Optional<Integer> max = intStream.boxed().collect(reducing(Integer::max));
                     ```
                   
                     * `boxed()` : 기본형 스트림을 스트림으로 변환한다. 
@@ -11826,7 +11848,7 @@ int[][] arr = {
                 
                     ```java
                     int grandTotal = stuStream.map(Student::getTotalScore).reduce(0, Integer::sum);
-                    int grandTotal = stuStream.collect(reducing(0, Student::getTotalScore, Integer::sum));
+                    int grandTotal = stuStream.collect(reducing(0, Student::getTotalScore, Integer::sum)); // reducing(초기 값, 변환 작업, 누적 작업)
                     ```
                               
     * `joining()` : 문자열 스트림의 모든 요소를 구분자로 연결한다.
@@ -11840,7 +11862,7 @@ int[][] arr = {
 
 * (2) 그룹화와 분할
 
-    * `partitioningBy()` : 스트림을 2개의 그룹으로 분할한다.
+    * `partitioningBy()` : 스트림의 요소를 2개의 그룹으로 분할한다.
     
         * 문법
 
@@ -11848,18 +11870,18 @@ int[][] arr = {
             Collector partitioningBy(Predicate predicate)
             Collector partitioningBy(Predicate predicate, Collector downstream)
             ```
-                
-            * `partitioningBy()`는 지정된 조건(`Predicate`)에 일치하는 그룹과 일치하지 않는 그룹으로 분할한다.
+
+            * **스트림의 요소를 분할 기준(`predicate`)에 따라 2개의 그룹으로 분할한 다음, Map으로 저장해서 반환한다.**                
+
+                * 즉, Key가 분할의 기준이면서 Value가 같은 그룹별 List인 Map을 반환한다.
             
-                * Key가 분할의 기준이며 Value가 같은 그룹별 List인 Map을 반환한다.
-            
-            * `Collectors.partitioningBy()`는 그룹화를 한 다음, 변환이나 집계를 할 수 있도록 두 번째 매개변수(`downstream`)로 `Collector`를 지정 할 수 있다.
+            * `Collectors.partitioningBy()`는 그룹화를 한 다음, 변환이나 집계를 할 수 있도록 두 번째 매개변수(`downstream`)로 `Collector`를 지정할 수 있다.
                 
-            * [참고] groupingBy()는 스트림의 요소를 Function으로, partitioningBy()는 Predicate로 분류한다.
+            * [참고] partitioningBy()는 스트림의 요소를 Predicate로 분할하고 groupingBy()는 Function으로 분할한다.
             
         * 예시
         
-            * 학생들을 성별로 나누어 분할한다.
+            * 학생들을 분할 기준(`성별`)에 따라 2개의 그룹으로 분할한 다음, Map으로 저장해서 반환한다.
         
                 ```java
                 Map<Boolean, List<Student>> stuBySex = stuStream
@@ -11869,41 +11891,44 @@ int[][] arr = {
                 List<Student> femaleStudent = stuBySex.get(false);    // Map에서 여학생 목록을 얻는다.
                 ```
                 
-                * Key가 분할의 기준(Boolean)이며 Value가 해당 스트림의 요소(Student)가 같은 그룹별로 저장된 List인 Map을 반환한다. 
+                * Key가 분할의 기준(Boolean)이면서 Value가 해당 스트림의 요소(Student)가 같은 그룹별로 저장된 List인 Map을 반환한다.
                 
-                    * 즉, Key가 성별, Value가 학생 List인 Map을 만든다.
-                
-            * 학생들을 성별로 나누어 분할한 다음, 집계(남학생과 여학생의 수)를 한다.
+            * 학생들을 분할 기준(`성별`)에 따라 2개의 그룹으로 분할한 다음, 집계(남학생과 여학생의 수)를 한다.
           
                 ```java
                 Map<Boolean, Long> stuNumBySex = stuStream
                                 .collect(partitioningBy(Student::isMale, counting())); // 분할 + 통계
               
-                System.out.println("남학생 수 :"+ stuNumBySex.get(true));     // 남학생 수 : 8
-                System.out.println("여학생 수 :"+ stuNumBySex.get(false));    // 여학생 수 : 10
+                System.out.println("남학생 수 :" + stuNumBySex.get(true));     // 남학생 수 : 8
+                System.out.println("여학생 수 :" + stuNumBySex.get(false));    // 여학생 수 : 10
                 ```
 
-            * 학생들을 성별로 나누어 분할한 다음, 집계(남학생 1등과 여학생 1등)를 한다.
+            * 학생들을 분할 기준(`성별`)에 따라 2개의 그룹으로 분할한 다음, 집계(남학생 1등과 여학생 1등)를 한다.
             
                 ```java
                 Map<Boolean, Optional<Student>> topScoreBySex = stuStream
                         .collect(partitioningBy(Student::isMale,
-                                maxBy(comparingInt(Student::getScore)) // score의 최대 값
+                                maxBy(comparingInt(Student::getScore))      // 분할 + 통계 
                         ));
-                System.out.println("남학생 1등 :"+ topScoreBySex.get(true));  // 남학생 1등 : Optional[[나자바, 남, 1, 1, 300]]
-                System.out.println("여학생 1등 :"+ topScoreBySex.get(false)); // 여학생 1등 : Optional[[김지미, 여, 1, 1, 250]]
+                System.out.println("남학생 1등 :" + topScoreBySex.get(true));  // 남학생 1등 : Optional[[나자바, 남, 1, 1, 300]]
+                System.out.println("여학생 1등 :" + topScoreBySex.get(false)); // 여학생 1등 : Optional[[김지미, 여, 1, 1, 250]]
                 ```
-
-            * 학생을 성별로 나누고 성적이 150점 아래인 학생들은 불합격, 그렇지 않은 경우에는 합격으로 분할한다. 
+    
+            * 학생들을 `성별`로 분할한 다음, 또 다시 성적으로 분할한다.
             
                 ```java
-                Map<Boolean, Map<Boolean, List<Student>>> failedStuBySex =    // 다중 분할 
-                        stuStream.collect(partitioningBy(Student::isMale,     // 1. 성별로 분할(남/녀)
-                                partitioningBy(s -> s.getScore() < 150))     // 2. 성적으로 분할(불합격/합격)
+                Stream<Student> stuStream = Arrays.stream(stuArr);
+                
+                Map<Boolean, Map<Boolean, List<Student>>> failedStuBySex =              // 다중 분할
+                        stuStream.collect(
+                                partitioningBy(Student::isMale,                         // 1. 성별로 분할(남/녀)
+                                partitioningBy(s -> s.getScore() < 150))                // 2. 성적으로 분할(불합격/합격)
                         );
-                List<Student> failedMaleStu   = failedStuBySex.get(true).get(true); // 남학생이면서 불합격
-                List<Student> failedFemaleStu = failedStuBySex.get(false).get(true); // 여학생이면서 불합격
+                List<Student> failedMaleStu   = failedStuBySex.get(true).get(true);     // 남학생이면서 불합격
+                List<Student> failedFemaleStu = failedStuBySex.get(false).get(true);    // 여학생이면서 불합격
                 ```
+              
+                * 학생을 성별로 분할하고 성적이 150점 아래인 학생들은 불합격, 그렇지 않은 경우에는 합격으로 분할한다.
 
         * 실습코드
 
@@ -11919,8 +11944,8 @@ int[][] arr = {
             class Student {
                 String name;        // 이름
                 boolean isMale;     // 성별
-                int hak;		    // 학년
-                int ban;		    // 반
+                int hak;            // 학년
+                int ban;            // 반
                 int score;          // 점수
             
                 Student(String name, boolean isMale, int hak, int ban, int score) {
@@ -11932,7 +11957,7 @@ int[][] arr = {
                 }
             
                 String	getName()  { return name;}
-                boolean isMale()    { return isMale;}
+                boolean	isMale()   { return isMale;}
                 int		getHak()   { return hak;}
                 int		getBan()   { return ban;}
                 int		getScore() { return score;}
@@ -12021,13 +12046,13 @@ int[][] arr = {
             }
             ```
           
-            * `collectingAndThen()`는 Collecting을 진행한 후 결과에 대해 다른 작업을 수행 할 수 있는 Collector다.
+            * `collectingAndThen()`는 collect를 한 이후에 결과에 대해서 추가 작업을 할 수 있는 Collector다.
             
                 * Ex) `collectingAndThen(maxBy(comparingInt(Student::getScore)), Optional::get)`
             
-                    * 스트림 요소 중 최대 값을 구한 다음, Optional에서 값을 꺼내서 반환한다.
+                    * 스트림의 요소 중 최대 값을 구한 다음, Optional에서 값을 꺼내서 반환한다.
             
-    * `groupingBy()` : 스트림을 n개의 그룹으로 분할한다.
+    * `groupingBy()` : 스트림의 요소를 n개의 그룹으로 분할한다.
     
         * 문법
 
@@ -12037,91 +12062,94 @@ int[][] arr = {
             Collector groupingBy(Function classifier, Supplier mapFactory, Collector downstream)
             ```
 
-            * 스트림을 n개의 그룹으로 분할해서 Map에 저장한 다음, 반환한다.
+            * **스트림의 요소를 분할 기준(`classifier`)에 따라 n개의 그룹으로 분할한 다음, Map으로 저장해서 반환한다.**
             
                 * `groupingBy(Function<T, K> classifier)`
         
-                    * K를 키(key)로 하고 T를 담고 있는 list를 값(value)으로 한 Map 객체를 만들어 반환한다.
+                    * K를 키(key)로 하면서 T를 담고 있는 list를 값(value)으로 한 Map 객체를 만들어 반환한다.
         
                 * `groupingBy(Function<T, K> classifier, Collector<T, A, D> downstream)`
         
-                    * K를 키(key)로 하고 T를 담고 있는 D 객체를 값(value)으로 한 Map 객체를 만들어 반환한다.
+                    * K를 키(key)로 하면서 T를 담고 있는 D 객체를 값(value)으로 한 Map 객체를 만들어 반환한다.
         
-                * `groupingBy(Function<T, K> classifier, Supplier<Map<K,D>> mapFactory ,Collector<T, A, D> downstream)` 
+                * `groupingBy(Function<T, K> classifier, Supplier<Map<K,D>> mapFactory, Collector<T, A, D> downstream)` 
         
-                    * K를 키(key)로 하고 T를 담고있는 D 객체를 값(value)으로 한 Supplier가 제공하는 Map 객체에 담아서 반환한다.
+                    * K를 키(key)로 하면서 T를 담고있는 D 객체를 값(value)으로 한 Supplier가 제공하는 Map 객체에 담아서 반환한다.
 
-                        * `classifier` : `groupingBy()`의 분류 기준으로 사용 할 람다식을 지정한다. 
+                        * `classifier` : `groupingBy()`의 분할 기준으로 사용할 람다식을 지정한다. 
                                                 
                         * `mapFactory` : `groupingBy()`의 결과로 만들어지는 Map을 생성하는 람다식을 지정한다.
                                                 
                         * `downstream` : `groupingBy()`의 결과로 얻게되는 Collector를 지정한다.
-
-        * 예시
-        
-            * 학생을 반별로 그룹화해서 Map에 저장한다. 
-
-                ```java
-                Map<Integer, List<Student>> stuByBan = stuStream          // 학생을 반별로 그룹화
-                        .collect(groupingBy(Student::getBan, toList()));  // toList() 생략 가능
-                ```
-              
-                * 키(Key)가 반이고 값(Value)이 학생을 그룹별로 담고 있는 List인 Map 객체를 생성해서 반환한다. 
-
-            * 학생을 학년별로 그룹화해서 Map에 저장한 다음, 그 안에 다시 반별로 그룹화해서 Map에 저장한다.
-            
-                ```java
-                Map<Integer, Map<Integer, List<Student>>> stuByHakAndBan = stuStream  // 다중 그룹화 
-                                .collect(groupingBy(Student::getHak,                  // 1. 학년별 그룹화 
-                                        groupingBy(Student::getBan)                   // 2. 반별 그룹화
-                                ));
-                ```
-              
-                * 키(Key)가 학년이고 값(Value)이 Map인 Map 객체를 생성해서 반환한다.
+    
+            * `Collectors.groupingBy()`는 그룹화를 한 다음, 변환(mapping)이나 집계를 할 수 있도록 두 번째 매개변수(`downstream`)로 다음과 같은 `Collector`를 지정할 수 있다.
+    
+                * `mapping()` : 스트림 내의 요소를 다른 요소로 변환한 다음, 변환된 요소를 수집할 Collector를 지정한다.
                 
-                * 내부에 있는 Map은 키(Key)가 반이고 값(Value)이 학생을 그룹별로 담고 있는 List다.
-                    
-            * 학년별과 반별로 그룹화한 다음, 성적 등급으로 변환(mapping)하여 Set에 저장한다.  
-            
-                ```java
-                // Map의 첫 번째 Integer : 학년, 두 번째 Integer : 반 
-                Map<Integer, Map<Integer, Set<Student.Level>>> stuByHakAndBan =
-                        Stream.of(stuArr)
-                                .collect(groupingBy(Student::getHak,  // 다중 그룹화 (학년별, 반별) 
-                                         groupingBy(Student::getBan, 
-                                                mapping(s -> {        // 스트림 내의 요소를 성적 등급(Levl)으로 변환
-                                                    if(s.getScore() >= 200)       return Student.Level.HIGH;
-                                                    else if(s.getScore() >= 100)  return Student.Level.MID;
-                                                    else                          return Student.Level.LOW;
-                                                }, toSet())
-                                         ))
-                                );
-                ```
-              
-                * `mapping()` : 스트림 내의 요소를 다른 요소로 변환한다. 
-                
-        * 그룹화 이후 변환(mapping) 및 집계
-        
-            * `Collectors.groupingBy()`는 그룹화를 한 다음, 변환(mapping)이나 집계를 할 수 있도록 두 번째 매개변수(`downstream`)로 다음과 같은 `Collector`를 지정 할 수 있다.
-        
-                * `mapping()` : 스트림 내의 요소를 다른 요소로 변환한 다음, 변환된 요소를 수집할 Collector를 지정한다. 
-                 
                 * `averagingDouble()` : 평균 값을 계산한다.
                 
                 * `counting()` : 요소의 총 개수를 계산한다.
                 
                 * `joining()` : 문자열 스트림의 모든 요소를 구분자로 연결한다.
                 
-                * `maxBy()` : Comparator를 이용해서 최대 값을 계산한다. 
+                * `maxBy()` : Comparator를 이용해서 최대 값을 계산한다.
                 
-                * `minBy()` : Comparator를 이용해서 최소 값을 계산한다. 
+                * `minBy()` : Comparator를 이용해서 최소 값을 계산한다.
                 
-                * `summingInt()` : Int 타입의 합계를 계산한다. 
-                 
-                * `summingLong()` : Long 타입의 합계를 계산한다. 
+                * `summingInt()` : Int 타입의 합계를 계산한다.
                 
-                * `summingDouble()` : Double 타입의 합계를 계산한다. 
+                * `summingLong()` : Long 타입의 합계를 계산한다.
+                
+                * `summingDouble()` : Double 타입의 합계를 계산한다.
 
+        * 예시
+        
+            * 학생들을 반별로 그룹화해서 Map에 저장한다. 
+
+                ```java
+                Map<Integer, List<Student>> stuByBan = stuStream          // 학생을 반별로 그룹화
+                        .collect(groupingBy(Student::getBan, toList()));  // toList()는 생략 가능하다.
+                ```
+              
+                * 키(Key)가 반이고 값(Value)이 학생을 그룹별로 담고 있는 List인 Map 객체를 생성해서 반환한다. 
+
+            * 학생들을 학년별로 그룹화한 다음, 다시 반별로 그룹화해서 Map에 저장한다.
+            
+                ```java
+                Map<Integer, Map<Integer, List<Student>>> stuByHakAndBan =
+                        stuStream.collect(                      // 다중 그룹화
+                                groupingBy(Student::getHak,     // 1. 학년별 그룹화
+                                groupingBy(Student::getBan))    // 2. 반별 그룹화
+                        );
+                ```
+              
+                * 키(Key)가 학년이고 값(Value)이 Map인 Map 객체를 생성해서 반환한다.
+                
+                * 내부에 있는 Map은 키(Key)가 반이고 값(Value)이 학생을 그룹별로 담고 있는 List다.
+                    
+            * 학생들을 학년별과 반별로 그룹화한 다음, 성적 등급으로 변환(mapping)하여 Set에 저장한다.  
+    
+                ```java
+                // Map<학년, Map<반, Set>>
+                Map<Integer, Map<Integer, Set<Student.Level>>> stuByHakAndBan =
+                        stuStream.collect(                      // 다중 그룹화 (학년, 반별)
+                                groupingBy(Student::getHak,
+                                groupingBy(Student::getBan,
+                                        mapping(s -> {          // 스트림 내의 요소를 성적 등급(Levl)으로 변환
+                                            if (s.getScore() >= 200) {
+                                                return Student.Level.HIGH;
+                                            } else if (s.getScore() >= 100) {
+                                                return Student.Level.MID;
+                                            } else {
+                                                return Student.Level.LOW;
+                                            }
+                                        }, toSet()))
+                                )
+                        );
+                ```
+              
+                * `mapping()` : 스트림 내의 요소를 다른 요소로 변환한다. 
+    
         * 실습코드 
         
             ```java
@@ -12134,8 +12162,8 @@ int[][] arr = {
             class Student {
                 String name;
                 boolean isMale; // 성별
-                int hak;		// 학년
-                int ban;		// 반
+                int hak;        // 학년
+                int ban;        // 반
                 int score;
             
                 Student(String name, boolean isMale, int hak, int ban, int score) {
@@ -12147,7 +12175,7 @@ int[][] arr = {
                 }
             
                 String	getName()  { return name;}
-                boolean isMale()   { return isMale;}
+                boolean	isMale()   { return isMale;}
                 int		getHak()   { return hak;}
                 int		getBan()   { return ban;}
                 int		getScore() { return score;}
@@ -12266,6 +12294,7 @@ int[][] arr = {
             
                     System.out.printf("%n6. 다중그룹화 + 통계(학년별, 반별 성적그룹)%n");
                     Map<String, Set<Student.Level>> stuByScoreGroup = Stream.of(stuArr)
+                            // 학년과 반을 문자열로 합친 값을 기준으로 그룹을 분할한다. 
                             .collect(groupingBy(s -> s.getHak() + "-" + s.getBan(),
                                     mapping(s-> {
                                         if(s.getScore() >= 200)      return Student.Level.HIGH;
