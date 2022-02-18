@@ -184,11 +184,6 @@ public class MemberRepositoryTest {
 
 #### (4) 테이블, 컬럼명 생성 전략
 
-스프링 부트 신규 설정 (엔티티(필드) 테이블(컬럼))
-1. 캐멀 케이스 → 언더스코어(memberPoint → member_point) 
-2. (점)  → _(언더스코어)
-3. 대문자 → 소문자
-
 ## 3~5. 회원, 상품, 주문 도메인 개발
 
 * `Given, When, Then`
@@ -198,17 +193,17 @@ public class MemberRepositoryTest {
 
 * `@PersistenceContext` : 스프링이 EntityManager를 만들어서 주입 시켜준다.
 
- ```java
-    @PersistenceContext
-    private EntityManager em;
- ```
+  ```java
+  @PersistenceContext
+  private EntityManager em;
+  ```
 
 * `@PersistenceUnit` : 스프링이 EntityManagerFactory를 만들어서 주입 시켜준다. (거의 사용 하지 않음)
 
- ```java
-    @PersistenceUnit
-    private EntityManagerFactory emf;
- ```
+  ```java
+  @PersistenceUnit
+  private EntityManagerFactory emf;
+  ```
 
 * `@RequiredArgsConstructor` : final 필드 만을 가지고 생성자를 만들어준다.
 
@@ -218,17 +213,17 @@ public class MemberRepositoryTest {
 
 * 그래서 아래와 같이 생성자 인젝션으로 작성 할 수 있다.
 
- ```java
-@Repository
-@RequiredArgsConstructor
-public class MemberRepository {
-
-    private final EntityManager em;
-
-    ...
-
-}
- ```
+   ```java
+  @Repository
+  @RequiredArgsConstructor
+  public class MemberRepository {
+  
+      private final EntityManager em;
+  
+      ...
+  
+  }
+   ```
 
 * `application.yml`에 `jdbc:h2:mem:test`를 사용하면 메모리 모드로 동작한다. 
 

@@ -232,6 +232,38 @@
         
             * SQL에 의존적인 개발을 피할 수 있다.
 
+* (6) 쿼리 파라미터 출력하기
+
+    * ① `pom.xml`에 다음 의존성을 추가한다.
+    
+        ```html
+        <!-- logback -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+        ```
+      
+    * ② `resources` 아래에 `logback.xml` 파일을 만든다.
+    
+        ```html
+        <?xml version="1.0" encoding="UTF-8"?>
+        <configuration>
+            <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+                <layout class="ch.qos.logback.classic.PatternLayout">
+                    <Pattern>%d{HH:mm} %-5level %logger{36} - %msg%n</Pattern>
+                </layout>
+            </appender>
+        
+            <logger name="org.hibernate.type" level="trace" />
+        
+            <root level="info">
+                <appender-ref ref="STDOUT" />
+            </root>
+        </configuration>
+        ```
+
 ## 3. 영속성 관리
 
 * (1) 영속성 컨텍스트(persistence context)
@@ -1169,7 +1201,9 @@
         * ① 양방향 연관관계 매핑 시 가장 많이하는 실수
         
             * **연관관계의 주인에는 값을 입력하지 않고, 주인이 아닌 방향(역방향)만 값을 입력하는 실수를 한다.**
-            
+
+                * 주인이 아닌 방향(역방향)만 값을 입력하면 테이블에 외래 키가 설정되지 않는 문제점이 있다.          
+
             * **순수한 객체 관계를 고려해서 항상 양쪽에 값을 설정해야 한다.** (객체 지향적인 관점)  
             
                 ```java
@@ -1213,7 +1247,7 @@
                     List<Member> members = findTeam.getMembers();
                     
                     for (Member m : members) {
-                    System.out.println("m = " + m.getUsername());
+                        System.out.println("m = " + m.getUsername());
                     }
                     ```
 
@@ -1330,7 +1364,7 @@
 
             * 나중에 추가해도 되는 이유는 테이블에 영향을 주지 않기 때문이다.
     
-        * **단방향 연관관계는 항상 외래 키가 있는 곳(多)을 기준으로 매핑하면 된다.**
+        * **단방향 연관관계는 항상 외래 키가 있는 곳(N)을 기준으로 매핑하면 된다.**
 
 ## 6. 다양한 연관관계 매핑
 
@@ -1408,7 +1442,7 @@
         
                 ![image 8](images/img8.png)
     
-                * **일대다 단방향 관계는 일(1)이 연관관계의 주인이다.** 
+                * **일대다 단방향 관계에서 일(1)이 연관관계의 주인이라고 가정한다.** 
     
                     * 하나의 팀은 여러 회원을 참조 할 수 있는데 이런 관계를 일대다 관계라 한다. (Team이 연관관계의 주인이 된 구조)
         
@@ -1416,7 +1450,7 @@
     
                 * **테이블의 일대다 관계는 항상 다(N) 쪽에 외래 키가 있다.**
     
-                * **일대다 단방향 관계**는 **반대편 테이블의 외래 키를 관리하는 특이한 구조**가 된다.
+                * **일대다 단방향 관계**는 (객체와 테이블의 차이 때문에) **반대편 테이블의 외래 키를 관리하는 특이한 구조**가 된다.
         
                     * 즉, Team 엔티티의 members의 값을 변경하면 반대편 테이블(MEMBER)의 외래 키를 수정(UPDATE)하게 된다.
                     
@@ -1447,7 +1481,7 @@
 
                     ```java
                     @Entity
-                    public class Team{
+                    public class Team {
                       @Id @GeneratedValue
                       @Column(name = "TEAM_ID")
                       private Long id;
@@ -1469,7 +1503,7 @@
                   
                     * **일대다 단방향 관계는** `@JoinColumn`**을 꼭 사용해야 한다.**
     
-                        * **그렇지 않으면 조인 테이블 방식을 사용해서 중간에 테이블을 하나 추가한다.**
+                        * **그렇지 않으면 조인 테이블 방식을 사용해서 중간 테이블(TEAM_MEMBER)을 하나 추가한다.**
                     
                     * **일대다 단방향 매핑 보다는 다대일 양방향 매핑을 사용하자**
         
@@ -1500,7 +1534,7 @@
                 }
                 ```
 
-                * **일대다 양방향 매핑보다는 다대일 양방향 매핑을 사용하자**
+                * **일대다 양방향 매핑 보다는 다대일 양방향 매핑을 사용하자**
             
     * 일대일 [1:1]
 
@@ -1532,7 +1566,7 @@
                 
                     ```java
                     @Entity
-                    public class Member{
+                    public class Member {
                       @Id @GeneratedValue
                       @Column(name = "MEMBER_ID")
                       private Long id;
@@ -1548,7 +1582,7 @@
                   
                     ```java
                     @Entity
-                    public class Locker{
+                    public class Locker {
                       @Id @GeneratedValue
                       private Long id;
                   
@@ -1570,7 +1604,7 @@
 
                     ```java
                     @Entity
-                    public class Locker{
+                    public class Locker {
                       @Id @GeneratedValue
                       private Long id;
                   
@@ -1589,11 +1623,11 @@
     
                 ![image 12](images/img12.png)
     
-                * 대상 테이블에 외래 키가 있는 일대일 단방향 관계는 JPA에서 지원하지 않는다. 
+                * 주 엔티티(Member)에 참조 필드가 있으면서 대상 테이블에 외래 키가 있는 일대일 단방향 관계는 JPA에서 지원하지 않는다.  (일대다 단방향과 거의 비슷함) 
                 
                     * 이러한 경우에는 양방향 관계로 만들고 Locker를 연관관계의 주인으로 설정해야 한다.
     
-                    * 즉, **일대일 관계는 자신의 엔티티가 자신의 테이블에 있는 외래 키를 직접 관리해야 한다. (★★★)**  
+                    * 즉, **일대일 연관관계는 자신의 엔티티가 자신의 테이블에 있는 외래 키를 직접 관리해야 한다. (★★★)**  
                       
             * ④ 대상 테이블에 외래 키가 있는 일대일 양방향 관계
     
@@ -1601,7 +1635,7 @@
     
                     ![image 13](images/img13.png)
         
-                    * 주 엔티티인 Member 엔티티 대신에 **대상 엔티티인 Locker를 연관관계의 주인으로 만들어서 LOCKER 테이블의 외래 키를 관리하도록 한다.**
+                    * 주 엔티티(Member) 대신에 **대상 엔티티인 Locker를 연관관계의 주인으로 만들어서 LOCKER 테이블의 외래 키를 관리하도록 한다.**
     
                     * 사실, 주 테이블에 외래 키가 있는 일대일 양방향 관계와 매핑 방법이 같다.
     
@@ -1609,7 +1643,7 @@
                     
                     ```java
                     @Entity
-                    public class Member{
+                    public class Member {
                       @Id @GeneratedValue
                       @Column(name = "MEMBER_ID")
                       private Long id;
@@ -1624,7 +1658,7 @@
                   
                     ```java
                     @Entity
-                    public class Locker{
+                    public class Locker {
                       @Id @GeneratedValue
                       private Long id;
                   
@@ -1638,13 +1672,13 @@
     
         * 정리하기
 
-            * ① 주 테이블에 외래 키가 있는 일대일 관계 - 객체지향 개발자가 선호하는 방식 
+            * ① 주 테이블에 외래 키가 있는 일대일 관계 - [객체지향 개발자가 선호하는 방식] 
             
                 * 장점 : 주 테이블만 조회해도 대상 테이블에 데이터가 있는지 확인 가능하다.
                 
                 * 단점 : 값이 없으면 외래 키에 null을 허용한다.
             
-            * ② 대상 테이블에 외래 키가 있는 일대일 관계 - DBA가 선호하는 방식
+            * ② 대상 테이블에 외래 키가 있는 일대일 관계 - [DBA가 선호하는 방식]
             
                 * 장점 : 주 테이블과 대상 테이블을 일대일에서 일대다 관계로 변경할 때 테이블 구조가 유지된다.
                 
@@ -1694,11 +1728,11 @@
                     
         * (4) 예시 - 다대다 매핑을 일대다 다대일로 변경하기
 
-            * 회원과 회원상품을 양방향 관계로 만든다. 회원 상품 엔티티 쪽이 외래 키를 가지고 있으므로 연관관계의 주인이다.
+            * ① 회원과 회원상품을 양방향 관계로 만든다. 회원 상품 엔티티 쪽이 외래 키를 가지고 있으므로 연관관계의 주인이다.
                 
                 ```java
                 @Entity
-                public class Member{
+                public class Member {
                   @Id @GeneratedValue
                   @Column(name = "MEMBER_ID")
                   private Long id;
@@ -1710,11 +1744,11 @@
                 }   
                 ```
               
-            * 회원 상품 엔티티는 기본 키를 매핑하는 `@Id`과 외래 키를 매핑하는 `@JoinColumn`을 동시에 사용한다.
+            * ② 회원 상품 엔티티는 기본 키를 매핑하는 `@Id`과 외래 키를 매핑하는 `@JoinColumn`을 동시에 사용한다.
             
                 ```java
                 @Entity
-                public class MemberProduct{
+                public class MemberProduct {
                   @Id @GeneratedValue
                   private Long id;
                 
@@ -1744,11 +1778,11 @@
                 }   
                 ```
               
-            * 상품 엔티티에서 회원 상품 엔티티로 연관관계를 만들었다.
+            * ③ 상품 엔티티에서 회원 상품 엔티티로 연관관계를 만들었다.
             
                 ```java
                 @Entity
-                public class Product{
+                public class Product {
                   @Id @GeneratedValue
                   private Long id;
               
@@ -1787,7 +1821,7 @@
     
         * 정석적인 방법이다.
     
-    * ② `단일 테이블 전략 (Single-Table Strategy)` : 테이블을 하나만 사용해서 통합한다. (기본 값)
+    * ② `단일 테이블 전략 (Single-Table Strategy)` : 하나의 테이블로 통합한다. (기본 값)
     
         * 구분 컬럼(DTYPE)으로 어떤 자식 데이터가 저장되었는지 구분한다.
     
@@ -1801,7 +1835,7 @@
     
         ![image 15](images/img15.png)
     
-        * `조인 전략(Joined Strategy)`은 엔티티 각각을 모두 테이블로 만들고 자식 테이블이 부모 테이블의 `기본 키`를 받아서 `기본 키 + 외래 키`로 사용하는 전략이다. 
+        * `조인 전략 (Joined Strategy)`은 엔티티 각각을 모두 테이블로 만들고 자식 테이블이 부모 테이블의 `기본 키`를 받아서 `기본 키 + 외래 키`로 사용하는 전략이다. 
         
             * 이 전략을 사용할 때 주의할 점이 있는데 객체는 타입으로 구분할 수 있지만 테이블은 타입의 개념이 없다. 
             
@@ -1815,13 +1849,16 @@
                 @Entity
                 @Inheritance(strategy = InheritanceType.JOINED)
                 @DiscriminatorColumn
-                public abstract class Item{
-                  @Id @GeneratedValue
-                  private Long id;
-              
-                  private String name;
-              
-                  private int price;
+                public abstract class Item {
+                    
+                    @Id @GeneratedValue
+                    private Long id;
+                    
+                    private String name;
+                    
+                    private int price;
+                    
+                    // Getter, Setter
                 }   
                 ```
               
@@ -1839,12 +1876,33 @@
             
                 ```java
                 @Entity
+                @DiscriminatorValue("A")
+                public class Album extends Item {
+                
+                    private String artist;  // 작곡가
+                
+                }
+                
+                @Entity
+                @DiscriminatorValue("B")
+                public class Book extends Item {
+                
+                    private String author;  // 작가
+                
+                    private String isbn;    // ISBN
+                
+                }
+                
+                @Entity
                 @DiscriminatorValue("M")
-                public class Movie extends Item{
-                  private String director;
-              
-                  private int price;
-                }   
+                public class Movie extends Item {
+                
+                    private String director;    // 감독
+                
+                    private String actor;       // 배우
+                
+                    // Getter, Setter
+                }
                 ```
           
                 * `@DiscriminatorValue("M")` : 자식 엔티티를 저장할 때, 구분 컬럼에 입력할 값을 지정한다.
@@ -1875,9 +1933,9 @@
     
         ![image 16](images/img16.png)
     
-        * `단일 테이블 전략(Single-Table Strategy)`은 하나의 테이블로 통합한다.
+        * `단일 테이블 전략 (Single-Table Strategy)`은 하나의 테이블로 통합한다.
         
-            * 그리고 구분 컬럼(DTYPE)으로 어떤 자식 데이터가 저장되었는지 구분한다.
+            * 그리고 구분 컬럼(DTYPE)으로 어떤 자식 데이터가 저장 되었는지 구분한다.
         
             * 이 전략을 사용할 때 주의점은 자식 엔티티가 매핑한 컬럼은 모두 null을 허용해야 한다는 점이다.
             
@@ -1888,14 +1946,18 @@
             ```java
             @Entity
             @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-            @DiscriminatorColumn
-            public abstract class Item{
-              @Id @GeneratedValue
-              private Long id;
-          
-              private String name;
-          
-              private int price;
+            @DiscriminatorColumn    // 단일 테이블 전략은 @DiscriminatorColumn가 없더라도 구분 컬럼을 무조건 추가한다.
+            public abstract class Item {
+                
+                @Id @GeneratedValue
+                private Long id;
+                
+                private String name;
+                
+                private int price;
+                
+                // Getter, Setter
+                
             }   
             ```
                  
@@ -1907,16 +1969,14 @@
 
         ![image 18](images/img18.png)
       
-        * `구현 클래스 마다 테이블 전략(Table-per-Concrete-Class Strategy)`은 자식 엔티티 마다 하나의 테이블을 만든다.
+        * `구현 클래스 마다 테이블 전략 (Table-per-Concrete-Class Strategy)`은 자식 엔티티 마다 하나의 테이블을 만든다.
     
             * 그리고 자식 테이블 각각에 필요한 컬럼이 모두 있다.
               
-            * 여러 자식 테이블을 함께 조회 할 때 성능이 느리다. (즉, 부모 엔티티 타입으로 조회 시) 
+            * 여러 자식 테이블을 함께 조회할 때 SQL에 UNION ALL을 사용해야 되기 때문에 성능이 느리다. (즉, 부모 엔티티 타입으로 조회 시) 
         
                 * Ex) `Item item = em.find(Item.class, movie.getId());`
-            
-                    * SQL에 UNION ALL을 사용해야 되기 때문에 성능이 느리다.
-                   
+    
                     * 이 전략은 데이터베이스 설계자와 ORM 전문가 둘 다 추천하지 않는다.
 
         * 예시
@@ -1924,17 +1984,17 @@
             ```java
             @Entity
             @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-            @DiscriminatorColumn
             public abstract class Item {
             
                 @Id @GeneratedValue
                 private Long id;
-            
+                
                 private String name;
-            
+                
                 private int price;
-            
-                //...
+                
+                // Getter, Setter
+                
             }
             ```
 
@@ -1945,6 +2005,8 @@
     * `@MappedSuperclass` : 자식 클래스에게 공통 매핑 정보를 제공하는 부모 클래스를 작성할 때 사용한다.
     
         * `@MappedSuperclass`로 지정한 클래스는 엔티티가 아니므로 `em.find()` 나 JPQL에서 사용할 수 없다.
+    
+            * Ex) `em.find(BaseEntity)` -> 불가능함
         
         * 해당 클래스를 직접 생성해서 사용할 일은 거의 없으므로 추상 클래스로 만드는 것을 권장한다.
         
@@ -1954,39 +2016,43 @@
     
 * (2) 예시
 
-    * BaseEntity를 작성하고 해당 클래스를 상속받도록 한다.
+    * ① BaseEntity를 작성한다.
 
         ```java
         @MappedSuperclass
         public abstract class BaseEntity {
-          // @Column는 없어도 됨. @Column를 사용할 수 있다는 것을 보여주기 위함
-          @Column(name = "INSERT_MEMBER") 
-          private String createdBy;
-      
-          private LocalDateTime createdDate;
-      
-          @Column(name = "UPDATE_MEMBER")
-          private String lastModifiedBy;
-      
-          private LocalDateTime lastModifiedDate;
-      
-          // Getter, Setter
+            // @Column는 없어도 됨. @Column를 사용할 수 있다는 것을 보여주기 위함
+            @Column(name = "INSERT_MEMBER") 
+            private String createdBy;
+            
+            private LocalDateTime createdDate;
+            
+            @Column(name = "UPDATE_MEMBER")
+            private String lastModifiedBy;
+            
+            private LocalDateTime lastModifiedDate;
+            
+            // Getter, Setter
         }   
         ```
-      
+
+    * ② 특정 엔티티 클래스가 BaseEntity를 상속 받도록 한다.      
+
         ```java
         @Entity
         public class Member extends BaseEntity {
-          @Id @GeneratedValue
-          @Column(name = "MEMBER_ID")
-          private Long id;
-      
-          @Column(name = "USER_NAME")
-          private String username;
+            @Id @GeneratedValue
+            @Column(name = "MEMBER_ID")
+            private Long id;
+            
+            @Column(name = "USER_NAME")
+            private String username;
         }   
         ```
       
-    * 엔티티를 만들어서 저장한다.
+        * BaseEntity를 상속 받는 자식 클래스는 공통 매핑 정보를 제공 받는다.
+      
+    * ③ 엔티티를 만들어서 저장한다.
 
         ```java
         Member member = new Member();
@@ -2001,56 +2067,61 @@
 
 ### 1. 프록시(Proxy)
 
-* `프록시 객체`는 실제 엔티티 객체를 대신하여 데이터베이스 조회를 지연 할 수 있는 가짜 객체를 말한다.
+* `프록시 객체`는 실제 엔티티 객체를 대신해서 데이터베이스 조회를 지연할 수 있는 가짜 객체를 말한다.
 
-* `em.find()` vs `em.getReference()` 
+* em.find() vs em.getReference() 
 
     * `em.find()` : 데이터베이스를 통해서 실제 엔티티 객체를 조회한다.
     
-    * `em.getReference()` : 데이터베이스 조회를 미루는 가짜(프록시) 엔티티 객체를 조회한다.
+    * `em.getReference()` : 데이터베이스 조회를 미루는 프록시 엔티티 객체를 조회한다.
+
+        ![image 27](images/img27.png)
 
 * 프록시 특징
 
-    * 프록시 클래스는 실제 클래스를 상속 받아서 만들어진다. 
+    * ① 프록시 클래스는 실제 클래스를 상속 받아서 만들어진다. 
 
-    * 프록시 객체는 실제 객체에 대한 참조(target)를 보관한다.
+        ![image 28](images/img28.png)
 
-    * 프록시 객체의 메소드를 호출하면 프록시 객체는 실제 객체의 메소드를 호출한다.
-    
+    * ② 프록시 객체는 실제 객체에 대한 참조(target)를 보관한다.
+
+    * ③ 프록시 객체의 메소드를 호출하면 프록시 객체는 실제 객체의 메소드를 호출한다.
+
+        ![image 29](images/img29.png)    
+
 * 프록시 객체의 초기화
     
-    * `프록시 객체의 초기화`는 프록시 객체가 사용될 때, 데이터베이스를 조회해서 실제 엔티티 객체를 생성하는 것을 말한다.
+    * `프록시 객체의 초기화`는 프록시 객체가 실제 사용될 때, 영속성 컨텍스트를 통해 실제 엔티티 객체를 생성하는 것이다.
     
-        * 즉, 프록시 객체의 메소드를 호출하면 초기화가 진행된다.
+    * 프록시의 초기화 과정
+
+        * 소스코드
 
             ```java
-            Member findMember = em.getReference(Member.class, "id1");
-          
-            // [결과] findMember = class hellojpa.Member$HibernateProxy$ZIFtUTMC
-            // System.out.println("findMember = " + findMember.getClass()); 
-          
-            findMember.getName(); // 프록시 객체의 메소드 호출
+            /* findMember의 클래스 타입이 hellojpa.Member$HibernateProxy$ZIFtUTMC인 것을 확인할 수 있다. */
+            Member findMember = em.getReference(Member.class, "id1");   // 프록시 객체를 반환한다.
+            findMember.getName();                                       // 프록시 객체의 메소드를 호출하면 프록시의 초기화가 진행된다. 
             ```
 
-    * 프록시의 초기화 과정
+        * 그림
     
-        ![image 17](images/img17.png)
-    
-        * ① 프록시 객체(`member`)의 `getName()`을 호출해서 실제 데이터를 조회한다.
-    
-            * 이 시점에는 프록시 객체의 target에 값이 없다.
-          
-        * ② 프록시 객체는 실제 엔티티 객체가 생성되어 있지 않으면 영속성 컨텍스트에 실제 엔티티 객체 생성을 요청한다. 이것을 프록시의 초기화라 한다.
-          
-        * ③ 영속성 컨텍스트는 데이터베이스를 조회해서 실제 엔티티 객체를 생성한다.
-          
-        * ④ 프록시 객체는 생성된 실제 엔티티 객체의 참조를 `Member` 타입의 `target` 멤버변수에 보관한다.
+            ![image 17](images/img17.png)
         
-            * ② ~ ④의 과정은 `target`에 값이 없을 때만 진행된다. 
-          
-        * ⑤ 프록시 객체는 실제 엔티티 객체의 `getName()`을 호출해서 결과를 반환한다.
+            * ① 프록시 객체(`member`)의 메소드(`getName()`)를 호출한다.
         
-* 프록시 정리
+                * 이 시점에는 프록시 객체의 target에 값이 없다.
+              
+            * ② 프록시 객체는 실제 엔티티 객체가 생성되어 있지 않으면 영속성 컨텍스트에 실제 엔티티 객체의 생성을 요청한다. 이것을 프록시의 초기화라 한다.
+              
+            * ③ 영속성 컨텍스트는 데이터베이스를 조회해서 실제 엔티티 객체를 생성한다.
+              
+            * ④ 프록시 객체는 생성된 실제 엔티티 객체의 참조를 `target` 멤버 변수에 보관한다.
+            
+                * ② ~ ④의 과정은 `target`에 값이 없을 때만 진행된다. 
+              
+            * ⑤ 프록시 객체는 실제 엔티티 객체의 메소드(`getName()`)를 호출해서 결과를 반환한다.
+        
+* 프록시 정리하기
 
     * ① 프록시 객체는 처음 사용할 때 한 번만 초기화된다.
 
@@ -2072,16 +2143,16 @@
         System.out.println("reference = " + reference.getClass()); // reference = class hellojpa.Member
         ```
     
-        * JPA는 같은 트랜잭션 안에서 같은 엔티티를 반환한다.
+        * JPA는 같은 트랜잭션 안에서 조회하면 같은 엔티티를 반환한다.
     
-            * 즉, JPA에서 실제 엔티티, 프록시 객체 중 무엇이던간에 `==` 비교는 `true`를 반환해야 한다.
+            * 즉, JPA에서 같은 트랜잭션 안에서 조회 했다면 실제 엔티티, 프록시 객체 중 무엇이던간에 `==` 비교는 `true`를 반환해야 한다.
 
     * ⑤ 영속성 컨텍스트에 찾는 엔티티가 이미 프록시로 있다면 `em.find()`를 호출해도 프록시를 반환한다. 
   
     * ⑥ 영속성 컨텍스트의 도움을 받을 수 없는 준영속 상태일 때, 프록시를 초기화 하면 문제가 발생한다.
 
         ```java
-        try{
+        try {
             Member member1 = new Member();
             member1.setUsername("member1");
             em.persist(member1);
@@ -2089,7 +2160,7 @@
             em.flush();
             em.clear();
             
-            Member refMember= em.getReference(Member.class, member1.getId());
+            Member refMember = em.getReference(Member.class, member1.getId());
             System.out.println("refMember = " + refMember.getClass());
             
             em.detach(refMember); // refMember를 준영속 상태로 만들기
@@ -2098,10 +2169,10 @@
             refMember.getUsername(); // LazyInitializationException 예외 발생
             
             tx.commit();
-        }catch (Exception e){
+        } catch (Exception e) {
             tx.rollback();
             e.printStackTrace();
-        }finally {
+        } finally {
             em.close();
         }
         ```
@@ -2127,62 +2198,62 @@
 
 * JPA는 개발자가 연관된 엔티티의 조회 시점을 선택 할 수 있도록 두 가지 방법을 제공한다.
 
-    * ① `즉시 로딩(EAGER LOADING)` : 엔티티를 조회할 때, 연관된 엔티티도 함께 조회하는 방식이다.
-    
-        * 예시 : `em.find(Member.class, "member1")` 처럼 호출할 때, 회원 엔티티와 연관된 팀 엔티티도 함께 조회한다.
-    
-            * 프록시를 사용하지 않는다.
-    
-        * 설정 방법 : `@ManyToOne(fetch = FetchType.EAGER)`
-    
-    * ② `지연 로딩(LAZY LOADING)`: 연관된 엔티티를 실제 사용할 때 조회하는 방식이다.
-    
-        * 연관된 엔티티를 프록시 객체로 조회한다. 그리고 프록시 객체를 실제 사용할 때, 초기화하면서 데이터베이스를 조회한다.
-    
-        * 예시 : `em.find(Member.class, "member1")` 처럼 호출할 때, 회원(member1)을 조회하고 회원의 team 멤버 변수에 프록시 객체를 넣어둔다.
-            
-            * `member.getTeam().getName()`처럼 팀 엔티티를 실제 사용하는 시점에 데이터베이스를 조회해서 프록시 객체를 초기화한다.
+    * ① `즉시 로딩 (EAGER LOADING)` : 엔티티를 조회할 때, 연관된 엔티티도 함께 조회하는 방식이다. 
+
+        * 연관된 엔티티를 프록시 객체로 조회하지 않는다. 따라서 연관된 엔티티가 실제 엔티티 객체다.   
+
+            * [예시] `em.find(Member.class, "member1")` 처럼 호출할 때, 회원 엔티티와 연관된 팀 엔티티도 함께 조인으로 조회한다.
         
-                * 조회 대상이 영속성 컨텍스트에 이미 있으면 프록시 객체가 아닌 실제 객체를 사용한다.
+            * [설정 방법] `@ManyToOne(fetch = FetchType.EAGER)`
     
-        * 설정 방법 : `@ManyToOne(fetch = FetchType.LAZY)`
+    * ② `지연 로딩 (LAZY LOADING)`: 연관된 엔티티를 실제 사용할 때 조회하는 방식이다.
+    
+        * 연관된 엔티티를 프록시 객체로 조회한다. 그리고 프록시 객체를 실제 사용할 때, 초기화를 하면서 데이터베이스를 조회한다.
+    
+            * [예시] `em.find(Member.class, "member1")` 처럼 호출할 때, 회원(member1)을 조회하고 회원의 team 멤버 변수에 프록시 객체를 넣어둔다.
+                
+                * `member.getTeam().getName()`처럼 팀 엔티티를 실제 사용하는 시점에 데이터베이스를 조회해서 프록시 객체를 초기화한다.
+            
+                    * 조회 대상이 영속성 컨텍스트에 이미 있으면 프록시 객체가 아닌 실제 객체를 사용한다.
+        
+            * [설정 방법] `@ManyToOne(fetch = FetchType.LAZY)`
         
 * 주의사항
 
-    * **실무에서는 모든 연관관계에 `지연 로딩(LAZY LOADING)`을 사용해야 한다.**
+    * ① **실무에서는 모든 연관관계에 `지연 로딩 (LAZY LOADING)`을 사용해야 한다.**
 
-    * `즉시 로딩(EAGER LOADING)`을 적용하면 예상하지 못한 쿼리가 발생한다.
+    * ② `즉시 로딩 (EAGER LOADING)`을 적용하면 예상하지 못한 쿼리가 발생한다.
     
-    * `즉시 로딩`은 JPQL에서 `N+1` 문제를 일으킨다.
+    * ③ `즉시 로딩`은 JPQL에서 `N+1` 문제를 일으킨다.
     
-        * `N+1 문제` : 처음에 쿼리 1개를 실행 했을 때, 얻은 결과의 개수(`N 개`)만큼 추가 쿼리가 발생하는 문제를 말한다.
+        * `N+1 문제` : 처음에 쿼리 1개를 실행 했을 때, 얻은 결과의 개수(`N개`)만큼 추가 쿼리가 발생하는 문제를 말한다.
 
             * N+1 문제의 발생 케이스와 해결책
 
-                * 예제로 사용할 엔티티
+                * 예제로 사용할 엔티티는 다음과 같다.
 
                     * 회원 (Member)
 
                         ```java
                         @Entity
                         public class Member {
-                          @Id @GeneratedValue
-                          @Column(name = "MEMBER_ID")
-                          private Long id;
-                        
-                          @Column(name = "USER_NAME")
-                          private String username;
-                        
-                          @ManyToOne
-                          @JoinColumn(name = "TEAM_ID", fetch = FetchType.EAGER)
-                          private Team team;
-                        
-                          // 연관관계 편의 메소드
-                          public void changeTeam(Team team) {
-                              this.team = team;
-                              team.getMembers().add(this);
-                          } 
-                        }   
+                            @Id @GeneratedValue
+                            @Column(name = "MEMBER_ID")
+                            private Long id;
+                            
+                            @Column(name = "USER_NAME")
+                            private String username;
+                            
+                            @ManyToOne(fetch = FetchType.EAGER)
+                            @JoinColumn(name = "TEAM_ID")
+                            private Team team;
+                            
+                            // 연관관계 편의 메소드
+                            public void changeTeam(Team team) {
+                                this.team = team;
+                                team.getMembers().add(this);
+                            } 
+                        }
                         ```
 
                     * 팀 (Team)
@@ -2190,20 +2261,20 @@
                         ```java
                         @Entity
                         public class Team {
-                          @Id @GeneratedValue
-                          @Column(name = "TEAM_ID")
-                          private Long id;
-                      
-                          private String name;
-                          
-                          @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
-                          private List<Member> members = new ArrayList<>();
+                            @Id @GeneratedValue
+                            @Column(name = "TEAM_ID")
+                            private Long id;
+                            
+                            private String name;
+                            
+                            @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
+                            private List<Member> members = new ArrayList<>();
                         }   
                         ```
     
-                * N+1 문제의 발생 케이스
+                * N+1 문제가 발생하는 케이스는 다음과 같다. 
                       
-                    * ① 특정 엔티티의 연관된 엔티티를 즉시 로딩(EAGER)으로 설정하고 JPQL로 특정 엔티티를 조회하는 경우에 `N+1` 문제가 발생한다.
+                    * ⓐ 특정 엔티티의 연관된 엔티티를 즉시 로딩(EAGER)으로 설정하고 JPQL로 특정 엔티티를 조회하는 경우에 `N+1` 문제가 발생한다.
 
                         ```java
                         // 초기 데이터 설정
@@ -2232,18 +2303,38 @@
                         List<Member> members = em.createQuery("select m from Member m", Member.class)
                                 .getResultList();
                         ```
-                      
-                        * 일단, JPQL(`select * from Member`)로 회원(Member) 엔티티를 조회한다.
-            
-                            * Member 클래스를 보면 연관된 엔티티인 Team이 즉시 로딩(EAGER)으로 설정되어 있다.
-            
-                        * 그러면 즉시, `select * from Team where TEAM_ID = xxx`라는 쿼리를 실행해서 연관된 엔티티인 Team을 조회한다.
-            
-                            * [해결책] 만약 연관된 엔티티인 Team을 LAZY로 설정하면 프록시 객체를 넣게 되며 N+1 문제도 발생하지 않는다.
+
+                        * 문제 상황 설명
+                          
+                            * 일단, JPQL(`select m from Member m`)로 회원(Member) 엔티티를 조회한다.
+                
+                                * Member 클래스를 보면 연관된 엔티티인 Team이 즉시 로딩(EAGER)으로 설정되어 있다.
+        
+                                * 그리고 Team은 조회하지 않은 상황이다.
+                
+                            * 그러면 즉시, `select t from Team t where t.TEAM_ID = xxx`라는 쿼리(SQL)를 실행해서 연관된 엔티티인 Team을 조회한다.
+        
+                            * 정리 하자면, JPQL(`select m from Member m`)로 회원(Member)만 조회 하더라도 조회한 회원의 결과 개수(`N`)만큼 연관된 엔티티인 팀(Team)을 조회하는 추가 쿼리가 발생한다. 
+
+                        * 해결책
+                          
+                            * 연관된 엔티티인 Team을 LAZY로 설정하면 연관된 엔티티에 프록시 객체를 넣게 되며 N+1 문제도 발생하지 않는다.
+
+                                ```java
+                                @Entity
+                                public class Member {
     
-                        * 정리 하자면, JPQL(`select * from Member`)로 회원(Member)만 조회하더라도 조회한 회원의 결과 개수(`N`)만큼 연관된 엔티티인 팀(Team)을 조회하는 추가 쿼리가 발생한다. 
-    
-                    * ② 특정 엔티티의 연관된 엔티티(`@OneToMany`)를 지연 로딩(LAZY)으로 설정하더라도 Loop를 이용해서 조회하면 N+1 문제가 발생한다.    
+                                    // ...
+                                
+                                    @ManyToOne(fetch = FetchType.LAZY)
+                                    @JoinColumn(name = "TEAM_ID")
+                                    private Team team;
+                                
+                                    // ...
+                                }
+                                ```
+
+                    * ⓑ 특정 엔티티의 연관된 엔티티(`@OneToMany`)를 지연 로딩(LAZY)으로 설정하더라도 Loop를 이용해서 조회하면 N+1 문제가 발생한다.    
 
                         ```java
                         // 초기 데이터 설정
@@ -2276,16 +2367,20 @@
                             System.out.println("team.getMembers() = " + team.getMembers());
                         } 
                         ```
+                      
+                        * 문제 상황 설명
 
-                        * 일단, JPQL(`select t from Team t`)로 팀(Team) 엔티티를 조회한다.
-
-                            * Team 클래스를 보면 연관된 엔티티인 Member가 지연 로딩(LAZY)으로 설정되어 있다.
-
-                        * 그러면 Team 엔티티에서 연관된 엔티티인 List<Member>에 프록시 객체를 넣어두게 되며 N+1 문제는 발생하지 않는다.
+                            * 일단, JPQL(`select t from Team t`)로 팀(Team) 엔티티를 조회한다.
     
-                        * 하지만 앞서 조회한 List<Team>를 Loop로 반복하며 팀(Team)과 연관된 엔티티 필드를 사용하면 프록시 초기화를 위한 쿼리가 발생하며 결과적으로 N+1 문제가 발생한다. 
+                                * Team 클래스를 보면 연관된 엔티티인 Member가 지연 로딩(LAZY)으로 설정되어 있다.
+    
+                            * 그러면 Team 엔티티에서 연관된 엔티티인 List<Member>에 프록시 객체를 넣어두게 되며 N+1 문제는 발생하지 않는다.
+        
+                            * 하지만 앞서 조회한 List<Team>를 Loop로 반복하며 팀(Team)과 연관된 엔티티 필드를 사용하면 프록시 초기화를 위한 쿼리가 발생하며 결과적으로 N+1 문제가 발생한다. 
 
-                            * [해결책] 팀(Team) 엔티티를 조회할 때, 연관된 엔티티인 Member를 함께 조회하도록 Fetch 조인을 사용하면 된다. 
+                        * 해결책
+
+                            * 팀(Team) 엔티티를 조회할 때, 연관된 엔티티인 Member를 함께 조회하도록 Fetch 조인을 사용하면 된다. 
 
                                 ```java
                                 // 일대다 조인은 일(1)의 기준에서는 데이터가 더 많아질 수 있기 때문에 distinct를 사용했다. 
@@ -2295,13 +2390,13 @@
 
                 * N+1 문제에 대한 해결책
                 
-                    * ① JPQL의 fetch 조인을 이용한다.
+                    * ⓐ JPQL의 fetch 조인을 이용한다.
                     
-                    * ② `@EntityGraph`를 이용한다.
+                    * ⓑ `@EntityGraph`를 이용한다.
                     
-                    * ③ `@BatchSize`를 이용한다.
+                    * ⓒ `@BatchSize`를 이용한다.
                 
-    * `@ManyToOne`, `@OneToOne`의 기본 값은 즉시(EAGER) 로딩이므로 `LAZY`로 설정해야 한다.
+    * ④ `@ManyToOne`, `@OneToOne`의 기본 값은 즉시(EAGER) 로딩이므로 `LAZY`로 설정해야 한다.
     
         * `@XToOne` 시리즈는 `LAZY`로 설정해야 한다.
 
@@ -2331,19 +2426,19 @@
         
     * 주의사항
     
-        * 영속성 전이는 연관관계를 매핑하는 것과 아무 관련이 없다.
+        * CASCADE는 연관관계를 매핑하는 것과 아무 관련이 없다.
         
         * 단지 엔티티를 영속화할 때 연관된 엔티티도 함께 영속화하는 편리함을 제공할 뿐이다.
         
         * **특정 엔티티가 개인 소유(혼자서 참조)하는 엔티티에만 CASCADE 속성을 사용해야 한다.**
     
-            * 즉, Parent 엔티티만 Child 엔티티를 참조하는 경우에만 사용해야 한다는 의미다.
+            * 즉, **하나의 부모 엔티티만 자식 엔티티를 참조하는 경우에 CASCADE 속성을 사용해야 한다**는 의미다.
     
             * 만약 Parent 이외에도 Member도 Child를 참조한다면 CASCADE를 사용해서는 안 된다.
 
 * 실습하기
     
-    * 부모 엔티티
+    * ① 부모 엔티티를 작성한다.
     
         ```java
         @Entity
@@ -2363,7 +2458,7 @@
         }
         ```
         
-    * 자식 엔티티
+    * ② 자식 엔티티를 작성한다.
     
         ```java
         @Entity
@@ -2377,18 +2472,46 @@
         }
         ```
       
-    * 부모를 영속화할 때, 연관된 자식들도 함께 영속화한다.
+    * ③ 부모 엔티티를 영속화할 때, 연관된 자식 엔티티들도 함께 영속화한다.
 
         ```java
         Child child1 = new Child();
         Child child2 = new Child();
-      
+        
         Parent parent = new Parent();
         parent.addChild(child1); // 연관관계 설정
         parent.addChild(child2); // 연관관계 설정
-      
+        
         em.persist(parent); // 부모 저장, 연관된 자식들 저장
+        /* 
+        em.persist(child1);
+        em.persist(child2); 
+        */
         ```
+
+* [참고] persist, remove 호출 순서      
+
+    * 다대일(일대다) 관계에서 `1`에 해당하는 엔티티를 먼저 persist 한 다음, `N`에 해당하는 엔티티를 persist 하자.
+    
+        ```java
+        em.persist(parent);
+        em.persist(child1);
+        em.persist(child2);
+        ```
+        
+        * 양방향 연관관계인 경우에 반대 순서로 persist를 하게 되면 불필요한 UPDATE 쿼리가 추가적으로 발생함.
+        
+    * 다대일(일대다) 관계에서 `N`에 해당하는 엔티티를 먼저 delete 한 다음, `1`에 해당하는 엔티티를 delete 하자.
+    
+        ```java
+        em.remove(child1);
+        em.remove(child2);
+        em.remove(parent);
+        ```
+        
+        * 외래 키 제약 조건으로 인해 자식 테이블에 데이터가 남아 있으면, 부모 테이블의 데이터를 변경하거나 삭제할 수 없다.
+        
+        * 따라서 자식 엔티티 부터 삭제해야 한다. 
     
 ### 4. 고아 객체
 
@@ -2398,7 +2521,7 @@
 
 * 실습하기
     
-    * 고아 객체 제거 기능을 활성화한다. 
+    * ① 고아 객체 제거 기능을 활성화한다. 
     
         ```java
         @Entity
@@ -2416,7 +2539,7 @@
         }
         ```
               
-    * 이제 컬렉션에서 제거한 자식 엔티티는 자동으로 삭제된다.
+    * ② 부모 엔티티의 컬렉션에서 자식 엔티티를 삭제하면 자동으로 DB에서도 삭제한다.
 
         ```java
         Parent findParent = em.find(Parent.class, parent.getId());
@@ -2435,17 +2558,21 @@
 
 * 영속성 전이 + 고아 객체, 생명주기
 
-    * `CascadeType.ALL + orphanRemovel=true` : 두 옵션을 모두 활성화 하면 부모 엔티티를 통해서 자식의 생명주기를 관리할 수 있다.
+    * `CascadeType.ALL + orphanRemoval=true` : 두 옵션을 모두 활성화 하면 부모 엔티티를 통해서 자식의 생명주기를 관리할 수 있다.
 
-        * 도메인 주도 설계(DDD)의 `Aggregate Root` 개념을 구현할 때, 유용하다.
+        * 도메인 주도 설계 (DDD)의 `Aggregate Root` 개념을 구현할 때, 유용하다.
     
             * 부모 엔티티의 데이터를 삭제하면 자식 엔티티의 데이터도 함께 삭제된다. - CASCADE
     
-            * 자식 엔티티를 부모 엔티티와 연관관계를 끊으면 자식 테이블에서 자식 데이터가 삭제된다. - orphanRemovel 
+            * 자식 엔티티를 부모 엔티티와 연관관계를 끊으면 자식 테이블에서 자식 데이터가 삭제된다. - orphanRemoval
+    
+        * 두 옵션을 모두 활성화 하면 자식 엔티티에 대해서는 리포지토리를 만들지 않아도 된다.
+    
+            * 그 이유는 부모 엔티티를 통해서 자식 엔티티의 생명주기를 관리하기 때문이다.
 
-## 9. 값 타입
+### 9. 값 타입
 
-### 1. JPA의 데이터 타입 분류
+#### 1) JPA의 데이터 타입 분류
 
 * JPA의 데이터 타입은 크게 `엔티티 타입`과 `값 타입`으로 나눌 수 있다.
 
@@ -2454,465 +2581,252 @@
         * `엔티티 타입` : `@Entity`로 정의한 객체다.
 
             * 데이터가 변해도 식별자를 통해 지속해서 추적 할 수 있다.
-    
-                * Ex) 회원 엔티티의 나이 값을 변경해도 식별자로 인식 가능하다. 
-        
+
+                * Ex) 회원 엔티티의 나이 값을 변경해도 식별자로 인식 가능하다.
+
             * 공유 할 수 있다.
 
-    * ② 값 타입(Value Type)
+    * ② 값 타입 (Value Type)
 
-        * `값 타입` : int, Integer, String처럼 단순히 값으로 사용하는 자바의 기본 타입이나 객체다.
+        * `값 타입` : int, Integer, String 처럼 단순히 값으로 사용하는 자바의 기본 타입이나 객체다.
 
             * 식별자가 없고 값만 있으므로 변경 시 추적 할 수 없다.
-    
+
                 * Ex) 숫자 100을 200으로 변경하면 완전히 다른 값으로 대체된다.
-        
-            * 공유하지 않는 것이 안전하다. (복사해서 사용)
-        
-            * 불변 객체로 만드는 것이 안전하다.
-        
-* 값 타입 분류
 
-    * `값 타입 (Value Type)`은 크게 3 가지로 나눌 수 있다.
+            * 값 타입은 생명주기를 엔티티에 의존한다.
 
-        * ① `기본값 타입`
-    
-            * 자바 기본 타입(int, double ...)
-        
-            * 래퍼 클래스(Integer, Long ...)
-        
-            * String
+                * Ex) 회원 엔티티를 삭제하면 이름, 나이 필드도 함께 삭제된다.
 
-        * ② `임베디드 타입(embedded type, 복합 값 타입)`
+            * 값 타입을 여러 엔티티에서 공유해서 사용하면 안 된다.
 
-        * ③ `컬렉션 값 타입(collection value type)`
-        
-    * (1) 기본 값 타입
+                * Ex) 회원 이름 변경 시 다른 회원의 이름도 함께 변경되면 안 되기 때문이다.
+
+            * [참고] 자바의 기본 타입(primitive type)은 절대 공유되지 않는다.
+
+                * int, double과 같은 기본 타입은 절대 공유되지 않는다.
+
+                    * 기본 타입은 항상 값을 복사하기 때문이다.
+
+                    * 그래서 기본 타입을 값 타입으로 사용 했을 때, 안전하다.
+
+                * Integer 같은 래퍼 클래스나 String 과 같은 특수한 클래스는 공유 가능한 객체이지만 변경 불가능 (Immutable)하다.
+
+                    * 따라서 부작용 (Side effect)이 발생하지 않는다.
+
+#### 2) 값 타입 분류
+
+* `값 타입 (Value Type)`은 크게 3 가지로 나눌 수 있다.
+
+    * ① `기본 값 타입 (Basic Value Type)` : 자바의 기본 타입 (int, double ...), 래퍼 클래스 (Integer, Long ...), String과 같은 것을 말한다.
+
+    * ② `임베디드 타입 (Embedded Type, 복합 값 타입)` : 다른 타입들을 포함하고 있는 타입을 말한다.
+
+        * 주로 기본 값 타입을 모아서 만들기 때문에 `복합 값 타입 (Composite Value Type)`이라고도 한다.
+
+        * 임베디드 타입도 `int`, `String`과 같은 **값 타입**이다.
+
+    * ③ `값 타입 컬렉션 (Value Type Collection)` : **컬렉션에 값 타입을 넣어서 사용하는 것**을 말한다.
+
+#### 3) 임베디드 타입
+
+* (1) 임베디드 타입의 장점
+
+    * 재사용이 가능하다.
+
+    * 응집도가 높다.
+
+        * `Period.isWork()`처럼 해당 값 타입만 사용하는 의미 있는 메소드를 만들 수 있다.
+
+* (2) 임베디드 타입을 사용하는 경우
+
+    * 회원 엔티티는 이름, 근무 시작일과 종료일, 도시, 번지, 우편번호를 가진다.
     
-        * 예를 들어 `String name`, `int age`가 기본 값 타입이다.
-    
-        * 값 타입은 생명주기를 엔티티에 의존한다.
-      
-            * Ex) 회원 엔티티를 삭제하면 이름, 나이 필드도 함께 삭제된다.
-    
-        * 값 타입은 공유하면 안 된다.
-    
-            * Ex) 회원 이름 변경 시 다른 회원의 이름도 함께 변경되면 안 되기 때문이다.
-    
-        * [참고] 자바의 기본 타입(primitive type)은 절대 공유되지 않는다.
-    
-            * int, double과 같은 기본 타입은 절대 공유되지 않는다.
-    
-                * 기본 타입은 항상 값을 복사하기 때문이다.
+        ```java
+        public class Member {
+            private Long id;                    
+            private String name;                // 이름
             
-                * 그래서 기본 타입을 값 타입으로 사용 했을 때, 안전하다.
-    
-            * Integer 같은 래퍼 클래스나 String 같은 특수한 클래스는 공유 가능한 객체이지만 변경 불가능(Immutable)하다.
-    
-                * 따라서 부작용 (Side effect)이 발생하지 않는다.
-                  
-    * (2) 임베디드 타입 (복합 값 타입)
-    
-        * `임베디드 타입(embedded type)`은 다른 타입들을 포함하고 있는 타입을 말한다.
+            private LocalDateTime startDate;    // 근무 시작일
+            private LocalDateTime endDate;      // 근무 종료일
         
-            * 주로 기본 값 타입을 모아서 만들기 때문에 `복합 값 타입(Composite Value Type)`이라고도 한다.
-            
-            * 임베디드 타입도 `int`, `String`과 같은 **값 타입**이다.
-
-        * 임베디드 타입의 장점
-
-            * 재사용이 가능하다.
-            
-            * 응집도가 높다.
-            
-                * `Period.isWork()`처럼 해당 값 타입만 사용하는 의미 있는 메소드를 만들 수 있다.
-
-        * 임베디드 타입을 사용하는 경우
+            private String city;                // 도시
+            private String street;              // 번지
+            private String zipcode;             // 우편번호
+        }
+        ```
     
-            * 회원 엔티티는 이름, 근무 시작일과 종료일, 도시, 번지, 우편번호를 가진다.
-
-                ```java
-                public class Member{
-                    private Long id;
-                    private String name;
-                    
-                    private LocalDateTime startDate;
-                    private LocalDateTime endDate;
+    * 여기서, 임베디드 타입을 이용하면 "회원 엔티티는 이름, 근무 기간, 집 주소를 가진다."로 변경할 수 있다.
+    
+        ```java
+        public class Member {
+            private Long id;
+            
+            private String name;                // 이름
+            
+            private Period workPeriod;          // 근무 기간
                 
-                    private String city;
-                    private String street;
-                    private String zipcode;
+            private Address homeAddress;        // 집 주소
+        }
+        ```
+
+* (3) 임베디드 타입과 테이블을 매핑하기
+
+    * 매핑 결과를 그림으로 먼저 살펴보기
+
+        ![image 23](images/img23.png)
+
+        * ① 임베디드 타입은 엔티티의 값일 뿐이다.
+
+        * ② **임베디드 타입을 사용하기 전과 후에 매핑하는 테이블은 같다.**
+
+        * ③ **임베디드 타입 덕분에 객체와 테이블을 아주 세밀하게 (find-grained) 매핑하는 것이 가능하다.**
+
+        * ④ 잘 설계한 ORM 애플리케이션은 매핑한 테이블의 수 보다 클래스의 수가 더 많다.
+
+        * ⑤ 임베디드 타입은 값 타입을 포함하거나 엔티티를 참조할 수 있다.
+
+    * 실습하기
+
+        * ① 임베디드 타입을 정의한다.
+
+            ```java
+            @Embeddable
+            public class Period {
+            
+                private LocalDateTime startDate;
+            
+                private LocalDateTime endDate;
+            
+                public Period() {
                 }
-                ```
-
-            * 임베디드 타입을 이용하면 "회원 엔티티는 이름, 근무 기간, 집 주소를 가진다."로 변경 할 수 있다.
-
-                ```java
-                public class Member{
-                    private Long id;
-                    
-                    private String name;
-                    
-                    private Period workPeriod;
-                    
-                    private Address homeAddress;
-                }
-                ```
-
-        * 임베디드 타입을 정의해서 사용하기
-
-            * ① 임베디드 타입과 테이블을 매핑한다.
-
-                * `@Embeddable` : 임베디드 타입을 정의하는 곳에 붙여준다.
-                
-                    ```java
-                    @Embeddable
-                    public class Address {
-                        private String city;
-                        private String street;
-                        private String zipcode;
-                    
-                        // 기본 생성자 필수
-                        public Address() {
-                        }
-                    
-                        public Address(String city, String street, String zipcode) {
-                            this.city = city;
-                            this.street = street;
-                            this.zipcode = zipcode;
-                        }
-                    
-                        /*
-                        * Getter만 만들기
-                        * "값 타입"을 여러 엔티티에서 공유하면 위험하다. 그 이유는 부작용(side effect)이 발생하기 때문이다.
-                        * 불변 객체(immutable object)로 만들기 위해, 생성자로만 값을 설정하고 수정자(Setter)는 만들지 않는다.
-                        * */
-                    
-                    }
-                    ```
-    
-                    * **임베디드 타입은 기본 생성자가 필수다.** 
-    
-                * `@Embedded` : 임베디드 타입을 사용하는 곳에 붙여준다.
-                
-                    ```java
-                    @Entity
-                    public class Member{
-                    
-                        @Id @GeneratedValue
-                        @Column(name = "MEMBER_ID")
-                        private Long id;
-                    
-                        @Column(name = "USERNAME")
-                        private String username;
-                    
-                        // Period
-                        @Embedded
-                        private Period workPeriod;
-                    
-                        // 주소
-                        @Embedded
-                        private Address homeAddress;
-                    
-                        // Getter
-                    }
-                    ```
-    
-            * ② 엔티티를 등록한다.
-        
-                ```java
-                Member member = new Member();
-                member.setUsername("hello");
-                member.setHomeAddress(new Address("city", "street", "100"));
-                
-                em.persist(member);
-                ```
-
-            * 정리하기
-
-                ![image 23](images/img23.png)    
-
-                * 임베디드 타입은 엔티티의 값일 뿐이다.
-    
-                * **임베디드 타입을 사용하기 전과 후에 매핑하는 테이블은 같다.**
-    
-                * **임베디드 타입 덕분에 객체와 테이블을 아주 세밀하게(find-grained) 매핑하는 것이 가능하다.**
-    
-                * 잘 설계한 ORM 애플리케이션은 매핑한 테이블의 수 보다 클래스의 수가 더 많다.
-    
-                * 임베디드 타입은 값 타입을 포함하거나 엔티티를 참조 할 수 있다.
-
-                    ```java
-                    @Embeddable
-                    public class Address{
-                        String street;
-                        String city;
-                        String state;
-                        
-                        @Embedded 
-                        Zipcode zipcode; // 임베디드 타입 포함
-                    }
-                    
-                    @Embeddable
-                    public class PhoneNumber{
-                        String areaCode;
-                        String localNumber;
-                        
-                        @ManyToOne
-                        PhoneServiceProvider provider; // 엔티티 참조
-                    }
-                    ```
-                  
-        * 하나의 엔티티 내에서 같은 값 타입을 여러 개 선언하기
-
-            * `@AttributeOverrides` : 임베디드 타입에 정의한 매핑 정보를 재정의한다. 
-
-                * 하나의 엔티티에서 같은 값 타입을 사용하면 테이블에 매핑하는 컬럼명이 중복된다.
-        
-                * 이때는 `@AttributeOverrides`를 사용해서 매핑 정보(컬럼명 속성)를 재정의한다.
-    
-            * 예시
-
-                ```java
-                @Entity
-                public class Member{
-                
-                    //...
-                
-                    @Embedded
-                    private Address homeAddress;
-                
-                    @Embedded
-                    @AttributeOverrides({
-                            @AttributeOverride(name = "city",
-                                               column = @Column(name = "COMPANY_CITY")),
-                            @AttributeOverride(name = "street",
-                                               column = @Column(name = "COMPANY_STREET")),
-                            @AttributeOverride(name = "zipcode",
-                                               column = @Column(name = "COMPANY_ZIPCODE"))
-                    })
-                    private Address companyAddress;
-                
-                }
-                ```
-              
-                * `@AttributeOverride`의 속성은 다음과 같다.
-              
-                    * `name` : 임베디드 타입 내에 있는 필드 이름을 의미한다.
-        
-                    * `column` : 임베디드 타입 내에 있는 필드와 매핑 하고자 하는 테이블의 컬럼 이름을 의미한다.
-
-        * 임베디드 타입과 null
-    
-            * 임베디드 타입의 값이 null이면 매핑한 컬럼 값은 모두 null이 된다.
-
-                ```java
-                member.setAddress(null); // null 입력
-                em.persist(member);
-                ```
-              
-                * 예를 들어, Address가 null이면 회원 테이블의 주소와 관련된 CITY, STREET, ZIPCODE 컬럼 값은 모두 null이 된다.
-
-    * (3) 컬렉션 값 타입
-    
-        * 컬렉션 값 타입?
-    
-            * `컬렉션 값 타입 (collection value type)` : **컬렉션에 값 타입을 넣어서 사용하는 것**을 말한다.
-    
-                * 값 타입을 하나 이상 저장할 때, 컬렉션 값 타입을 사용한다.
-                    
-                * `@ElementCollection`, `@CollectionTable`를 사용해서 매핑한다.
             
-                * 관계형 데이터베이스의 테이블은 컬럼 안에 컬렉션을 포함 할 수 없다. 
-        
-                    * JSON을 지원하는 DB는 가능한 경우도 있다. 하지만 기본적으로는 가능하지 않다. 
-                
-                * 따라서 컬렉션을 저장하기 위한 별도의 테이블을 생성해야 한다.
-                  
-                * 그리고 컬렉션 값 타입은 기본적으로 `지연 로딩(LAZY LOADING)` 전략을 사용한다. 
-     
-        * 컬렉션 값 타입을 매핑하고 사용하기
+                // Getter만 만들기
+            }
+            ```
 
-            * 컬렉션 값 타입을 매핑하기
-  
-                ```java
-                @Entity
-                public class Member{
-                
-                    @Id @GeneratedValue
-                    @Column(name = "MEMBER_ID")
-                    private Long id;
-                
-                    @Column(name = "USERNAME")
-                    private String username;
-                
-                    @Embedded
-                    private Address homeAddress;
-                
-                    @ElementCollection
-                    @CollectionTable(name = "FAVORITE_FOOD",
-                                     joinColumns = @JoinColumn(name = "MEMBER_ID"))
-                    @Column(name = "FOOD_NAME") // 새롭게 생성되는 테이블의 컬럼명을 지정 (String은 예외적으로 가능)
-                    private Set<String> favoriteFoods = new HashSet<>();
-                
-                    @ElementCollection
-                    @CollectionTable(name = "ADDRESS",
-                                     joinColumns = @JoinColumn(name = "MEMBER_ID"))
-                    private List<Address> addressHistory = new ArrayList<>();
-                
-                    // Getter, Setter
-              
+            ```java
+            @Embeddable
+            public class Address {
+          
+                private String city;
+          
+                private String street;
+          
+                private String zipcode;
+            
+                // 기본 생성자 필수
+                public Address() {
                 }
-                ```
-    
-                * `@ElementCollection` : 컬렉션 값 타입을 사용할 때 지정한다.
-                  
-                * `@CollectionTable` : 컬렉션 값 타입과 매핑할 테이블을 지정한다. 새롭게 생성되는 테이블에 대한 매핑 정보를 입력한다. 컬렉션 값 타입을 매핑하는 테이블은
-        
-                    * `joinColumns` : 컬렉션 값 타입과 매핑할 테이블의 외래 키(FK)를 지정한다.
-    
-                * favoriteFoods처럼 값으로 사용되는 컬럼이 하나면 `@Column`을 사용해서 컬럼명을 지정 할 수 있다.
-    
-                * addressHistory에 대한 테이블 매핑 정보는 `@AttributeOverride`를 사용해서 재정의 할 수 있다.
-
-            * 컬렉션 값 타입을 사용하기
-
-                * 값 타입 저장
-
-                    ```java
-                    Member member = new Member();
-                    member.setUsername("member1");
-                    member.setHomeAddress(new Address("homeCity", "street", "10000"));
-                    
-                    member.getFavoriteFoods().add("치킨");
-                    member.getFavoriteFoods().add("족발");
-                    member.getFavoriteFoods().add("피자");
-                    
-                    member.getAddressHistory().add(new Address("old1", "street", "10000"));
-                    member.getAddressHistory().add(new Address("old2", "street", "10000"));
-                    
-                    em.persist(member);
-                    ```
-        
-                    * 컬렉션 값 타입은 영속성 전이(Cascade) + 고아 객체 제거 기능을 필수로 가진다고 볼 수 있다.
-                    
-                        * member만 영속 상태로 만들어도 값 타입 컬렉션은 자동으로 DB에 반영된다.
-
-                * 값 타입 조회 및 수정
-
-                    ```java
-                    /*
-                     * 값 타입 조회
-                     * */
-                    Member findMember = em.find(Member.class, member.getId());
-                    
-                    /*
-                     * 값 타입 수정
-                     * */
-                    // findMember.getHomeAddress().setCity("newCity"); // 잘못된 방식 (X)
-                    Address a = findMember.getHomeAddress();
-                    findMember.setHomeAddress(new Address("newCity", a.getStreet(), a.getZipcode())); // 올바른 방식 (O)
-                    
-                    // 좋아하는 음식을 "치킨"에서 "한식"으로 변경하기
-                    findMember.getFavoriteFoods().remove("치킨");
-                    findMember.getFavoriteFoods().add("한식");
-                    
-                    // 주소를 변경하기 (Address에서 eqauls()와 hashCode()가 오버라이딩 되어 있어야 함)
-                    findMember.getAddressHistory().remove(new Address("old1", "street", "10000"));
-                    findMember.getAddressHistory().add(new Address("newCity1", "street", "10000"));
-                    ```
-                  
-                    * **값 타입을 수정할 때는 값 타입 인스턴스 자체를 대체해야 한다.**
-    
-                        * 값 타입 안의 필드 하나만 변경하는 것은 잘못된 방식이다.
-
-        * 컬렉션 값 타입의 제약사항
-    
-            * 값 타입은 엔티티와 다르게 식별자 개념이 없다. 값은 변경하면 추적이 어렵다.
-    
-                * 식별자가 있다면 값 타입이 아닌 엔티티다.
-    
-            * **컬렉션 값 타입에 변경사항이 발생하면, 주인 엔티티와 연관된 모든 데이터를 테이블에서 삭제하고, 컬렉션 값 타입에 있는 현재 값을 테이블에 모두 다시 저장한다.**
-
-                * Ex) `delete from ADDRESS where MEMBER_ID=?`
-    
-            * 컬렉션 값 타입을 매핑하는 테이블은 모든 컬럼을 묶어서 기본 키(PK)를 구성해야 한다.
-    
-                * 컬럼에 `null`을 입력 할 수 없고, 같은 값을 중복해서 저장 할 수 없다.
-
-            * 컬렉션 값 타입을 사용하는 경우는 다음과 같다.
-              
-                * 값을 추적할 필요가 없고 정말 단순한 경우에만 컬렉션 값 타입을 사용한다.
-    
-                    * Ex) 셀렉트 박스에 내가 좋아하는 음식을 여러 개를 체크 할 수 있도록 하는 경우
-
-                * 하지만 대부분은 엔티티를 사용한다.
-    
-                    * Ex) 주소 이력 관리
-
-        * 컬렉션 값 타입의 대안
-    
-            * 설명
-    
-                * 실무에서는 `컬렉션 값 타입` 대신에 **일대다 관계를 위한 엔티티를 만들고, 여기에서 값 타입을 사용**한다. (값 타입을 엔티티로 승격)
-                
-                    * 일대다 단방향 매핑은 다른 테이블에 외래 키가 있기 때문에 update 쿼리가 발생한다.
-                
-                    * 다대일 일대다 양방향 매핑을 하면 update 쿼리가 발생하지 않는다.
-                
-                * 그리고 `영속성 전이(Cascade)` + `고아 객체 제거(ORPHAN REMOVE)` 기능을 적용하면 컬렉션 값 타입처럼 사용 할 수 있다.
             
-            * 예시
+                public Address(String city, String street, String zipcode) {
+                    this.city = city;
+                    this.street = street;
+                    this.zipcode = zipcode;
+                }
             
-                * ① AddressEntity 만들기
-             
-                    ```java
-                    @Entity
-                    @Table(name = "ADDRESS")
-                    public class AddressEntity {
-                    
-                        @Id @GeneratedValue
-                        private Long id;
-                    
-                        private Address address;
-                    
-                        public AddressEntity() {
-                        }
-                    
-                        public AddressEntity(String city, String street, String zipcode) {
-                            this.address = new Address(city, street, zipcode);
-                        }
-                    
-                        // Getter, Setter
-                    
-                    }
-                    ```
-                
-                * ② Member 엔티티 코드 변경
-                
-                    ```java
-                    @Entity
-                    public class Member{
-                    
-                        @Id @GeneratedValue
-                        @Column(name = "MEMBER_ID")
-                        private Long id;
-                    
-                        @Column(name = "USERNAME")
-                        private String username;
-                    
-                        @Embedded
-                        private Address homeAddress;
-                    
-                        // 일대다 단방향 매핑
-                        @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-                        @JoinColumn(name = "MEMBER_ID") // FK로 사용
-                        private List<AddressEntity> addressHistory = new ArrayList<>();
-                    
-                    }
-                    ```
+                /*
+                * Getter만 만들기
+                * "값 타입"을 여러 엔티티에서 공유하면 위험하다. 그 이유는 부작용(side effect)이 발생하기 때문이다.
+                * 불변 객체(immutable object)로 만들기 위해, 생성자로만 값을 설정하고 수정자(Setter)는 만들지 않는다.
+                * */
+            
+            }
+            ```
 
-### 2. 값 타입과 불변 객체 
+            * `@Embeddable` : 임베디드 타입을 정의하는 곳에 붙여준다.
+
+            * **임베디드 타입은 기본 생성자가 필수다.**
+
+        * ② 임베디드 타입을 사용한다.
+
+            ```java
+            @Entity
+            public class Member {
+            
+                @Id @GeneratedValue
+                @Column(name = "MEMBER_ID")
+                private Long id;
+            
+                @Column(name = "USERNAME")
+                private String username;
+            
+                // Period
+                @Embedded
+                private Period workPeriod;
+            
+                // 주소
+                @Embedded
+                private Address homeAddress;
+            
+                // Getter
+            }
+            ```
+
+            * `@Embedded` : 임베디드 타입을 사용하는 곳에 붙여준다.
+
+        * ③ 엔티티를 등록한다.
+
+            ```java
+            Member member = new Member();
+            member.setUsername("hello");
+            member.setHomeAddress(new Address("city", "street", "100"));
+            member.setWorkPeriod(new Period());
+            
+            em.persist(member);
+            ```
+
+* (4) 하나의 엔티티 내에서 같은 값 타입을 여러 개 선언하기
+
+    * `@AttributeOverrides` : 임베디드 타입에 정의한 매핑 정보를 재정의한다.
+
+        * 하나의 엔티티에서 같은 값 타입을 여러 번 선언하면 테이블에 매핑되는 컬럼명이 중복된다.
+
+        * 이때는 @AttributeOverrides를 사용해서 매핑 정보(컬럼명 속성)를 재정의한다.
+
+        * @AttributeOverride의 속성은 다음과 같다.
+
+            * `name` : 임베디드 타입 내에 있는 필드 이름을 의미한다.
+
+            * `column` : 임베디드 타입 내에 있는 필드와 매핑 하고자 하는 테이블의 컬럼 이름을 의미한다.
+
+    * 예시
+
+        ```java
+        @Entity
+        public class Member {
+        
+            //...
+        
+            @Embedded
+            private Address homeAddress;
+        
+            @Embedded
+            @AttributeOverrides({
+                    @AttributeOverride(name = "city",
+                            column = @Column(name = "COMPANY_CITY")),
+                    @AttributeOverride(name = "street",
+                            column = @Column(name = "COMPANY_STREET")),
+                    @AttributeOverride(name = "zipcode",
+                            column = @Column(name = "COMPANY_ZIPCODE"))
+            })
+            private Address companyAddress;
+        
+        }
+        ```
+
+* (5) 임베디드 타입과 null
+
+    * 임베디드 타입의 값이 `null`이면 매핑한 컬럼 값은 모두 `null`이 된다.
+
+        ```java
+        member.setAddress(null); // null 입력
+        em.persist(member);
+        ```
+
+        * 예를 들어, 임베디드 타입(`Address`)의 값이 null이면 회원 테이블의 주소와 관련된 CITY, STREET, ZIPCODE 컬럼 값은 모두 null이 된다.
+
+#### 4) 값 타입과 불변 객체
 
 * (1) 개요
 
@@ -2923,9 +2837,9 @@
 * (2) 값 타입 공유 참조
 
     * 임베디드 타입과 같은 "값 타입"을 여러 엔티티에서 공유하면 위험하다.
-   
+
     * 그 이유는 부작용(side effect)이 발생하기 때문이다.
-    
+
         ```java
         Address address = new Address("city", "street", "10000");
         
@@ -2945,16 +2859,14 @@
         member1.getHomeAddress().setCity("newCity");
         ```
 
-        * 회원1, 회원2가 같은 Address 인스턴스를 참조하고 있는 상황에서 city 값을 newCity로 변경하면 회원 1, 2 모두 값이 변경된다.
-        
-        * 이러한 부작용을 막으려면 값(인스턴스)을 복사해서 사용하면 된다.
+        * 회원1, 회원2가 같은 Address 인스턴스를 참조하고 있는 상황에서 city의 값을 "newCity"로 변경하면 회원 1, 2 모두 값이 변경된다.
 
-* (3) 값 타입 복사
+    * 이러한 부작용을 막으려면 값 타입을 복사해서 사용하면 된다.
 
-    * 값 타입의 실제 인스턴스인 값을 공유하는 것은 위험하다.
-      
-    * 대신 값(인스턴스)을 복사해서 사용해야 한다.
-    
+* (3) 값 타입을 복사해서 사용하기
+
+    * 값 타입을 공유하는 것은 위험하다. 대신 값(인스턴스)을 복사해서 사용해야 한다.
+
         ```java
         Address address = new Address("city", "street", "10000");
         
@@ -2986,46 +2898,46 @@
     * 임베디드 타입처럼 **직접 정의한 `값 타입`은 자바의 기본 타입(primitive)이 아니라 객체 타입이다.**
 
     * 객체 타입은 복사를 하지 않고 원본의 참조 값을 직접 대입하는 것을 막을 방법이 없다.
-    
+
         * 즉, **객체의 공유 참조는 피할 수 없다.**
-    
+
             * 자바의 기본 타입은 값을 복사해서 전달한다.
-        
+
                 ```java
                 int a = 10;
-                int b = a;  // 기본 타입은 값을 복사
+                int b = a;  // 기본 타입은 값을 복사해서 전달한다.
                 b = 4;
                 ```
-              
+
             * 자바의 객체 타입은 참조 값을 복사해서 전달한다.
-        
+
                 ```java
                 Address a = new Address("Old");
-                Address b = a;  // 객체 타입은 참조를 전달
+                Address b = a;  // 객체 타입은 참조를 복사해서 전달한다.
                 b.setCity("New");
                 ```
-              
+
                 * a와 b는 같은 Address 인스턴스를 가리킨다.
-            
+
                 * 따라서 b의 값을 변경하면 a도 변경된다.
-    
+
 * (5) 불변 객체
 
     * 값 타입은 부작용 걱정 없이 사용 할 수 있어야 한다. 부작용이 일어나면 값 타입이라 할 수 없다.
 
     * **객체 타입을 변경할 수 없게 만들면 부작용을 원천 차단할 수 있다.**
 
-    * 따라서 **값 타입은 불변 객체(Immutable Object)로 설계해야 한다.**
+    * 따라서 **값 타입은 불변 객체 (Immutable Object)로 설계해야 한다.**
 
         * `불변 객체 (Immutable Object)` : **생성 시점 이후 절대 값을 변경할 수 없는 객체**를 말한다.
 
-            * 불변 객체를 구현하는 간단한 방법은 **생성자로만 값을 설정하고 수정자(Setter)를 만들지 않으면 된다.** 
-    
+            * 불변 객체를 구현하는 간단한 방법은 **생성자로만 값을 설정하고 수정자(Setter)를 만들지 않으면 된다.**
+
                 * 또는 수정자를 `private`으로 만들어도 된다.
-    
+
             * [참고] `Integer`, `String`은 자바가 제공하는 대표적인 불변 객체다.
-    
-    * 값 타입을 변경할 때는 값 타입 인스턴스 자체를 대체해야 한다. (newAddress로 대체하기)
+
+    * **값 타입의 일부를 변경하고 싶다면 값 타입 인스턴스를 새롭게 만들어 완전히 대체해야 한다.** (newAddress로 대체하기)
 
         ```java
         Address address = new Address("city", "street", "10000");
@@ -3038,10 +2950,10 @@
         Address newAddress = new Address("newCity", address.getStreet(), address.getZipcode());
         member1.setHomeAddress(newAddress);
         ```
-      
+
         * 값 타입 안의 필드 하나만 변경하는 것은 잘못된 방식이다.
 
-### 3. 값 타입의 비교
+#### 5) 값 타입의 비교
 
 * **값 타입은 인스턴스가 달라도 그 안에 있는 값이 같으면 같은 것으로 봐야 한다.**
 
@@ -3049,25 +2961,225 @@
     int a = 10;
     int b = 10;
     ```
-  
+
     ```java
     Address a = new Address("서울시");
     Address b = new Address("서울시");
     ```
 
-* 자바에서 제공하는 객체 비교는 2가지가 있다.
+* 자바에서 제공하는 객체 비교는 2 가지가 있다.
 
-    * ① `동일성(identity) 비교` : 두 개의 객체가 완전히 같다는 것을 의미한다. 
-      
+    * ① `동일성 (identity) 비교` : 두 개의 객체가 완전히 같다는 것을 의미한다.
+
         * 객체의 참조 값을 비교하며 `==` 연산자를 사용한다.
-    
-    * ② `동등성(equivalence) 비교` : 두 개의 객체가 가지고 있는 값이 같다는 것을 의미한다.
-      
+
+    * ② `동등성 (equivalence) 비교` : 두 개의 객체가 가지고 있는 값이 같다는 것을 의미한다.
+
         * 객체의 값을 비교하며 `equals()`를 사용한다.
-    
+
         * **값 타입은 `a.equals(b)`를 사용해서 동등성 비교를 해야 한다.**
+
+            * 따라서 값 타입의 `equals()` 메소드를 적절하게 재정의해야 한다. (주로 모든 필드 사용함)
+
+#### 6) 값 타입 컬렉션
+
+* (1) 값 타입 컬렉션 ?
+
+    * `값 타입 컬렉션 (Value Type Collection)` : **컬렉션에 값 타입을 넣어서 사용하는 것**을 말한다.
+
+        * 값 타입을 하나 이상 저장할 때, 값 타입 컬렉션을 사용한다.
+
+        * `@ElementCollection`, `@CollectionTable`를 사용해서 매핑한다.
+
+        * 관계형 데이터베이스의 테이블은 컬럼 안에 컬렉션을 포함 할 수 없다.
+
+            * JSON을 지원하는 DB는 가능한 경우도 있다. 하지만 기본적으로는 가능하지 않다.
+
+            * 따라서 컬렉션을 저장하기 위한 별도의 테이블을 생성해야 한다.
+
+        * 값 타입 컬렉션은 기본적으로 `지연 로딩 (LAZY LOADING)` 전략을 사용한다.
+
+            * @ElementCollection의 fetch 속성을 확인 해보면 알 수 있다.
+
+* (2) 값 타입 컬렉션을 매핑하고 사용하기
+
+    * ① 값 타입 컬렉션을 매핑한다.
+
+        ```java
+        @Entity
+        public class Member {
         
-            * 따라서 값 타입의 `equals()` 메소드를 적절하게 재정의해야 한다. (주로 모든 필드 사용)
+            @Id @GeneratedValue
+            @Column(name = "MEMBER_ID")
+            private Long id;
+        
+            @Column(name = "USERNAME")
+            private String username;
+        
+            @Embedded
+            private Address homeAddress;
+        
+            @ElementCollection
+            @CollectionTable(name = "FAVORITE_FOOD",
+                    joinColumns = @JoinColumn(name = "MEMBER_ID"))
+            @Column(name = "FOOD_NAME") // 새롭게 생성되는 테이블의 컬럼명을 지정 (String은 예외적으로 가능)
+            private Set<String> favoriteFoods = new HashSet<>();
+        
+            @ElementCollection
+            @CollectionTable(name = "ADDRESS",
+                    joinColumns = @JoinColumn(name = "MEMBER_ID"))
+            private List<Address> addressHistory = new ArrayList<>();
+        
+            // Getter, Setter
+        
+        }
+        ```
+
+        * `@ElementCollection` : 값 타입 컬렉션을 사용할 때 지정한다.
+
+        * `@CollectionTable` : 값 타입 컬렉션과 매핑할 테이블을 지정한다. 새롭게 생성되는 테이블에 대한 매핑 정보를 입력한다.
+
+            * `joinColumns` : 값 타입 컬렉션과 매핑할 테이블의 외래 키(FK)를 지정한다.
+
+        * favoriteFoods처럼 값으로 사용되는 컬럼이 하나면 `@Column`을 사용해서 컬럼명을 지정 할 수 있다.
+
+    * ② 값 타입 컬렉션을 사용한다.
+
+        * 값 타입을 저장하기
+
+            ```java
+            Member member = new Member();
+            member.setUsername("member1");
+            member.setHomeAddress(new Address("homeCity", "street", "10000"));
+            
+            member.getFavoriteFoods().add("치킨");
+            member.getFavoriteFoods().add("족발");
+            member.getFavoriteFoods().add("피자");
+            
+            member.getAddressHistory().add(new Address("old1", "street", "10000"));
+            member.getAddressHistory().add(new Address("old2", "street", "10000"));
+            
+            em.persist(member);
+            ```
+
+            * 값 타입 컬렉션은 영속성 전이(Cascade) + 고아 객체 제거 기능을 필수로 가진다고 볼 수 있다.
+
+                * 즉, member만 영속 상태로 만들어도 값 타입 컬렉션은 자동으로 DB에 반영된다.
+
+        * 값 타입을 조회 및 수정하기
+
+            ```java
+            /*
+             * 값 타입 조회
+             * */
+            Member findMember = em.find(Member.class, member.getId());
+            
+            /*
+             * 값 타입 수정
+             * */
+            // findMember.getHomeAddress().setCity("newCity"); // 잘못된 방식 (X)
+            Address a = findMember.getHomeAddress();
+            findMember.setHomeAddress(new Address("newCity", a.getStreet(), a.getZipcode())); // 올바른 방식 (O)
+            
+            // 좋아하는 음식을 "치킨"에서 "한식"으로 변경하기
+            findMember.getFavoriteFoods().remove("치킨");
+            findMember.getFavoriteFoods().add("한식");
+            
+            // 주소를 변경하기 (Address에서 eqauls()와 hashCode()가 오버라이딩 되어 있어야 함)
+            findMember.getAddressHistory().remove(new Address("old1", "street", "10000"));
+            findMember.getAddressHistory().add(new Address("newCity1", "street", "10000"));
+            ```
+
+            * **값 타입을 수정할 때는 값 타입 인스턴스 자체를 대체해야 한다.**
+
+                * 값 타입 안의 필드 하나만 변경하는 것은 잘못된 방식이다.
+
+* (3) 값 타입 컬렉션의 제약사항
+
+    * ① 값 타입은 엔티티와 다르게 식별자 개념이 없다. 값은 변경하면 추적이 어렵다.
+
+        * 식별자가 있다면 값 타입이 아닌 엔티티다.
+
+    * ② **값 타입 컬렉션에 변경사항이 발생하면, 주인 엔티티와 연관된 모든 데이터를 테이블에서 삭제하고, 값 타입 컬렉션에 있는 현재 값을 테이블에 모두 다시 저장한다.**
+
+        * Ex) `delete from ADDRESS where MEMBER_ID=?`
+
+    * ③ 값 타입 컬렉션을 매핑하는 테이블은 모든 컬럼을 묶어서 기본 키(PK)를 구성해야 한다.
+
+        * 컬럼에 `null`을 입력 할 수 없고, 같은 값을 중복해서 저장 할 수 없다.
+
+* (4) 값 타입 컬렉션을 사용하는 경우
+
+    * 값을 추적할 필요가 없고 정말 단순한 경우에만 값 타입 컬렉션을 사용한다.
+
+        * Ex) 셀렉트 박스에 내가 좋아하는 음식을 여러 개를 체크 할 수 있도록 하는 경우
+
+    * 하지만 대부분은 엔티티를 사용한다.
+
+        * Ex) 주소 이력 관리
+
+* (5) **값 타입 컬렉션의 대안**
+
+    * 이론 설명
+
+        * 실무에서는 `값 타입 컬렉션` 대신에 **일대다 관계를 위한 엔티티를 만들고, 여기에서 값 타입을 사용**한다. (값 타입을 엔티티로 승격)
+
+            * 일대다 단방향 매핑은 다른 테이블에 외래 키가 있기 때문에 update 쿼리가 발생한다.
+
+            * 다대일 일대다 양방향 매핑을 하면 update 쿼리가 발생하지 않는다.
+
+        * 그리고 `CASCADE` + `고아 객체 제거 (Orphan Removal)` 기능을 적용하면 값 타입 컬렉션처럼 사용 할 수 있다.
+
+    * 예시
+
+        * ① AddressEntity를 작성한다.
+
+            ```java
+            @Entity
+            @Table(name = "ADDRESS")
+            public class AddressEntity {
+            
+                @Id @GeneratedValue
+                private Long id;
+            
+                private Address address;
+            
+                public AddressEntity() {
+                }
+            
+                public AddressEntity(String city, String street, String zipcode) {
+                    this.address = new Address(city, street, zipcode);
+                }
+            
+                // Getter, Setter
+            
+            }
+            ```
+
+        * ② Member 엔티티의 코드를 변경한다.
+
+            ```java
+            @Entity
+            public class Member {
+            
+                @Id @GeneratedValue
+                @Column(name = "MEMBER_ID")
+                private Long id;
+            
+                @Column(name = "USERNAME")
+                private String username;
+            
+                @Embedded
+                private Address homeAddress;
+            
+                // 일대다 단방향 매핑
+                @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+                @JoinColumn(name = "MEMBER_ID") // FK로 사용
+                private List<AddressEntity> addressHistory = new ArrayList<>();
+            
+            }
+            ```
+
 
 ## 10. 객체지향 쿼리 언어
 
@@ -4521,3 +4633,196 @@
                 * 영속성 컨텍스트를 초기화하면 이후 엔티티를 조회할 때, 벌크 연산이 적용된 데이터베이스에서 엔티티를 조회한다.
             
     * 스프링 데이터 JPA에서는 벌크 연산을 `@Modifying`으로 제공한다.
+
+## 11. ETC
+
+### 1. 변경 감지(Dirty Checking) 와 병합(merge)
+
+* (1) 준영속 엔티티?
+
+    * `준영속 엔티티` : 영속성 컨텍스트가 더 이상 관리하지 않는 엔티티를 말한다.
+
+        ```java
+        @Controller
+        @RequiredArgsConstructor
+        public class ItemController {
+        
+            // ...
+            
+            @PostMapping(value = "/items/{itemId}/edit")
+            public String updateItem(@ModelAttribute("form") BookForm form) {
+                Book book = new Book();
+                book.setId(form.getId());
+                book.setName(form.getName());
+                book.setPrice(form.getPrice()); book.setStockQuantity(form.getStockQuantity());
+                book.setAuthor(form.getAuthor());
+                book.setIsbn(form.getIsbn());
+        
+                itemService.saveItem(book);
+        
+                return "redirect:/items";
+            }
+        
+        }
+        ```
+
+        * Book 객체는 이미 DB에 한번 저장 되어서 식별자가 존재한다.
+    
+        * Book 객체처럼 엔티티 객체를 새롭게 만들더라도 기존의 식별자를 가지고 있으면 준영속 엔티티로 볼 수 있다.
+    
+        * 따라서 Book 객체는 준영속 상태의 객체다.
+
+* (2) 준영속 엔티티를 수정하는 2 가지 방법 
+  
+    * ① 변경 감지 기능 사용
+    
+        ```java
+        @Service
+        @Transactional(readOnly = true)
+        @RequiredArgsConstructor
+        public class ItemService {
+            
+            // ...
+        
+            @Transactional
+            public void updateItem(Long itemId, Item itemParam) {   // itemParam : 파라미터로 넘어온 준영속 상태의 엔티티
+                // 영속성 컨텍스트에서 엔티티를 다시 조회한다.
+                Item findItem = itemRepository.findOne(itemId);
+        
+                // 데이터를 수정한다.
+                findItem.setName(itemParam.getName());
+                findItem.setPrice(itemParam.getPrice());
+                findItem.setStockQuantity(itemParam.getStockQuantity());
+            }
+            
+        }
+        ```
+        
+        * ⓐ 트랜잭션 안에서 엔티티를 다시 조회한다. 
+          
+            * 조회한 엔티티는 영속 상태다. 
+        
+        * ⓑ 조회한 영속 상태의 엔티티 값을 파라미터로 넘어온 준영속 상태의 엔티티 값으로 변경한다.
+        
+        * ⓒ 트랜잭션을 커밋하는 시점에 변경 감지(Dirty Checking)가 동작해서 데이터베이스에 UPDATE SQL를 실행한다.
+        
+    * ② 병합(merge) 사용
+    
+        ```java
+        @Service
+        @Transactional(readOnly = true)
+        @RequiredArgsConstructor
+        public class ItemService {
+        
+            @Transactional
+            public void updateItem(Item itemParam) { // itemParam : 파라미터로 넘어온 준영속 상태의 엔티티
+                Item mergeItem = em.merge(item);
+            }
+            
+        }
+        ```
+      
+        * `merge`는 준영속 상태의 엔티티를 영속 상태로 변경할 때 사용한다.
+    
+* (3) 병합 동작 방식
+
+    * 상세 버전
+    
+        ![image 24](images/img24.png)
+      
+        * ① `merge()`를 실행한다.
+          
+        * ② 파라미터로 넘어온 준영속 엔티티의 식별자 값으로 1차 캐시에서 엔티티를 조회한다. 
+
+            * 만약 1차 캐시에 엔티티가 없으면 데이터베이스에서 엔티티를 조회한 다음, 1차 캐시에 저장한다.          
+
+        * ③ 조회한 영속 엔티티(mergeMember)에 준영속 엔티티(member)의 값을 채워 넣는다.
+    
+            * member 엔티티의 모든 값을 mergeMember에 밀어 넣는다. 
+              
+            * 이때 mergeMember의 "회원1"이라는 이름이 "회원명변경"으로 변경된다.
+
+        * ④ 영속 상태인 엔티티(mergeMember)를 반환한다.
+    
+    * 요약 버전
+
+        * ① 준영속 엔티티의 식별자 값으로 영속 엔티티를 조회한다.
+          
+        * ② 영속 엔티티의 값을 준영속 엔티티의 값으로 모두 교체한다 (병합한다). 
+          
+        * ③ 트랜잭션 커밋 시점에 변경 감지 기능이 동작해서 데이터베이스에 UPDATE SQL를 실행한다.
+    
+    * 주의 사항
+
+        * 변경 감지 기능을 사용하면 원하는 속성만 선택해서 변경할 수 있지만 병합을 사용하면 모든 속성이 변경된다. 
+          
+        * 따라서 병합 시 값이 없으면 null로 수정할 위험도 있다. 
+    
+### 2. OSIV와 성능 최적화
+
+* (1) OSIV는 무엇인가?
+
+    * `OSIV (Open Session In View)` : 영속성 컨텍스트를 뷰까지 열어둔다는 의미다.
+
+        * 하이버네이트에서는 Open Session In View 라고 하며 JPA에서는 Open EntityManager In View 라고 한다.    
+
+        * 영속성 컨텍스트가 살아 있으면 엔티티는 항상 영속 상태로 유지된다. 따라서 뷰에서도 지연 로딩이 가능하다.
+        
+        * 스프링 부트에서는 기본적으로 OSIV가 켜져 있다.
+        
+            * 실시간 서비스는 OSIV를 끄고, ADMIN 처럼 데이터베이스 커넥션을 많이 사용하지 않는 서비스는 OSIV를 켠다.
+
+* (2) OSIV ON / OFF
+  
+    * OSIV ON (`spring.jpa.open-in-view=true`)
+    
+        ![image 24](images/img25.png)
+        
+        * 클라이언트의 요청이 들어와서 **서비스 계층에서 트랜잭션을 시작하면 영속성 컨텍스트(데이터베이스 커넥션)를 생성해서 클라이언트의 요청에 대한 응답을 완료할 때까지 유지한다.**
+        
+        * 따라서 뷰 템플릿 또는 컨트롤러에서 지연 로딩이 가능했던 것이다.
+
+        * 하지만 OSIV가 켜져 있으면 오랜 시간 동안 데이터베이스 커넥션 리소스를 사용하기 때문에 실시간 트래픽이 중요한 애플리케이션에서는 커넥션이 부족할 수 있다. 이것은 결국 장애로 이어질 수 있다.
+        
+            * 예를 들어, 컨트롤러에서 외부 API를 호출하면 외부 API가 처리될 때까지 대기하는 시간만큼 데이터베이스 커넥션 리소스를 반환하지 못하고 유지해야 한다.
+            
+                * `외부 API` : 다른 팀 또는 기업과 협업하기 위한 API를 말한다.
+
+    * OSIV OFF (`spring.jpa.open-in-view=false`)
+    
+        ![image 24](images/img26.png)
+        
+        * 클라이언트의 요청이 들어와서 **서비스 계층에서 트랜잭션을 시작하면 영속성 컨텍스트(데이터베이스 커넥션)를 생성해서 트랜잭션을 종료할 때까지 유지한다.**
+    
+            * 즉, 트랜잭션을 시작해서 종료할 때까지만 영속성 컨텍스트를 유지한다. 
+    
+            * 트랜잭션을 종료할 때 영속성 컨텍스트도 종료하고 데이터베이스 커넥션도 반환한다. 
+    
+        * 따라서 데이터베이스 커넥션 리소스를 낭비하지 않는다.
+    
+        * 하지만 모든 지연 로딩을 트랜잭션 안에서 처리해야 된다는 단점이 있다.
+    
+* (3) 커맨드와 쿼리 분리하기
+
+    * 실무에서 OSIV를 끈 상태로 복잡성을 관리하는 좋은 방법이 있다. 
+      
+    * 바로 Command와 Query를 분리하는 것이다.
+
+        * 보통 비즈니스 로직은 특정 엔티티 몇 개를 등록하거나 수정하는 것이므로 성능이 크게 문제가 되지 않는다. 
+        
+        * 그런데 복잡한 화면을 출력하기 위한 쿼리는 화면에 맞추어 성능을 최적화 하는 것이 중요하다. 
+    
+        * 따라서 이 둘의 관심사를 명확하게 분리하는 선택은 유지보수 관점에서 충분히 의미 있다.
+    
+        * 단순하게 설명해서 다음처럼 분리하는 것이다.
+
+            * OrderService
+            
+                * `OrderService` : 핵심 비즈니스 로직
+                
+                * `OrderQueryService` : 화면이나 API에 맞춘 서비스 (주로 읽기 전용 트랜잭션 사용)
+
+        * 보통 서비스 계층에서 트랜잭션을 유지하며 두 서비스는 모두 트랜잭션을 유지하면서 지연 로딩을 사용할 수 있다.
+    
+
+    
