@@ -5086,36 +5086,61 @@ int[][] arr = {
             Integer.parseInt("100", 16);  // 100(16) -> 256
             ```
 
-    * 오토박싱 & 언박싱 (autoboxing & unboxing)
+    * 오토 박싱 & 언박싱 (Autoboxing & Unboxing)
+
+        * 오토 박싱과 언박싱은 무엇인가?    
+
+            * JDK 1.5 이전에는 기본형과 참조형 간의 연산은 불가능 했기 때문에 기본형을 래퍼 클래스를 이용하여 객체로 만든 다음, 연산해야 했다.
     
-        * JDK 1.5 이전에는 기본형과 참조형 간의 연산은 불가능 했기 때문에 기본형을 래퍼 클래스를 이용하여 객체로 만든 다음, 연산해야 했다.
-
-        * 그러나 이제는 기본형과 참조형 간의 연산이 가능하다. 그 이유는 오토박싱 & 언박싱 때문이다.
-        
-            * `오토 박싱(autoboxing)` : 기본 자료형의 값을 래퍼 클래스 객체로 자동 변환하는 것을 말한다.
+            * 그러나 이제는 기본형과 참조형 간의 연산이 가능하다. 그 이유는 오토박싱 & 언박싱 때문이다.
             
-            * `오토 언박싱(unboxing)` : 래퍼 클래스 객체를 기본 자료형의 값으로 자동 변환하는 것을 말한다. 
-            
-                ```java
-                ArrayList<Integer> list = new ArrayList<>();
-                list.add(10);               // [오토박싱] 10 -> new Integer(10)
-                int value = list.get(0);    // [언박싱] new Integer(10) -> 10
-                ```
-
-        * 래퍼 클래스의 연산 
-
-            * 자바에서 래퍼 클래스로 연산을 시도하면 오토 언박싱으로 기본 자료형으로 변환한 다음, 연산을 수행한다.
-        
-                ```java
-                Integer num1 = new Integer(20);
-                Integer num2 = new Integer(30);
+                * `오토 박싱 (Autoboxing)` : 기본형의 값을 래퍼 클래스의 객체로 자동 변환하는 것을 말한다.
                 
-                Integer sum = num1 + num2; // [결과] 50
-                ```
-              
-                * 래퍼 클래스와 기본 자료형 간의 연산도 동일하게 동작한다. 
-              
-            * 래퍼 클래스와 래퍼 클래스 간의 `==` 연산은 주의해야 한다.
+                * `언박싱 (Unboxing)` : 래퍼 클래스의 객체를 기본형의 값으로 자동 변환하는 것을 말한다. 
+                
+                    ```java
+                    ArrayList<Integer> list = new ArrayList<>();
+                    list.add(10);               // [오토박싱] 10 -> new Integer(10)
+                    int value = list.get(0);    // [언박싱] new Integer(10) -> 10
+                    ```
+
+        * 오토 박싱과 언박싱이 적용되는 경우
+        
+            * 자바 컴파일러가 오토 박싱 (Autoboxing)을 적용하는 경우는 다음과 같다.
+            
+                * ① 기본형 값이 래퍼 클래스 타입의 파라미터를 받는 메서드로 전달되는 경우
+                
+                    ```java
+                    List<Integer> list = new ArrayList<>();
+                    list.add(1); // Autoboxing 발생
+                    ```
+                
+                * ② 기본형 값이 래퍼 클래스 타입의 변수에 할당되는 경우
+                
+                    ```java
+                    int num = 10;
+                    Integer result = num; // Autoboxing 발생
+                    ```
+        
+            * 자바 컴파일러가 언박싱 (Unboxing)을 적용하는 경우는 다음과 같다.
+            
+                * ① 래퍼 클래스의 객체가 기본형(primitive type) 파라미터를 받는 메서드로 전달되는 경우
+                
+                * ② 래퍼 클래스의 객체가 기본형 변수에 할당되는 경우
+                
+                    ```java
+                    Integer num = 10;
+                    int result = num; // Unboxing 발생
+                    
+                    List<Integer> list = new ArrayList<>();
+                    list.add(1); // Autoboxing 발생
+                    
+                    int number = list.get(0); // Unboxing 발생
+                    ```
+                  
+        * 자바에서 오토 박싱을 사용할 때 주의사항
+        
+            * ① 두 래퍼 클래스의 인스턴스가 같은지 비교할 때는 동등 연산자(`==`)가 아닌 `equals()`를 사용해야 한다.
 
                 ```java
                 Integer num1 = new Integer(20);
@@ -5126,13 +5151,15 @@ int[][] arr = {
                 else
                     System.out.println("다르다");
                 ```
-          
-                * `==` 연산은 참조 값을 비교하는 연산이다.
+              
+                * num1과 num2는 참조 값이 다른 객체이므로 "다르다"가 출력된다.
     
-                    * num1과 num2는 참조 값이 다른 객체이므로 "다르다"가 출력된다.
-    
-                    * 값이 같은지 확인하려면 equals()를 사용해야 한다.  
+                * 값이 같은지 확인하려면 `equals()`를 사용해야 한다.
 
+            * ② 기본형 값과 래퍼 클래스의 객체를 혼합해서 연산하면 객체를 대상으로 언박싱이 발생한다.
+            
+                * 이때, 만약 객체가 `null`이면 `NullPointerException`이 발생한다.
+    
 ## 9. 날짜와 시간 & 형식화
 
 #### 1) 자바 8에 새로운 날짜와 시간 API가 생긴 이유
@@ -5155,13 +5182,13 @@ int[][] arr = {
 
             ![image 42](images/img42.png)    
 
-    * mutable / immutable
+    * Mutable / Immutable
 
-        * `mutable` : 객체의 상태를 변경할 수 있다는 것을 의미한다. 
+        * `Mutable` : 객체가 생성된 이후에 상태를 변경할 수 있다는 것을 의미한다. 
     
-        * `immutable` : 객체의 상태를 변경할 수 없다는 것을 의미한다.
+        * `Immutable` : 객체가 생성된 이후에 상태를 변경할 수 없다는 것을 의미한다.
         
-            * 연산을 하면 새로운 객체가 생성된다.
+            * 새로운 값을 입력하려면 새로운 객체를 만들어야 한다.
     
 * ② 클래스 이름이 명확하지 않다. 
   
@@ -5219,11 +5246,11 @@ int[][] arr = {
 
 * `DateTimeFormatter` : 날짜나 시간에 대한 형식(패턴)을 지정할 때 사용한다.
 
-    * `format()` : 날짜나 시간을 특정 형식에 해당하는 문자열로 만든다.
+    * `format()` : 날짜나 시간을 특정 형식에 해당하는 문자열로 만든다. (날짜/시간 객체 → 문자열)
 
         * LocalDateTime, LocalDate, LocalTime 등에서 인스턴스 메소드로 제공한다.    
 
-    * `parse()` : 날짜나 시간을 표현하는 문자열을 파싱해서 날짜나 시간 객체로 만든다.
+    * `parse()` : 날짜나 시간을 표현하는 문자열을 파싱해서 날짜나 시간 객체로 만든다. (문자열 → 날짜/시간 객체)
     
         * LocalDateTime, LocalDate, LocalTime 등에서 static 메소드로 제공한다.
     
@@ -5247,7 +5274,7 @@ int[][] arr = {
             
             * `TemporalField`는 날짜와 시간의 필드(년, 월, 일 등)를 정의해 놓은 인터페이스다.
     
-                * 메소드의 매개변수 타입이 `TemporalUnit`이면 `ChronoUnit`를, `TemporalField`이면 `ChronoField`를 사용하자.
+                * **메소드의 매개변수 타입이 `TemporalUnit`이면 `ChronoUnit`를, `TemporalField`이면 `ChronoField`를 사용하자. (★★★)**
     
         * 구현체 
         
@@ -5521,15 +5548,19 @@ int[][] arr = {
             System.out.println(zonedDateTime);
             ```
           
-        * 특정 시간대(예를 들어, 뉴욕)의 현재 시간을 알고 싶다면 다음과 같이 한다.
-        
+        * `withZoneSameInstant()` : 날짜와 시간을 특정 시간대에 맞게 변환해서 반환한다.
+
             ```java
             ZoneId newYorkZoneId = ZoneId.of("America/New_York");
             ZonedDateTime newYorkTime = ZonedDateTime.now().withZoneSameInstant(newYorkZoneId);
             
             System.out.println(newYorkTime);
             ```
-  
+          
+            * 위의 코드는 특정 시간대(예를 들어, 뉴욕)의 현재 시간을 출력한다. 
+    
+            * [참고] `withZoneSameLocal()` : 다른 날짜와 시간 필드는 그대로 유지하면서 시간대만 변경한다.
+
         * ZonedDateTime를 날짜와 시간에 관련된 다른 클래스로 변환한다.
 
             * `toLocalDate()` : LocalDate로 변환한다.
@@ -5573,7 +5604,7 @@ int[][] arr = {
 
 #### 8) TemporalAdjusters
 
-* `TemporalAdjusters`는 자주 사용되는 날짜 계산을 처리해주는 메서드를 정의 해놓은 클래스다.
+* `TemporalAdjusters`는 날짜 계산을 할 때 자주 사용되는 메소드를 정의 해놓은 클래스다.
 
     * TemporalAdjusters의 팩토리 메서드 
 
@@ -5607,7 +5638,7 @@ int[][] arr = {
 
         ```java
         LocalDate today = LocalDate.now();
-        LocalDate nextMonth = today.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+        LocalDate nextMonday = today.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
         ```
     
 #### 9) Period와 Duration
@@ -5616,93 +5647,93 @@ int[][] arr = {
 
     * `Period`는 날짜 간의 차이를 표현할 때 사용한다.
 
-    * `Period.between()`는 두 날짜 간의 차이를 계산한다.
+        * `Period.between()`는 두 날짜 간의 차이를 계산한다.
+        
+            ```java
+            // 두 날짜의 차이를 구하기
+            LocalDate date1 = LocalDate.of(2014, 1, 1);
+            LocalDate date2 = LocalDate.of(2015, 12, 31);
+        
+            Period period = Period.between(date1, date2);
+            ```  
     
-        ```java
-        // 두 날짜의 차이를 구하기
-        LocalDate date1 = LocalDate.of(2014, 1, 1);
-        LocalDate date2 = LocalDate.of(2015, 12, 31);
+        * `Period.of()` / `Period.ofXXX()`는 Period 객체를 생성할 때 사용한다.
     
-        Period period = Period.between(date1, date2);
-        ```  
-
-    * `Period.of()` / `Period.ofXXX()`는 Period 객체를 생성할 때 사용한다.
-
-        ```java
-        Period period = Period.of(1, 12, 31); // 1년 12개월 31일
-        ```
-
-    * `get()`는 Period에서 특정 필드의 값을 가져온다.
-
-        ```java
-        // Period에서 특정 필드 값 얻기
-        long year = period.get(ChronoUnit.YEARS);
-        long month = period.get(ChronoUnit.MONTHS);
-        long day = period.get(ChronoUnit.DAYS);
-        ```
-
-    * `with()`는 특정 필드의 값을 변경한 새로운 객체를 반환한다.
-
-        ```java
-        Period newPeriod = period.withYears(2); // 2년으로 변경
-        ```
-
-    * 다른 단위로 변환하기
+            ```java
+            Period period = Period.of(1, 12, 31); // 1년 12개월 31일
+            ```
     
-        * `toTotalMonths()` : 년월일을 월 단위로 변환해서 반환한다. (일 단위는 무시)
+        * `get()`는 Period에서 특정 필드의 값을 가져온다.
+    
+            ```java
+            // Period에서 특정 필드 값 얻기
+            long year = period.get(ChronoUnit.YEARS);
+            long month = period.get(ChronoUnit.MONTHS);
+            long day = period.get(ChronoUnit.DAYS);
+            ```
+    
+        * `with()`는 특정 필드의 값을 변경한 새로운 객체를 반환한다.
+    
+            ```java
+            Period newPeriod = period.withYears(2); // 2년으로 변경
+            ```
+    
+        * 다른 단위로 변환하기
+        
+            * `toTotalMonths()` : 년월일을 월 단위로 변환해서 반환한다. (일 단위는 무시)
 
 * Duration
 
     * `Duration`은 시간의 차이를 표현할 때 사용한다.
 
-    * `Duration.between()`은 두 개의 시간의 차이를 계산한다.
-    
-        ```java
-        // 두 시각의 차이를 구하기
-        LocalTime time1 = LocalTime.of(00, 00, 00);
-        LocalTime time2 = LocalTime.of(12, 34, 56);
+        * `Duration.between()`은 두 개의 시간의 차이를 계산한다.
         
-        Duration duration = Duration.between(time1, time2);
-        ```
-
-    * `Duration.of()` / `Duration.ofXXX()`는 Duration 객체를 생성할 때 사용한다.  
-
-        ```java
-        Duration duration = Duration.of(60, ChronoUnit.SECONDS); // 60초
-        ```
-
-    * `get()`는 Duration에서 특정 필드의 값을 가져온다.
+            ```java
+            // 두 시각의 차이를 구하기
+            LocalTime time1 = LocalTime.of(00, 00, 00);
+            LocalTime time2 = LocalTime.of(12, 34, 56);
+            
+            Duration duration = Duration.between(time1, time2);
+            ```
     
-        ```java
-        // Duration에서 특정 필드 값 얻기
-        long sec = duration.get(ChronoUnit.SECONDS);
-        long nano = duration.get(ChronoUnit.NANOS);
-        ```
-
-    * `with()`는 특정 필드의 값을 변경한 새로운 객체를 반환한다.
-
-        ```java
-        duration.withSeconds(120); // 120초로 변경 
-        ```
-
-    * 다른 단위로 변환하기
+        * `Duration.of()` / `Duration.ofXXX()`는 Duration 객체를 생성할 때 사용한다.  
     
-        * `toDays()` : 일 단위로 변환해서 반환한다.
+            ```java
+            Duration duration = Duration.of(60, ChronoUnit.SECONDS); // 60초
+            ```
     
-        * `toHours()` : 시간 단위로 변환해서 반환한다. 
+        * `get()`는 Duration에서 특정 필드의 값을 가져온다.
+        
+            ```java
+            // Duration에서 특정 필드 값 얻기
+            long sec = duration.get(ChronoUnit.SECONDS);
+            long nano = duration.get(ChronoUnit.NANOS);
+            ```
     
-        * `toMinutes()` : 분 단위로 변환해서 반환한다.
+        * `with()`는 특정 필드의 값을 변경한 새로운 객체를 반환한다.
     
-        * `toMillis()` : 천분의 일 초 단위로 변환해서 반환한다. 
+            ```java
+            duration.withSeconds(120); // 120초로 변경 
+            ```
     
-        * `toNanos()` : 나노 초 단위로 변환해서 반환한다. 
+        * 다른 단위로 변환하기
+        
+            * `toDays()` : 일 단위로 변환해서 반환한다.
+        
+            * `toHours()` : 시간 단위로 변환해서 반환한다. 
+        
+            * `toMinutes()` : 분 단위로 변환해서 반환한다.
+        
+            * `toMillis()` : 천분의 일 초 단위로 변환해서 반환한다. 
+        
+            * `toNanos()` : 나노 초 단위로 변환해서 반환한다. 
     
-* `getUnits()`는 `get()`에 사용 할 수 있는 ChronoUnit의 종류를 알려준다.
-
-    ```java
-    System.out.println(period.getUnits());
-    System.out.println(duration.getUnits());
-    ```
+        * `getUnits()`는 `get()`에 사용할 수 있는 ChronoUnit의 종류를 알려준다.
+        
+            ```java
+            System.out.println(period.getUnits());
+            System.out.println(duration.getUnits());
+            ```
 
 #### 10) 파싱과 포매팅
 
@@ -5909,7 +5940,7 @@ int[][] arr = {
 
 * (1) ArrayList
 
-    * `ArrayList`는 내부적으로 배열을 이용해서 요소를 저장하는 컬렉션 클래스이다.
+    * `ArrayList`는 내부적으로 배열을 이용해서 데이터를 저장하는 컬렉션 클래스이다.
 
         ```java
         public class ArrayList<E> extends AbstractList<E>
@@ -6036,9 +6067,13 @@ int[][] arr = {
             
             ![image 23](images/img23.png)
     
+            * ArrayList의 remove()는 특정 인덱스의 객체를 제거하고 바로 뒤 인덱스 부터 마지막 인덱스까지의 객체들을 한 칸씩 앞으로 이동시킨다.
+    
+            * 따라서 ArrayList에서 전체 삭제를 하려면 clear()를 사용하거나 remove()를 이용한다면 마지막 데이터 부터 삭제해야 한다. 
+    
 * (2) LinkedList
 
-    * `LinkedList`는 내부적으로 연결 리스트를 이용해서 요소를 저장하는 컬렉션 클래스이다.
+    * `LinkedList`는 내부적으로 연결 리스트를 이용해서 데이터를 저장하는 컬렉션 클래스이다.
   
         * 연결 리스트(Linked List)는 불연속적으로 존재하는 데이터를 서로 연결(link)한 형태로 구성되어 있다.
   
@@ -6066,11 +6101,11 @@ int[][] arr = {
 
     * LinkedList의 종류
     
-        * `단일 연결 리스트(Singly Linked List)` : 이동 방향이 단방향이기 때문에 다음 요소에 대한 접근은 쉽지만 이전 요소에 대한 접근은 어렵다.
+        * `단일 연결 리스트(Singly Linked List)` : 이동 방향이 단방향이기 때문에 다음 노드에 대한 접근은 쉽지만 이전 노드에 대한 접근은 어렵다.
     
             ![image 26](images/img26.png)
         
-        * `이중 연결 리스트(Doubly Linked List)` : 참조 변수를 하나 더 추가하여 다음 요소에 대한 참조 뿐만 아니라 이전 요소에 대한 참조가 가능하도록 하였다.
+        * `이중 연결 리스트(Doubly Linked List)` : 참조 변수를 하나 더 추가하여 다음 노드에 대한 참조 뿐만 아니라 이전 노드에 대한 참조가 가능하도록 하였다.
         
             ![image 27](images/img27.png)
         
@@ -6350,7 +6385,7 @@ int[][] arr = {
     
         * `copyOf()`는 배열 전체를 복사해서 새로운 배열을 만들어 반환한다.
           
-        * `copyOfRange()`는 배열의 일부를 복사해서 새로운 배열을 만들어 반환한다. (지정된 범위 끝은 포함되지 않음)
+        * `copyOfRange()`는 배열의 일부만 복사해서 새로운 배열을 만들어 반환한다. (지정된 범위 끝은 포함되지 않음)
 
             ```java
             int[] arr  =  {0,1,2,3,4};
@@ -6426,24 +6461,23 @@ int[][] arr = {
 
 * Comaprator와 Comaprable
 
-    * `Comparator`, `Comparable`은 객체를 정렬 하는데 필요한 메서드를 정의한 인터페이스다. (정렬 기준을 제공)
+    * `Comparable` : 객체를 정렬할 때, 기본 정렬 기준이 되는 메소드를 정의한 인터페이스다. 
     
         ```java
-        Comparable - 기본 정렬 기준을 구현하는데 사용.
-        Comparator - 기본 정렬 기준 외에 다른 기준으로 정렬하고자 할 때 사용.
+        public interface Comparable {
+            public int compareTo(Object o); // 주어진 객체(o)를 자신(this)과 비교
+        }
         ```
+    
+    * `Comparator` : 기본 정렬 기준과 다르게 정렬 하고자 할 때 사용하는 인터페이스다.
     
         ```java
         public interface Comparator {
-          int compare(Object o1, Object o2); // 두 객체(o1, o2)를 비교 
-          boolean equals(Object obj);
-        }
-        
-        public interface Comparable {
-          public int compareTo(Object o); // 주어진 객체(o)를 자신(this)과 비교
+            int compare(Object o1, Object o2); // 두 객체(o1, o2)를 비교 
+            boolean equals(Object obj);
         }
         ```
-      
+    
     * `compare()`와 `compareTo()`는 두 객체의 비교 결과를 반환하도록 구현해야 한다.
     
         * `오름차순 정렬` : `a.compareTo(b)`이면 왼쪽이 작으면 `음수`, 같으면 `0`, 왼쪽이 크면 `양수`를 리턴한다.
@@ -6528,66 +6562,60 @@ int[][] arr = {
           
             * 이 Comparator를 이용하면 문자열을 대소문자 구분 없이 정렬 할 수 있다.
 
-    * 예시 2 - 다중 정렬 
+    * 예시 2 - 다중 조건 정렬 
 
         ```java
-        // 다중 조건 정렬 예시
-        // 정렬 대상인 품목(Item) 클래스를 정의한다.
+        import java.util.ArrayList;
+        import java.util.Collections;
+        import java.util.Comparator;
+        import java.util.List;
+        
+        /*
+        * 다중 조건 정렬 예시
+        * 정렬 대상인 품목(Item) 클래스를 정의한다.
+        * */
         class Item {
-            int weight; // 무게
-            String name; // 이름
-            String prodDt; // 생산일자
+        
+            int weight;     // 무게
+            String name;    // 이름
+            String prodDt;  // 생산일자
         
             Item(int weight, String name, String prodDt) {
                 this.weight = weight;
                 this.name = name;
                 this.prodDt = prodDt;
             }
+        
         }
         
-        /*
-        
-         Comparator<Item>를 구현하는 ItemCompare 클래스를 작성한다.
-         compare()는 비교하는 왼쪽이 작으면 음수, 두 객체가 같으면 0, 왼쪽이 크면 양수를 반환한다. (오름차순 기준)
-         여기서 우선 순위는 무게 (오름차순), 이름 (오름차순), 생산일자 (내림차순) 순이다.
-        
-        */
-        
+        /*  Comparator<Item>를 구현하는 ItemCompare 클래스를 작성한다.
+            여기서 정렬 기준은 무게 (오름차순), 이름 (오름차순), 생산일자 (내림차순) 순이다.   */
         class ItemCompare implements Comparator<Item> {
-            int result = 0;
-        
             @Override
             public int compare(Item s1, Item s2) {
-                if(s1.weight < s2.weight) {
-                    result = -1;
-                }else if(s1.weight == s2.weight) {
-                    if(s1.name.compareTo(s2.name) < 0) {
-                        result = -1;
-                    }else if(s1.name.compareTo(s2.name) == 0) {
-                        if(s1.prodDt.compareTo(s2.prodDt) < 0) { // 내림차순
-                            result = 1;
-                        }else if(s1.prodDt.compareTo(s2.prodDt) == 0) {
-                            result = 0;
-                        }else{
-                            result = -1;
-                        }
-                    }else{
-                        result = 1;
+                if (s1.weight == s2.weight) {
+                    if (s1.name == s2.name) {
+                        return s2.prodDt.compareTo(s1.prodDt);
+                    } else {
+                        return s1.name.compareTo(s2.name);
                     }
-                }else{
-                    result = 1;
+                } else {
+                    return Integer.compare(s1.weight, s2.weight);
                 }
-        
-                return result;
             }
         }
         
         public class MultipleConditionSortEx {
             public static void main(String[] args) {
+                /* [실행 결과]
+                    5 너트 20200920
+                    10 볼트 20201003
+                    10 볼트 20201002 */
+        
                 List<Item> list = new ArrayList<>();
-                Item s1 = new Item(10, "볼트", "20201003"); // 우선 순위 : 2번
-                Item s2 = new Item(10, "볼트", "20201002"); // 우선 순위 : 3번
-                Item s3 = new Item(5, "너트", "20200920"); // 우선 순위 : 1번
+                Item s1 = new Item(10, "볼트", "20201003");
+                Item s2 = new Item(10, "볼트", "20201002");
+                Item s3 = new Item(5, "너트", "20200920");
         
                 list.add(s1);
                 list.add(s2);
@@ -6595,7 +6623,7 @@ int[][] arr = {
         
                 Collections.sort(list, new ItemCompare());
         
-                for(Item item : list){
+                for (Item item : list) {
                     System.out.println(item.weight + " " + item.name + " " + item.prodDt);
                 }
             }
@@ -6611,10 +6639,12 @@ int[][] arr = {
         * `HashSet`은 해싱을 이용해서 데이터를 저장한다.
         
             * Set 인터페이스를 구현 했기 때문에 저장 순서를 유지하지 않고 중복도 허용하지 않는다.
+    
+            * [참고] `해싱 (Hashing)` : 해시 테이블을 이용한 탐색을 말한다. 
         
         * 내부적으로 HashMap을 이용해서 만들어졌다.
         
-            * 해시 알고리즘(hash algorithm)을 사용하기 때문에 검색 속도가 매우 빠르다.
+        * 해시 알고리즘(hash algorithm)을 사용하기 때문에 검색 속도가 매우 빠르다.
             
     * HashSet의 생성자, 메서드
  
@@ -11882,17 +11912,23 @@ int[][] arr = {
         * 예시
         
             * 학생들을 분할 기준(`성별`)에 따라 2개의 그룹으로 분할한 다음, Map으로 저장해서 반환한다.
-        
-                ```java
-                Map<Boolean, List<Student>> stuBySex = stuStream
-                                .collect(partitioningBy(Student::isMale)); // 학생들을 성별로 분할
+
+                * 소스코드    
+
+                    ```java
+                    Map<Boolean, List<Student>> stuBySex = stuStream
+                                    .collect(partitioningBy(Student::isMale)); // 학생들을 성별로 분할
+                    
+                    List<Student> maleStudent = stuBySex.get(true);       // Map에서 남학생 목록을 얻는다. 
+                    List<Student> femaleStudent = stuBySex.get(false);    // Map에서 여학생 목록을 얻는다.
+                    ```
+                    
+                    * Key가 분할의 기준(Boolean)이면서 Value가 해당 스트림의 요소(Student)가 같은 그룹별로 저장된 List인 Map을 반환한다.
+
+                * 실행 결과 
                 
-                List<Student> maleStudent = stuBySex.get(true);       // Map에서 남학생 목록을 얻는다. 
-                List<Student> femaleStudent = stuBySex.get(false);    // Map에서 여학생 목록을 얻는다.
-                ```
-                
-                * Key가 분할의 기준(Boolean)이면서 Value가 해당 스트림의 요소(Student)가 같은 그룹별로 저장된 List인 Map을 반환한다.
-                
+                    ![image 44](images/img44.png)
+    
             * 학생들을 분할 기준(`성별`)에 따라 2개의 그룹으로 분할한 다음, 집계(남학생과 여학생의 수)를 한다.
           
                 ```java
@@ -12105,27 +12141,39 @@ int[][] arr = {
         * 예시
         
             * 학생들을 반별로 그룹화해서 Map에 저장한다. 
+    
+                * 소스코드 
 
-                ```java
-                Map<Integer, List<Student>> stuByBan = stuStream          // 학생을 반별로 그룹화
-                        .collect(groupingBy(Student::getBan, toList()));  // toList()는 생략 가능하다.
-                ```
-              
-                * 키(Key)가 반이고 값(Value)이 학생을 그룹별로 담고 있는 List인 Map 객체를 생성해서 반환한다. 
+                    ```java
+                    Map<Integer, List<Student>> stuByBan = stuStream          // 학생을 반별로 그룹화
+                            .collect(groupingBy(Student::getBan, toList()));  // toList()는 생략 가능하다.
+                    ```
+                  
+                    * 키(Key)가 반이고 값(Value)이 학생을 그룹별로 담고 있는 List인 Map 객체를 생성해서 반환한다. 
+    
+                * 실행 결과
+
+                    ![image 45](images/img45.png)
 
             * 학생들을 학년별로 그룹화한 다음, 다시 반별로 그룹화해서 Map에 저장한다.
-            
-                ```java
-                Map<Integer, Map<Integer, List<Student>>> stuByHakAndBan =
-                        stuStream.collect(                      // 다중 그룹화
-                                groupingBy(Student::getHak,     // 1. 학년별 그룹화
-                                groupingBy(Student::getBan))    // 2. 반별 그룹화
-                        );
-                ```
-              
-                * 키(Key)가 학년이고 값(Value)이 Map인 Map 객체를 생성해서 반환한다.
+
+                * 소스코드            
+
+                    ```java
+                    Map<Integer, Map<Integer, List<Student>>> stuByHakAndBan =
+                            stuStream.collect(                      // 다중 그룹화
+                                    groupingBy(Student::getHak,     // 1. 학년별 그룹화
+                                    groupingBy(Student::getBan))    // 2. 반별 그룹화
+                            );
+                    ```
+                  
+                    * 키(Key)가 학년이고 값(Value)이 Map인 Map 객체를 생성해서 반환한다.
+                    
+                    * 내부에 있는 Map은 키(Key)가 반이고 값(Value)이 학생을 그룹별로 담고 있는 List다.
+
+                * 실행 결과
                 
-                * 내부에 있는 Map은 키(Key)가 반이고 값(Value)이 학생을 그룹별로 담고 있는 List다.
+                    ![image 46](images/img46.png)
                     
             * 학생들을 학년별과 반별로 그룹화한 다음, 성적 등급으로 변환(mapping)하여 Set에 저장한다.  
     
