@@ -7284,7 +7284,7 @@ int[][] arr = {
 
     * `제네릭(Generic)` : 클래스 내부에서 사용할 타입을 외부에서 지정하는 방법이다.
 
-        * 컴파일 시 타입을 체크 해 주는 기능이다.
+        * 그리고 컴파일 시 타입을 체크한다.
         
             ```java
             // Tv 객체만 저장 할 수 있는 ArrayList를 생성
@@ -7298,7 +7298,7 @@ int[][] arr = {
             
             * `ArrayList<E>` : 제네릭 클래스
             
-                * `제네릭 클래스`는 클래스 이름 옆에 `타입 매개변수`를 선언한 것을 말한다.
+                * `제네릭 클래스`는 클래스 이름 옆에 `타입 매개변수 (type parameter)`를 선언한 것을 말한다.
 
 * 제네릭의 장점
 
@@ -7374,7 +7374,7 @@ int[][] arr = {
 
     * `Box<String> b = new Box<String>();`
 
-        * 지정된 타입 `String`을 `매개변수화된 타입(Parameterized Type)`이라 한다. 
+        * 지정된 타입 `String`을 `매개변수화된 타입 (Parameterized Type)`이라 한다. 
         
             * 해당 용어는 좀 길어서, `대입된 타입`이라는 용어를 대신 사용할 것이다.
 
@@ -7400,7 +7400,7 @@ int[][] arr = {
     
 * ③ 매개변수의 다형성도 성립한다.
 
-    * `ArrayList`에 `Product`를 대입한다.
+    * `ArrayList`의 타입 매개변수(`E`)에 `Product`를 대입한다.
 
         ```java
         ArrayList<Product> list = new ArrayList<Product>();
@@ -7426,7 +7426,7 @@ int[][] arr = {
     
 #### 5) 제한된 제네릭 클래스
 
-* `<T extends 조상 타입>` : 타입 매개변수(`T`)에 `extends`를 사용하면, **타입 매개변수에 대입 할 수 있는 타입을 조상 타입과 그 자손으로 제한한다.**
+* `<T extends 조상 타입>` : 타입 매개변수(`T`)에 대입 할 수 있는 타입을 조상 타입과 그 자손으로 제한한다.
     
     * 아래 코드는 타입 매개변수에 대입 할 수 있는 타입을 Fruit과 그 자손으로 제한한다. (Fruit를 상속받은 타입으로 제한) 
     
@@ -7476,7 +7476,7 @@ int[][] arr = {
     	public String toString() { return list.toString();}
     }
    
-    // 타입 매개변수 T에는 Fruit과 그 자손과 Eatable 인터페이스를 클래스만 대입될 수 있다.
+    // 타입 매개변수 T에는 Fruit과 그 자손 그리고 Eatable 인터페이스를 구현한 클래스만 대입될 수 있다.
     class FruitBox<T extends Fruit & Eatable> extends Box<T> {}
   
     class Ex12_3 {
@@ -7532,7 +7532,7 @@ int[][] arr = {
             T[] itemArr; // OK. T 타입의 배열을 위한 참조변수
                 //...
                 
-            T[] toArray(); {
+            T[] toArray() {
             	T[] tmpArr = new T[itemArr.length]; // 에러. 제네릭 타입의 배열 생성 불가
       
                 //...
@@ -7551,7 +7551,7 @@ int[][] arr = {
 
 #### 7) 와일드 카드 '?'
 
-* `와일드 카드(?)`는 대입된 타입이 서로 다른 객체를 하나의 참조 변수로 참조 할 수 있도록 한다.
+* `와일드 카드 (?)`는 대입된 타입이 서로 다른 객체를 하나의 참조 변수로 참조 할 수 있도록 한다.
 
     ```java
     ArrayList<? extends Product> list1 = new ArrayList<Tv>();     // OK
@@ -7561,15 +7561,23 @@ int[][] arr = {
   
     * 와일드카드는 `?`로 표현하며 와일드 카드는 어떠한 타입도 될 수 있다.
     
-        * `<? extends T>` : 와일드 카드의 상한 제한. T와 그 자손들만 가능
+        * `<? extends T>` : T와 그 자손들만 가능하다. 
+          
+            * 와일드 카드의 상한 제한
         
-        * `<? super T>`  : 와일드 카드의 하한 제한. T와 그 조상들만 가능
+        * `<? super T>`  : T와 그 조상들만 가능하다.
+    
+            * 와일드 카드의 하한 제한
         
-        * `<?>` : 제한없음. 모든 타입 가능. `<? extends Object>`와 동일
+        * `<?>` : 제한 없다.
+    
+            * 모든 타입이 가능하다.
+    
+            * `<? extends Object>`와 동일하다.
 
     * 와일드 카드에는 `&`를 사용 할 수 없다.
     
-        * `<? extends T & E>`는 불가능하다.
+        * Ex) `<? extends T & E>`는 불가능하다.
     
     * 메서드의 매개변수에 와일드 카드를 사용 할 수 있다. (클래스를 선언할 때는 사용 X)
     
@@ -7679,9 +7687,10 @@ int[][] arr = {
 * 제네릭 클래스의 타입 매개변수 `<T>`와 제네릭 메서드의 타입 매개변수 `<T>`는 다르다.
   
     ```java
-    class FruitBox<T> { 
+    // 제네릭 클래스와 제네릭 메소드의 타입 문자가 T로 일치하지만 다른 타입 매개변수다.
+    class FruitBox<T> { // 제네릭 클래스
   
-        // <T>, List<T>, Comparator<? super T> : 제네릭 메소드의 타입 매개변수
+        // 제네릭 메소드
         static <T> void sort(List<T> list, Comparator<? super T> c) {
             //...
         }
@@ -7692,7 +7701,9 @@ int[][] arr = {
     * 제네릭 메서드의 타입 매개변수 `<T>`는 메소드 내에서만 유효하다. 
     
     * 제네릭 클래스의 타입 매개변수 `<T>` 보다 제네릭 메서드의 타입 매개변수의 우선순위가 더 높다. 
-
+    
+    * 예를 들어, 제네릭 클래스의 타입 매개변수에는 String을 대입하고 제네릭 메소드의 타입 매개변수에는 Integer를 대입할 수 있다. (같아도 됨)
+    
 * 예시
 
     * 앞선 예시에서 살펴본 `makeJuice()`를 제네릭 메서드로 변경하면 다음과 같다.
@@ -7728,15 +7739,15 @@ int[][] arr = {
         System.out.println(Juicer.<Fruit>makeJuice(fruitBox));	// OK
         ```
       
-        * 에러가 발생하면 `Juicer.<Fruit>makeJuice(fruitBox)`처럼 모두 명시하면 된다. 
+        * 만약 에러가 발생하면 `Juicer.<Fruit>makeJuice(fruitBox)`처럼 모두 명시하면 된다. 
       
 * 제네릭 메서드와 와일드 카드의 차이
 
-    * `와일드 카드`는 대입된 타입이 서로 다른 객체를 하나의 참조 변수로 참조 할 수 있도록 하기 위한 것이다. 
+    * `와일드 카드 (?)`는 대입된 타입이 서로 다른 객체를 하나의 참조 변수로 참조 할 수 있도록 하기 위한 것이다. 
     
     * `제네릭 메서드`는 메서드를 호출 할 때 마다 서로 다른 제네릭 타입을 대입 할 수 있도록 하기 위한 것이다.
     
-        * 와일드 카드를 사용할 수 없는 경우에 제네릭 메서드를 사용한다.
+        * 와일드 카드를 사용할 수 없는 경우에 제네릭 메서드를 사용할 수 있다.
 
 #### 9) 제네릭 타입의 형 변환
 
@@ -7820,13 +7831,13 @@ int[][] arr = {
 
 * 열거형의 정의
 
-    * `열거형(enum)`은 서로 관련된 상수들을 묶어서 정의해 놓은 것이다.
+    * `열거형 (enum)`은 서로 관련된 상수들의 집합이다.
     
     * Java는 타입에 안전한 열거형을 제공한다.
     
         * "타입에 안전한 열거형"이라는 것은 실제 값이 같아도 타입이 다르면 컴파일 에러가 발생하는 것을 의미한다.
 
-        * 즉, **자바의 열거형(enum)은 값과 타입을 모두 체크한다.**
+        * 즉, **자바의 열거형(enum)은 타입과 값을 모두 체크한다.**
 
             * 열거형을 사용하지 않고 다음과 같이 상수를 정의한다고 가정한다. 
 
@@ -7907,7 +7918,7 @@ int[][] arr = {
     }
     ```
 
-* 열거형 상수를 비교할 때는 `==`와 `compareTo()`를 사용할 수 있다.
+* **열거형(enum) 상수를 비교할 때는 `==`와 `compareTo()`를 사용할 수 있다.**
 
     * 열거형을 비교할 때는 비교 연산자 (`>`, `<`, ...)가 아닌 `compareTo()`를 사용해야 한다.
     
@@ -7986,6 +7997,12 @@ int[][] arr = {
     }
     ```
 
+    * switch 문의 조건식에 사용될 수 있는 타입은 정수, 문자, 문자열, enum이다.
+
+        * **switch 문의 조건식에 enum을 사용하면 case 문은 상수명만 작성하면 된다.**
+    
+        * Ex) `case Direction.EAST:`가 아닌 `case EAST:`으로 작성하면 된다.
+
 #### 4) 열거형에 멤버 추가하기
 
 * 열거형 상수에 직접 값을 지정하기
@@ -7996,7 +8013,7 @@ int[][] arr = {
         enum Direction { EAST(1), SOUTH(5), WEST(-1), NORTH(10) } // 괄호 ()는 생성자를 호출하는 것이다.
         ```
     
-    * 그리고 **괄호 `()`를 사용하려면, 인스턴스 변수와 생성자를 추가해야 한다.**
+    * 즉, **열거형 상수에 괄호 `()`를 사용하려면, 인스턴스 변수와 생성자를 추가해야 한다.**
     
         ```java
         enum Direction {
@@ -8133,7 +8150,7 @@ int[][] arr = {
 
     * 표준 애노테이션은 Java에서 제공하는 애노테이션이다.
     
-        * `@Override` : 컴파일러에게 오버라이딩하는 메서드라는 것을 알린다.
+        * `@Override` : 오버라이딩을 올바르게 했는지 컴파일러가 체크하도록 한다.
     
         * `@Deprecated` : 앞으로 사용하지 않을 것을 권장하는 대상에 붙인다.
     
@@ -8141,7 +8158,7 @@ int[][] arr = {
     
         * `@SafeVarargs` : 제네릭 타입의 가변인자에 사용한다. (JDK 1.7)
     
-        * `@FunctionalInterface` : 함수형 인터페이스라는 것을 알린다. (JDK 1.8)
+        * `@FunctionalInterface` : 함수형 인터페이스를 올바르게 작성했는지 컴파일러가 체크하도록 한다. (JDK 1.8)
     
         * `@Native` : native 메서드에서 참조되는 상수 앞에 붙인다.
     
@@ -8259,7 +8276,7 @@ int[][] arr = {
 
 * (1) 메타 애노테이션?
 
-    * `메타 애노테이션(Meta Annotation)` : 애노테이션을 정의할 때 사용하는 애노테이션이다.
+    * `메타 애노테이션 (Meta Annotation)` : 애노테이션을 정의할 때 사용하는 애노테이션이다.
 
         * 애노테이션을 정의할 때, 애노테이션의 적용 대상(target)이나 유지 기간(retention) 등을 지정하는데 사용된다.
     
@@ -8267,7 +8284,7 @@ int[][] arr = {
 
 * (2) @Target
 
-    * `@Target` : 해당 애노테이션을 적용할 수 있는 대상을 지정할 때 사용한다.
+    * `@Target` : 해당 애노테이션을 적용할 수 있는 대상을 지정한다.
       
         * 여러 개의 값을 지정할 때는 배열에서 처럼 괄호 {}를 사용해야 한다.
     
@@ -8298,9 +8315,9 @@ int[][] arr = {
             
             * `CONSTRUCTOR` : 생성자를 선언할 때 붙일 수 있다는 의미다.
 
-            * `FIELD` : 멤버 변수 또는 enum 상수를 선언할 때 붙일 수 있다는 의미다.
+            * `FIELD` : 필드 (멤버 변수 또는 enum 상수)를 선언할 때 붙일 수 있다는 의미다.
 
-            * `TYPE` : 클래스, 인터페이스, enum를 선언할 때 붙일 수 있다는 의미다.
+            * `TYPE` : 클래스, 인터페이스 (+ 애노테이션), enum를 선언할 때 붙일 수 있다는 의미다.
 
             * `TYPE_PARAMETER` : 타입 매개변수를 선언할 때 붙일 수 있다는 의미다.
             
@@ -8308,7 +8325,7 @@ int[][] arr = {
 
 * (3) @Retention
 
-    * `@Retention` : 해당 애노테이션 정보가 유지(retention)되는 기간을 지정할 때 사용한다.
+    * `@Retention` : 해당 애노테이션 정보가 유지(retention)되는 기간을 지정한다.
     
         |     유지 정책     |                    의미                 |
         |:----------------|:---------------------------------------|
@@ -8417,7 +8434,7 @@ int[][] arr = {
 
 * (6) @Repeatable 
 
-    * `@Repeatable` : 반복해서 붙일 수 있는 애노테이션을 정의할 때 사용한다.
+    * `@Repeatable` : 반복해서 붙일 수 있는 애노테이션을 정의할 때 사용한다. 
 
         * ① 반복해서 붙일 수 있는 애노테이션을 정의한다.  
 
@@ -8454,7 +8471,8 @@ int[][] arr = {
     * `@Native` : native 메서드에 의해 참조되는 상수에 붙인다.
 
         ```java
-        @Native public static final long MIN_VALUE = 0x8000000000000000L;
+        @Native 
+        public static final long MIN_VALUE = 0x8000000000000000L;
         ```
 
         * `네이티브 메서드`는 JVM이 설치된 OS의 메서드를 말한다.
@@ -8474,9 +8492,9 @@ int[][] arr = {
     }
     ```
 
-* (2) 애노테이션의 요소(element)
+* (2) 애노테이션의 요소
 
-    * `애노테이션의 요소` : 애노테이션 내에 선언된 추상 메서드를 말한다.
+    * `애노테이션의 요소 (element)` : 애노테이션 내에 선언된 추상 메서드를 말한다.
 
     * 예시 
 
@@ -8487,9 +8505,11 @@ int[][] arr = {
                 int       count();
                 String    testedBy();
                 String[]  testTools();
-                TestType  testType(); // enum TestType { FIRST , FINAL }
+                TestType  testType(); // enum
                 DateTime  testDate(); // 자신이 아닌 다른 애노테이션(@DateTime)을 포함 할 수 있다.
             }
+            
+            enum TestType { FIRST, FINAL }
             
             @interface DateTime {
                 String yymmdd();
@@ -8497,7 +8517,7 @@ int[][] arr = {
             }
             ```
     
-            * 애노테이션의 요소는 반환 값이 있고, 매개변수는 없는 추상 메서드의 형태를 가진다.
+            * **애노테이션의 요소는 반환 값이 있고, 매개변수가 없는 추상 메서드의 형태를 가진다.**
     
         * 그리고 애노테이션을 적용할 때, 이 요소들의 값을 모두 지정해야 한다. 요소의 이름도 같이 적어주므로 순서는 상관없다.
     
@@ -8524,7 +8544,7 @@ int[][] arr = {
         public class NewClass { ... }
         ```
 
-    * 애노테이션의 요소가 하나이고 이름이 value인 경우, 애노테이션을 적용할 때 요소의 이름을 생략하고 값만 적어도 된다.
+    * 애노테이션의 요소가 하나면서 이름이 value인 경우, 애노테이션을 적용할 때 요소의 이름은 생략하고 값만 적어도 된다.
 
         ```java
         @interface TestInfo {
@@ -8576,9 +8596,9 @@ int[][] arr = {
     
         * `Annotation` 인터페이스에는 `equals()`, `hashCode()`, `toString()`과 같은 메소드가 정의되어 있기 때문에 모든 애노테이션은 이러한 메소드를 호출 할 수 있다. 
 
-* (5) 마커 애노테이션 (Marker Anntation)
+* (5) 마커 애노테이션
 
-    * `마커 애노테이션` : 요소가 하나도 정의되지 않은 애노테이션이다.
+    * `마커 애노테이션 (Marker Annotation)` : 요소가 하나도 정의되지 않은 애노테이션이다.
 
         ```java
         @Target(ElementType.METHOD)
@@ -9990,11 +10010,11 @@ int[][] arr = {
     
 * (2) 람다식 작성하기
 
-    * 반환 타입과 메서드의 이름을 제거하고 중괄호{} 앞에 ‘->’를 추가한다. [이것만 적용하더라도 람다식]
+    * 메서드에서 반환 타입과 메서드 이름을 제거하고 중괄호(`{}`) 앞에 `->`를 추가한다. [이것만 적용하더라도 람다식]
 
         ![image 1](images/img1.png)
 
-    * 반환 값이 있는 경우, 식이나 값만 적고 return 문 생략 가능 (끝에 ‘;’ 을 붙이지 않는다.) 
+    * 반환 값이 있는 경우, 식이나 값만 적고 return 문 생략 가능 (끝에 `;`을 붙이지 않는다.) 
 
         ![image 2](images/img2.png)
 
@@ -10002,21 +10022,21 @@ int[][] arr = {
 
         ![image 3](images/img3.png)
  
-    * 매개변수가 하나인 경우, 소괄호() 생략 가능 (단, 타입이 없을 때만) 
+    * 매개변수가 하나인 경우, 소괄호(`()`) 생략 가능 (단, 타입이 없을 때만) 
 
         ![image 4](images/img4.png)
 
-    * 블록 안의 문장이 하나 일 때는 중괄호 {} 생략 가능 (끝에 ‘;’ 을 붙이지 않는다) 
+    * 블록 안의 문장이 하나 일 때는 중괄호(`{}`) 생략 가능 (끝에 `;` 을 붙이지 않는다) 
 
         ![image 5](images/img5.png)  
   
-    * 단, 하나뿐인 문장이 return문이면 중괄호{} 생략 불가 [대부분, return을 생략하기 때문에 신경 X]
+    * 단, 하나뿐인 문장이 return문이면 중괄호(`{}`) 생략 불가 [대부분, return을 생략하기 때문에 신경 X]
 
         ![image 6](images/img6.png)  
 
 * (3) 람다식은 익명 함수? 익명 객체!
 
-    * 람다식은 익명 함수가 아니라 `익명 클래스의 객체(익명 객체)`와 같다. 
+    * 람다식은 익명 함수가 아니라 `익명 클래스의 객체 (익명 객체)`와 같다. 
     
         ![image 7](images/img7.png)
     
@@ -10026,9 +10046,9 @@ int[][] arr = {
     
 * (4) 변수 캡처 (Variable Capture)
 
-    * 람다식에서 사용되는 변수는 `final` 이거나 `effective final` 인 경우에만 참조할 수 있다.
+    * 람다식에서 사용되는 변수는 `final` 이거나 `effectively final` 인 경우에만 참조할 수 있다.
       
-        * `effective final` : (final 키워드를 붙이진 않았지만) 사실상 final인 변수를 말한다.
+        * `effectively final` : (final 키워드를 붙이진 않았지만) 사실상 final인 변수를 말한다.
     
     * 그렇지 않을 경우 concurrency 문제가 생길 수 있어서 컴파일러가 방지한다.
 
@@ -10148,11 +10168,11 @@ int[][] arr = {
     
         * `void accept(T t)`
         
-    * ③ `Supplier` : 매개변수 없이 특정 타입의 값을 반환한다.
+    * ③ `Supplier` : 매개변수는 없고 반환 값만 있다.
     
         * `T get()`
         
-    * ④ `Function` : 매개변수를 받아서 특정 타입으로 변환해서 값을 반환한다. 
+    * ④ `Function` : 매개변수를 받아서 특정 타입으로 변환한 다음, 값을 반환한다. 
     
         * `R apply(T t)`
         
@@ -10331,17 +10351,19 @@ int[][] arr = {
     
 * (2) Predicate의 결합
 
-    * `and()`, `or()`, `negate()`로 두 Predicate를 하나로 결합할 수 있다. (default 메서드)
-
-        * ① `and()` : 두 Predicate가 모두 true를 반환하면 true를 반환
-        
-        * ② `or()` : 두 Predicate 중 하나만 true를 반환하면 true를 반환
-        
-        * ③ `negate()` : Predicate의 결과가 true이면 false, false이면 true를 반환
-
-    * 등가 비교를 위한 Predicate의 작성에는 `isEqual()`를 사용한다. (static 메서드)
+    * 주요 메소드
+      
+        * `and()`, `or()`로 두 Predicate를 하나로 결합할 수 있다. (default 메서드)
     
-        * `isEqual()`의 매개변수로 비교 대상을 하나 지정하고, 또 다른 비교 대상은 `test()`의 매개변수로 지정한다. 
+            * ① `and()` : 두 Predicate가 모두 true를 반환하면 true를 반환
+            
+            * ② `or()` : 두 Predicate 중 하나만 true를 반환하면 true를 반환
+            
+        * `negate()` : Predicate의 결과가 true이면 false, false이면 true를 반환
+    
+        * 등가 비교를 위한 Predicate의 작성에는 `isEqual()`를 사용한다. (static 메서드)
+        
+            * `isEqual()`의 매개변수로 비교 대상을 하나 지정하고, 또 다른 비교 대상은 `test()`의 매개변수로 지정한다. 
     
     * 예시 - and(), or(), negate()
           
@@ -10456,7 +10478,7 @@ int[][] arr = {
 
         * Iterable 인터페이스
           
-            * `void forEach(Consumer<T> action)` : 모든 요소에 작업(action)을 수행한다.
+            * `void forEach(Consumer<T> action)` : 컬렉션의 모든 요소를 순회한다.
             
                 * 리스트를 순회할 때 사용한다. 
             
@@ -10731,7 +10753,7 @@ int[][] arr = {
 
 * (1) 스트림(Stream)
 
-    * `스트림(Stream)`은 다양한 데이터 소스(배열, 컬렉션 등)를 표준화된 방법으로 다루기 위한 것이다.
+    * `스트림(Stream)` : 컬렉션, 배열 등에 저장되어 있는 요소들을 하나씩 참조하며 반복적인 처리가 가능 하도록 하는 기능이다.
     
     * 스트림으로 작업하는 과정은 다음과 같다.
     
@@ -10969,7 +10991,7 @@ int[][] arr = {
     
     * `Files.lines(Path path)` : 파일의 한 행(line)을 요소로 하는 스트림을 만들어서 반환한다.
 
-          * `Path`는 파일 또는 디렉토리
+        * `Path`는 파일 또는 디렉토리
 
     * 예시
 
@@ -10996,7 +11018,7 @@ int[][] arr = {
         long count = emptyStream.count(); // count의 값은 0
         ```
     
-    * `Stream.ofNullable()` : null이 될 수 있는 객체로 스트림을 만들어서 반환한다. (객체가 null이면 빈 스트림을 반환한다.) 
+    * `Stream.ofNullable()` : null 일 수도 있는 객체를 포함하는 스트림을 만들어서 반환한다. (객체가 null이면 빈 스트림을 반환한다.) 
 
         ```java
         Map<String, String> properties = new HashMap<>();
@@ -11004,6 +11026,8 @@ int[][] arr = {
         properties.put("home", "seoul");
         
         Stream.of("config", "home", "user")
+                /* Stream.ofNullable()를 사용해서 스트림의 각 값(String)을 Stream<String>으로 만든다.
+                   flatMap()를 사용해서 여러 개의 Stream<String>를 하나의 스트림(Stream<String>)으로 만든다. */
                 .flatMap(key -> Stream.ofNullable(properties.get(key)))
                 .forEach(System.out::println);
         ```
@@ -11093,17 +11117,24 @@ int[][] arr = {
             
             * `comparing(Function<T, U> keyExtractor, Comparator<U> keyComparator)`
 
-                * `keyExtractor` : 정렬할 때 사용할 필드를 추출할 때 사용한다.
+                * `keyExtractor` : 정렬할 때 사용할 키(Key)를 추출하는 Function를 지정한다. 
                 
-                * `keyComparator` : 정렬 기준을 제공할 때 사용한다. (오름차순, 내림차순)
+                * `keyComparator` : 키(Key)를 정렬하는 기준으로 사용할 Comparator를 지정한다. (오름차순, 내림차순)
             
         * 예시
         
-            * 학생 스트림(studentStream)을 반(ban)별로 정렬하여 출력하려면 다음과 같이 한다.
+            * 학생 스트림(studentStream)을 반(ban)별로 오름차순 정렬하여 출력하려면 다음과 같이 한다.
             
                 ```java
-                studentStream.sorted(Comparator.comparing(Student::getBan)) // 반 별로 정렬
+                studentStream.sorted(Comparator.comparing(Student::getBan)) // 반 별로 오름차순 정렬
                           .forEach(System.out::println);
+                ```
+
+            * 학생 스트림(studentStream)을 반(ban)별로 내림차순 정렬하여 출력하려면 다음과 같이 한다.
+            
+                ```java
+                studentStream.sorted(Comparator.comparing(Student::getBan, Comparator.reverseOrder())) // 반 별로 내림차순 정렬
+                        .forEach(System.out::print);
                 ```
           
     * `Comparator.thenComparing()` : 추가 정렬 기준을 제공할 때 사용한다. (정렬 기준이 여러 개인 경우에 사용)
@@ -11216,7 +11247,7 @@ int[][] arr = {
         
         * map(word -> word.split(""))
         
-            * `Stream<String>` -> `Stream<String[]>` (각 단어를 개별 문자를 포함하는 배열로 변환한다.)
+            * `Stream<String>` -> `Stream<String[]>` (각 단어를 개별 문자로 이루어진 배열로 변환한다.)
         
         * flatMap(arr -> Arrays.stream(arr))
         
@@ -11226,7 +11257,7 @@ int[][] arr = {
 
 * (6) 스트림의 요소를 소비하지 않고 엿보기 - peek()
 
-    * `peek()` : 스트림의 각 요소를 반복하며 람다식을 적용한다. (스트림을 소비 X)
+    * `peek()` : 매개변수에 대입된 람다식을 스트림의 모든 요소에 적용한다. (스트림의 요소를 소비 X)
     
         * 문법
         
@@ -11436,13 +11467,13 @@ int[][] arr = {
  
 * (1) 루핑(looping)
 
-    * `forEach()` : 스트림의 각 요소를 반복하며 람다식을 적용한다. (스트림의 요소를 소비 O)
+    * `forEach()` : 매개변수에 대입된 람다식을 스트림의 모든 요소에 적용한다. (스트림의 요소를 소비 O)
     
         * 병렬 스트림인 경우에 스트림 요소의 순서가 보장되지 않는다. 
      
             * `void forEach(Consumer<? super T> action)`
 
-    * `forEachOrdered()` : 스트림의 각 요소를 반복하며 람다식을 적용한다
+    * `forEachOrdered()` : 매개변수에 대입된 람다식을 스트림의 모든 요소에 적용한다. (스트림의 요소를 소비 O)
     
         * 병렬 스트림인 경우에도 스트림 요소의 순서가 보장된다.
     
@@ -11559,7 +11590,7 @@ int[][] arr = {
 
 * (5) 리듀싱 - reduce()
 
-    * `reduce()` : 스트림의 요소를 소비해서 최종 결과를 도출한다. 
+    * `reduce()` : 스트림의 요소를 소모해서 최종 결과를 도출한다. 
 
         * `Optional<T> reduce (BinaryOperator<T> accumulator)`
         
@@ -11604,7 +11635,7 @@ int[][] arr = {
  
 * (1) collect()와 Collectors
 
-    * `collect()` : 스트림의 요소를 소비해서 최종 결과를 도출한다. 
+    * `collect()` : 스트림의 요소를 소모해서 최종 결과를 도출한다. 
     
         * 특징 
           
