@@ -2297,7 +2297,7 @@ public class MyEventHandler{
 
 #### 4) AOP 적용 방법
 
-* `위빙(Weaving)`은 지정된 객체에 Aspect를 적용해서 새로운 프록시 객체를 생성하는 과정을 말한다.
+* `위빙(Weaving)`은 타겟 객체에 Advice를 적용해서 새로운 프록시 객체를 생성하는 과정을 말한다.
 
     * (1) `컴파일 시점` - AspectJ
     
@@ -2308,8 +2308,12 @@ public class MyEventHandler{
         * JVM이 클래스를 로딩할 때, 위빙이 이루어지는 방식이다.
     
     * (3) `런타임 시점` - Spring AOP
-    
-        * 런타임 시에 메소드를 호출할 때, 위빙이 이루어지는 방식이다.
+
+        * 런타임 시에 메소드를 호출할 때, 위빙이 이루어지는 방식이다.    
+
+            * 런타임 시에 프록시 빈을 생성한다. 그리고 클라이언트가 타겟을 호출한다.
+
+            * 그러면 타겟을 감싸고 있는 프록시 빈이 어드바이스에 등록된 기능을 수행한 다음에 타겟 메소드를 호출한다.
 
 ## 7. 스프링 AOP : 프록시 기반 AOP
 
@@ -2317,13 +2321,13 @@ public class MyEventHandler{
 
 * `스프링 AOP`는 **프록시 기반의 AOP 구현체**이다.
 
-* **스프링 빈(Bean)에만 AOP를 적용 할 수 있다.** 
+* **스프링 빈(Bean)에만 AOP를 적용할 수 있다.** 
 
 * 모든 AOP 기능을 제공하는 것이 목적이 아니라, 스프링 IoC와 연동하여 엔터프라이즈 애플리케이션에서 가장 흔한 문제에 대한 해결책을 제공하는 것이 목적이다.
 
 #### 2) 프록시 패턴
 
-* **프록시 패턴을 사용하는 이유는 접근 제어 또는 부가 기능을 추가하기 위해 사용된다.**
+* **프록시 패턴을 사용하는 이유는 기존 코드를 변경하지 않고 접근 제어 또는 부가 기능을 추가하기 위해 사용된다.**
 
     ![image 1](images/img1.png)
 
@@ -2335,213 +2339,219 @@ public class MyEventHandler{
 
 #### 3) 예제
 
-* 앞서 살펴본 그림의 `Subject`에 해당하는 EventService 인터페이스를 작성한다.
+* 프록시 패턴을 적용하기 전 코드
 
-    ```java
-    public interface EventService {
+    * 앞서 살펴본 그림의 `Subject`에 해당하는 EventService 인터페이스를 작성한다.
     
-        void createEvent();
+        ```java
+        public interface EventService {
+        
+            void createEvent();
+        
+            void publishEvent();
+        
+        }
+        ```
     
-        void publishEvent();
+    * 그리고 `Real Subject`에 해당하는 SimpleEventService 클래스를 작성한 다음, 빈으로 등록한다.
+          
+        ```java
+        @Service
+        public class SimpleEventService implements EventService {
+        
+            @Override
+            public void createEvent() {
+                try {
+                    Thread.sleep(1000);            // 1초 쉬고
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Created an event"); // 메시지 출력
+            }
+        
+            @Override
+            public void publishEvent() {
+                try {
+                    Thread.sleep(2000);            // 2초 쉬고
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Published an event"); // 메시지 출력
+            }
+        }
+        ```
     
-    }
-    ```
-
-* 그리고 `Real Subject`에 해당하는 SimpleEventService 클래스를 작성한 다음, 빈으로 등록한다.
+    * `Client`에 해당하는 AppRunner 클래스를 작성한다.
+          
+        ```java
+        @Component
+        public class AppRunner implements ApplicationRunner {
+        
+            @Autowired
+            EventService eventService; // 인터페이스가 있다면 인터페이스 타입으로 주입 받는 것이 좋다.
+        
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                eventService.createEvent();
+                eventService.publishEvent();
+            }
+        }
+        ```
       
-    ```java
-    @Service
-    public class SimpleEventService implements EventService {
-    
-        @Override
-        public void createEvent() {
-            try {
-                Thread.sleep(1000);            // 1초 쉬고
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("Created an event"); // 메시지 출력
-        }
-    
-        @Override
-        public void publishEvent() {
-            try {
-                Thread.sleep(2000);            // 2초 쉬고
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("Published an event"); // 메시지 출력
-        }
-    }
-    ```
-
-* `Client`에 해당하는 AppRunner 클래스를 작성한다.
+        * 위의 코드를 실행하면 `createEvent()`를 호출하고 1초 후에 "Created an event" 메시지가 출력되고
+                
+        * `publishEvent()`를 호출하고 나서 2초 후에 "Published an event" 메시지가 출력된다.
       
-    ```java
-    @Component
-    public class AppRunner implements ApplicationRunner {
-    
-        @Autowired
-        EventService eventService; // 인터페이스가 있다면 인터페이스 타입으로 주입 받는 것이 좋다.
-    
-        @Override
-        public void run(ApplicationArguments args) throws Exception {
-            eventService.createEvent();
-            eventService.publishEvent();
+    * EventService에 deleteEvent()를 새롭게 추가하고 `Real Subject`에 해당하는 SimpleEventService에 createEvent()와 publishEvent()의 실행 시간을 측정하는 기능을 추가한다. 
+          
+        ```java
+        public interface EventService {
+        
+            void createEvent();
+        
+            void publishEvent();
+        
+            void deleteEvent();
         }
-    }
-    ```
-  
-    * 위의 코드를 실행하면 `createEvent()`를 호출하고 1초 후에 "Created an event" 메시지가 출력되고
-            
-    * `publishEvent()`를 호출하고 나서 2초 후에 "Published an event" 메시지가 출력된다.
-  
-* EventService에 deleteEvent()를 새롭게 추가하고 `Real Subject`에 해당하는 SimpleEventService에 createEvent()와 publishEvent()의 실행 시간을 측정하는 기능을 추가한다. 
+        ```
       
-    ```java
-    public interface EventService {
-    
-        void createEvent();
-    
-        void publishEvent();
-    
-        void deleteEvent();
-    }
-    ```
-  
-    ```java
-    public class SimpleEventService implements EventService {
-    
-        @Override
-        public void createEvent() {
-            long begin = System.currentTimeMillis(); // 흩어진 관심사
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        ```java
+        public class SimpleEventService implements EventService {
+        
+            @Override
+            public void createEvent() {
+                long begin = System.currentTimeMillis(); // 흩어진 관심사
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Created an event");
+                System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
             }
-            System.out.println("Created an event");
-            System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
-        }
-    
-        @Override
-        public void publishEvent() {
-            long begin = System.currentTimeMillis();
-            try {
-                Thread.sleep(2000);           
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        
+            @Override
+            public void publishEvent() {
+                long begin = System.currentTimeMillis();
+                try {
+                    Thread.sleep(2000);           
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Published an event"); 
+                System.out.println(System.currentTimeMillis() - begin);
             }
-            System.out.println("Published an event"); 
-            System.out.println(System.currentTimeMillis() - begin);
-        }
-    
-        public void deleteEvent(){
-            System.out.println("Delete an event");
-        }
-    }
-    ```
-
-* 그리고 AppRunner에 deleteEvent()를 호출하는 코드를 추가한다.
-
-    ```java
-    @Component
-    public class AppRunner implements ApplicationRunner {
-    
-        @Autowired
-        EventService eventService;
-    
-        @Override
-        public void run(ApplicationArguments args) throws Exception {
-            eventService.createEvent();
-            eventService.publishEvent();
-            eventService.deleteEvent();
-        }
-    }
-    ```
-
-* 성능 측정이 필요하다면 매번 기존 코드에 성능을 측정하는 코드를 추가해주어야 한다.
-  
-* 기존의 코드를 건들지 않고 성능을 측정 할 수는 없을까? 라는 생각에 적용 할 수 있는 것이 Proxy 패턴이다.
-  
-* 일단, `SimpleEventService` 클래스에서 성능을 측정하는 코드를 제거하자.
-
-    ```java
-    @Service
-    public class SimpleEventService implements EventService {
-    
-        @Override
-        public void createEvent() {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        
+            public void deleteEvent(){
+                System.out.println("Delete an event");
             }
-            System.out.println("Created an event");
         }
+        ```
     
-        @Override
-        public void publishEvent() {
-            try {
-                Thread.sleep(2000);            
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    * 그리고 AppRunner에 deleteEvent()를 호출하는 코드를 추가한 다음, 애플리케이션을 실행 해보자.
+    
+        ```java
+        @Component
+        public class AppRunner implements ApplicationRunner {
+        
+            @Autowired
+            EventService eventService;
+        
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                eventService.createEvent();
+                eventService.publishEvent();
+                eventService.deleteEvent();
             }
-            System.out.println("Published an event");
         }
-    
-        public void deleteEvent(){
-            System.out.println("Delete an event");
-        }
-    }
-    ```
+        ```
 
-* 그 다음, `SimpleEventService`와 동일한 인터페이스를 구현한 Proxy 클래스를 작성한 다음, 빈으로 등록한다.
-  
-* 그리고 `@Primary`로 우선 순위를 가지는 빈으로 지정해서 해당 빈이 주입 되도록 한다.
-  
-    ```java
-    @Primary
-    @Service
-    public class ProxySimpleEventService implements EventService {
-    
-        @Autowired
-        SimpleEventService simpleEventService; // Proxy는 Real Subject의 빈을 주입 받아 사용해야 한다.
-    
-        @Override
-        public void createEvent() {
-            long begin = System.currentTimeMillis(); // 흩어진 관심사
-            simpleEventService.createEvent(); // Proxy는 SimpleEventService로 위임을 한다.
-            System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
-        }
-    
-        @Override
-        public void publishEvent() {
-            long begin = System.currentTimeMillis(); // 흩어진 관심사
-            simpleEventService.publishEvent();
-            System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
-        }
-    
-        @Override
-        public void deleteEvent() {
-            simpleEventService.deleteEvent();  
-        }
-    }
-    ```
+        * 성능 측정이 필요하다면 매번 기존 코드에 성능을 측정하는 코드를 추가해주어야 한다.
+          
+        * 기존의 코드를 건들지 않고 성능을 측정 할 수는 없을까? 라는 생각에 적용 할 수 있는 것이 Proxy 패턴이다.
 
-    * 프록시는 `Real Subject`에게 일을 대신 처리 하도록 위임을 한 다음, 부가 기능(성능을 측정하는 코드)를 수행한다.
+* 프록시 패턴을 적용한 코드  
 
-    * 그러면 `Client`에 해당하는 `AppRunner`는 `@Autowired`로 `EventService`를 주입 받는데 `@Primary`로 지정한 `ProxySimpleEventService` 빈이 주입된다.
-
-* 앞서 Proxy 클래스를 만들어서 모든 문제가 해결된 것처럼 보이지만 아직도 문제점이 존재한다.
- 
-    * 매번 Proxy 클래스를 작성해야 되며 이를 여러 클래스와 메소드에 적용해야 한다면 상당히 번거롭다고 느끼게 될 것이다.
+    * 일단, `SimpleEventService` 클래스에서 성능을 측정하는 코드를 제거하자.
+    
+        ```java
+        @Service
+        public class SimpleEventService implements EventService {
+        
+            @Override
+            public void createEvent() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Created an event");
+            }
+        
+            @Override
+            public void publishEvent() {
+                try {
+                    Thread.sleep(2000);            
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Published an event");
+            }
+        
+            public void deleteEvent(){
+                System.out.println("Delete an event");
+            }
+        }
+        ```
+    
+    * 그 다음, `SimpleEventService`와 동일한 인터페이스를 구현한 Proxy 클래스를 작성한 다음, 빈으로 등록한다.
       
-    * 이러한 이유로 등장하게 된 것이 바로 `스프링 AOP`다.
+    * 그리고 `@Primary`로 우선 순위를 가지는 빈으로 지정해서 해당 빈이 주입 되도록 한다.
+      
+        ```java
+        @Primary
+        @Service
+        public class ProxySimpleEventService implements EventService {
+        
+            @Autowired
+            SimpleEventService simpleEventService; // Proxy는 Real Subject의 빈을 주입 받아 사용해야 한다.
+        
+            @Override
+            public void createEvent() {
+                long begin = System.currentTimeMillis(); // 흩어진 관심사
+                simpleEventService.createEvent(); // Proxy는 SimpleEventService로 위임을 한다.
+                System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
+            }
+        
+            @Override
+            public void publishEvent() {
+                long begin = System.currentTimeMillis(); // 흩어진 관심사
+                simpleEventService.publishEvent();
+                System.out.println(System.currentTimeMillis() - begin); // 흩어진 관심사
+            }
+        
+            @Override
+            public void deleteEvent() {
+                simpleEventService.deleteEvent();  
+            }
+        }
+        ```
+    
+        * 프록시는 `Real Subject`에게 일을 대신 처리 하도록 위임을 한 다음, 부가 기능(성능을 측정하는 코드)를 수행한다.
+    
+        * 그러면 `Client`에 해당하는 `AppRunner`는 `@Autowired`로 `EventService`를 주입 받는데 `@Primary`로 지정한 `ProxySimpleEventService` 빈이 주입된다.
+
+* 여전히 존재하는 문제점    
+
+    * 앞서 Proxy 클래스를 만들어서 모든 문제가 해결된 것처럼 보이지만 아직도 문제점이 존재한다.
+     
+        * 매번 Proxy 클래스를 작성해야 되며 이를 여러 클래스와 메소드에 적용해야 한다면 상당히 번거롭다고 느끼게 될 것이다.
+          
+        * 이러한 이유로 등장하게 된 것이 바로 `스프링 AOP`다.
     
 #### 4) 동적 프록시 (Dynamic Proxy)
 
-* 스프링 IoC 컨테이너가 제공하는 기반 시설과 동적 프록시를 사용하여 여러 복잡한 문제를 해결한 것이 바로 스프링 AOP이다.
+* 스프링 IoC 컨테이너가 제공하는 기반 시설과 동적 프록시를 사용하여 여러 복잡한 문제를 해결한 것이 바로 스프링 AOP다.
   
     * `동적 프록시 (Dynamic Proxy)` : 애플리케이션이 실행되고 있는 도중에 프록시 객체를 생성하는 방법을 말한다. 
     
@@ -2549,13 +2559,13 @@ public class MyEventHandler{
     
         * 이때, 사용되는 것이 `AbstractAutoProxyCreator`이다.
         
-        * `AbstractAutoProxyCreator`는 `BeanPostProcessor`의 구현체이다.
+        * `AbstractAutoProxyCreator`는 `BeanPostProcessor`의 구현체다.
         
             * `BeanPostProcessor` : 새로운 빈(Bean) 인스턴스를 조작 할 수 있는 기능을 제공한다.
 
 ## 8. 스프링 AOP : @AOP
 
-#### 1) 애노테이션 기반의 스프링 AOP 구현하기
+#### 1) 스프링 AOP 구현하기
 
 * (1) 다음과 같은 의존성을 추가한다.  
 
@@ -2609,6 +2619,8 @@ public class MyEventHandler{
         * 주의사항
 
             * 어드바이스 메소드의 파라미터(`ProceedingJoinPoint`)는 해당 Advice가 적용되는 대상을 의미한다.
+    
+                * IDE에서 `ProceedingJoinPoint`를 입력할 때, PJP만 입력하면 알려준다. 
             
             * 여기서 주의할 점은 `@Around`의 경우, 반드시 `proceed()`가 호출되어야 한다는 것이다.
             
