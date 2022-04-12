@@ -1,11 +1,11 @@
-# 백기선님의 스프링 프레임워크 핵심 기술
-> 아래 내용은 [스프링 프레임워크 핵심 기술](https://www.inflearn.com/course/spring-framework_core "스프링 프레임워크 핵심 기술") 강좌를 정리한 내용 입니다.
+# 스프링 프레임워크 핵심 기술
+> 아래 내용은 [백기선님의 스프링 프레임워크 핵심 기술](https://www.inflearn.com/course/spring-framework_core "스프링 프레임워크 핵심 기술")과 [김영한님의 스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EA%B8%B0%EB%B3%B8%ED%8E%B8 "스프링 핵심 원리 - 기본편") 강좌를 정리한 내용입니다.
 
 ## 1. 스프링 소개
 
 #### 1) 스프링이란?
 
-* 스프링은 “소규모 애플리케이션 또는 기업용 애플리케이션을 자바로 개발하는데 있어 유용하고 편리한 기능을 제공하는 프레임워크"이다.
+* 스프링은 "소규모 애플리케이션 또는 기업용 애플리케이션을 자바로 개발하는데 있어 유용하고 편리한 기능을 제공하는 프레임워크"이다.
 
 #### 2) 스프링의 역사
 
@@ -35,49 +35,53 @@
 
 * `제어의 역전(IoC)`은 `의존성 주입(Dependency Injection)`이라고도 하며, **어떤 객체가 사용하는 의존 객체를 직접 만들어 사용하는게 아니라 주입 받아 사용하는 방법**을 말한다.
 
-* 의존 객체를 직접 만들어 사용하는 예시는 다음과 같다.
-
-    ```java
-    BookRepository bookRepository = new BookRepository();
-     
-    BookService service = new BookService(bookRepository);
-    ```
-
-* IoC의 예시는 다음과 같다.
-
-    ```java
-    // BookService 타입의 객체가 사용할 bookRepository라는 의존 객체를 
-    // 직접 만들어 사용하는게 아니라, 주입 받아 사용하는 방법을 말함
+    * 의존 객체를 직접 만들어 사용하는 예시는 다음과 같다.
     
-    @Autowired
-    BookRepository bookRepository;
-     
-    BookService service = new BookService(bookRepository);
-    ```
+        ```java
+        BookRepository bookRepository = new BookRepository();
+         
+        BookService service = new BookService(bookRepository);
+        ```
+    
+    * IoC의 예시는 다음과 같다.
+    
+        ```java
+        // BookService 타입의 객체가 사용할 bookRepository라는 의존 객체를 
+        // 직접 만들어 사용하는게 아니라, 주입 받아 사용하는 방법을 말함
+        
+        @Autowired
+        BookRepository bookRepository;
+         
+        BookService service = new BookService(bookRepository);
+        ```
 
 #### 2) 빈(Bean)
 
-* `빈(Bean)`은 **스프링 IoC 컨테이너가 관리 하는 객체**이다
+* `빈(Bean)`은 **스프링 IoC 컨테이너가 관리하는 객체**이다
 
 * **스프링에서 빈으로 등록될 때의 장점**은 다음과 같다.
   
-    * **의존성 관리**
+    * ① **의존성 관리**
 
         * 의존성 주입을 받으려면 빈이 되어야 한다.
   
-    * **싱글톤 객체로 만들어서 관리 하고 싶을 때, 편리하다.**
+    * ② **싱글톤 객체로 만들어서 관리하고 싶을 때, 편리하다.**
   
         * 스프링 IoC 컨테이너에 등록되는 빈은 기본적으로 싱글톤 scope으로 등록된다.
         
-        * (메모리 측면에서 효율적이며 컨테이너 안에 미리 만들어둔 객체를 사용하므로 런타임 시 성능 최적화에 유리함.)
+            * 메모리 측면에서 효율적이며 컨테이너 안에 미리 만들어둔 객체를 사용하므로 런타임 시 성능 최적화에 유리함.
   
-    * **라이프 사이클 인터페이스를 제공한다.** `@PostConstruct`
+    * ③ **라이프 사이클 인터페이스를 제공한다.** 
+      
+        * Ex) `@PostConstruct`
 
 #### 3) 스프링 IoC 컨테이너
 
 * `스프링 IoC 컨테이너`는 빈 설정 파일로 부터 빈 정의를 읽어 들이고 빈을 생성한 다음, 제공(주입)하는 역할을 한다.
 
-* Annotation을 사용하여 POJO 객체를 Bean으로 등록하고 Bean으로 등록된 객체를 주입 받아서 사용한다.
+    * 스프링 컨테이너는 싱글톤 패턴의 문제점을 해결하면서, 객체를 싱글톤으로 관리한다.
+
+    * `싱글톤 레지스트리 (Singleton Registry)` : 스프링이 직접 싱글톤 객체를 생성하고 관리하는 기능을 제공하는 것을 말한다.    
 
 #### 4) 스프링 IoC 컨테이너 관련 인터페이스
 
@@ -89,7 +93,7 @@
 
 ##### (2) ApplicationContext
 
-* `ApplicationContext`는 BeanFactory를 상속 받은 인터페이스이다.
+* `ApplicationContext`는 BeanFactory를 상속받은 인터페이스이다.
 
 * `ApplicationContext`는 BeanFactory의 IoC 컨테이너 기능을 가지고 있으면서도 다음과 같은 추가적인 기능을 가진다.
 
@@ -157,7 +161,7 @@
         
         * `<bean>` 태그의 id는 빈을 구분할 때 사용하는 이름을 의미하며 camel-case로 작성한다.
         
-        * 그리고 class는 빈의 타입을 의미한다.
+            * 그리고 class는 빈의 타입을 의미한다.
         
         * `<property>` 태그는 setter를 이용하여 의존성을 주입 받을 때 사용한다.
         
@@ -200,7 +204,7 @@
 
 ##### 2-3) Java 설정 파일
 
-* 빈 설정 파일을 xml이 아닌 Java로 만들 수 없을까? 라는 생각에 등장한 것이 바로 Java 설정 파일이다.
+* "빈 설정 파일을 XML이 아닌 Java로 만들 수 없을까?" 라는 생각에 등장한 것이 바로 Java 설정 파일이다.
 
 * 방금 전까지 선언 했던 애노테이션(`@Repository`, `@Service`, `@Autowird`)을 모두 제거한다.
 
@@ -229,7 +233,9 @@
                 * `@Configuration`이 선언된 클래스 내에 있는 메서드에 사용된다.
                 
                 * 보통 외부 라이브러리들을 Bean으로 등록하고 싶은 경우에 사용된다.
-                
+
+        * 예시는 다음과 같다.                
+
             ```java
             @Configuration
             public class ApplicationConfig {
@@ -259,9 +265,9 @@
 
 ##### 2-4) Java 설정 파일에 @ComponentScan를 활용한 빈 등록  ★★★
 
-* 앞서 살펴본 Java 설정도 Bean을 일일이 등록해야 하는 번거로움이 있어서 xml에서 처럼 컴포넌트 스캔을 사용 할 수 있다.
+* 앞서 살펴본 Java 설정도 Bean을 일일이 등록해야 하는 번거로움이 있어서 XML에서 처럼 컴포넌트 스캔을 사용할 수 있다.
 
-* `@ComponentScan` 애노테이션을 이용하여 지정한 Class가 위치한 곳부터 컴포넌트 스캔을 하여 Bean으로 등록한다.
+* `@ComponentScan` 애노테이션을 이용하여 `@Component` 애노테이션이 붙어 있는 클래스들을 스캔해서 빈으로 등록한다.
 
     * 빈(Bean) 등록 및 의존성 주입하기
     
@@ -273,7 +279,7 @@
         
         }
         ```
-        * `basePackages`로 classpath를 사용 할 수도 있지만 `basePackageClasses`가 더 type-safe 하다.
+        * `basePackages`로 classpath를 사용할 수도 있지만 `basePackageClasses`가 더 type-safe 하다.
         
     * 빈(Bean)을 사용하기
     
@@ -283,9 +289,9 @@
 
 * `@SpringBootApplication`는 내부적으로 `@Configuration`과 `@ComponentScan` 애노테이션을 포함하고 있다.
 
-* 따라서 `@SpringBootApplication`이 붙어 있는 클래스 자체가 Bean 설정 파일이다.
+* 따라서 `@SpringBootApplication`이 붙어있는 클래스 자체가 Bean 설정 파일이다.
 
-* 그러므로 SpringBoot의 경우, ApplicationConfig 파일이 필요 없다.
+* 그러므로 SpringBoot의 경우, ApplicationConfig 파일이 필요없다.
            
     ```java
     @SpringBootApplication
@@ -298,95 +304,264 @@
 
 ### 2-3. IoC 컨테이너 3부: @Autowired
 
-#### 1) @Autowired
+#### 1) 실습 준비
+
+* Book
+
+    ```java
+    public class Book {
+    
+        private Long id;
+    
+        private String name;
+    
+        private Long price;
+    
+        public Book(Long id, String name, Long price) {
+            this.id = id;
+            this.name = name;
+            this.price = price;
+        }
+    
+        // Getter, Setter
+        
+    }
+    ```
+  
+* BookService
+
+    ```java
+    @Service
+    public class BookService {
+    
+        private BookRepository bookRepository;
+        
+        public BookService(BookRepository bookRepository) {
+            this.bookRepository = bookRepository;
+        }
+    
+        public void save(Book book) {
+            bookRepository.save(book);
+        }
+    
+        public Book findBook(Long bookId) {
+            return bookRepository.findById(bookId);
+        }
+    
+    }
+    ```
+
+* BookRepository
+
+    ```java
+    public interface BookRepository {
+    
+        void save(Book book);
+    
+        Book findById(Long id);
+    
+    }
+    ```
+
+* MemoryBookRepository
+
+    ```java
+    @Repository
+    public class MemoryBookRepository implements BookRepository {
+    
+        private static ConcurrentMap<Long, Book> store = new ConcurrentHashMap<>();
+    
+        @Override
+        public void save(Book book) {
+            store.put(book.getId(), book);
+        }
+    
+        @Override
+        public Book findById(Long bookId) {
+            return store.get(bookId);
+        }
+    
+    }
+    ```
+
+#### 2) @Autowired
 
 * `@Autowired`는 필요한 의존 객체의 “타입"에 해당하는 빈을 찾아 주입한다.
 
-#### 2) @Autowired의 required
+    * 즉, `@Autowired`는 의존관계를 자동으로 주입해준다.
 
-* `@Autowired`의 required는 true가 기본 값이다.
+    * 의존관계를 자동으로 주입 받으려면 스프링 컨테이너가 관리하는 스프링 빈이어야 한다.
+
+#### 2) @Autowired의 required 옵션
+
+* `@Autowired`의 required 옵션은 자동 주입 대상이 반드시 존재해야 되는지 여부를 의미한다.
+
+    * required 옵션이 `true`면 자동 주입 대상이 반드시 존재해야 한다. (기본 값)
  
-* 필요한 의존 객체의 타입에 해당하는 빈을 찾지 못하면 애플리케이션 구동에 실패한다.
+        * 따라서 필요한 의존 객체의 타입에 해당하는 빈을 찾지 못하면 애플리케이션 구동에 실패한다.
 
-    ```java
-    @Service
-    public class BookService {
+    * required 옵션이 `false`면 자동 주입 대상이 없더라도 애플리케이션 구동에 성공한다. (필드, setter만 가능)
+
+        * 수정자 (setter)의 자동 주입 대상을 선택으로 처리하기
+        
+            ```java
+            @Service
+            public class BookService {
+            
+                private BookRepository bookRepository;
+            
+                @Autowired(required = false)
+                public void setBookRepository(BookRepository bookRepository) {
+                    this.bookRepository = bookRepository;
+                }
+            
+                // ...
+            }
+            ```
     
-        BookRepository bookRepository;
+            * `@Autowired(required=false)`는 자동 주입할 대상(BookRepository)이 없으면 수정자(setter) 메서드 자체가 호출되지 않는다.
+
+            * 즉, BookRepository가 의존성 주입이 되지 않은 상태로 BookService가 빈으로 등록된다.
     
-        @Autowired
-        public void setBookRepository(BookRepository bookRepository) {
-            this.bookRepository = bookRepository;
-        }
-    }
-    ```
-
-* BookRepository가 빈으로 등록되어 있지 않다고 가정 할 때, 아래 코드에서 required를 false로 지정 하면, 의존성 주입을 할 수 없더라도 애플리케이션을 구동한다. (필드, 세터만 가능)
-
-* 즉, BookRepository가 의존성 주입이 되지 않은 상태로 BookService가 빈으로 등록된다.
-
-    ```java
-    @Service
-    public class BookService {
-    
-        BookRepository bookRepository;
-    
-        @Autowired(required = false)
-        public void setBookRepository(BookRepository bookRepository) {
-            this.bookRepository = bookRepository;
-        }
-    }
-    ```
-
-* 해당 내용은 필드에도 적용 가능 하다.
-
-    ```java
-    @Service
-    public class BookService {
-    
-        @Autowired(required = false)
-        BookRepository bookRepository;
-    }
-    ```
+        * 필드의 자동 주입 대상을 선택으로 처리하기
+        
+            ```java
+            @Service
+            public class BookService {
+            
+                @Autowired(required = false)
+                BookRepository bookRepository;
+          
+                // ...
+            }
+            ```
 
 #### 3) @Autowired를 사용 할 수 있는 위치
 
-* `@Autowired`는 생성자, 세터(setter), 필드(field)에 사용 할 수 있다.
+* `@Autowired`는 생성자 (constructor), 수정자 (setter), 필드 (field)에 사용할 수 있다.
 
-    * `생성자 주입` : 생성자를 통해서 의존 관계를 주입 받는 방법이다.
+    * `생성자 주입 (Constructor Injection)` : 생성자를 통해서 의존관계를 주입 받는 방법이다.
 
         ```java
         @Service
         public class BookService {
         
-            BookRepository bookRepository;
+            private BookRepository bookRepository;
         
             @Autowired
             public BookService(BookRepository bookRepository) {
                 this.bookRepository = bookRepository;
             }
+        
+            // ...
         }
         ```
     
-        * 스프링 빈으로 등록하면서 의존 관계 주입도 한번에 처리한다.
-    
-        * 생성자가 하나인 경우에는 `@Autowired`를 생략 할 수 있다. (스프링 4.3 부터) 
+        * 생성자 주입의 특징
 
+            * ① 생성자를 호출하는 시점에 단 1번만 호출되는 것이 보장된다.
+
+            * ② 불변, 필수 의존관계에 사용한다.
+
+                * `불변` : 한번 생성되고 난 이후에 변하지 않는 경우를 말한다.
+                
+                * `필수` : 반드시 값이 입력 되어야 하는 경우를 말한다.
+
+        * **생성자가 하나인 경우에는 `@Autowired`를 생략 하더라도 의존관계를 자동으로 주입한다.** (스프링 4.3 부터)
+    
         * 생성자 주입을 권장하는 이유는 다음과 같다.
 
-            * 생성자 주입은 객체를 생성할 때, 딱 1번만 호출되므로 이후에 호출되는 일이 없다. 따라서 불변하게 설계할 수 있다.
-
+            * ① 불변 객체로 설계 가능 
+            
                 * 대부분의 의존관계 주입은 한번 일어나면 애플리케이션 종료 시점까지 의존관계를 변경할 일이 거의 없다.
-
-                * 수정자 주입을 사용하면, setXxx 메서드를 public으로 열어두어야 한다. 누군가 실수로 변경할 수도 있다.
-
-            * 생성자 주입을 사용하면 필드에 final 키워드를 사용할 수 있으며 생성자에서 값이 설정되지 않는 오류를 컴파일 시점에 막아준다.
-
-                * 수정자(setter) 주입을 포함한 나머지 주입 방식은 모두 생성자 이후에 호출되므로, 필드에 final 키워드를 사용할 수 없다.
-                  
-                * [참고] final 키워드를 사용하면 해당 필드는 필수 값이 된다.
+            
+                    * 대부분의 의존관계는 애플리케이션 종료 전까지 변하면 안된다. (불변해야 한다.)
+            
+                * 수정자 주입을 사용하면, setter를 public으로 열어 두어야 한다.
+            
+                    * 누군가 실수로 변경할 수도 있고, 변경하면 안되는 메서드를 열어두는 것은 좋은 설계 방법이 아니다.
+            
+                * **생성자 주입은 객체를 생성할 때, 단 1번만 호출 되므로 이후에 호출되는 일이 없다. 따라서 불변하게 설계할 수 있다.**
+            
+            * ② 누락 방지
+            
+                * 생성자 주입을 사용하면 의존관계에 해당하는 객체를 누락 했을 때 컴파일 오류가 발생한다.  
     
-      * `수정자(setter) 주입` : 필드의 값을 변경하는 수정자(setter) 메서드를 통해서 의존 관계를 주입하는 방법이다.
+                    ```java
+                    // 생성자 주입을 사용한 코드
+                    @Service
+                    public class BookService {
+                    
+                        private BookRepository bookRepository;
+                    
+                        @Autowired
+                        public BookService(BookRepository bookRepository) {
+                            this.bookRepository = bookRepository;
+                        }
+                    
+                        // ...
+                    }
+                    ```
+                    
+                    ```java
+                    class BookServiceTest {
+                    
+                        @Test
+                        void createBook() {
+                            // BookRepository bookRepository = new MemoryBookRepository();
+                            // BookService bookService = new BookService(bookRepository);
+                            BookService bookService = new BookService(); // 의존 객체 누락 시, 컴파일 에러 발생
+                    
+                            bookService.save(new Book(1L, "JPA", 38000L));
+                            Book findBook = bookService.findBook(1L);
+                    
+                            assertThat(findBook.getName()).isEqualTo("JPA");
+                            assertThat(findBook.getId()).isEqualTo(1L);
+                            assertThat(findBook.getPrice()).isEqualTo(38000L);
+                        }
+                        
+                    }
+                    ```
+                    
+                    * `isSameAs()`는 == 연산자를 사용해서 비교하며 `isEqualTo()`은 equals()를 사용해서 비교한다고 생각하면 된다.
+
+                    * 즉, `isSameAs()`는 객체의 참조 값을 비교하며 `isEqualTo()`는 객체가 가진 값을 비교할 때 사용한다고 생각하면 된다.
+
+            * ③ final 키워드 사용 가능
+            
+                * 생성자 주입을 사용하면 필드에 final 키워드를 사용할 수 있다.
+            
+                    * `final` : 값을 한번 할당하면 재할당 할 수 없다는 것을 의미한다.
+                    
+                        * 즉, final 키워드를 사용하면 해당 필드는 필수 값이 된다.
+            
+                * 따라서 생성자에서 필드 값을 설정하지 않는 실수를 컴파일 시점에 막아준다.
+            
+                    ```java
+                    @Service
+                    public class BookService {
+                    
+                        private final BookRepository bookRepository;    // 컴파일 에러 발생
+                    
+                        @Autowired
+                        public BookService(BookRepository bookRepository) {
+                            // 생성자에서 bookRepository의 필드 값을 설정하지 않았다.
+                            // 즉, this.bookRepository = bookRepository; 와 같은 코드를 작성하지 않는 실수를 했다고 가정한다.
+                        }
+                    
+                        // ...
+                    }
+                    ```
+            
+                    * 필드에 final 키워드를 사용 했다면 자바는 컴파일 시점에 오류를 발생시킨다.
+                    
+                        * **컴파일 오류는 세상에서 가장 빠르고, 좋은 오류다!**
+            
+                    * [참고] 생성자 주입을 제외한 나머지 주입 방식은 모두 생성자 이후에 호출되므로, 필드에 final 키워드를 사용할 수 없다.
+            
+                        * 생성자 주입 방식만 final 키워드를 사용할 수 있다.
+    
+      * `수정자 주입 (Setter Injection)` : 필드의 값을 변경하는 수정자(setter) 메서드를 통해서 의존관계를 주입 받는 방법이다.
   
         ```java
         @Service
@@ -399,18 +574,25 @@
                 this.bookRepository = bookRepository;
             }
         
+            // ...
         }
         ```
     
-        * 선택, 변경 가능성이 있는 의존관계에 사용한다.
-        
-            * `선택` : 의존 관계에 있는 객체가 스프링 빈으로 등록되지 않았을 때도 의존 관계를 주입 하고자 할 때 사용 할 수 있다는 것을 의미한다.
+        * 수정자 주입의 특징
+          
+            * ① 선택, 변경 가능성이 있는 의존관계에 사용한다.
             
-            * `변경` : 중간에 의존 관계에 있는 객체를 다른 빈으로 변경 하고자 할 때 사용 할 수 있다는 것을 의미한다.
-        
-        * 자바 빈 프로퍼티 규약의 수정자 메서드 방식을 사용하는 방법이다.
+                * `선택` : 선택적으로 의존관계를 주입하고 싶은 경우를 말한다. 
+                  
+                    * 의존관계에 있는 객체가 스프링 빈으로 등록되지 않았더라도 정상적으로 동작하게 하는 경우다.
+
+                    * setter에 `@Autowired(required = false)`를 지정하면 된다.                     
+
+                * `변경` : 의존관계에 있는 객체가 중간에 다른 객체로 변경될 수 있는 경우를 말한다.
+                  
+            * ② 자바 빈 프로퍼티 규약의 수정자 메서드 방식을 사용하는 방법이다.
    
-    * `필드(field) 주입` : 필드에 바로 주입하는 방법이다.
+    * `필드 주입 (Field Injection)` : 필드에 바로 의존관계를 주입 받는 방법이다.
 
         ```java
         @Service
@@ -420,169 +602,554 @@
             BookRepository bookRepository;
         }
         ```
-    
-        * 외부에서 변경이 불가능해서 테스트 하기가 힘들다는 치명적인 단점이 있다.
-        
-        * DI 프레임워크가 없으면 아무것도 할 수 없다.
-        
-        * 필드 주입은 사용하지 말자!
-        
-            * 애플리케이션의 실제 코드와 관계 없는 테스트 코드에서는 사용해도 된다.
+
+        * 필드 주입의 특징    
+
+            * ① 외부에서 변경이 불가능해서 테스트 하기가 힘들다는 치명적인 단점이 있다.
             
-            * 스프링 설정을 목적으로 하는 @Configuration 같은 곳에서만 특별한 용도로 사용해도 된다.
+            * ② DI 프레임워크가 없으면 아무것도 할 수 없다. (즉, 스프링 컨테이너를 구동하지 않으면서 순수한 자바 코드로 테스트를 할 수 없다.)
+            
+                * 필드 주입은 사용하지 말자!
+                
+                    * 애플리케이션의 실제 코드와 관계 없는 테스트 코드에서는 사용해도 된다.
+                    
+                    * 또는 스프링 설정을 목적으로 하는 @Configuration과 같은 곳에서만 특별한 용도로 사용해도 된다.
 
 * 의존관계 주입을 하는 순서
 
-    * `필드, setter 주입`은 먼저 스프링 빈으로 등록한 다음, 의존 관계 주입을 한다.
+    * `필드`, `setter` 주입은 먼저 스프링 빈으로 등록한 다음, 의존관계를 주입한다.
 
         ```java
         @Service
         public class BookService {              // 1) BookService가 스프링 빈으로 등록된다.
         
             @Autowired
-            BookRepository bookRepository;      // 2) BookService의 생성자 호출 이후에 BookRepository에 대한 의존 관계 주입을 한다.
+            BookRepository bookRepository;      // 2) BookService의 생성자 호출 이후에 BookRepository에 대한 의존관계를 주입한다.
         }
         ```
       
         * 생성자 주입을 제외한 나머지 의존 관계 주입은 생성자 호출 이후에 이루어진다.
     
-    * `생성자 주입`은 스프링 빈으로 등록하면서 의존 관계 주입도 한번에 처리한다.
+    * `생성자 주입`은 스프링 빈으로 등록하면서 의존관계 주입도 한번에 처리한다.
 
-        * 스프링 빈 저장소는 스프링 빈이 등록되기 전에 본인이 필요한 의존관계 그래프를 내부에서 모두 만든다.
+        * 스프링 빈 저장소는 스프링 빈을 등록하기 전에 필요한 의존관계 그래프를 내부에서 모두 만든다.
 
             ```java
             @Service
-            public class MemberService {
-                private final MemberRepository memberRepository;
+            public class BookService {
             
-                public MemberService(MemberRepository memberRepository) {
-                    this.memberRepository = memberRepository;
+                private BookRepository bookRepository;
+            
+                @Autowired
+                public BookService(BookRepository bookRepository) {
+                    this.bookRepository = bookRepository;
                 }
-            } 
+            
+                // ...
+            }
+            ```
+    
+        * 예를 들어, BookService를 빈으로 등록하려고 할 때, 의존관계에 있는 빈(BookRepository)이 스프링 컨테이너에 없다면 해당 객체를 먼저 빈으로 등록한다.
+
+        * 그리고 스프링 빈 저장소에서 BookRepository를 꺼낸 다음, 생성자를 통해 주입하면서 BookService를 스프링 빈으로 등록하는 과정을 마무리한다.
+
+#### 4) 롬복과 최신 트렌드
+
+* (1) 롬복 ?
+
+    * `롬복 (Lombok)` : getter, setter 등의 반복되는 코드를 자동으로 생성해주는 라이브러리다.
+
+        * `@Getter` : getter 메서드를 자동 생성한다.
+
+        * `@Setter` : setter 메서드를 자동 생성한다.
+
+        * `@NoArgsConstructor` : 매개변수가 없는 생성자(기본 생성자)를 자동 생성한다.
+
+        * `@AllArgsConstructor` : 모든 필드를 매개변수로 받는 생성자를 자동 생성한다.
+
+        * `@RequiredArgsConstructor` : `final` 필드만 매개변수로 받는 생성자를 자동 생성한다.
+
+        * `@ToString` : toString() 메서드를 자동 생성한다.
+
+        * `@EqualsAndHashCode` : equals()와 hashCode() 메서드를 자동 생성한다.
+
+            * of 속성을 사용하여 동등성 비교에 사용할 필드를 명시한다.
+
+                * Ex) `@EqualsAndHashCode(of = "id")`
+
+        * `@Data` : `@Getter`, `@Setter`, `@RequiredArgsConstructor`, `@ToString`, `@EqualsAndHashCode`를 한번에 설정한다.
+
+        * `@Builder` : 빌더 패턴을 사용할 수 있도록 한다.
+
+* (2) 프로젝트에 롬복 라이브러리를 적용하기 
+
+    * ① 인텔리제이에 롬복 플러그인을 설치(Install)한 다음, 인텔리제이를 재시작한다.
+
+        ![image 5](images/img5.png)
+
+    * ② 빌드 도구에 롬복 라이브러리를 추가한다.
+
+        * Maven
+
+            ```html
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.16.20</version>
+                <scope>provided</scope>
+            </dependency>
             ```
 
-        * 따라서 MemberService를 빈으로 등록하려고 하는데 의존 관계에 있는 빈(MemberRepository)이 없으면 먼저 MemberRepository를 빈으로 등록한다.
+        * Gradle
 
-        * 그리고 스프링 빈 저장소에서 MemberRepository를 꺼내서 생성자를 통해 주입하여 MemberService를 스프링 빈으로 등록하는 것을 마무리한다.
+            ```
+            //lombok 설정 추가 - START
+            configurations {
+                compileOnly {
+                    extendsFrom annotationProcessor
+                }
+            }
+            //lombok 설정 추가 - END
+        
+            dependencies {
+                implementation 'org.springframework.boot:spring-boot-starter'
+            
+                //lombok 라이브러리 추가 - START
+                compileOnly 'org.projectlombok:lombok'
+                annotationProcessor 'org.projectlombok:lombok'
+                //lombok 라이브러리 추가 - END
+            
+                testImplementation('org.springframework.boot:spring-boot-starter-test') {
+                    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+                }
+            }
+            ```
 
-#### 4) @Autowired에서 발생 할 수 있는 경우의 수
-
-* 해당 타입의 빈이 없는 경우, 실패 
-
-* **해당 타입의 빈이 한 개인 경우**  
-
-* 해당 타입의 빈이 여러 개인 경우
-
-    * **빈 이름으로 시도하여 같은 이름의 빈을 찾으면 해당 빈 사용** 
-
-    * 빈 이름으로 시도하여 같은 이름의 빈을 찾지 못하면 실패
-
-#### 5) 같은 타입의 빈이 여러 개일 때, 의존성 주입
-
-* 아래의 BookRepository 인터페이스를 구현한 클래스(MyBookRepository, KeesunBookRepository)가 2개 있다.
-
-    ```java
-    public interface BookRepository { }
+    * ③ 인텔리제이에서 `Preferences` -> `Annotation Processors`를 검색 -> `Enable annotation processing`를 체크한다. (+ 재시작)
     
-    @Repository
-    public class MyBookRepository implements BookRepository { }
-    
-    @Repository
-    public class KeesunBookRepository implements BookRepository{ }
-    ```
+    * ④ 임의의 클래스를 만들어서 롬복이 정상적으로 동작하는지 확인한다.
+
+      ```java
+      @Getter
+      @Setter
+      @ToString
+      public class HelloLombok {
       
-* BookService 클래스에서는 `@Autowired`로 BookRepository를 주입 받으려고 하는데 에러가 발생한다.    
+          private String name;
+          private int age;
+      
+          public static void main(String[] args) {
+              HelloLombok helloLombok = new HelloLombok();
+              helloLombok.setName("kevin");
+      
+              System.out.println("helloLombok = " + helloLombok);
+          }
+      
+      }
+      ```
 
-* 에러가 발생한 이유는 두 개의 클래스 중 어떤 클래스를 주입해야 하는지 알 수 없기 때문이다. 
+* (3) 롬복을 사용하는 최신 트렌드
 
-* 해결책으로는 다음 3가지가 존재한다.
+    * 생성자가 단 하나인 경우에는 `@Autowired`를 생략 하더라도 의존관계를 자동으로 주입한다. (스프링 4.3 부터)
 
-    * ① `@Primary` : 같은 타입의 빈이 여러 개 일 때, 우선 순위를 가지는 빈으로 지정하여 해당 빈이 주입 되도록 한다.
+    * 롬복 라이브러리가 제공하는 `@RequiredArgsConstructor`를 사용하면 final 필드만 매개변수로 받는 생성자를 자동으로 생성한다.
+
+        ```java
+        @Service
+        @RequiredArgsConstructor
+        public class BookService {
+        
+            private final BookRepository bookRepository;
+        
+            // ...
+        }
+        ```
+
+        * 코드에는 보이지 않지만 실제 호출이 가능하다.
+
+#### 5) @Autowired에서 발생할 수 있는 경우의 수
+
+* @Autowired에서 발생할 수 있는 경우의 수
+
+    * ① 필요한 의존 객체의 타입에 해당하는 빈이 없는 경우, 애플리케이션 구동에 실패한다.
+    
+    * ② **필요한 의존 객체의 타입에 해당하는 빈이 한 개인 경우**, 해당 빈을 주입한다.
+    
+    * ③ 필요한 의존 객체의 타입에 해당하는 빈이 여러 개인 경우
+    
+        * **빈 이름으로 시도해서 같은 이름의 빈을 찾으면** 해당 빈을 주입한다. 
+    
+        * 빈 이름으로 시도해서 같은 이름의 빈을 찾지 못하면 애플리케이션 구동에 실패한다.
+
+* 정리하자면, `@Autowired`는 타입으로 매칭을 시도하고 이때 2개 이상의 빈이 있으면 필드 이름(파라미터 이름)으로 빈 이름과 매칭을 시도한다.
+
+#### 6) 같은 타입의 빈이 여러 개일 때, 의존성 주입
+
+* (1) 실습 준비
+  
+    * BookRepository 인터페이스를 구현한 클래스 2개를 작성한다. (MemoryBookRepository, DbBookRepository)
+    
+        ```java
+        public interface BookRepository { }
+        
+        @Repository
+        public class MemoryBookRepository implements BookRepository { }
+        
+        @Repository
+        public class DbBookRepository implements BookRepository{ }
+        ```
+          
+    * BookService 클래스에서 `@Autowired`로 BookRepository를 주입 받으려고 한다.    
+
+        ```java
+        @Service
+        public class BookService {
+            
+            private BookRepository bookRepository;
+        
+            @Autowired
+            public BookService(BookRepository bookRepository) {
+                this.bookRepository = bookRepository;
+            }
+        }
+        ```
+      
+    * 애플리케이션을 실행하면 에러가 발생한다.
+    
+        * 에러가 발생한 이유는 두 개의 클래스 중 어떤 클래스를 주입해야 하는지 알 수 없기 때문이다. 
+
+* (2) 조회 대상 빈이 2개 이상일 때 해결책
+
+    * ① `@Primary` : (같은 타입의 빈이 여러 개 일 때) 우선 순위를 가지는 빈으로 지정하여 해당 빈이 주입 되도록 한다.
 
         ```java
         @Repository
         @Primary
-        public class KeesunBookRepository implements BookRepository{}
+        public class DbBookRepository implements BookRepository {}
         ```
 
-    * ② `@Qualifier`
-    
-        * `@Qualifier`는 `@Autowired`와 함께 사용하며 빈의 이름이 같은 객체를 찾는다.
-          
-        * `@Qualifier`에 전달하는 빈의 이름은 클래스 명에서 첫 글자만 소문자로 변경하여 지정한다.
+    * ② `@Qualifier`는 추가 구분자를 붙여주는 방법이다.
+
+        * ① 빈 등록 시 `@Qualifier`를 붙여준다.
+        
+            * dbBookRepository라는 구분자를 붙여준다.
+            
+                ```java
+                @Repository
+                @Qualifier("dbBookRepository")
+                public class DbBookRepository implements BookRepository {}
+                ```
+            
+            * memoryBookRepository라는 구분자를 붙여준다.
+            
+                ```java
+                @Repository
+                @Qualifier("memoryBookRepository")
+                public class MemoryBookRepository implements BookRepository {}
+                ```
+        
+        * ② 주입 시에 `@Qualifier`를 붙여주고 등록한 이름을 적어준다.
         
             ```java
-            @Autowired
-            @Qualifier("keesunBookRepository")
-            BookRepository bookRepository;
+            // 생성자 자동 주입 예시
+            @Service
+            public class BookService {
+            
+                private BookRepository bookRepository;
+            
+                @Autowired
+                public BookService(@Qualifier("dbBookRepository") BookRepository bookRepository) {
+                    this.bookRepository = bookRepository;
+                }
+                
+            }
             ```
-                 
-        * `@Qualifier` 보다 좀 더 type-safe 한 `@Primary`를 사용하는 것을 권장한다. 
-
+            
+            * `@Qualifier`로 주입할 때 `@Qualifier("dbBookRepository")`로 지정한 부분을 찾지 못하면 어떻게 될까?
+            
+            * 그러면 `dbBookRepository`라는 빈 이름을 갖는 스프링 빈을 추가적으로 찾는다.
+            
+            * 하지만 `@Qualifier`는 `@Qualifier`로 지정한 부분을 찾는 용도로만 사용하는게 명확하고 좋다.
+    
     * ③ `해당 타입의 모든 빈을 주입 받기`
+
+        * 컬렉션을 사용하면 해당 타입의 모든 빈을 주입 받을 수 있다.
+
+            * List  
+            
+                ```java
+                @Service
+                public class BookService {
+                
+                    private List<BookRepository> bookRepositories;
+                
+                    @Autowired
+                    public BookService(List<BookRepository> bookRepositories) {
+                        this.bookRepositories = bookRepositories;
+                    }
+                
+                    public List<BookRepository> getBookRepositories() {
+                        return bookRepositories;
+                    }
+                
+                }
+                ```
+              
+                * `List<BookRepository>` : BookRepository 타입의 모든 빈을 List 형식으로 넣어준다.
+
+                    * 만약 해당 타입의 스프링 빈이 없으면, 비어 있는 컬렉션을 주입한다.
+
+            * Map
+
+                ```java
+                @Service
+                public class BookService {
+                
+                    private Map<String, BookRepository> bookRepositoryMap;
+                
+                    @Autowired
+                    public BookService(Map<String, BookRepository> bookRepositoryMap) {
+                        this.bookRepositoryMap = bookRepositoryMap;
+                    }
+                
+                    public Map<String, BookRepository> getBookRepositoryMap() {
+                        return bookRepositoryMap;
+                    }
+                    
+                }
+                ```
+
+                * `Map<String, BookRepository>` : Map의 키에 스프링 빈의 이름을 넣어주고, 값으로는 필요한 의존 객체의 타입(BookRepository)에 해당하는 모든 빈을 넣어준다.
+
+                    * 만약 해당 타입의 스프링 빈이 없으면, 비어 있는 Map을 주입한다.
     
-        * 다음과 같이 List를 사용하면 해당 타입의 (BookRepository) 타입의 모든 빈을 주입 받을 수 있다.  
+* (3) @Primary과 @Qualifier를 비교하기
+
+    * 사용 예시
+    
+        * 예를 들어, 메인 데이터베이스의 커넥션을 가져오는 빈에는 `@Primary`를 사용하고 서브 데이터베이스의 커넥션을 가져오는 객체에는 `@Qualifier`를 사용할 수 있다.
+    
+    * 우선 순위
+    
+        * `@Primary`과 `@Qualifier`를 둘 다 지정하면 `@Primary` 보다는 `@Qualifier`의 우선순위가 더 높다.
+        
+        * 스프링은 자동 보다는 수동이, 넒은 범위의 선택권 보다는 좁은 범위의 선택권이 우선 순위가 높다.
+
+* (4) @Qualifier를 대체하는 커스텀 애노테이션을 만들어 사용하기
+
+    * 설명
+      
+        * `@Qualifier("mainBookRepository")`처럼 문자로 입력하면 컴파일 시 타입 체크가 되지 않는다.
+    
+        * 따라서 커스텀 애노테이션을 만들어서 문제를 해결할 수 있다.
+
+    * 예시
+    
+        * ① 커스텀 애노테이션을 작성한다.
 
             ```java
-            @Autowired
-            List<BookRepository> bookRepositories;
+            @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER,
+                    ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+            @Retention(RetentionPolicy.RUNTIME)
+            @Documented
+            @Qualifier("mainBookRepository")
+            public @interface MainBookRepository {
+            }
+            ```
+    
+            * 위에서 사용한 메타 애노테이션은 `@Qualifier`의 내용을 참고했다.
+    
+        * ② 커스텀 애노테이션을 적용한다.
+    
+            ```java
+            @Repository
+            @MainBookRepository
+            public class DbBookRepository implements BookRepository {
+            
+            }
+            ```
+    
+            ```java
+            @Service
+            public class BookService {
+            
+                private BookRepository bookRepository;
+            
+                @Autowired
+                public BookService(@MainBookRepository BookRepository bookRepository) {
+                    this.bookRepository = bookRepository;
+                }
+            
+                public BookRepository getBookRepository() {
+                    return bookRepository;
+                }
+                
+            }
             ```
 
-#### 6) @Autowired 동작 원리
+#### 7) @Autowired 동작 원리
 
-* `BeanPostProcessor`의 구현체(`AutowiredAnnotationBeanPostProcessor`)가 Bean의 초기화 라이프 사이클(초기화 콜백) 이전에 @Autowired 애노테이션이 붙어 있는 빈(Bean)을 찾아 주입 한다.
+* `BeanPostProcessor`의 구현체(`AutowiredAnnotationBeanPostProcessor`)가 Bean의 초기화 라이프 사이클(초기화 콜백) 이전에 @Autowired 애노테이션이 붙어 있는 빈(Bean)을 찾아 주입한다.
 
-* [참고] 빈 생명주기 콜백 ([김영한님의 스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EA%B8%B0%EB%B3%B8%ED%8E%B8 "스프링 핵심 원리 - 기본편") 내용 중 일부를 참고 하였습니다.)
-    
-    * 개요
-    
-        * 스프링 빈은 객체를 생성하고, 의존관계 주입이 다 끝난 다음에야 필요한 데이터를 사용할 수 있는 준비가 완료된다. 
-        
-        * 따라서 초기화 작업은 의존관계 주입이 모두 완료되고 난 다음에 호출해야 한다. 
-        
-        * 그런데 개발자가 의존관계 주입이 모두 완료된 시점을 어떻게 알 수 있을까?
-        
-        * 스프링은 의존관계 주입이 완료되면 스프링 빈에게 콜백 메서드를 통해서 초기화 시점을 알려주는 다양한 기능을 제공한다. 
-        
-        * 또한 스프링은 스프링 컨테이너가 종료되기 직전에 소멸 콜백을 준다. (싱글톤 빈에만 해당)
-        
-    * 스프링 빈의 이벤트 라이프 사이클
-    
-        * `스프링 컨테이너 생성` -> `스프링 빈 생성` -> `의존관계 주입` -> `초기화 콜백` -> `빈(Bean) 사용` -> `소멸전 콜백` -> `스프링 컨테이너 종료`    
+#### 8) 빈 생명주기 콜백
 
-            * **생성자 주입**의 경우, 생성자를 호출하면서 의존관계 주입도 한번에 처리된다. 
+* (1) 개요
+
+    * 스프링 빈은 객체를 생성하고, 의존관계 주입이 다 끝난 다음에야 필요한 데이터를 사용할 수 있는 준비가 완료된다. 
+    
+    * 따라서 초기화 작업은 의존관계 주입이 모두 완료되고 난 다음에 호출해야 한다. 
+    
+    * 그런데 개발자가 의존관계 주입이 모두 완료된 시점을 어떻게 알 수 있을까?
+    
+    * 스프링은 의존관계 주입이 완료되면 스프링 빈에게 콜백 메서드를 통해서 초기화 시점을 알려주는 다양한 기능을 제공한다. 
+    
+    * 또한 스프링은 스프링 컨테이너가 종료되기 직전에 소멸 콜백을 준다. (싱글톤 빈에만 해당)
+    
+* (2) 스프링 빈의 이벤트 라이프 사이클
+
+    * `스프링 컨테이너 생성` -> `스프링 빈 생성` -> `의존관계 주입` -> `초기화 콜백` -> `빈(Bean) 사용` -> `소멸전 콜백` -> `스프링 컨테이너 종료`    
+
+        * **생성자 주입**의 경우, 생성자를 호출하면서 의존관계 주입도 한번에 처리된다. 
+        
+        * `초기화 콜백` : 스프링 빈이 생성되고, 의존관계 주입이 완료된 이후에 호출된다.
+
+            * 초기화 작업은 외부 커넥션을 연결하는 것과 같은 무거운 동작을 수행한다.
             
-            * `초기화 콜백`: 빈이 생성되고, 빈의 의존관계 주입이 완료된 이후에 호출된다.
+            * 따라서 생성자 안에서 초기화 작업을 함께 처리하는 것 보다는 객체를 생성하는 부분과 초기화 작업을 하는 부분을 명확하게 나누는 것이 유지보수 관점에서 좋다.
             
-            * `소멸전 콜백`: 빈이 소멸되기 직전에 호출된다.
-         
-    * 빈 생명주기 콜백
-    
-        * ① 초기화, 소멸 인터페이스(InitializingBean, DisposableBean)
+                * 물론, 초기화 작업이 단순하다면 생성자에서 한번에 처리하는 것이 나을 수도 있다.
 
+        * `소멸전 콜백` : 스프링 빈이 소멸되기 직전에 호출된다.
+    
+        * [참고] `콜백 (callback)` : 어떤 이벤트가 발생하는 경우, 호출되는 메소드를 말한다. 
+    
+* (3) 빈 생명주기 콜백
+
+    * `빈 생명주기 콜백 (Bean LifeCycle Callback)`은 빈의 특정 시점(생성, 초기화, 소멸 등)에 호출 되도록 정의된 메소드를 말합니다.
+
+    * 스프링은 크게 3 가지 방법으로 빈 생명주기 콜백을 지원한다.
+
+        * ① 초기화, 소멸 인터페이스(InitializingBean, DisposableBean)를 사용하기
+    
             * `InitializingBean`은 `afterPropertiesSet()` 메서드로 초기화를 지원한다.
         
             * `DisposableBean`은 `destroy()` 메서드로 소멸을 지원한다.
             
-            * 인터페이스를 사용하는 초기화, 종료 방법은 스프링 초창기에 나온 방법들이고, 지금은 다음의 더 나은 방법들이 있어서 거의 사용하지 않는다.
+                * 인터페이스를 사용하는 초기화, 종료 방법은 스프링 초창기에 나온 방법들이고, 지금은 다음의 더 나은 방법들이 있어서 거의 사용하지 않는다.
             
-        * ② 빈 설정 정보에 초기화 메서드, 소멸 메서드를 지정
+        * ② 빈 설정 정보에서 초기화 메서드, 소멸 메서드를 지정하기
+
+            * 빈 설정 정보에서 `@Bean`의 `initMethod`, `destroyMethod` 옵션으로 초기화 메서드, 소멸 메서드를 지정한다.        
+    
+        * ③ `@PostConstruct`, `@PreDestroy` 애노테이션을 사용하기
         
-            * 빈 설정 정보에 `@Bean(initMethod = "init", destroyMethod = "close")`처럼 초기화, 소멸 메서드를 지정할 수 있다.
+            * `@PostConstruct` : 빈이 생성되고, 의존관계 주입이 완료된 이후에 호출될 초기화 메소드에 적용한다.
+        
+            * `@PreDestroy` : 빈이 소멸되기 직전에 호출될 소멸 메소드에 적용한다.
+    
+* (4) 실습
+
+    * ① 먼저, 실습을 위한 준비 작업을 한다.
+    
+        * NetworkClient를 작성한다.
+
+            ```java
+            public class NetworkClient {
+            
+                private String url;
+            
+                public NetworkClient() {
+                    System.out.println("생성자 호출, url = " + url);
+                    connect();
+                    call("초기화 연결 메시지");
+                }
+            
+                public void setUrl(String url) {
+                    this.url = url;
+                }
+            
+                // 서비스 시작 시 호출
+                public void connect() {
+                    System.out.println("connect: " + url);
+                }
+            
+                public void call(String message) {
+                    System.out.println("call: " + url + " message = " + message);
+                }
+            
+                // 서비스 종료 시 호출
+                public void disconnect() {
+                    System.out.println("close: " + url);
+                }
+                
+            }
+            ```
+
+        * 빈 설정 정보를 작성한다.
+    
+            ```java
+            @Configuration
+            public class AppConfig {
+          
+                @Bean
+                public NetworkClient networkClient() {
+                    NetworkClient networkClient = new NetworkClient();
+                    networkClient.setUrl("http://hello-spring.dev");
+                    return networkClient;
+                } 
+          
+            }
+            ```
+
+    * ② 빈 생명주기 콜백을 사용하는 코드를 작성한다.
+    
+        * 초기화, 소멸 인터페이스(InitializingBean, DisposableBean)를 사용하기
+
+            * ⓐ InitializingBean, DisposableBean 인터페이스를 구현한다.
 
                 ```java
-                @Configuration
-                static class LifeCycleConfig {
-              
-                    @Bean(initMethod = "init", destroyMethod = "close")
-                    public NetworkClient networkClient() {
-                        NetworkClient networkClient = new NetworkClient();
-                        networkClient.setUrl("http://hello-spring.dev");
-                        return networkClient;
+                public class NetworkClient implements InitializingBean, DisposableBean {
+                
+                    private String url;
+                
+                    // ...
+                
+                    // 초기화 메소드
+                    @Override
+                    public void afterPropertiesSet() throws Exception {
+                        System.out.println("NetworkClient.afterPropertiesSet");
+                        connect();
+                        call("초기화 연결 메시지");
                     }
-              
+                
+                    // 소멸 메소드
+                    @Override
+                    public void destroy() throws Exception {
+                        System.out.println("NetworkClient.destroy");
+                        disconnect();
+                    }
+                
                 }
                 ```
+              
+            * ⓑ 애플리케이션을 실행해서 결과를 확인한다.
+    
+                ```
+                생성자 호출, url = null
+                NetworkClient.afterPropertiesSet
+                connect: http://hello-spring.dev
+                call: http://hello-spring.dev message = 초기화 연결 메시지
+                NetworkClient.destroy
+                close: http://hello-spring.dev
+                ```
+              
+                * 출력 결과를 보면 초기화 메서드가 의존관계 주입 완료 이후에 적절하게 호출된 것을 확인할 수 있다.
+    
+                * 그리고 스프링 컨테이너를 종료하자 소멸 메서드가 호출된 것도 확인할 수 있다.
+
+        * 빈 설정 정보에서 초기화 메서드, 소멸 메서드를 지정하기
+        
+            * ⓐ 스프링 컨테이너에 빈으로 등록 하고자 하는 클래스에 초기화, 소멸 메소드를 선언한다.
               
                 ```java
                 public class NetworkClient {
@@ -590,82 +1157,213 @@
                     
                     //...
               
-                    public void init() { 
+                    public void init() { // 초기화 메소드
                         System.out.println("NetworkClient.init"); 
                         connect();
                         call("초기화 연결 메시지");
                     }
                     
-                    public void close() {
+                    public void close() { // 소멸 메소드
                         System.out.println("NetworkClient.close");
-                        disConnect();
+                        disconnect();
                     } 
                 }
                 ```
+    
+            * ⓑ 앞서 작성한 클래스를 빈 설정 정보에서 직접 빈으로 등록하면서 초기화, 소멸 메서드를 지정한다.
+    
+                ```java
+                @Configuration
+                public class AppConfig {
+                
+                    @Bean(initMethod = "init", destroyMethod = "close")
+                    public NetworkClient networkClient() {
+                        NetworkClient networkClient = new NetworkClient();
+                        networkClient.setUrl("http://hello-spring.dev");
+                        return networkClient;
+                    }
+                
+                }
+                ```
 
-        * ③ `@PostConstruct`, `@PreDestroy` 애노테이션
-        
-            * `@PostConstruct` : 빈이 생성되고, 의존관계 주입이 완료된 이후에 호출될 초기화 메소드에 적용한다.
-        
-            * `@PreDestroy` : 빈이 소멸되기 직전에 호출될 소멸 메소드에 적용한다.
-    
-            * 특징
+        * `@PostConstruct`, `@PreDestroy` 애노테이션을 사용하기
+
+            * 초기화, 소멸 메소드를 선언한 다음, `@PostConstruct`, `@PreDestroy` 애노테이션을 적용하면 된다.
             
-                * 최신 스프링에서 가장 권장하는 방법이다.
+                ```java
+                public class NetworkClient {
                 
-                * 애노테이션 하나만 붙이면 되므로 매우 편리하다.
+                    private String url;
                 
-                * 코드를 고칠 수 없는 외부 라이브러리를 초기화, 종료해야 하면 `@Bean`의 initMethod, destroyMethod를 사용하자.
-    
+                    public NetworkClient() {
+                        System.out.println("생성자 호출, url = " + url);
+                    }
+                
+                    public void setUrl(String url) {
+                        this.url = url;
+                    }
+                
+                    // 서비스 시작 시 호출
+                    public void connect() {
+                        System.out.println("connect: " + url);
+                    }
+                
+                    public void call(String message) {
+                        System.out.println("call: " + url + " message = " + message);
+                    }
+                
+                    // 서비스 종료 시 호출
+                    public void disconnect() {
+                        System.out.println("close: " + url);
+                    }
+                
+                    @PostConstruct
+                    public void init() { // 초기화 메소드
+                        System.out.println("NetworkClient.init");
+                        connect();
+                        call("초기화 연결 메시지");
+                    }
+                
+                    @PreDestroy
+                    public void close() { // 소멸 메소드
+                        System.out.println("NetworkClient.close");
+                        disconnect();
+                    }
+                
+                }
+                ```
+              
+                * AppConfig에서 @Bean의 initMethod과 destroyMethod 옵션을 제거하자.
+
+* (5) 빈 생명주기 콜백에 대한 3 가지 방법의 각 특징
+
+    * 초기화, 소멸 인터페이스(InitializingBean, DisposableBean)를 사용하기
+
+        * ① 초기화, 소멸 인터페이스는 스프링에 의존하는 코드를 작성하게 된다.
+
+        * ② 초기화, 소멸 메서드의 이름을 변경할 수 없다.
+
+        * ③ 내가 코드를 고칠 수 없는 외부 라이브러리에 초기화, 소멸 메서드를 적용할 수 없다.
+
+    * 빈 설정 정보에서 초기화 메서드, 소멸 메서드를 지정하기
+
+        * ① 메서드 이름을 자유롭게 줄 수 있다.
+
+        * ② 스프링 빈이 스프링 코드에 의존하지 않는다.
+
+        * ③ 내가 코드를 고칠 수 없는 외부 라이브러리에 초기화, 소멸 메서드를 적용할 수 있다.
+
+    * `@PostConstruct`, `@PreDestroy` 애노테이션을 사용하기
+
+        * ① 최신 스프링에서 가장 권장하는 방법이다.
+
+        * ② 애노테이션 하나만 붙이면 되므로 매우 편리하다.
+
+        * ③ 컴포넌트 스캔과 잘 어울린다.
+
+        * ④ 내가 코드를 고칠 수 없는 외부 라이브러리에는 초기화, 소멸 메서드를 적용할 수 없다.
+
+            * 이 경우에는 `@Bean`의 initMethod, destroyMethod 옵션을 사용하자.
+
 ### 2-4. IoC 컨테이너 4부: @Component와 컴포넌트 스캔
 
 #### 1) @ComponentScan
 
-* `@ComponentScan`는 `@Component` 애노테이션이 붙어 있는 클래스들을 스캔하여 빈으로 등록한다.
+* `@ComponentScan`는 `@Component` 애노테이션이 붙어 있는 클래스들을 스캔해서 빈으로 등록한다.
 
-    * `BasePackages`는 입력된 패키지의 경로를 기준으로 스캔을 시작한다. 
+    * `BasePackages` : 입력된 패키지를 컴포넌트 스캔의 시작 위치로 지정한다.
       
-        * 패키지의 경로를 문자열로 입력 받기 때문에 type-safe 하지 않음
+        * 입력된 패키지를 포함한 하위 패키지를 모두 탐색한다.      
 
-    * `BasePackageClasses`는 입력된 클래스가 위치한 패키지를 기준으로 스캔을 시작한다.
+        * 패키지의 경로를 문자열로 입력 받기 때문에 type-safe 하지 않다.
+
+    * `BasePackageClasses` : 입력된 클래스가 위치한 패키지를 컴포넌트 스캔의 시작 위치로 지정한다.  
     
-    * 만약 해당 애노테이션에 값을 지정하지 않으면 `@ComponentScan`이 붙어 있는 클래스가 위치한 패키지가 시작 위치가 된다.
-    
-* 스프링 부트에서는 `@SpringBootApplication`이 붙어 있는 클래스가 컴포넌트 스캔의 시작 지점이다.
+    * `값을 지정하지 않음` : 해당 애노테이션에 값을 지정하지 않으면 `@ComponentScan`이 붙어있는 클래스가 위치한 패키지를 컴포넌트 스캔의 시작 위치로 지정한다.
+
+* 컴포넌트 스캔을 사용하려면 빈 설정 정보에 `@ComponentScan`을 붙여주면 된다.    
+
+* 스프링 부트에서는 `@SpringBootApplication`이 붙어있는 클래스가 컴포넌트 스캔의 시작 지점이다.
 
 #### 2) @ComponentScan의 주요 기능
 
-* 스캔 위치를 설정하고, 어떤 애노테이션을 스캔 할지 또는 하지 않을지 결정하는 필터(Filter) 기능을 가지고 있다.
+* ① 컴포넌트 스캔의 시작 위치를 설정하는 기능을 가지고 있다. 
+  
+* ② 특정 애노테이션에 대한 컴포넌트 스캔 여부를 결정하는 필터(Filter) 기능을 가지고 있다.
 
-#### 3) 컴포넌트 스캔 대상 : @Component를 확장한 애노테이션
+    * `includeFilters` : 컴포넌트 스캔의 대상에 포함한다.
+    
+    * `excludeFilters` : 컴포넌트 스캔의 대상에서 제외한다.
 
-* `@Repository`
+        ```java
+        @Configuration
+        @ComponentScan(
+            includeFilters = @Filter(type = FilterType.ANNOTATION, classes = MyIncludeComponent.class),
+            excludeFilters = @Filter(type = FilterType.ANNOTATION, classes = MyExcludeComponent.class)
+        )
+        ```
+      
+#### 3) 컴포넌트 스캔 대상 : @Component과 이를 확장한 애노테이션
 
-* `@Service`
+* `@Component` : 컴포넌트 스캔의 대상이 된다.
 
-* `@Controller`
+* @Component를 확장한 애노테이션
+  
+    * @Component를 확장한 애노테이션은 컴포넌트 스캔의 대상이 될 뿐만 아니라 스프링이 부가 기능을 수행한다.
+      
+        * `@Controller` : 스프링 MVC의 컨트롤러로 인식한다.
+        
+        * `@Service` : 특별한 처리를 하지 않습니다.
+    
+            * 다만, 개발자들이 "핵심 비즈니스 로직이 여기에 있겠구나"라고 생각 하도록 도움을 준다.
+          
+        * `@Repository` : 스프링 데이터 접근 계층으로 인식한다. 
+          
+            * 데이터 계층의 예외를 스프링 예외로 변환한다. 
+        
+        * `@Configuration` : 빈 설정 정보로 인식한다. 
+    
+            * 스프링 빈이 싱글톤을 유지 하도록 추가적인 처리를 한다.
+    
+            * 즉, `@Configuration`을 적용하면 바이트코드를 조작하는 CGLIB 기술을 사용해서 싱글톤을 보장한다.
+    
+### 2-5. IoC 컨테이너 5부: 빈의 스코프
 
-* `@Configuration`
+#### 1) 빈의 스코프
 
-### 2-5. IoC 컨테이너 5부: 빈의 스코프(Scope)
+* `빈의 범위 (Scope)` : 빈이 존재할 수 있는 범위를 의미합니다.
 
-#### 1) 빈의 범위(Scope)
+    * `싱글톤 (singleton)` : (스프링 컨테이너에 조회할 때 마다) 스프링 빈의 인스턴스를 단 한번만 생성한다. (기본 값) 
 
-* `싱글톤`은 해당 Bean의 인스턴스를 단 한번만 생성한다. (기본 값)
+        * 스프링 컨테이너의 시작과 종료까지 유지된다.
+    
+        * 싱글톤 빈은 스프링 컨테이너를 생성하는 시점에 생성되고 초기화 메서드도 실행된다.
 
-* `프로토타입`은 해당 Bean의 인스턴스를 매번 새롭게 생성한다.
+    * `프로토타입 (prototype)` : (스프링 컨테이너에 조회할 때 마다) 스프링 빈의 인스턴스를 매번 새롭게 생성한다.
 
-    * 스프링 컨테이너에서 프로토타입 스코프의 빈을 조회하면 스프링 컨테이너는 항상 새로운 인스턴스를 생성해서 반환한다.
+        * 스프링 컨테이너는 프로토타입 빈을 생성하고 의존관계 주입, 초기화 콜백까지만 처리하고 더 이상 관리하지 않는다.   
+    
+            * 프로토타입 빈을 관리할 책임은 프로토타입 빈을 받은 클라이언트에 있다.
 
-    * 프로토타입과 유사한 Scope는 `Request`, `Session`, `WebSocket` 등이 있다.
+        * 프로토타입 빈은 스프링 컨테이너에서 빈을 조회할 때 생성되고 초기화 메서드도 실행된다.
+
+    * 웹 관련 스코프
+
+        * `request` : 스프링 빈의 인스턴스를 HTTP 요청 마다 새롭게 생성한다.
+
+            * 웹 요청이 들어와서 나갈 때까지 유지되는 스코프이다. 
+          
+        * `session` : 스프링 빈의 인스턴스를 세션 마다 새롭게 생성한다.
+          
+            * 세션이 생성되고 종료될 때까지 유지되는 스코프이다. 
+          
+        * `application` : 서블릿 컨텍스트와 같은 범위로 유지되는 스코프이다.
 
 * `@Scope`는 빈의 범위를 지정한다.
 
-#### 2) 빈의 범위(Scope) 관련 실습 
+#### 2) 빈의 스코프에 대한 실습 
 
-* 빈의 Scope에 대해서 알아보기 위해 다음과 같은 실습을 진행한다.
-
-* Proto라는 클래스를 작성하고 Bean으로 등록한다. 그리고 @Scope를 붙여서 prototype으로 지정한다.
+* ① Proto라는 클래스를 작성한 다음, 컴포넌트 스캔의 대상이 되어 Bean으로 등록 되도록 한다. 그리고 @Scope를 붙여서 빈의 스코프를 prototype으로 지정한다.
 
     ```java
     @Component
@@ -674,9 +1372,7 @@
     }
     ```
   
-* Single이라는 클래스를 작성한 다음, Bean으로 등록하고 Proto 타입의 필드에 의존성을 주입 받는다.
-
-* 그리고 Single 클래스의 proto 값을 가져 올 수 있도록 getter를 작성한다.
+* ② Single이라는 클래스를 작성한 다음, 컴포넌트 스캔의 대상이 되어 Bean으로 등록 되도록 한다.
 
     ```java
     @Component
@@ -690,52 +1386,54 @@
     }
     ```
   
-* AppRunner 클래스에서 ApplicationContext를 이용하여 getBean()의 내용을 출력 해보면
-
-* 싱글톤의 스코프인 Single 빈은 항상 같은 인스턴스이며 프로토타입의 스코프인 Proto 빈은 매번 새로운 인스턴스를 생성하는 것을 확인 할 수 있다.
+    * 싱글톤 빈이 프로토타입의 빈을 의존 하도록 한다. 그리고 프로토타입의 빈을 가져올 수 있도록 getter를 작성한다.
+    
+* ③ AppRunner 클래스에서 스프링 컨테이너에 등록된 싱글톤과 프로토타입 빈을 꺼내서 출력한다.
   
-  ```java
-  @Component
-  public class AppRunner implements ApplicationRunner {
+    ```java
+    @Component
+    public class AppRunner implements ApplicationRunner {
+    
+        @Autowired
+        ApplicationContext ctx;
+        
+        @Override
+        public void run(ApplicationArguments args) throws Exception {
+            System.out.println("proto");
+            
+            System.out.println(ctx.getBean(Proto.class));
+            System.out.println(ctx.getBean(Proto.class));
+            System.out.println(ctx.getBean(Proto.class));
+            
+            System.out.println("single");
+            System.out.println(ctx.getBean(Single.class));
+            System.out.println(ctx.getBean(Single.class));
+            System.out.println(ctx.getBean(Single.class));
+        }
+    }
+    ```
+    
+    * 싱글톤 스코프인 Single 빈은 항상 같은 인스턴스이며 프로토타입 스코프인 Proto 빈은 매번 새로운 인스턴스를 생성하는 것을 확인할 수 있다.
   
-      @Autowired
-      ApplicationContext ctx;
-  
-      @Override
-      public void run(ApplicationArguments args) throws Exception {
-          System.out.println("proto");
-  
-          System.out.println(ctx.getBean(Proto.class));
-          System.out.println(ctx.getBean(Proto.class));
-          System.out.println(ctx.getBean(Proto.class));
-  
-          System.out.println("single");
-          System.out.println(ctx.getBean(Single.class));
-          System.out.println(ctx.getBean(Single.class));
-          System.out.println(ctx.getBean(Single.class));
-      }
-  }
-  ```
-  
-* ApplicationRunner 인터페이스를 구현한 클래스에 @Component 애노테이션을 선언하면 컴포넌트 스캔이 되고 스프링 부트 구동 시점에 run 메서드의 코드가 실행된다.
+    * ApplicationRunner 인터페이스를 구현한 클래스에 @Component 적용하면 컴포넌트 스캔의 대상이 되며 스프링 부트를 구동하는 시점에 run 메서드의 코드가 실행된다.
 
 #### 3) 싱글톤과 프로토타입을 같이 사용 하는 경우, 발생할 수 있는 문제점 
 
-* ① 프로토타입 빈이 싱글톤 빈을 참조하는 경우
+* ⓐ 프로토타입 빈이 싱글톤 빈을 참조하는 경우
 
     * 아무 문제가 없다.
     
-        * 그 이유는 프로토타입의 Bean은 Ioc 컨테이너에서 매번 꺼낼 때 마다 항상 새로운 인스턴스를 생성하지만
-          
-        * 그 새로운 인스턴스가 참조하고 있는 싱글톤 Bean은 항상 동일하며 원래 의도한대로 사용되는 것이므로 문제가 없다.  
+    * 그 이유는 프로토타입 빈은 스프링 컨테이너에서 꺼낼 때 마다 항상 새로운 인스턴스를 생성하지만 그 새로운 인스턴스가 참조하고 있는 싱글톤 Bean은 항상 동일하며 원래 의도한대로 사용되는 것이므로 문제가 없다.  
 
-* ② 싱글톤 빈이 프로토타입 빈을 참조하는 경우 
+* ⓑ 싱글톤 빈이 프로토타입 빈을 참조하는 경우 
 
-    * 문제가 발생함
+    * ① 문제가 발생한다.
     
-        * 싱글톤 Bean은 인스턴스가 단 한번만 생성 된다. 그리고 생성될 때 프로토타입 Bean의 프로퍼티도 이미 설정 되었기 때문에 
+        * 싱글톤 빈은 인스턴스가 단 한번만 생성 된다. 그리고 생성될 때 프로토타입 빈의 프로퍼티도 이미 설정 되었기 때문에 
           
-        * 매번 싱글톤 Bean을 사용할 때, 프로토타입 빈의 프로퍼티가 변경되지 않는 문제점이 있다.  
+        * 싱글톤 Bean을 매번 사용할 때 마다 싱글톤 빈이 참조하고 있는 프로토타입 빈이 변경되지 않는 문제점이 있다.  
+
+    * ② 예시를 한번 살펴 보자.
 
       ```java
       @Component
@@ -750,7 +1448,7 @@
               System.out.println("proto by single");
       
               /* 여기서 getProto()가 매번 다른 인스턴스를 반환하는 것을 의도 하였는데
-                 결과는 그렇지 않음 */
+                 결과는 그렇지 않다 */
               System.out.println(ctx.getBean(Single.class).getProto());
               System.out.println(ctx.getBean(Single.class).getProto());
               System.out.println(ctx.getBean(Single.class).getProto());
@@ -758,33 +1456,39 @@
       }
       ``` 
   
-  * 앞서 살펴본 문제점을 해결하는 방법은 `@Scope` 애노테이션을 사용할 때 `proxyMode`를 설정하는 것이다.
+    * ③ 앞서 살펴본 문제점을 해결하는 방법은 프로토타입 빈에 `@Scope` 애노테이션을 사용할 때 `proxyMode`를 설정하는 것이다.
   
-    * `scopedProxyMode.DEFAULT`가 기본 값이며 이는 Proxy를 사용하지 않는다는 것을 의미한다.
-    
-    * `proxyMode = ScopedProxyMode.TARGET_CLASS` → 해당 Bean을 클래스 기반의 Proxy로 감싸도록 한다. 
-
-        * Q. Proxy로 감싸는 이유는 무엇일까?
-
-            ![image 4](images/img4.png)
+        * `scopedProxyMode.DEFAULT`가 기본 값이며 이는 "프록시 (Proxy)를 사용하지 않는다"는 것을 의미한다.
         
-        * A. 싱글톤 Bean이 프로토타입 Bean을 직접 참조하는 것이 아닌 Proxy를 거쳐서 참조 하도록 해야 프로토타입 Bean을 매번 새로운 인스턴스로 바꿔 줄 수 있다.
+        * `proxyMode = ScopedProxyMode.TARGET_CLASS`는 "해당 Bean을 클래스 기반의 Proxy로 감싼다"는 것을 의미한다. 
 
-          ```java
-          @Component 
-          @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
-          public class proto {
-          
-          }
-          ```
+            * Q. Proxy로 감싸는 이유는 무엇일까?
+    
+                ![image 4](images/img4.png)
+            
+            * A. 싱글톤 Bean이 프로토타입 Bean을 직접 참조하는 것이 아닌 Proxy를 거쳐서 참조 하도록 해야 프로토타입 Bean을 매번 새로운 인스턴스로 바꿔 줄 수 있다.
+    
+                ```java
+                @Component 
+                @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+                public class proto {
+                
+                }
+                ```
               
 #### 4) 싱글톤 객체 사용 시 주의할 점
 
-* 프로퍼티(필드)가 공유 되므로 thread-safe 할 것이라고 보장 받을 수 없다.
-  
-    * 그러므로 thread-safe한 방법으로 코딩을 해야 한다.
+* 싱글톤 객체는 여러 클라이언트가 같은 객체를 공유하기 때문에 상태를 유지 하도록 (Stateful) 설계하면 안된다.
+
+    * 싱글톤 빈은 무상태(Stateless)로 설계해야 한다.
+
+        * ① 특정 클라이언트가 값을 변경할 수 있는 필드를 사용하지 않는다.
+
+        * ② 가급적 읽기만 가능해야 한다.
+
+        * ③ 필드 대신에 자바에서 공유되지 않는 지역 변수, 파라미터, ThreadLocal 등을 사용해야 한다.
     
-* ApplicationContext 초기 구동 시 싱글톤 인스턴스를 생성하게 된다.
+* 싱글톤 빈은 스프링 컨테이너를 구동하는 시점에 인스턴스를 생성합니다.
 
 ### 2-6. IoC 컨테이너 6부: Environment 1부. 프로파일
          
