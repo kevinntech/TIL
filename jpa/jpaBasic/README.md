@@ -1202,7 +1202,21 @@
         
             * **연관관계의 주인에는 값을 입력하지 않고, 주인이 아닌 방향(역방향)만 값을 입력하는 실수를 한다.**
 
-                * 주인이 아닌 방향(역방향)만 값을 입력하면 테이블에 외래 키가 설정되지 않는 문제점이 있다.          
+                ```java
+                Team team = new Team();
+                team.setName("TeamA");
+                em.persist(team);
+              
+                Member member = new Member();
+                member.setUsername("member1");
+                
+                // 역방향 (연관관계의 주인이 아닌 방향)만 연관관계 설정 
+                team.getMembers().add(member);
+              
+                em.persist(member);
+                ```
+
+                * 주인이 아닌 방향(역방향)만 값을 입력하면 테이블(MEMBER)에 외래 키가 설정되지 않는 문제점이 있다.          
 
             * **순수한 객체 관계를 고려해서 항상 양쪽에 값을 설정해야 한다.** (객체 지향적인 관점)  
             
