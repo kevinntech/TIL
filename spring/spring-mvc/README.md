@@ -7,7 +7,7 @@
 
 * (1) 롬복(Lombok)
 
-    * `롬복(Lombok)`은 자바로 개발할 때, 자주 사용하는 코드(Getter, Setter, 기본 생성자, toString 등)를 애노테이션으로 자동 생성 해준다.
+    * `롬복(Lombok)`은 getter, setter 등의 반복되는 코드를 자동으로 생성해주는 라이브러리다.
 
     * 롬복 설치 과정
     
@@ -56,7 +56,7 @@
 
         * `@Data` : `@Getter`, `@Setter`, `@RequiredArgsConstructor`, `@ToString`, `@EqualsAndHashCode`를 한번에 설정한다.
         
-        * `@Builder` : 빌더 패턴을 사용 할 수 있도록 한다.
+        * `@Builder` : 빌더 패턴을 사용할 수 있도록 한다.
 
 * (2) MVC 란?
     

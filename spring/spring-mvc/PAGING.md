@@ -3,7 +3,7 @@
 
 ## 1. 스프링 데이터 JPA를 이용한 페이징 처리하기
 
-* (1) 도메인 작성하기
+* **(1) 도메인 작성하기**
 
     ```java
     @Entity
@@ -26,9 +26,13 @@
     }
     ```
 
-* (2) 컨트롤러 작성하기
+* **(2) 컨트롤러 작성하기**
 
     ```java
+    /*
+    * 예제 코드를 쉽게 작성하기 위해 아래처럼 URI 매핑을 작성 했지만 URI 매핑과 관련된 부분은 개선이 필요합니다.
+    * 예를 들어, 게시글을 생성하는 코드에서 GET "/posts/new" 보다는 POST "/posts"이 더 나은 선택입니다.
+    * */
     @Controller
     @RequiredArgsConstructor
     public class PostController {
@@ -38,10 +42,11 @@
     
         /*
          * 게시글 생성하기
+         * GET http://localhost:8080/posts/new
          * */
         @GetMapping("/posts/new")
         @ResponseBody
-        public String newPostSubmit() {
+        public String createPost() {
             PostDto postDto = new PostDto();
             postDto.setTitle("제목 입니다.");
             postDto.setContent("내용 입니다.");
@@ -49,8 +54,8 @@
             postDto.setUpdatedDate(LocalDateTime.now());
     
             // 게시글 생성
-            for (int i = 0; i < 80; i++) {
-                postService.createNewBoard(postDto);
+            for (int i = 0; i < 50; i++) {
+                postService.createPost(postDto);
             }
     
             return "ok";
@@ -58,26 +63,40 @@
     
         /*
          * 게시글 목록
+         * GET http://localhost:8080/posts/search
          * */
-        @GetMapping("/posts/list")
-        public String postList(Model model, @ModelAttribute PageRequestDto pageRequestDto) {
-            Page<Post> postPage = postRepository.findAll(pageRequestDto.getPageable());
-            PageResultDto<Post, PostDto> postPageResultDto = new PageResultDto<>(postPage, post -> new PostDto(post));
+        @GetMapping("/posts/search")
+        public String getPosts(Model model, @ModelAttribute CustomPageRequest customPageRequest) {
+            Page<Post> postPage = postRepository.findAll(customPageRequest.getPageable());
+            CustomPageResponse<Post, PostDto> postCustomPageResponse = new CustomPageResponse<>(postPage, post -> new PostDto(post));
     
-            model.addAttribute("currentPage", postPageResultDto.getCurrentPage());
-            model.addAttribute("postList", postPageResultDto.getDtoList());
-            model.addAttribute("startPage", postPageResultDto.getStartPage());
-            model.addAttribute("endPage", postPageResultDto.getEndPage());
-            model.addAttribute("isPrevious", postPageResultDto.isPrevious());
-            model.addAttribute("isNext", postPageResultDto.isNext());
+            model.addAttribute("currentPage", postCustomPageResponse.getCurrentPage());
+            model.addAttribute("postList", postCustomPageResponse.getContent());
+            model.addAttribute("startPage", postCustomPageResponse.getStartPage());
+            model.addAttribute("endPage", postCustomPageResponse.getEndPage());
+            model.addAttribute("isPrevious", postCustomPageResponse.isPrevious());
+            model.addAttribute("isNext", postCustomPageResponse.isNext());
     
             return "posts/list";
+        }
+    
+        /*
+         * 게시글 목록 (JSON)
+         * GET http://localhost:8080/posts/search-in-json
+         * */
+        @GetMapping("/posts/search-in-json")
+        @ResponseBody
+        public CustomPageResponse<Post, PostDto> getPostsInJson(@ModelAttribute CustomPageRequest customPageRequest) {
+            Page<Post> postPage = postRepository.findAll(customPageRequest.getPageable());
+            CustomPageResponse<Post, PostDto> postCustomPageResponse = new CustomPageResponse<>(postPage, post -> new PostDto(post));
+    
+            return postCustomPageResponse;
         }
     
     }
     ```
 
-* (3) 서비스 작성하기
+* **(3) 서비스 작성하기**
 
     ```java
     @Service
@@ -87,7 +106,7 @@
     
         private final PostRepository postRepository;
     
-        public Post createNewBoard(PostDto postDto) {
+        public Post createPost(PostDto postDto) {
             Post newPost = postRepository.save(postDto.toEntity());
     
             return newPost;
@@ -96,7 +115,7 @@
     }
     ```
 
-* (4) 리포지토리 작성하기
+* **(4) 리포지토리 작성하기**
 
     ```java
     public interface PostRepository extends JpaRepository<Post, Long> {
@@ -106,9 +125,9 @@
     }
     ```
 
-* (5) DTO 작성하기
+* **(5) DTO 작성하기**
 
-    * PostDto를 작성한다.
+    * ⓐ PostDto를 작성한다.
     
         ```java
         @Data
@@ -145,11 +164,11 @@
         }
         ```
     
-    * PageRequestDto를 작성한다.
+    * ⓑ CustomPageRequest를 작성한다.
     
         ```java
         @Data
-        public class PageRequestDto {
+        public class CustomPageRequest {
         
             // 현재 페이지 번호
             private int page;
@@ -157,11 +176,13 @@
             // 페이지 크기
             private int size;
         
-            public PageRequestDto() {
+            public CustomPageRequest() {
                 this.page = 1;
                 this.size = 10;
             }
         
+            /* 클라이언트는 페이지 번호가 1번 부터 시작하는 것으로 알고 있으며 스프링 데이터 JPA는 페이지 번호가 0번 부터 시작하는 것으로 알고 있다.
+               클라이언트의 요청을 처리할 때는 스프링 데이터 JPA의 기준으로 맞춰주기 위해 전달받은 페이지 번호에서 -1을 한다. */
             public Pageable getPageable() {
                 return PageRequest.of(page - 1, size);
             }
@@ -169,17 +190,18 @@
             public Pageable getPageable(Sort sort) {
                 return PageRequest.of(page - 1, size, sort);
             }
+            
         }
         ```
     
-    * PageResultDto를 작성한다.
+    * ⓒ CustomPageResponse를 작성한다.
     
         ```java
         // PageResultDto에서 페이징 처리에 필요한 정보들을 정의한다.
         @Data
-        public class PageResultDto<Entity, Dto> {
-            // Dto 리스트
-            private List<Dto> dtoList;
+        public class CustomPageResponse<$Entity, $Dto> {
+            // 컨텐츠를 담을 때는 Dto 형태로 담는다. (즉, Dto 리스트로 만듦)
+            private List<$Dto> content;
         
             // 페이지 번호 목록
             private List<Integer> pageNumbers;
@@ -199,26 +221,29 @@
             // 이전 페이지와 다음 페이지 존재 여부
             private boolean isPrevious, isNext;
         
-            public PageResultDto(Page<Entity> page, Function<Entity, Dto> function) {
-                dtoList = page.stream().map(function).collect(Collectors.toList());
+            public CustomPageResponse(Page<$Entity> page, Function<$Entity, $Dto> function) {
+                content = page.stream()
+                        .map(function)
+                        .collect(Collectors.toList());
         
                 totalPages = page.getTotalPages();
         
-                createPageData(page.getPageable());
+                createPagingData(page.getPageable());
             }
         
-            private void createPageData(Pageable pageable) {
-                // 스프링 데이터 JPA에서 페이지 번호는 0 부터 시작하며 1 부터 시작 하도록 하기 위해서 1을 추가한다.
+            private void createPagingData(Pageable pageable) {
+                /* 클라이언트는 페이지 번호가 1번 부터 시작하는 것으로 알고 있으며 스프링 데이터 JPA는 페이지 번호가 0번 부터 시작하는 것으로 알고 있다.
+                   서버가 응답을 만들 때는 클라이언트의 기준으로 맞춰주기 위해 전달받은 페이지 번호에서 +1을 한다. */
                 this.currentPage = pageable.getPageNumber() + 1;
                 this.pageSize = pageable.getPageSize();     // 한 페이지에 출력될 데이터(게시글) 수
                 int displayPageSize = 10;                   // 한 화면에 출력될 페이지 수
         
                 // 현재 페이지 번호(currentPage)를 기준으로 화면에 출력되어야 하는 마지막 페이지 번호를 먼저 계산한다.
                 int tempEndPage = (int) (Math.ceil(currentPage / (double) displayPageSize)) * displayPageSize;
-                
+        
                 // 화면의 시작 페이지 번호는 다음과 같이 처리한다. Ex) 20 - 9 = 11
                 startPage = tempEndPage - (displayPageSize - 1);
-                
+        
                 // 실제 데이터가 부족한 경우를 위해 마지막 페이지 번호는 전체 데이터의 개수를 이용해서 다시 계산한다.
                 endPage = tempEndPage < totalPages ? tempEndPage : totalPages;
         
@@ -296,9 +321,9 @@
     
                         * endPage : 15 , totalPages : 15  -> 다음 페이지가 존재하지 않는다.    
 
-* (6) 뷰 작성하기
+* **(6) 뷰 작성하기**
 
-    * ① Header를 작성한다. (`templates/fragments/header.html`)
+    * ⓐ Header를 작성한다. (`templates/fragments/header.html`)
 
         ```html
         <!DOCTYPE html>
@@ -344,37 +369,36 @@
         </head>
         ```
 
-    * ② 페이징을 처리하는 게시글 목록 뷰를 작성한다. (`templates/posts/list.html`)
+    * ⓑ 페이징을 처리하는 게시글 목록 뷰를 작성한다. (`templates/posts/list.html`)
 
         ```html
         <!DOCTYPE html>
         <html lang="en" xmlns:th="http://www.thymeleaf.org">
         <head th:replace="fragments/header :: header"></head>
         <body>
-        
             <div class="container my-5">
                 <div>
                     <table class="table border-bottom border-gray">
                         <thead>
-                            <tr>
-                                <th scope="col">번호</th>
-                                <th scope="col">제목</th>
-                                <th scope="col">작성자</th>
-                                <th scope="col">작성일</th>
-                            </tr>
+                        <tr>
+                            <th scope="col">번호</th>
+                            <th scope="col">제목</th>
+                            <th scope="col">작성자</th>
+                            <th scope="col">작성일</th>
+                        </tr>
                         </thead>
         
                         <tbody>
-                            <tr th:each="post : ${postList}">
-                                <th scope="row" th:text="${post.id}">1</th>
-                                <td>
-                                    <a th:href="@{'/post/' + ${post.id}}" class="text-decoration-none">
-                                        <span class="text-truncate" th:text="${post.title}"></span>
-                                    </a>
-                                </td>
-                                <td th:text="${post.updatedBy}">별명</td>
-                                <td th:text="${#temporals.format(post.updatedDate, 'yyyy년 MM월 dd일')}">작성일</td>
-                            </tr>
+                        <tr th:each="post : ${postList}">
+                            <th scope="row" th:text="${post.id}">number</th>
+                            <td>
+                                <a th:href="@{'/posts/' + ${post.id}}" class="text-decoration-none">
+                                    <span class="text-truncate" th:text="${post.title}"></span>
+                                </a>
+                            </td>
+                            <td th:text="${post.updatedBy}">별명</td>
+                            <td th:text="${#temporals.format(post.updatedDate, 'yyyy년 MM월 dd일')}">작성일</td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -385,15 +409,15 @@
                 <nav>
                     <ul class="pagination justify-content-center">
                         <li class="page-item" th:classappend="${!isPrevious} ? disabled">
-                            <a th:href="@{/posts/list(page=${startPage} - 1)}" class="page-link" tabindex="-1" aria-disabled="true">
+                            <a th:href="@{/posts/search(page=${startPage} - 1)}" class="page-link" tabindex="-1" aria-disabled="true">
                                 Previous
                             </a>
                         </li>
                         <li class="page-item" th:classappend="${i == currentPage}? active" th:each="i : ${#numbers.sequence(startPage, endPage)}">
-                            <a th:href="@{/posts/list(page=${i})}" class="page-link" href="#" th:text="${i}">1</a>
+                            <a th:href="@{/posts/search(page=${i})}" class="page-link" href="#" th:text="${i}">1</a>
                         </li>
                         <li class="page-item" th:classappend="${!isNext} ? disabled">
-                            <a th:href="@{/posts/list(page=${endPage} + 1)}" class="page-link">
+                            <a th:href="@{/posts/search(page=${endPage} + 1)}" class="page-link">
                                 Next
                             </a>
                         </li>
