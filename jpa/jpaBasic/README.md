@@ -852,7 +852,7 @@
         }
         ```
 
-    * 문제점 
+    * 문제점 \
 
         * 외래 키를 직접 다루기 때문에 객체 지향적인 방법이 아니다.
 
@@ -2469,6 +2469,8 @@
               children.add(child);
               child.setParent(this);
           }
+      
+          // Getter, Setter
         }
         ```
         
@@ -2483,6 +2485,8 @@
           @ManyToOne
           @JoinColumn(name = "parent_id")
           private Parent parent;
+      
+          // Getter, Setter
         }
         ```
       
@@ -2505,27 +2509,33 @@
 
 * [참고] persist, remove 호출 순서      
 
-    * 다대일(일대다) 관계에서 `1`에 해당하는 엔티티를 먼저 persist 한 다음, `N`에 해당하는 엔티티를 persist 하자.
+    * 외래 키 테이블에 데이터를 입력할 때는 외래 키에 의해 참조되는 테이블에 데이터가 있는지 확인하고 입력한다.
+      
+        * 먼저 참조되는 테이블에 데이터를 입력한 다음에, 외래 키 테이블에 데이터를 입력하자.
     
-        ```java
-        em.persist(parent);
-        em.persist(child1);
-        em.persist(child2);
-        ```
-        
-        * 양방향 연관관계인 경우에 반대 순서로 persist를 하게 되면 불필요한 UPDATE 쿼리가 추가적으로 발생함.
-        
-    * 다대일(일대다) 관계에서 `N`에 해당하는 엔티티를 먼저 delete 한 다음, `1`에 해당하는 엔티티를 delete 하자.
+            ```java
+            // 참조되는 테이블
+            em.persist(parent);
+          
+            // 외래 키 테이블
+            em.persist(child1);
+            em.persist(child2);
+            ```
+            
+            * 양방향 연관관계인 경우에 반대 순서로 persist를 하게 되면 불필요한 UPDATE 쿼리가 추가적으로 발생한다.
+
+    * 외래 키 테이블에 데이터가 남아 있다면, 외래 키에 의해 참조되는 테이블의 데이터를 변경하거나 삭제할 수 없다.        
+
+        * 먼저 외래 키 테이블의 데이터를 삭제한 다음에, 참조되는 테이블의 데이터를 삭제하자. (입력의 반대 순서로 진행함)  
     
-        ```java
-        em.remove(child1);
-        em.remove(child2);
-        em.remove(parent);
-        ```
-        
-        * 외래 키 제약 조건으로 인해 자식 테이블에 데이터가 남아 있으면, 부모 테이블의 데이터를 변경하거나 삭제할 수 없다.
-        
-        * 따라서 자식 엔티티 부터 삭제해야 한다. 
+            ```java
+            // 외래 키 테이블
+            em.remove(child1);
+            em.remove(child2);
+          
+            // 참조되는 테이블
+            em.remove(parent);
+            ```
     
 ### 4. 고아 객체
 
@@ -2543,7 +2553,7 @@
           @Id @GeneratedValue
           private Long id;
           
-          @OneToMany(mappedBy = "parent", cascade = CascadeType.PERSIST, orphanRemoval = true)
+          @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
           private List<Child> children = new ArrayList<>();
       
           public void addChild(Child child) {
@@ -2556,6 +2566,19 @@
     * ② 부모 엔티티의 컬렉션에서 자식 엔티티를 삭제하면 자동으로 DB에서도 삭제한다.
 
         ```java
+        Child child1 = new Child();
+        Child child2 = new Child();
+        
+        Parent parent = new Parent();
+        parent.addChild(child1);
+        parent.addChild(child2);
+        
+        em.persist(parent);
+        
+        em.flush();
+        em.clear();
+        
+        // orphanRemoval를 사용하는 코드 
         Parent findParent = em.find(Parent.class, parent.getId());
         findParent.getChildren().remove(0); // delete from Child where id=? 과 같은 쿼리가 발생한다.
         ```
@@ -2574,7 +2597,7 @@
 
     * `CascadeType.ALL + orphanRemoval=true` : 두 옵션을 모두 활성화 하면 부모 엔티티를 통해서 자식의 생명주기를 관리할 수 있다.
 
-        * 도메인 주도 설계 (DDD)의 `Aggregate Root` 개념을 구현할 때, 유용하다.
+        * 도메인 주도 설계 (DDD)의 `애그리거트 루트 (Aggregate Root)` 개념을 구현할 때, 유용하다.
     
             * 부모 엔티티의 데이터를 삭제하면 자식 엔티티의 데이터도 함께 삭제된다. - CASCADE
     
@@ -2592,19 +2615,23 @@
 
     * ① 엔티티 타입
 
-        * `엔티티 타입` : `@Entity`로 정의한 객체다.
-
-            * 데이터가 변해도 식별자를 통해 지속해서 추적 할 수 있다.
+        * `엔티티 타입 (Entity Type)` : 식별자를 가지고 있는 객체를 말한다.
+          
+            * `@Entity`로 정의한 객체를 말하기도 한다.
+    
+            * 데이터가 변해도 식별자를 통해 지속해서 추적할 수 있다.
 
                 * Ex) 회원 엔티티의 나이 값을 변경해도 식별자로 인식 가능하다.
 
             * 공유 할 수 있다.
 
-    * ② 값 타입 (Value Type)
+    * ② 값 타입 
 
-        * `값 타입` : int, Integer, String 처럼 단순히 값으로 사용하는 자바의 기본 타입이나 객체다.
+        * `값 타입 (Value Type)` : 식별자를 가지지 않는 값 그 자체를 의미한다. 
+    
+            * int, Integer, String 처럼 단순히 값으로 사용하는 자바의 기본 타입이나 객체를 말한다.
 
-            * 식별자가 없고 값만 있으므로 변경 시 추적 할 수 없다.
+            * 식별자가 없으므로 값을 변경하면 추적할 수 없다.
 
                 * Ex) 숫자 100을 200으로 변경하면 완전히 다른 값으로 대체된다.
 
@@ -2634,7 +2661,7 @@
 
     * ① `기본 값 타입 (Basic Value Type)` : 자바의 기본 타입 (int, double ...), 래퍼 클래스 (Integer, Long ...), String과 같은 것을 말한다.
 
-    * ② `임베디드 타입 (Embedded Type, 복합 값 타입)` : 다른 타입들을 포함하고 있는 타입을 말한다.
+    * ② `임베디드 타입 (Embedded Type)` : 다른 타입들을 포함하고 있는 타입을 말한다.
 
         * 주로 기본 값 타입을 모아서 만들기 때문에 `복합 값 타입 (Composite Value Type)`이라고도 한다.
 
@@ -2644,15 +2671,15 @@
 
 #### 3) 임베디드 타입
 
-* (1) 임베디드 타입의 장점
+* **(1) 임베디드 타입의 장점**
 
     * 재사용이 가능하다.
 
     * 응집도가 높다.
 
-        * `Period.isWork()`처럼 해당 값 타입만 사용하는 의미 있는 메소드를 만들 수 있다.
+        * `Period.isWork()`처럼 해당 값 타입에서만 사용하는 의미 있는 메소드를 만들 수 있다.
 
-* (2) 임베디드 타입을 사용하는 경우
+* **(2) 임베디드 타입을 사용하는 경우**
 
     * 회원 엔티티는 이름, 근무 시작일과 종료일, 도시, 번지, 우편번호를 가진다.
     
@@ -2684,7 +2711,7 @@
         }
         ```
 
-* (3) 임베디드 타입과 테이블을 매핑하기
+* **(3) 임베디드 타입과 테이블을 매핑하기**
 
     * 매핑 결과를 그림으로 먼저 살펴보기
 
@@ -2694,7 +2721,7 @@
 
         * ② **임베디드 타입을 사용하기 전과 후에 매핑하는 테이블은 같다.**
 
-        * ③ **임베디드 타입 덕분에 객체와 테이블을 아주 세밀하게 (find-grained) 매핑하는 것이 가능하다.**
+        * ③ **임베디드 타입 덕분에 객체와 테이블을 아주 세밀하게 (fine-grained) 매핑하는 것이 가능하다.**
 
         * ④ 잘 설계한 ORM 애플리케이션은 매핑한 테이블의 수 보다 클래스의 수가 더 많다.
 
@@ -2712,6 +2739,7 @@
             
                 private LocalDateTime endDate;
             
+                // 기본 생성자 필수
                 public Period() {
                 }
             
@@ -2790,15 +2818,15 @@
             em.persist(member);
             ```
 
-* (4) 하나의 엔티티 내에서 같은 값 타입을 여러 개 선언하기
+* **(4) 하나의 엔티티 내에서 같은 값 타입을 여러 개 선언하기**
 
     * `@AttributeOverrides` : 임베디드 타입에 정의한 매핑 정보를 재정의한다.
 
         * 하나의 엔티티에서 같은 값 타입을 여러 번 선언하면 테이블에 매핑되는 컬럼명이 중복된다.
 
-        * 이때는 @AttributeOverrides를 사용해서 매핑 정보(컬럼명 속성)를 재정의한다.
+        * 이때는 `@AttributeOverrides`를 사용해서 매핑 정보(컬럼명 속성)를 재정의한다.
 
-        * @AttributeOverride의 속성은 다음과 같다.
+        * `@AttributeOverride`의 속성은 다음과 같다.
 
             * `name` : 임베디드 타입 내에 있는 필드 이름을 의미한다.
 
@@ -2829,7 +2857,7 @@
         }
         ```
 
-* (5) 임베디드 타입과 null
+* **(5) 임베디드 타입과 null**
 
     * 임베디드 타입의 값이 `null`이면 매핑한 컬럼 값은 모두 `null`이 된다.
 
@@ -2842,13 +2870,13 @@
 
 #### 4) 값 타입과 불변 객체
 
-* (1) 개요
+* **(1) 개요**
 
     * 값 타입은 복잡한 객체 세상을 조금이라도 단순화하려고 만든 개념이다.
 
     * 따라서 값 타입은 단순하고 안전하게 다룰 수 있어야 한다.
 
-* (2) 값 타입 공유 참조
+* **(2) 값 타입 공유 참조**
 
     * 임베디드 타입과 같은 "값 타입"을 여러 엔티티에서 공유하면 위험하다.
 
@@ -2877,7 +2905,7 @@
 
     * 이러한 부작용을 막으려면 값 타입을 복사해서 사용하면 된다.
 
-* (3) 값 타입을 복사해서 사용하기
+* **(3) 값 타입을 복사해서 사용하기**
 
     * 값 타입을 공유하는 것은 위험하다. 대신 값(인스턴스)을 복사해서 사용해야 한다.
 
@@ -2905,7 +2933,7 @@
         member1.getHomeAddress().setCity("newCity");
         ```
 
-* (4) 객체 타입의 한계
+* **(4) 객체 타입의 한계**
 
     * 항상 값을 복사해서 사용하면 공유 참조로 인해 발생하는 부작용을 피할 수 있다.
 
@@ -2935,7 +2963,7 @@
 
                 * 따라서 b의 값을 변경하면 a도 변경된다.
 
-* (5) 불변 객체
+* **(5) 불변 객체**
 
     * 값 타입은 부작용 걱정 없이 사용 할 수 있어야 한다. 부작용이 일어나면 값 타입이라 할 수 없다.
 
@@ -2991,13 +3019,13 @@
 
         * 객체의 값을 비교하며 `equals()`를 사용한다.
 
-        * **값 타입은 `a.equals(b)`를 사용해서 동등성 비교를 해야 한다.**
+* **값 타입은 `a.equals(b)`를 사용해서 동등성 비교를 해야 한다.**
 
-            * 따라서 값 타입의 `equals()` 메소드를 적절하게 재정의해야 한다. (주로 모든 필드 사용함)
+    * 따라서 값 타입의 `equals()` 메소드를 적절하게 재정의해야 한다. (주로 모든 필드 사용함)
 
 #### 6) 값 타입 컬렉션
 
-* (1) 값 타입 컬렉션 ?
+* **(1) 값 타입 컬렉션 ?**
 
     * `값 타입 컬렉션 (Value Type Collection)` : **컬렉션에 값 타입을 넣어서 사용하는 것**을 말한다.
 
@@ -3005,17 +3033,21 @@
 
         * `@ElementCollection`, `@CollectionTable`를 사용해서 매핑한다.
 
-        * 관계형 데이터베이스의 테이블은 컬럼 안에 컬렉션을 포함 할 수 없다.
+        * 관계형 데이터베이스의 테이블은 하나의 컬럼 안에 컬렉션을 포함할 수 없다.
 
             * JSON을 지원하는 DB는 가능한 경우도 있다. 하지만 기본적으로는 가능하지 않다.
 
             * 따라서 컬렉션을 저장하기 위한 별도의 테이블을 생성해야 한다.
 
+                ![image 30](images/img30.png)
+    
+                * 값 타입 컬렉션을 매핑하는 테이블은 모든 컬럼을 묶어서 기본 키(PK)를 구성해야 한다.
+
         * 값 타입 컬렉션은 기본적으로 `지연 로딩 (LAZY LOADING)` 전략을 사용한다.
 
             * @ElementCollection의 fetch 속성을 확인 해보면 알 수 있다.
 
-* (2) 값 타입 컬렉션을 매핑하고 사용하기
+* **(2) 값 타입 컬렉션을 매핑하고 사용하기**
 
     * ① 값 타입 컬렉션을 매핑한다.
 
@@ -3055,7 +3087,7 @@
 
             * `joinColumns` : 값 타입 컬렉션과 매핑할 테이블의 외래 키(FK)를 지정한다.
 
-        * favoriteFoods처럼 값으로 사용되는 컬럼이 하나면 `@Column`을 사용해서 컬럼명을 지정 할 수 있다.
+        * favoriteFoods처럼 값 타입 컬렉션에 사용되는 것(String)이 하나면 `@Column`을 사용해서 컬럼명을 지정 할 수 있다.
 
     * ② 값 타입 컬렉션을 사용한다.
 
@@ -3108,7 +3140,7 @@
 
                 * 값 타입 안의 필드 하나만 변경하는 것은 잘못된 방식이다.
 
-* (3) 값 타입 컬렉션의 제약사항
+* **(3) 값 타입 컬렉션의 제약사항**
 
     * ① 값 타입은 엔티티와 다르게 식별자 개념이 없다. 값은 변경하면 추적이 어렵다.
 
@@ -3122,7 +3154,7 @@
 
         * 컬럼에 `null`을 입력 할 수 없고, 같은 값을 중복해서 저장 할 수 없다.
 
-* (4) 값 타입 컬렉션을 사용하는 경우
+* **(4) 값 타입 컬렉션을 사용하는 경우**
 
     * 값을 추적할 필요가 없고 정말 단순한 경우에만 값 타입 컬렉션을 사용한다.
 
@@ -3132,9 +3164,9 @@
 
         * Ex) 주소 이력 관리
 
-* (5) **값 타입 컬렉션의 대안**
+* **(5) 값 타입 컬렉션의 대안**
 
-    * 이론 설명
+    * 설명
 
         * 실무에서는 `값 타입 컬렉션` 대신에 **일대다 관계를 위한 엔티티를 만들고, 여기에서 값 타입을 사용**한다. (값 타입을 엔티티로 승격)
 
@@ -3193,13 +3225,12 @@
             
             }
             ```
-
-
+          
 ## 10. 객체지향 쿼리 언어
 
 ### 1. 객체지향 쿼리 언어 소개 
 
-* (1) JPA는 다양한 쿼리 방법을 지원
+* **(1) JPA는 다양한 쿼리 방법을 지원한다**
 
     * JPQL
     
@@ -3209,13 +3240,29 @@
     
     * 네이티브 SQL
 
-    * JDBC API 직접 사용, MyBatis, SpringJdbcTemplate 함께 사용
+    * JDBC API를 직접 사용하거나 MyBatis, SpringJdbcTemplate를 함께 사용하기
 
-* (2) JPQL
+* **(2) JPQL**
 
     * 애플리케이션이 필요한 데이터만 DB에서 가져오려면 결국 검색 조건이 포함된 SQL이 필요하다. 
-
+    
+        * Ex) 나이가 18살 이상인 회원을 모두 검색한다.
+    
     * JPA는 SQL을 추상화한 JPQL이라는 객체 지향 쿼리 언어를 제공한다.
+
+        ```java
+        // JPQL
+        String jpql = "select m from Member m where m.age > 18";
+        List<Member> result = em.createQuery(jpql, Member.class).getResultList();
+        
+        // 실행된 SQL
+        select m.id as id,
+               m.age as age,
+               m.USERNAME as USERNAME,
+               m.TEAM_ID as TEAM_ID
+        from   Member m
+        where  m.age > 18
+        ```
 
     * SQL과 문법이 유사하다. (SELECT, FROM, WHERE, GROUP BY, HAVING, JOIN 지원)
     
@@ -3223,63 +3270,91 @@
     
     * SQL은 데이터베이스 테이블을 대상으로 쿼리한다.
     
-* (3) Criteria
+* **(3) Criteria**
 
-    * JPQL을 생성하는 빌더 역할을 한다.
+    * `Criteria`는 JPQL을 자바 코드로 작성할 수 있도록 도와주는 기술(빌더 클래스 API)이다.
     
-    * 문자가 아닌 자바 코드로 JPQL을 작성할 수 있다.
+        ```java
+        // Criteria 사용 준비
+        CriteriaBuilder cb = em.getCriteriaBuilder(); 
+        CriteriaQuery<Member> query = cb.createQuery(Member.class);
+        
+        // 루트 클래스 (조회를 시작할 클래스)
+        Root<Member> m = query.from(Member.class);
+        
+        // 쿼리 생성
+        CriteriaQuery<Member> cq = query.select(m).where(cb.equal(m.get("username"), "kim"));
+        List<Member> resultList = em.createQuery(cq).getResultList();
+        ```
+    
+    * JPA 표준 스펙이다.
+      
+    * 장점 : 문자 기반의 JPQL 보다 동적 쿼리를 안전하게 생성할 수 있다.
 
-    * **단점: 너무 복잡하고 실용성이 없다.** 
+    * **단점 : 코드가 복잡하고 직관적으로 이해하기 힘들다.** 
     
-        * `Criteria` 대신에 `QueryDSL` 사용 권장
+        * `Criteria` 대신에 `QueryDSL`를 사용하는 것을 권장한다.
     
-* (4) QueryDSL
+* **(4) QueryDSL**
 
-    * JPQL을 생성하는 빌더 역할을 한다.
+    * `QueryDSL`는 JPQL을 자바 코드로 작성할 수 있도록 도와주는 기술(빌더 클래스 API)이다.
 
-    * 문자가 아닌 자바 코드로 JPQL을 작성할 수 있다.
-   
-    * 컴파일 시점에 문법 오류를 찾을 수 있음
+        ```java
+        // JPQL
+        /* select m from Member m where m.age > 18 */
+        JPAFactoryQuery query = new JPAQueryFactory(em);
+        QMember m = QMember.member;
+        
+        List<Member> list =
+            query.selectFrom(m)
+                 .where(m.age.gt(18))
+                 .orderBy(m.name.desc())
+                 .fetch();
+        ```
+
+    * 오픈소스 프로젝트다.
     
-    * 동적 쿼리를 작성하는데 편리하다.
-    
-        * `동적 쿼리`는 상황에 따라 분기 처리를 통해 SQL을 동적으로 만드는 것을 말한다.
+    * 문자 기반의 JPQL 보다 동적 쿼리를 안전하게 생성할 수 있다.
+
+        * `동적 쿼리`는 실행 시점에 검색 조건에 따라 다른 쿼리를 생성하는 것을 말한다.      
+
+    * 컴파일 시점에 문법 오류를 찾을 수 있다.
     
     * 단순하고 쉽기 때문에 실무에서 사용하는 것을 권장한다.
 
     * [참고] 레퍼런스 문서
     
-        * `영어` : http://www.querydsl.com/static/querydsl/4.4.0/reference/html_single/
+        * `영어 버전` : http://www.querydsl.com/static/querydsl/4.4.0/reference/html_single/
           
-        * `한글` : http://www.querydsl.com/static/querydsl/4.0.1/reference/ko-KR/html_single/
+        * `한글 버전` : http://www.querydsl.com/static/querydsl/4.0.1/reference/ko-KR/html_single/
 
-* (5) 네이티브 SQL
+* **(5) 네이티브 SQL**
 
-    * SQL을 직접 사용 할 수 있는 기능을 제공한다.
-    
-    * JPQL로 해결할 수 없는 특정 데이터베이스에 의존적인 기능을 사용할 때 이용한다.
-     
-    * Ex) 오라클 CONNECT BY, 특정 DB만 사용하는 SQL 힌트
+    * `네이티브 SQL`는 SQL을 직접 사용할 수 있도록 JPA가 제공하는 기능을 말한다.
 
         ```java
         String sql = "SELECT ID, AGE, TEAM_ID, NAME FROM MEMBER WHERE NAME = 'kim'";
         List<Member> resultList = em.createNativeQuery(sql, Member.class).getResultList();
         ```
 
-* (6) JDBC 직접 사용, SpringJdbcTemplate 등
-
-    * JPA를 사용하면서 JDBC 커넥션을 직접 사용하거나, 스프링 JdbcTemplate, 마이바티스 등을 함께 사용 할 수 있다.
+    * JPQL로 해결할 수 없는 특정 데이터베이스에 의존적인 기능을 사용할 때 이용한다.
+     
+        * Ex) 오라클 CONNECT BY, 특정 DB만 사용하는 SQL 힌트
     
-    * 단 영속성 컨텍스트를 적절한 시점에 강제로 플러시를 할 필요가 있다.
+* **(6) JDBC 직접 사용하거나 SpringJdbcTemplate 등**
+
+    * JPA를 사용하면서 JDBC 커넥션을 직접 사용하거나 스프링 JdbcTemplate, 마이바티스 등을 함께 사용할 수 있다.
+    
+    * 단, 적절한 시점에 영속성 컨텍스트를 강제로 플러시 할 필요가 있다.
     
         * Ex) JPA를 우회해서 SQL을 실행하기 직전에 영속성 컨텍스트를 수동으로 `flush()` 해야한다.
 
             ```java
-            /*
+            /* [★★★ 중요 ★★★]
             * JPA와 관련 없이 DB에 접근해서 쿼리를 실행한다고 가정한다.
             * 이러한 경우에는 SQL을 실행하기 직전에 영속성 컨텍스트를 수동으로 flush() 해야 한다.
             * */
-            em.flush();    // ★★★
+            em.flush();
             
             /*
             * JDBC 커넥션을 직접 사용해서 쿼리를 실행한다.
@@ -3302,16 +3377,178 @@
 
 ### 2. JPQL
 
-* JPQL(Java Persistence Query Language, 자바 영속성 쿼리 언어)
+* JPQL ?
 
-    * `JPQL`는 테이블이 아닌 엔티티 객체를 대상으로 검색하는 객체지향 쿼리 언어이다.
+    * `JPQL (Java Persistence Query Language, 자바 영속성 쿼리 언어)` : 테이블이 아닌 엔티티 객체를 대상으로 검색하는 객체지향 쿼리 언어다.
     
-    * 애플리케이션이 필요한 데이터만 DB에서 가져오려면 결국 검색 조건이 포함된 SQL이 필요하다. 
+        * 애플리케이션이 DB에서 필요한 데이터만 가져오려면 결국 검색 조건이 포함된 SQL이 필요하다. 
+            
+        * JPQL은 SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다.
         
-    * JPQL은 SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다.
+        * JPQL은 결국 SQL로 변환된다.
     
-    * JPQL은 결국 SQL로 변환된다.
+* 예제로 사용할 도메인 모델
+
+    * 그림
+      
+        * UML
     
+            ![image 31](images/img31.png)    
+        
+        * ERD
+    
+            ![image 32](images/img32.png)
+        
+            * Address라는 임베디드 타입은 ERD에서 ORDERS 테이블에 포함되어 있다. 
+    
+    * 소스코드
+    
+        * Member
+        
+            ```java
+            @Entity
+            public class Member {
+            
+                @Id @GeneratedValue
+                private Long id;
+            
+                private String username;
+            
+                private int age;
+            
+                @ManyToOne
+                @JoinColumn(name = "TEAM_ID")
+                private Team team;
+            
+                @OneToMany(mappedBy = "member")
+                private List<Order> orders = new ArrayList<>();
+            
+                // Getter, Setter
+            }
+            ```
+        
+        * Team
+        
+            ```java
+            @Entity
+            public class Team {
+            
+                @Id @GeneratedValue
+                private Long id;
+            
+                private String name;
+            
+                @OneToMany(mappedBy = "team")
+                private List<Member> members = new ArrayList<>();
+            
+                // Getter, Setter
+            }
+            ```
+        
+        * Order
+        
+            ```java
+            @Entity
+            @Table(name = "ORDERS")
+            public class Order {
+            
+                @Id @GeneratedValue
+                private Long id;
+            
+                private int orderAmount;
+            
+                @Embedded
+                private Address address;
+            
+                @ManyToOne
+                @JoinColumn(name = "MEMBER_ID")
+                private Member member;
+            
+                @ManyToOne
+                @JoinColumn(name = "PRODUCT_ID")
+                private Product product;
+            
+                // 연관관계 편의 메소드 
+                public void changeMember(Member member) {
+                    this.member = member;
+                    member.getOrders().add(this);
+                }
+            
+                // Getter, Setter
+            }
+            ``` 
+         
+        * Address
+        
+            ```java
+            @Embeddable
+            public class Address {
+            
+                private String city;
+            
+                private String street;
+            
+                private String zipcode;
+            
+                // Getter, Setter
+            }
+            ```
+        
+        * Product
+        
+            ```java
+            @Entity
+            public class Product {
+            
+                @Id @GeneratedValue
+                private Long id;
+            
+                private String name;
+            
+                private int price;
+            
+                private int stackAmount;
+            
+                // Getter, Setter
+            }
+            ```
+
+* 실행 코드 작성하기
+
+    ```java
+    public class JpaMain {
+    
+        public static void main(String[] args) {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+    
+            EntityManager em = emf.createEntityManager();
+    
+            EntityTransaction tx = em.getTransaction();
+    
+            tx.begin(); // 트랜잭션 시작
+    
+            try {
+                // 실행 준비 데이터 만들기
+                Member member = new Member();
+                member.setUsername("member1");
+                member.setAge(10);
+                em.persist(member);
+    
+                // JPQL 작성하기
+                
+                tx.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+                tx.rollback();
+            } finally {
+                em.close();
+            }
+    
+            emf.close();
+        }
+    }
+    ```
+
 * JPQL 문법
 
     * 문법
@@ -3333,8 +3570,10 @@
             * 테이블 이름이 아닌 엔티티 이름을 사용한다. (Member) 
             
             * 별칭이 필수다. (m) 
+    
+                * 즉, m과 같은 별칭을 반드시 넣어야 한다.
             
-            * as는 생략 가능하다.
+                * as는 생략 가능하다.
 
 * TypedQuery, Query
 
@@ -3354,12 +3593,12 @@
         // username은 String , age는 int이므로 타입 정보가 명확하지 않다.
         Query query = em.createQuery("select m.username, m.age from Member m");
         ```
-      
+    
 * 결과 조회 API
 
-    * `query.getResultList()` : 결과가 하나 이상일 때, 리스트를 반환한다.
+    * `query.getResultList()` : (SELECT 쿼리를 실행한) 결과를 리스트로 반환한다.
     
-        * 결과가 없으면 비어있는 리스트를 반환한다.
+        * 단, 결과가 없으면 비어있는 리스트를 반환한다.
         
             ```java
             List<Member> resultList = em.createQuery("select m from Member m", Member.class).getResultList();
@@ -3369,11 +3608,13 @@
             }
             ```
     
-    * `query.getSingleResult()` : 결과가 정확히 하나일 때, 단일 객체를 반환한다.
+    * `query.getSingleResult()` : (SELECT 쿼리를 실행한) 결과를 단일 객체로 반환한다. 
+    
+        * 결과가 정확히 하나일 때, 사용해야 한다.
 
-        * 결과가 없으면: `javax.persistence.NoResultException` 예외 발생
+        * 결과가 없으면 예외(`javax.persistence.NoResultException`)가 발생한다.
         
-        * 둘 이상이면: `javax.persistence.NonUniqueResultException` 예외 발생
+        * 결과가 둘 이상이면 예외(`javax.persistence.NonUniqueResultException`)가 발생한다.
 
 * 파라미터 바인딩
 
@@ -3393,11 +3634,11 @@
                 System.out.println("singleResult = " + singleResult.getUsername());
                 ```
 
-                * `이름 기준 파라미터 바인딩` 방식을 사용하는 것이 좋다.
+                * `위치 기준 파라미터 바인딩` 보다는 `이름 기준 파라미터 바인딩` 방식을 사용하는 것이 좋다.
 
         * `위치 기준 파라미터`는 위치를 기준으로 파라미터를 구분하는 방법이다.
 
-            * 문법 : `?위치 값`  (위치 값은 1 부터 시작함)        
+            * 문법 : `?위치 값` (위치 값은 1 부터 시작함)        
 
             * 예시
               
@@ -3409,9 +3650,11 @@
                 System.out.println("singleResult = " + singleResult.getUsername());
                 ```
               
+                * 해당 방식은 순서에 따라서 버그가 발생할 가능성이 있다. 
+
 * 프로젝션
 
-    * `프로젝션(projection)`은 SELECT 절에 조회할 대상을 지정하는 것을 말한다.
+    * `프로젝션 (projection)`은 SELECT 절에 조회할 대상을 지정하는 것을 말한다.
     
         * 프로젝션 대상은 엔티티, 임베디드 타입, 스칼라 타입이 있다.
         
@@ -3421,13 +3664,13 @@
         
         * **엔티티 프로젝션으로 조회한 엔티티는 영속성 컨텍스트에서 관리된다.**
     
-    * 예시
+    * 프로젝션에 대한 예시
     
         ```java
-        SELECT m FROM Member m                    // Member 엔티티를 조회한다.                     [엔티티 프로젝션] => 결과가 모두 영속성 컨텍스트에서 관리된다.
-        SELECT m.team FROM Member m               // Member 엔티티와 연관된 Team 엔티티를 조회한다.    [엔티티 프로젝션]
+        SELECT m FROM Member m                    // Member 엔티티를 조회한다.                     [엔티티 프로젝션]      => 결과가 모두 영속성 컨텍스트에서 관리된다.
+        SELECT m.team FROM Member m               // Member 엔티티와 연관된 Team 엔티티를 조회한다.    [엔티티 프로젝션]      =>              ""
         SELECT m.address FROM Member m            // Member 엔티티의 Address 임베디드 타입을 조회한다. [임베디드 타입 프로젝션]
-        SELECT m.username, m.age FROM Member m    //                                           [스칼라 타입 프로젝션]
+        SELECT m.username, m.age FROM Member m    // Member 엔티티의 회원 이름, 나이를 조회한다.       [스칼라 타입 프로젝션]
         ```
       
         * [참고] `SELECT a FROM Address a`처럼 FROM 절에 임베디드 타입을 사용하는 것은 불가능하다.
@@ -3443,7 +3686,7 @@
             
             for (Object o : resultList) {
                 // Query 객체는 SELECT 절의 조회 대상(엔티티, 필드)이 둘 이상이면 Object[]를 반환하고 하나면 Object를 반환한다.
-                // 따라서 이 경우에는 조회 대상이 2개이므로 Object[]로 형변환을 해야 한다.
+                // 따라서 이 경우에는 조회 대상이 2개이므로 Object[]로 형변환을 해야한다.
                 Object[] result = (Object[]) o; 
                 System.out.println("username = " + result[0] + ", age = " + result[1]);
             }
@@ -3461,7 +3704,7 @@
             }
             ```
         
-        * ③ `new` 명령어로 조회 (여러 개의 단순 값을 DTO로 바로 조회)
+        * ③ `new` 명령어로 조회 (여러 개의 단순 값을 DTO로 바로 조회하는 방식)
         
             * 먼저 DTO를 작성한다.
 
@@ -3526,6 +3769,46 @@
       
         * `setFirstResult(0)` 처럼 `startPosition`이 0으로 지정되면 실행되는 SQL 문에서 `OFFSET`이 생략된다.
 
+    * 데이터베이스 방언을 이용해서 다음과 같이 DBMS 마다 다른 페이징 쿼리를 실행한다.
+
+        * MySQL
+        
+            ```sql
+            SELECT  M.ID AS ID,
+                    M.AGE AS AGE,
+                    M.TEAM_ID AS TEAM_ID,
+                    M.USERNAME AS USERNAME
+            FROM    MEMBER M
+            ORDER BY M.AGE DESC LIMIT ?, ?
+            ```
+
+        * Oracle 12c
+        
+            ```sql
+            SELECT  * 
+            FROM    ( SELECT    ROW_.*,
+                                ROWNUM ROWNUM_ 
+                      FROM      ( SELECT    M.ID as ID,
+                                            M.AGE as AGE,
+                                            M.TEAM_ID as TEAM_ID,
+                                            M.USERNAME as USERNAME 
+                                  FROM      MEMBER M    
+                                  ORDER BY  M.AGE DESC ) ROW_ 
+                      WHERE     ROWNUM <= ? ) 
+            WHERE   ROWNUM_ > ?
+            ```
+        
+        * SQL Server 2012
+        
+            ```sql
+            SELECT  M.ID,
+                    M.AGE,
+                    M.TEAM_ID,
+                    M.USERNAME
+            FROM    MEMBER M
+            ORDER BY M.AGE DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+            ```
+
 * 집합과 정렬
 
     * 집합은 집합 함수와 함께 통계 정보를 구할 때, 사용한다.
@@ -3564,7 +3847,7 @@
                 HAVING AVG(m.age) >= 10
                 ```
 
-        * 정렬(ORDER BY)
+        * 정렬 (ORDER BY)
         
             * `ORDER BY` : 결과를 정렬할 때 사용한다.
             
@@ -3654,7 +3937,7 @@
     
 * 서브 쿼리
 
-    * `서브 쿼리(Sub Query)`은 쿼리문 안에 포함되어 있는 또 다른 쿼리문을 말한다.
+    * `서브 쿼리 (Sub Query)`은 쿼리문 안에 포함되어 있는 또 다른 쿼리문을 말한다.
     
         * JPQL는 WHERE, HAVING 절에서만 서브 쿼리를 사용 할 수 있다.
         
@@ -4124,9 +4407,9 @@
         
             * Ex) `select m.team from Member m`
             
-* 페치 조인(fetch join)
+* 페치 조인
 
-    * `페치 조인`은 **연관된 엔티티나 컬렉션을 SQL 한 번에 함께 조회하는 기능**이다.
+    * `페치 조인 (fetch join)`은 **연관된 엔티티나 컬렉션을 SQL 한 번에 함께 조회하는 기능**이다.
     
         * SQL 조인의 종류가 아니다.
         
@@ -4568,7 +4851,7 @@
 
     * JPQL 쿼리는 동적 쿼리와 정적 쿼리로 나눌 수 있다.
 
-        * `동적 쿼리` : 검색 조건에 따라 실행 시점에 쿼리를 생성하는 것을 말한다. 
+        * `동적 쿼리` : 실행 시점에 검색 조건에 따라 다른 쿼리를 생성하는 것을 말한다.
         
             * `em.createQuery("select ...")`
 
