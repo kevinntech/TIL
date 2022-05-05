@@ -2239,176 +2239,178 @@
     * ② `즉시 로딩 (EAGER LOADING)`을 적용하면 예상하지 못한 쿼리가 발생한다.
     
     * ③ `즉시 로딩`은 JPQL에서 `N+1` 문제를 일으킨다.
+
+        * `N+1 문제` : 쿼리 1개를 실행 했을 때, 얻은 결과의 개수(`N개`)만큼 추가 쿼리가 발생하는 문제를 말한다.
+
+            * (정리 하자면) 특정 엔티티를 조회하기 위한 쿼리 1개를 실행 했을 때, 얻은 결과의 개수(N개) 만큼 해당 엔티티와 연관된 엔티티를 조회하기 위한 추가적인 쿼리가 발생하는 문제를 말한다.
     
-        * `N+1 문제` : 처음에 쿼리 1개를 실행 했을 때, 얻은 결과의 개수(`N개`)만큼 추가 쿼리가 발생하는 문제를 말한다.
+        * N+1 문제의 발생 케이스와 해결책
 
-            * N+1 문제의 발생 케이스와 해결책
+            * 예제로 사용할 엔티티는 다음과 같다.
 
-                * 예제로 사용할 엔티티는 다음과 같다.
+                * 회원 (Member)
 
-                    * 회원 (Member)
-
-                        ```java
-                        @Entity
-                        public class Member {
-                            @Id @GeneratedValue
-                            @Column(name = "MEMBER_ID")
-                            private Long id;
-                            
-                            @Column(name = "USER_NAME")
-                            private String username;
-                            
-                            @ManyToOne(fetch = FetchType.EAGER)
-                            @JoinColumn(name = "TEAM_ID")
-                            private Team team;
-                            
-                            // 연관관계 편의 메소드
-                            public void changeTeam(Team team) {
-                                this.team = team;
-                                team.getMembers().add(this);
-                            } 
-                        }
-                        ```
-
-                    * 팀 (Team)
-
-                        ```java
-                        @Entity
-                        public class Team {
-                            @Id @GeneratedValue
-                            @Column(name = "TEAM_ID")
-                            private Long id;
-                            
-                            private String name;
-                            
-                            @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
-                            private List<Member> members = new ArrayList<>();
-                        }   
-                        ```
-    
-                * N+1 문제가 발생하는 케이스는 다음과 같다. 
-                      
-                    * ⓐ 특정 엔티티의 연관된 엔티티를 즉시 로딩(EAGER)으로 설정하고 JPQL로 특정 엔티티를 조회하는 경우에 `N+1` 문제가 발생한다.
-
-                        ```java
-                        // 초기 데이터 설정
-                        Team teamA = new Team();
-                        teamA.setName("teamA");
-                        em.persist(teamA);
+                    ```java
+                    @Entity
+                    public class Member {
+                        @Id @GeneratedValue
+                        @Column(name = "MEMBER_ID")
+                        private Long id;
                         
-                        Team teamB = new Team();
-                        teamB.setName("teamB");
-                        em.persist(teamB);
+                        @Column(name = "USER_NAME")
+                        private String username;
                         
-                        Member member1 = new Member();
-                        member1.setUsername("member1");
-                        member1.setTeam(teamA);
-                        em.persist(member1);
+                        @ManyToOne(fetch = FetchType.EAGER)
+                        @JoinColumn(name = "TEAM_ID")
+                        private Team team;
                         
-                        Member member2 = new Member();
-                        member2.setUsername("member2");
-                        member2.setTeam(teamB);
-                        em.persist(member2);
-                        
-                        em.flush();
-                        em.clear();
-                        
-                        // [N + 1 문제 발생] Member 클래스에서 연관된 엔티티(Team)를 즉시 로딩으로 설정했다고 가정한다.
-                        List<Member> members = em.createQuery("select m from Member m", Member.class)
-                                .getResultList();
-                        ```
-
-                        * 문제 상황 설명
-                          
-                            * 일단, JPQL(`select m from Member m`)로 회원(Member) 엔티티를 조회한다.
-                
-                                * Member 클래스를 보면 연관된 엔티티인 Team이 즉시 로딩(EAGER)으로 설정되어 있다.
-        
-                                * 그리고 Team은 조회하지 않은 상황이다.
-                
-                            * 그러면 즉시, `select t from Team t where t.TEAM_ID = xxx`라는 쿼리(SQL)를 실행해서 연관된 엔티티인 Team을 조회한다.
-        
-                            * 정리 하자면, JPQL(`select m from Member m`)로 회원(Member)만 조회 하더라도 조회한 회원의 결과 개수(`N`)만큼 연관된 엔티티인 팀(Team)을 조회하는 추가 쿼리가 발생한다. 
-
-                        * 해결책
-                          
-                            * 연관된 엔티티인 Team을 LAZY로 설정하면 연관된 엔티티에 프록시 객체를 넣게 되며 N+1 문제도 발생하지 않는다.
-
-                                ```java
-                                @Entity
-                                public class Member {
-    
-                                    // ...
-                                
-                                    @ManyToOne(fetch = FetchType.LAZY)
-                                    @JoinColumn(name = "TEAM_ID")
-                                    private Team team;
-                                
-                                    // ...
-                                }
-                                ```
-
-                    * ⓑ 특정 엔티티의 연관된 엔티티(`@OneToMany`)를 지연 로딩(LAZY)으로 설정하더라도 Loop를 이용해서 조회하면 N+1 문제가 발생한다.    
-
-                        ```java
-                        // 초기 데이터 설정
-                        Team teamA = new Team();
-                        teamA.setName("teamA");
-                        em.persist(teamA);
-                        
-                        Team teamB = new Team();
-                        teamB.setName("teamB");
-                        em.persist(teamB);
-                        
-                        Member member1 = new Member();
-                        member1.setUsername("member1");
-                        member1.setTeam(teamA);
-                        em.persist(member1);
-                        
-                        Member member2 = new Member();
-                        member2.setUsername("member2");
-                        member2.setTeam(teamB);
-                        em.persist(member2);
-                        
-                        em.flush();
-                        em.clear();
-                        
-                        // [N + 1 문제 발생] Team 클래스에서 연관된 엔티티(Member)를 지연 로딩으로 설정했다고 가정한다.
-                        List<Team> teams = em.createQuery("select t from Team t", Team.class)
-                                .getResultList();
-                        
-                        for (Team team : teams) {
-                            System.out.println("team.getMembers() = " + team.getMembers());
+                        // 연관관계 편의 메소드
+                        public void changeTeam(Team team) {
+                            this.team = team;
+                            team.getMembers().add(this);
                         } 
-                        ```
+                    }
+                    ```
+
+                * 팀 (Team)
+
+                    ```java
+                    @Entity
+                    public class Team {
+                        @Id @GeneratedValue
+                        @Column(name = "TEAM_ID")
+                        private Long id;
+                        
+                        private String name;
+                        
+                        @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
+                        private List<Member> members = new ArrayList<>();
+                    }   
+                    ```
+
+            * N+1 문제가 발생하는 케이스는 다음과 같다. 
+                  
+                * ⓐ 특정 엔티티의 연관된 엔티티를 즉시 로딩(EAGER)으로 설정하고 JPQL로 특정 엔티티를 조회하는 경우에 `N+1` 문제가 발생한다.
+
+                    ```java
+                    // 초기 데이터 설정
+                    Team teamA = new Team();
+                    teamA.setName("teamA");
+                    em.persist(teamA);
+                    
+                    Team teamB = new Team();
+                    teamB.setName("teamB");
+                    em.persist(teamB);
+                    
+                    Member member1 = new Member();
+                    member1.setUsername("member1");
+                    member1.setTeam(teamA);
+                    em.persist(member1);
+                    
+                    Member member2 = new Member();
+                    member2.setUsername("member2");
+                    member2.setTeam(teamB);
+                    em.persist(member2);
+                    
+                    em.flush();
+                    em.clear();
+                    
+                    // [N + 1 문제 발생] Member 클래스에서 연관된 엔티티(Team)를 즉시 로딩으로 설정했다고 가정한다.
+                    List<Member> members = em.createQuery("select m from Member m", Member.class)
+                            .getResultList();
+                    ```
+
+                    * 문제 상황 설명
                       
-                        * 문제 상황 설명
-
-                            * 일단, JPQL(`select t from Team t`)로 팀(Team) 엔티티를 조회한다.
+                        * 일단, JPQL(`select m from Member m`)로 회원(Member) 엔티티를 조회한다.
+            
+                            * Member 클래스를 보면 연관된 엔티티인 Team이 즉시 로딩(EAGER)으로 설정되어 있다.
     
-                                * Team 클래스를 보면 연관된 엔티티인 Member가 지연 로딩(LAZY)으로 설정되어 있다.
+                            * 그리고 Team은 조회하지 않은 상황이다.
+            
+                        * 그러면 즉시, `select t from Team t where t.TEAM_ID = xxx`라는 쿼리(SQL)를 실행해서 연관된 엔티티인 Team을 조회한다.
     
-                            * 그러면 Team 엔티티에서 연관된 엔티티인 List<Member>에 프록시 객체를 넣어두게 되며 N+1 문제는 발생하지 않는다.
-        
-                            * 하지만 앞서 조회한 List<Team>를 Loop로 반복하며 팀(Team)과 연관된 엔티티 필드를 사용하면 프록시 초기화를 위한 쿼리가 발생하며 결과적으로 N+1 문제가 발생한다. 
+                        * 정리 하자면, JPQL(`select m from Member m`)로 회원(Member)만 조회 하더라도 조회한 회원의 결과 개수(`N`)만큼 연관된 엔티티인 팀(Team)을 조회하는 추가 쿼리가 발생한다. 
 
-                        * 해결책
+                    * 해결책
+                      
+                        * 연관된 엔티티인 Team을 LAZY로 설정하면 연관된 엔티티에 프록시 객체를 넣게 되며 N+1 문제도 발생하지 않는다.
 
-                            * 팀(Team) 엔티티를 조회할 때, 연관된 엔티티인 Member를 함께 조회하도록 Fetch 조인을 사용하면 된다. 
+                            ```java
+                            @Entity
+                            public class Member {
 
-                                ```java
-                                // 일대다 조인은 일(1)의 기준에서는 데이터가 더 많아질 수 있기 때문에 distinct를 사용했다. 
-                                List<Team> teams = em.createQuery("select distinct t from Team t join fetch t.members", Team.class)
-                                        .getResultList();
-                                ```
+                                // ...
+                            
+                                @ManyToOne(fetch = FetchType.LAZY)
+                                @JoinColumn(name = "TEAM_ID")
+                                private Team team;
+                            
+                                // ...
+                            }
+                            ```
 
-                * N+1 문제에 대한 해결책
+                * ⓑ 특정 엔티티의 연관된 엔티티(`@OneToMany`)를 지연 로딩(LAZY)으로 설정하더라도 Loop를 이용해서 조회하면 N+1 문제가 발생한다.    
+
+                    ```java
+                    // 초기 데이터 설정
+                    Team teamA = new Team();
+                    teamA.setName("teamA");
+                    em.persist(teamA);
+                    
+                    Team teamB = new Team();
+                    teamB.setName("teamB");
+                    em.persist(teamB);
+                    
+                    Member member1 = new Member();
+                    member1.setUsername("member1");
+                    member1.setTeam(teamA);
+                    em.persist(member1);
+                    
+                    Member member2 = new Member();
+                    member2.setUsername("member2");
+                    member2.setTeam(teamB);
+                    em.persist(member2);
+                    
+                    em.flush();
+                    em.clear();
+                    
+                    // [N + 1 문제 발생] Team 클래스에서 연관된 엔티티(Member)를 지연 로딩으로 설정했다고 가정한다.
+                    List<Team> teams = em.createQuery("select t from Team t", Team.class)
+                            .getResultList();
+                    
+                    for (Team team : teams) {
+                        System.out.println("team.getMembers() = " + team.getMembers());
+                    } 
+                    ```
+                  
+                    * 문제 상황 설명
+
+                        * 일단, JPQL(`select t from Team t`)로 팀(Team) 엔티티를 조회한다.
+
+                            * Team 클래스를 보면 연관된 엔티티인 Member가 지연 로딩(LAZY)으로 설정되어 있다.
+
+                        * 그러면 Team 엔티티에서 연관된 엔티티인 List<Member>에 프록시 객체를 넣어두게 되며 N+1 문제는 발생하지 않는다.
+    
+                        * 하지만 앞서 조회한 List<Team>를 Loop로 반복하며 팀(Team)과 연관된 엔티티 필드를 사용하면 프록시 초기화를 위한 쿼리가 발생하며 결과적으로 N+1 문제가 발생한다. 
+
+                    * 해결책
+
+                        * 팀(Team) 엔티티를 조회할 때, 연관된 엔티티인 Member를 함께 조회하도록 Fetch 조인을 사용하면 된다. 
+
+                            ```java
+                            // 일대다 조인은 일(1)의 기준에서는 데이터가 더 많아질 수 있기 때문에 distinct를 사용했다. 
+                            List<Team> teams = em.createQuery("select distinct t from Team t join fetch t.members", Team.class)
+                                    .getResultList();
+                            ```
+
+            * N+1 문제에 대한 해결책은 다음과 같다. 
+            
+                * ⓐ JPQL의 fetch 조인을 이용한다.
                 
-                    * ⓐ JPQL의 fetch 조인을 이용한다.
-                    
-                    * ⓑ `@EntityGraph`를 이용한다.
-                    
-                    * ⓒ `@BatchSize`를 이용한다.
+                * ⓑ `@EntityGraph`를 이용한다.
+                
+                * ⓒ `@BatchSize`를 이용한다.
                 
     * ④ `@ManyToOne`, `@OneToOne`의 기본 값은 즉시(EAGER) 로딩이므로 `LAZY`로 설정해야 한다.
     
@@ -2639,9 +2641,9 @@
 
                 * Ex) 회원 엔티티를 삭제하면 이름, 나이 필드도 함께 삭제된다.
 
-            * 값 타입을 여러 엔티티에서 공유해서 사용하면 안 된다.
+            * 여러 엔티티에서 값 타입을 공유해서 사용하면 안 된다.
 
-                * Ex) 회원 이름 변경 시 다른 회원의 이름도 함께 변경되면 안 되기 때문이다.
+                * Ex) 특정 회원의 이름 변경 시 다른 회원의 이름도 함께 변경되면 안 되기 때문이다.
 
             * [참고] 자바의 기본 타입(primitive type)은 절대 공유되지 않는다.
 
@@ -2653,7 +2655,9 @@
 
                 * Integer 같은 래퍼 클래스나 String 과 같은 특수한 클래스는 공유 가능한 객체이지만 변경 불가능 (Immutable)하다.
 
-                    * 따라서 부작용 (Side effect)이 발생하지 않는다.
+                    * 따라서 `부작용 (Side effect)`이 발생하지 않는다.
+    
+                    * `부작용 (Side effect)` : 의도하지 않은 결과가 나타나는 것을 말한다. 
 
 #### 2) 값 타입 분류
 
@@ -2878,7 +2882,7 @@
 
 * **(2) 값 타입 공유 참조**
 
-    * 임베디드 타입과 같은 "값 타입"을 여러 엔티티에서 공유하면 위험하다.
+    * 여러 엔티티에서 (임베디드 타입과 같은) "값 타입"을 공유하면 위험하다.
 
     * 그 이유는 부작용(side effect)이 발생하기 때문이다.
 
@@ -3009,17 +3013,17 @@
     Address b = new Address("서울시");
     ```
 
-* 자바에서 제공하는 객체 비교는 2 가지가 있다.
+* 자바에서 객체를 비교하는 방법은 2 가지가 있다.
 
-    * ① `동일성 (identity) 비교` : 두 개의 객체가 완전히 같다는 것을 의미한다.
+    * ① `동일성 (Identity)` : 두 개의 객체가 완전히 같다는 것을 의미한다.
 
-        * 객체의 참조 값을 비교하며 `==` 연산자를 사용한다.
+        * 동일성 비교는 `==` 연산자를 사용해서 객체의 참조 값을 비교한다.
 
-    * ② `동등성 (equivalence) 비교` : 두 개의 객체가 가지고 있는 값이 같다는 것을 의미한다.
+    * ② `동등성 (Equivalence)` : 두 개의 객체가 가지고 있는 값이 같다는 것을 의미한다.
 
-        * 객체의 값을 비교하며 `equals()`를 사용한다.
+        * 동등성 비교는 `equals()`를 사용해서 객체가 가지고 있는 값을 비교한다.
 
-* **값 타입은 `a.equals(b)`를 사용해서 동등성 비교를 해야 한다.**
+* **값 타입은 `a.equals(b)`를 사용해서 동등성 비교를 해야한다.**
 
     * 따라서 값 타입의 `equals()` 메소드를 적절하게 재정의해야 한다. (주로 모든 필드 사용함)
 
