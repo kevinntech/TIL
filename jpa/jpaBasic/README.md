@@ -2212,7 +2212,7 @@
 
 * JPA는 개발자가 연관된 엔티티의 조회 시점을 선택 할 수 있도록 두 가지 방법을 제공한다.
 
-    * ① `즉시 로딩 (EAGER LOADING)` : 엔티티를 조회할 때, 연관된 엔티티도 함께 조회하는 방식이다. 
+    * ① `즉시 로딩 (EAGER LOADING)` : 특정 엔티티를 조회할 때, 연관된 엔티티도 함께 조회하는 방식이다.
 
         * 연관된 엔티티를 프록시 객체로 조회하지 않는다. 따라서 연관된 엔티티가 실제 엔티티 객체다.   
 
@@ -2220,9 +2220,9 @@
         
             * [설정 방법] `@ManyToOne(fetch = FetchType.EAGER)`
     
-    * ② `지연 로딩 (LAZY LOADING)`: 연관된 엔티티를 실제 사용할 때 조회하는 방식이다.
+    * ② `지연 로딩 (LAZY LOADING)` : 특정 엔티티를 조회할 때, 연관된 엔티티는 실제 사용할 때 조회하는 방식이다.
     
-        * 연관된 엔티티를 프록시 객체로 조회한다. 그리고 프록시 객체를 실제 사용할 때, 초기화를 하면서 데이터베이스를 조회한다.
+        * 특정 엔티티를 조회할 때, 연관된 엔티티에 프록시 객체를 넣어둔다. 그리고 프록시 객체를 실제 사용할 때, 초기화 하면서 데이터베이스를 조회한다.
     
             * [예시] `em.find(Member.class, "member1")` 처럼 호출할 때, 회원(member1)을 조회하고 회원의 team 멤버 변수에 프록시 객체를 넣어둔다.
                 
@@ -3908,7 +3908,7 @@
       
     * ON 절
     
-        * ON 절은 **조인 대상을 필터링**하고 조인을 할 때, 사용한다.
+        * ON 절은 **조인 대상을 필터링**한 다음, 조인을 하고자 할 때, 사용한다.
         
             * Ex) 회원과 팀을 조인하면서, 팀 이름이 A인 것만 조회한다.
             
@@ -3918,13 +3918,13 @@
         
         * **연관관계가 없는 엔티티를 외부 조인**할 때도, 사용한다. (하이버네이트 5.1 부터)
         
-            * Ex) 회원의 이름과 팀의 이름이 같은 대상 외부 조인
+            * Ex1) 회원의 이름과 팀의 이름이 같은 대상을 외부 조인
             
                 ```java          
                 String query = "select m from Member m left join Team t on m.username = t.name";
                 ```
 
-            * Ex) 회원과 팀의 팀 아이디가 같은 대상을 외부 조인 (SQL에서 외부 조인 하듯이)
+            * Ex2) 회원과 팀의 팀 아이디가 같은 대상을 외부 조인 (SQL에서 외부 조인 하듯이)
             
                 ```java
                 String query = "select m.username, t.name from Member m left join Team t on m.team = t.id";
@@ -3951,18 +3951,18 @@
                 select (select avg(m1.age) from Member m1) as avgAge from Member m
                 ```
 
-            * FROM 절의 서브 쿼리 (인라인 뷰)는 지원하지 않는다.
+            * JPQL에서 FROM 절의 서브 쿼리 (인라인 뷰)는 지원하지 않는다.
 
                 ```java
                 // 다음과 같은 인라인 뷰는 JPQL에서 지원하지 않는다.
                 select mm.age, mm.username from (select m.age, m.username from Member m) as mm
                 ```
               
-            * 지원하지 않는 인라인 뷰에 대한 해결책
+            * 지원하지 않는 인라인 뷰에 대한 해결책은 다음과 같다.
               
                 * 조인으로 해결 할 수 있다면 조인을 사용한다.
                 
-                * 또는 네이티브 쿼리로 해결 할 수도 있다.
+                * 또는 네이티브 쿼리로 해결할 수도 있다.
             
         * 예시
           
@@ -3993,7 +3993,7 @@
             * 예시
             
                 ```java          
-                // 팀A에 소속인 회원
+                // 팀A 소속인 회원을 조회한다.
                 select m from Member m 
                 where exists (select t from m.team t WHERE t.name = '팀A')
                 ```
@@ -4036,13 +4036,13 @@
 
     * JPQL 타입 표현
 
-        * JPQL에서 사용하는 타입은 대소문자를 구분하지 않는다. 
+        * JPQL에서 사용하는 타입은 아래와 같이 표시한다.
 
             * 문자
             
                 * 문자는 작은 따옴표 사이에 표현한다.
                 
-                * 작은 따옴표를 표현하고 싶으면 작은 따옴표 2개(`''`)를 사용한다.
+                * 작은 따옴표(`'`)를 표현하고 싶으면 작은 따옴표 2개(`''`)를 사용한다.
                 
                     * Ex) `'HELLO'`, `'She''s'`
                 
@@ -4072,7 +4072,7 @@
                 
             * ENUM
             
-                * ENUM은 (하드 코딩 시) 패키지 명을 포함한 전체 이름을 사용해야 한다.
+                * ENUM은 하드 코딩 시, 패키지명을 포함한 전체 이름(`jpql.MemberType.ADMIN`)을 사용해야 한다.
 
                     ```java
                     @Entity
@@ -4092,7 +4092,7 @@
                   
                     * [참고] 엔티티에서 enum 타입을 선언할 때는 `@Enumerated(EnumType.STRING)`을 사용해야 한다.
     
-                * `setParameter()`를 사용하면 패키지 명을 포함하지 않아도 된다.
+                * `setParameter()`를 사용하면 패키지명을 포함하지 않아도 된다.
 
                     ```java          
                     String query = "select m.username, 'HELLO', true from Member m " + 
@@ -4107,7 +4107,7 @@
             
                 * `TYPE(별칭)`은 엔티티의 상속 구조에서 조회 대상을 특정 자식 타입으로 한정할 때 사용한다. 
     
-                * 주로 상속 관계에서 사용함. (잘 사용하지 않음)
+                * 주로 상속 관계에서 사용한다.
                 
                     * Ex) `TYPE(i) = Book`
     
@@ -4116,6 +4116,8 @@
                         ```
                         
                         * 엔티티 타입이 Book인 데이터만 조회한다.
+    
+                * 사실, 자주 사용하지는 않는다.
 
     * 연산자
     
@@ -4125,7 +4127,7 @@
     
             * `OR` : 둘 중 하나만 만족하면 참
     
-            * `NOT` : 조건식의 결과 반대
+            * `NOT` : 조건식의 결과를 반대로 만든다.
     
         * 비교식
     
@@ -4203,7 +4205,7 @@
             * 예시
             
                 ```java
-                // 사용자 이름(m.username)이 null이 아니면 사용자 이름(m.username)을 반환하고, null이면 이름 없는 회원을 반환한다.
+                // 사용자 이름(m.username)이 null이 아니면 사용자 이름(m.username)을 반환하고, null이면 '이름 없는 회원'을 반환한다.
                 select coalesce(m.username,'이름 없는 회원') from Member m
                 ```
               
@@ -4227,6 +4229,8 @@
         * `CONCAT(문자1, 문자2)` : 문자를 더한다.
         
             * Ex) `CONCAT('A', 'B')` = AB
+    
+            * [참고] `||` 연산자는 문자열 연결을 한다.
             
         * `SUBSTRING(문자, 위치 [,길이])` : 위치부터 시작해서 길이만큼 문자를 구한다. 길이 값이 없으면 나머지 전체 길이를 의미한다.
         
@@ -4300,58 +4304,105 @@
 
 * 사용자 정의 함수 호출
 
-    * JPA는 사용자 정의 함수를 지원한다.
+    * JPA는 사용자 정의 함수 호출을 지원한다.
     
-        * ① 자신이 사용하는 DB 방언(Dialect) 클래스를 상속받은 다음, 사용자 정의 함수를 등록한다.
-
-            ```java
-            public class MyH2Dialect extends H2Dialect {
-          
-                public MyH2Dialect(){
-                    registerFunction("group_concat", new StandardFunction("group_concat", StandardBasicTypes.STRING));
-                }
-          
-            }
-            ```
-          
-        * ② `persistence.xml`에서 기존의 방언 클래스를 상속받은 방언 클래스로 대체한다.
-
-            ```html
-            <property name="hibernate.dialect" value="dialect.MyH2Dialect" />
-            ```
-
-        * ③ 사용자 정의 함수는 다음과 같이 사용하면 된다.
+        * Dialect에 추가하는 방법
         
-            * JPA 문법
+            * ① 자신이 사용하는 DB 방언 (Dialect) 클래스를 상속받은 다음, 사용자 정의 함수를 등록한다.
+    
+                ```java
+                public class MyH2Dialect extends H2Dialect {
+              
+                    // Dialect의 생성자에서 사용자 정의 함수를 추가한다.
+                    public MyH2Dialect() {
+                        registerFunction("group_concat", new StandardFunction("group_concat", StandardBasicTypes.STRING));
+                    }
+              
+                }
+                ```
+
+                * **Dialect에 사용자 정의 함수를 추가하는 방법은 버전이 변경됨에 따라 수정이 필요할 수 있기 때문에 추천하지 않는다.** 
+    
+                * **따라서 MetadataBuilderContributor 인터페이스를 구현하는 방법을 이용하자.** 
+                
+            * ② `persistence.xml`에서 기존의 방언 클래스를 상속받은 방언 클래스로 대체한다.
+    
+                ```html
+                <property name="hibernate.dialect" value="dialect.MyH2Dialect" />
+                ```
+    
+            * ③ 사용자 정의 함수를 호출한다.
+            
+                * JPA 문법
+    
+                    ```java
+                    select function('group_concat', m.username) from Member m
+                    ```
+                  
+                * 하이버네이트 문법
+    
+                    ```java
+                    select group_concat(m.username) from Member m
+                    ```
+
+        * MetadataBuilderContributor 인터페이스를 구현하는 방법 (Hibernate 5.2.18 부터)
+    
+            * ① MetadataBuilderContributor 인터페이스를 구현한 클래스를 작성한다.
 
                 ```java
-                select function('group_concat', m.username) from Member m
+                public class SqlFunctionsMetadataBuilderContributor 
+                        implements MetadataBuilderContributor {
+                         
+                    @Override
+                    public void contribute(MetadataBuilder metadataBuilder) {
+                        metadataBuilder.applySqlFunction("group_concat", new StandardSQLFunction("group_concat",StandardBasicTypes.STRING));
+                    }
+                }
                 ```
-              
-            * 하이버네이트 문법
 
-                ```java
-                select group_concat(m.username) from Member m
+            * ② 새로 만든 SqlFunctionsMetadataBuilderContributor를 Spring 설정 파일에 추가한다.
+
                 ```
-              
+                spring.jpa.properties.hibernate.metadata_builder_contributor=com.example.SqlFunctionsMetadataBuilderContributor
+                ```
+
+            * ③ 사용자 정의 함수를 호출한다.
+            
+                * @Query
+                
+                    ```java
+                    @Query("select function('group_concat', m.username) from Member m")
+                    ```
+                
+                * Querydsl
+                
+                    ```java
+                    List<String> result = queryFactory
+                            .select(Expressions.stringTemplate(
+                                    "function('replace', {0}, {1}, {2})",
+                                    member.username, "member", "m"))
+                            .from(member)
+                            .fetch();
+                    ```
+
 * 경로 표현식
 
     * `경로 표현식` : `.(점)`을 찍어 객체 그래프를 탐색하는 것을 말한다.
     
         ```java
-        SELECT m.username               // 상태 필드
-        FROM Member m JOIN m.team t     // 단일 값 연관 필드
-                      JOIN m.orders o   // 컬렉션 값 연관 필드
+        SELECT m.username               // 상태 필드 (m.username, t.name)
+        FROM Member m JOIN m.team t     // 단일 값 연관 필드 (m.team)
+                      JOIN m.orders o   // 컬렉션 값 연관 필드 (m.orders)
         WHERE t.name = '팀A';
         ```
       
     * 경로 표현식 용어 정리
     
-        * `상태 필드(state field)` : 단순히 값을 저장하기 위한 필드를 말한다.
+        * `상태 필드 (state field)` : 단순히 값을 저장하기 위한 필드를 말한다.
         
             * Ex) m.username
         
-        * `연관 필드(association field)` : 연관 관계를 위한 필드를 말한다.
+        * `연관 필드 (association field)` : 연관 관계를 위한 필드를 말한다.
         
             * `단일 값 연관 필드` : 대상이 엔티티인 필드를 말한다. (`@ManyToOne`, `@OneToOne`)
             
@@ -4363,27 +4414,54 @@
                 
     * 경로 표현식의 특징
     
-        * `상태 필드 경로` : 경로 탐색의 끝이다. 더 이상 탐색 할 수 없다.
+        * `상태 필드 경로` : 경로 탐색의 끝이다. 더 이상 탐색할 수 없다.
     
             * Ex) `select m.username from Member m`
     
-                * 예를 들어, `m.username`에서 점(.)을 찍더라도 더 이상 탐색 할 수 없다. 
+                * 예를 들어, `m.username`에서 점(.)을 찍더라도 더 이상 탐색할 수 없다. 
         
-        * `단일 값 연관 경로` : **묵시적으로 내부 조인이 발생한다.** 계속 탐색 할 수 있다.
+        * `단일 값 연관 경로` : **묵시적으로 내부 조인이 발생한다.** 계속 탐색할 수 있다.
 
             * Ex) `select m.team from Member m`
 
                 * 예를 들어, SELECT 절에 `m.team`처럼 작성하면 실행되는 SQL에 묵시적으로 내부 조인이 발생한다.
 
-                * 그리고 `m.team`에서 점(.)을 찍어서 `m.team.name`으로 더 탐색 할 수 있다.
+                    ```sql
+                    -- 연관 경로에 의해 실행되는 묵시적 내부 조인은 다음과 같다. 
+                    SELECT  T.ID, T.NAME 
+                    FROM    MEMBER  M INNER JOIN TEAM T ON M.TEAM_ID = T.ID
+                    ```
+                  
+                * 그리고 `m.team`에서 점(.)을 찍어서 `m.team.name`으로 더 탐색할 수 있다.
 
-        * `컬렉션 값 연관 경로`: **묵시적으로 내부 조인이 발생한다.** 더 이상 탐색 할 수 없다.
+        * `컬렉션 값 연관 경로` : **묵시적으로 내부 조인이 발생한다.** 더 이상 탐색할 수 없다.
+
+            ```java
+            // 컬렉션 값 연관 경로를 사용하는 JPQL를 작성한다.
+            String query = "select t.members from Team t";
+            Collection result = em.createQuery(query, Collection.class)
+                    .getResultList();
+            
+            for (Object o : result) {
+                System.out.println("o = " + o);
+            }
+            ```
+            
+            ```sql
+            -- 연관 경로에 의해 실행되는 묵시적 내부 조인은 다음과 같다. 
+            SELECT  M.ID,
+                    M.AGE,
+                    M.TEAM_ID,
+                    M.TYPE,
+                    M.USERNAME
+            FROM    TEAM T INNER JOIN MEMBER M ON T.ID = M.TEAM_ID
+            ```
 
             * [묵시적 조인] `select t.members from Team t`
 
                 * 예를 들어, SELECT 절에 `t.members`처럼 작성하면 실행되는 SQL에 묵시적으로 내부 조인이 발생한다.
                   
-                * `t.members`는 컬렉션 자체를 의미하기 때문에 `t.members.size`처럼 size만 사용 할 수 있다.
+                * `t.members`는 컬렉션 자체를 의미하기 때문에 `t.members.size`처럼 size만 사용할 수 있다.
                 
             * [명시적 조인] `select m.username from Team t join t.members m`
     
@@ -4393,15 +4471,17 @@
                 
         * 정리하기
           
-            * 위의 내용 보다는 아래 내용을 확실히 기억하자. 
+            * "경로 표현식의 특징"에서 살펴본 내용 보다는 아래 내용을 확실히 기억하자. 
               
             * **묵시적 조인 보다는 항상 명시적 조인을 사용하자.**
     
                 * **묵시적 조인은 조인이 일어나는 상황을 파악하기 어렵다.**
+    
+                * 그리고 조인은 SQL 튜닝에 중요한 포인트다. 
 
     * 명시적 조인, 묵시적 조인
     
-        * `명시적 조인` : JOIN 키워드를 직접 사용하는 것을 의미한다.
+        * `명시적 조인` : JOIN 키워드를 직접 사용해서 SQL 조인이 발생하는 것을 의미한다.
         
             * Ex) `select m from Member m join m.team t`
             
@@ -4410,7 +4490,21 @@
         * `묵시적 조인` : 경로 표현식에 의해 묵시적으로 SQL 조인이 발생하는 것을 의미한다. (내부 조인만 가능하다.)
         
             * Ex) `select m.team from Member m`
-            
+
+    * 경로 표현식 예제    
+
+        * Ex1) `select o.member.team from Order o` (성공)
+
+            * 조인이 2번 발생한다.
+    
+        * Ex2) `select t.members from Team` (성공)
+    
+        * Ex3) `select t.members.username from Team t` (실패)
+    
+            * 컬렉션(`t.members`)은 경로 탐색의 끝이다.
+    
+        * Ex4) `select m.username from Team t join t.members m` (성공)
+
 * 페치 조인
 
     * `페치 조인 (fetch join)`은 **연관된 엔티티나 컬렉션을 SQL 한 번에 함께 조회하는 기능**이다.
@@ -4421,28 +4515,30 @@
     
         * `join fetch` 명령어를 사용한다.
         
-            * `[ LEFT [OUTER] | INNER ] JOIN FETCH` `조인경로`
+            * `[ LEFT [OUTER] | INNER ] JOIN FETCH 조인경로`
             
         * `N+1 문제`는 즉시 로딩, 지연 로딩 둘 다에서 발생하는 문제다.
         
             * 해결 방법으로 페치 조인을 사용 할 수 있다.
             
-    * 엔티티 페치 조인
+    * 엔티티 페치 조인 - 다대일 관계 페치 조인 
     
-        * 회원을 조회 하면서 연관된 팀도 SQL 한 번에 함께 조회한다.
-        
+        * 페치 조인을 사용해서 회원 엔티티를 조회하면서 연관된 팀 엔티티도 함께 조회하는 JPQL을 보자.
+    
             ```java
             // JPQL
             select m from Member m join fetch m.team
             ```
+    
+        * 실행된 SQL은 다음과 같다. 
 
             ```sql
             // SQL
             SELECT M.*, T.* 
             FROM MEMBER M INNER JOIN TEAM T ON M.TEAM_ID = T.ID
             ```
-
-        * 위의 예제를 좀 더 자세히 살펴보자. (다대일 관계)
+    
+        * 페치 조인을 사용하는 코드는 살펴보자.
         
             ```java
             /*
@@ -4485,21 +4581,62 @@
                     .getResultList();
             
             for (Member member : result) {
-                // 회원과 팀의 이름을 같이 출력한다. 페치 조인으로 지연 로딩이 아닌 연관된 엔티티를 함께 조회한다.
+                // 페치 조인으로 회원과 팀을 함꼐 조회하기 때문에 지연 로딩이 발생하지 않는다.
                 System.out.println("member = " + member.getUsername() + ", " + member.getTeam().getName());
             }
             ```
 
-            * 다대일 조인의 결과는 데이터가 같거나 줄어든다.
+            * 실행 과정 설명
+              
+                * 페치 조인을 사용하면 다음 그림처럼 SQL 조인을 시도한다.
     
-    * 컬렉션 페치 조인
+                    ![image 33](images/img33.png)
     
-        * 일대다 관계인 컬렉션에서도 페치 조인을 사용 할 수 있다.
+                * SQL 조인의 결과는 다음 그림과 같다.
+    
+                    ![image 34](images/img34.png)
+    
+                * 엔티티 페치 조인을 한 결과 객체는 다음 그림과 같다.
+    
+                    ![image 35](images/img35.png)
+                    
+                    * 회원과 팀 객체가 객체 그래프를 유지하면서 조회된 것을 확인할 수 있다.    
+
+            * 소스코드 설명
+
+                * 위의 예제에서 페치 조인을 사용하지 않는다면 N+1 문제가 발생한다.
+                
+                    ```java
+                    String query =  "select m from Member m";
+                    
+                    List<Member> result = em.createQuery(query, Member.class)
+                            .getResultList();
+                    
+                    for (Member member : result) {
+                        /* [N+1 문제 발생]
+                           회원1, 팀A (SQL 실행)
+                           회원2, 팀B (1차 캐시에서 조회)
+                           회원3, 팀B (SQL 실행)       */
+                        System.out.println("member = " + member.getUsername() + ", " + member.getTeam().getName());
+                    }
+                    ```
+    
+                * 회원을 조회할 때 페치 조인을 사용해서 팀도 함께 조회 했으므로 연관된 팀 엔티티는 프록시가 아닌 실제 엔티티다. 
+                  
+                    * 따라서 연관된 팀을 사용해도 지연 로딩이 일어나지 않는다.
+    
+                * 페치 조인을 사용해서 함께 조회하는 회원과 팀 엔티티는 영속성 컨텍스트에서 관리된다.    
+
+    * 컬렉션 페치 조인 - 일대다 관계 페치 조인
+    
+        * 페치 조인을 사용해서 팀 엔티티를 조회하면서 연관된 회원 컬렉션도 함께 조회하는 JPQL을 보자. (즉, 일대다 관계인 컬렉션을 페치 조인한다.)
 
             ```java
             // JPQL        
             select t from Team t join fetch t.members where t.name = '팀A'
             ```
+
+        * 실행된 SQL은 다음과 같다.
 
             ```sql
             // SQL        
@@ -4507,7 +4644,7 @@
             FROM TEAM T INNER JOIN MEMBER M ON T.ID = M.TEAM_ID
             WHERE T.NAME = '팀A'
             ```
-
+    
         * 위의 예제를 좀 더 자세히 살펴보자. (일대다 관계)
 
             ```java
@@ -4518,68 +4655,53 @@
             for (Team team : result) {
                 System.out.println("team = " + team.getName() + " | members = " + team.getMembers().size());
                 
-                for(Member member : team.getMembers()){
+                for (Member member : team.getMembers()) {
                     //페치 조인으로 팀과 회원을 함께 조회해서 지연 로딩이 발생하지 않는다.
                     System.out.println("-> member = " + member);
                 }
             }
             ```
+
+            * 실행 과정 설명
+              
+                * 컬렉션을 페치 조인하면 다음 그림처럼 SQL 조인을 시도한다.
     
-            * **일대다 조인의 결과는 데이터가 더 많아 질 수 있다. [주의!]**
-
-                * 일대다 관계인 컬렉션을 페치 조인 했을 때, 결과 테이블은 다음과 같다. 
-
-                    * TEAM (`1`)
-                    
-                        | ID (PK) | NAME |
-                        |:-------:|:----:|
-                        |    1    |  팀A |
-                        |    2    |  팀B |
-                        |    3    |  팀C |
+                    ![image 36](images/img36.png)
     
-                    * MEMBER (`N`)
-                    
-                        | ID (PK) |      NAME    |   TEAM_ID (FK) |
-                        |:-------:|:------------:|:--------------:|
-                        |    1    |      회원1    |       1        |
-                        |    2    |      회원2    |       1        |
-                        |    3    |      회원3    |       2        |
-                        |    4    |      회원4    |      null      |
-                    
-                    * TEAM과 MEMBER를 조인 했을 때 결과는 다음과 같다.
-                    
-                        |    ID (PK)  |   NAME  |    TEAM_ID (FK)  |    ID (PK)   |     NAME   |
-                        |:-----------:|:-------:|:----------------:|:------------:|:----------:|
-                        |    **1**    |  **팀A** |       **1**      |     **1**    |   **회원1** |
-                        |    **1**    |  **팀A** |       **1**      |     **2**    |   **회원2** |
-                        |      2      |  팀B     |       2          |     3        |   회원3     |
-        
-                        * 원래 TEAM 테이블에서 팀 A는 1건 이었다. 
-                          
-                        * 하지만 일대다 조인을 한 이후에는 팀 A가 2건으로 더 많아진 것을 확인 할 수 있다.
-
-                * 일대다 관계인 컬렉션을 페치 조인 했을 때, 결과 객체는 다음과 같다.
-
+                * SQL 조인의 결과는 다음 그림과 같다.
+    
+                    ![image 37](images/img37.png)   
+    
+                * 일대다 관계인 컬렉션을 페치 조인한 결과 객체는 다음과 같다.
+    
                     ![image 21](images/img21.png)
+    
+                    * 컬렉션 페치 조인을 한 결과 객체 (`teams`)는 주소가 `0x100`으로 같은 '팀A'를 2건 가지게 된다.
+    
+                    * 위의 그림에 있는 `teams`는 예제 소스코드의 `List<Team> result`과 같다. 
 
-                    * 그림에 있는 teams 결과 리스트는 위의 소스코드에 있는 `List<Team> result`과 같다고 보면 된다. 
+            * **주의사항**
+            
+                * **일대다 조인은 결과 개수가 증가할 수 있다.**
+                
+                * 일대일 또는 다대일 조인은 결과 개수가 증가하지 않는다. (같거나 작아진다)
 
-                    * teams 결과 리스트는 주소가 `0x100`으로 같은 팀A를 2건 가지게 된다. 
+            * 실행 결과
 
-                * 그리고 위의 예시를 실행한 결과는 다음과 같다.
-
-                    ```
-                    teamname = 팀A, team = Team@0x100
-                    -> username = 회원1, member = Member@0x200 
-                    -> username = 회원2, member = Member@0x300 
-                    teamname = 팀A, team = Team@0x100
-                    -> username = 회원1, member = Member@0x200 
-                    -> username = 회원2, member = Member@0x300
-                    ```
+                ```
+                team = 팀A | members = 2
+                -> member = Member{id=3, username='회원1', age=0}
+                -> member = Member{id=4, username='회원2', age=0}
+                team = 팀A | members = 2
+                -> member = Member{id=3, username='회원1', age=0}
+                -> member = Member{id=4, username='회원2', age=0}
+                team = 팀B | members = 1
+                -> member = Member{id=5, username='회원3', age=0}
+                ```
     
     * 페치 조인과 DISTINCT
     
-        * JPQL의 `DISTINCT`는 SQL에 DISTINCT를 추가하고 애플리케이션에서 엔티티의 중복을 제거한다.
+        * JPQL의 `DISTINCT`는 SQL에 DISTINCT를 추가하면서 애플리케이션에서 한번 더 중복을 제거한다. (같은 식별자를 가지는 엔티티 제거). 
 
             ```java        
             select distinct t
@@ -4588,15 +4710,15 @@
           
             * `select distinct t`의 의미는 팀 엔티티의 중복을 제거하라는 것이다. 
 
-            * 위의 예시를 실행 했을 때 결과는 다음과 같다.    
+            * 위의 예시를 실행 했을 때, 동작 과정은 다음과 같다.    
 
-                * ① SQL에 DISTINCT를 추가하더라도 데이터가 다르므로 SQL 결과에서는 중복 제거에 실패한다. (SQL은 완전히 같아야 중복이 제거 됨)
+                * ① SQL에 DISTINCT를 추가하더라도 각 행(ROW)의 데이터가 다르므로 SQL 결과에서는 중복 제거에 실패한다. (SQL은 완전히 같아야 중복이 제거 됨)
                 
                     * TEAM_ID: 1, TEAM_NAME : 팀A, **MEMBER_ID : 1**, TEAM_ID : 1, NAME : 회원1
                     
                     * TEAM_ID: 1, TEAM_NAME : 팀A, **MEMBER_ID : 2**, TEAM_ID : 1, NAME : 회원2
                 
-                * ② 애플리케이션에서 추가적으로 중복 제거를 시도한다. 그리고 같은 식별자를 가진 Team 엔티티를 제거한다.
+                * ② 애플리케이션에서 한번 더 중복 제거를 시도한다. 즉, **같은 식별자를 가진 Team 엔티티를 제거한다.**
         
                     * 애플리케이션에서 중복을 제거 했을 때 결과 객체는 다음과 같다.
 
@@ -4605,9 +4727,11 @@
                     * 애플리케이션 실행 결과는 다음과 같다.
         
                         ```
-                        teamname = 팀A, team = Team@0x100
-                        -> username = 회원1, member = Member@0x200 
-                        -> username = 회원2, member = Member@0x300 
+                        team = 팀A | members = 2
+                        -> member = Member{id=3, username='회원1', age=0}
+                        -> member = Member{id=4, username='회원2', age=0}
+                        team = 팀B | members = 1
+                        -> member = Member{id=5, username='회원3', age=0}
                         ```                        
 
     * 페치 조인과 일반 조인의 차이
@@ -4634,14 +4758,43 @@
                 * 단지 SELECT 절에 지정한 엔티티만 조회할 뿐이다.
             
             * 따라서 팀 엔티티만 조회하고, 연관된 회원 컬렉션은 조회하지 않는다.
+    
+                * 만약 회원 컬렉션을 지연 로딩으로 설정 했다면 프록시나 아직 초기화하지 않은 컬렉션 래퍼를 반환한다.
 
-        * ② 페치 조인을 사용할 때만 연관된 엔티티도 함께 조회한다. (즉시 로딩) 
-        
+        * ② 페치 조인을 사용할 때만 연관된 엔티티도 함께 조회한다. 
+
+            ```java
+            // JPQL
+            select t
+            from Team t join fetch t.members where t.name = ‘팀A'
+            ```
+            
+            ```sql
+            // SQL
+            SELECT T.*, M.*
+            FROM TEAM T INNER JOIN MEMBER M ON T.ID = M.TEAM_ID
+            WHERE T.NAME = '팀A'
+            ```
+          
+            * 실행된 SQL를 보면 `SELECT T.*, M.*`으로 팀과 회원을 함께 조회한 것을 알 수 있다.
+
             * 즉, **페치 조인은 객체 그래프를 SQL 한번에 조회하는 개념이다.** 
         
     * 페치 조인의 특징과 한계
+
+        * ① **페치 조인의 대상에는 별칭을 사용하면 안 된다.**
     
-        * ① **fetch join 대상을 on, where 등에서 필터링 조건으로 사용하면 안된다.**
+            * `select t from Team t join fetch t.members m` (X)
+    
+                * 여기서 문제가 되는 부분은 `t.members m` 이다.
+
+            * JPA 표준에서는 지원하지 않지만 하이버네이트는 페치 조인에 별칭을 사용하는 것을 지원한다. (가급적 사용하면 안 된다.)
+    
+            * 하지만 별칭을 잘못 사용하면 연관된 데이터 수가 달라져서 데이터 무결성이 깨질 수 있다.
+    
+                * Ex) 팀과 연관된 회원이 5명인데, 그 중에 1명만 조회하면 나머지 회원 4명이 누락되기 때문에 이상하게 동작할 수 있다.
+                  
+        * ② **fetch join 대상을 on, where 등에서 필터링 조건으로 사용하면 안된다.**
     
             * 아래 예시를 살펴보며 좀 더 자세히 이해해보자.
 
@@ -4656,8 +4809,12 @@
                         * 페치 조인 대상(`t.members`)에 별칭을 잘못 사용해서 컬렉션 결과를 일부만 조회 되도록 필터링 하면 객체와 DB의 상태 일관성이 깨져버린다.
 
                             * 예를 들어, 팀과 연관된 회원이 5명이라고 가정한다.
-
-                            * 그 중에 1명만 조회 되도록 where 조건을 지정하면 객체와 DB의 상태 일관성이 깨져버린다.
+    
+                            * where 조건을 나이가 10살 보다 큰 회원만 조회 하도록 지정하면 결과는 3명이 된다.
+                    
+                            * 이것은 JPA에서 설계한 의도와 다르다. 
+    
+                                * 즉, `t.members`를 하면 팀과 연관된 회원에 모두 접근 가능해야 한다.
 
                 * 2번.
     
@@ -4669,19 +4826,21 @@
 
                 * 3번. 
                   
-                    * `select t from Team t join fetch t.members m join fetch m.team` (O)
+                    * `select t from Team t join fetch t.members m join fetch m.locker` (O)
     
                         * 페치 조인을 여러 단계로 하는 경우에는 페치 조인의 대상에 별칭을 줄 수 있다.
     
-        * ② 둘 이상의 컬렉션은 페치 조인을 할 수 없다.
+        * ③ 둘 이상의 컬렉션은 페치 조인을 할 수 없다.
 
             * JPA 구현체에 따라 가능한 경우도 있는데 가급적 사용하면 안된다.
 
             * `컬렉션 * 컬렉션`의 카테시안 곱이 만들어지므로 주의해야 한다.
+    
+            * 하이버네이트를 사용하면 `MultipleBagFetchException` 예외가 발생한다.
 
-        * ③ 컬렉션을 페치 조인하면 페이징 API(setFirstResult, setMaxResults)를 사용 할 수 없다.
+        * ④ 컬렉션을 페치 조인하면 페이징 API(setFirstResult, setMaxResults)를 사용할 수 없다.
         
-            * 일대일, 다대일과 같은 단일 값 연관 필드들은 페치 조인을 사용해도 페이징 API를 사용 할 수 있다.
+            * 컬렉션(`일대일`)이 아닌 단일 값 연관 필드(`일대일`, `다대일`)들은 페치 조인을 사용해도 페이징 API를 사용할 수 있다.
     
                 * 일대다는 조심하자! 데이터가 더 많아 질 수 있다.
                  
@@ -4697,7 +4856,7 @@
                         .getResultList();
                 ```
 
-                * 성능 이슈와 메모리 초과 예외가 발생 할 수 있어서 매우 위험하다.
+                * 데이터가 많으면 성능 이슈와 메모리 초과 예외가 발생 할 수 있어서 매우 위험하다.
 
             * 해결 방법은 다음과 같다.
             
@@ -4739,39 +4898,41 @@
                     for (Team team : result) {
                         System.out.println("team = " + team.getName() + " | members = " + team.getMembers().size());
                     
-                        for(Member member : team.getMembers()){
+                        for (Member member : team.getMembers()) {
                             System.out.println("-> member = " + member);
                         }
                     }
                     ```
 
-                    * `@BatchSize` : 연관된 엔티티를 조회할 때 지정된 size 만큼 SQL의 IN 절을 사용해서 조회한다.
-
-                        * 위의 예시에서는 Team의 members는 지연 로딩(LAZY LOADING)으로 설정되어 있다.
+                    * `@BatchSize` : (특정 엔티티와 연관된 엔티티를 실제 사용할 때) 지정한 size 만큼 SQL의 IN 절에 특정 엔티티의 ID를 설정해서 연관된 엔티티를 조회한다.
     
-                        * 지연 로딩을 한 엔티티인 members를 실제 사용할 때, 지정된 size 만큼 SQL의 IN 절을 사용해서 조회한다. 
-
-                            * 조회한 Team의 id를 size 만큼 SQL의 IN 절에 설정해서 실행한다.
-
-                                ```sql
-                                SELECT  M.*
-                                FROM    MEMBER M
-                                WHERE   M.TEAM_ID IN (?, ?) 
-                                ```
-
+                        * 위의 예시에서 Team의 members는 지연 로딩(LAZY LOADING)으로 설정되어 있다.
+    
+                        * 조회한 Team 엔티티와 연관된 엔티티인 members를 실제 사용할 때, 지정한 size 만큼 SQL의 IN 절에 Team 엔티티의 ID를 설정해서 연관된 엔티티 members를 조회한다.
+    
+                            ```sql
+                            SELECT  M.*
+                            FROM    MEMBER M
+                            WHERE   M.TEAM_ID IN (?, ?) 
+                            ```
+                          
                     * `hibernate.default_batch_fetch_size`로 글로벌 설정이 가능하다.
+
+                        * size는 1000 이하의 값을 설정한다.
     
     * 정리하기
     
-        * ① 페치 조인은 연관된 엔티티들을 SQL 한 번으로 조회한다. - 성능 최적화 
+        * ① 페치 조인은 연관된 엔티티들을 SQL 한 번으로 조회한다. 
+    
+            * SQL 호출 횟수를 줄여서 성능을 최적화할 수 있다.  
         
-        * ② 페치 조인은 엔티티에 직접 적용하는 글로벌 로딩 전략 보다 우선적으로 적용된다.
+        * ② 엔티티에 직접 적용하는 글로벌 로딩 전략 보다 페치 조인이 우선적으로 적용된다.
         
             * `@OneToMany(fetch = FetchType.LAZY)` : 글로벌 로딩 전략
 
         * ③ 실무에서 글로벌 로딩 전략은 모두 지연 로딩으로 설정한다.
 
-        * ④ 페치 조인은 객체 그래프를 유지 할 때 사용하면 효과적이다.
+        * ④ 페치 조인은 객체 그래프를 유지할 때 사용하면 효과적이다.
         
         * ⑤ **여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 만들어야 하면, 페치 조인 보다는 일반 조인을 사용하고 필요한 값들만 조회해서 DTO로 반환하는 것이 효과적이다.**
         
@@ -4790,7 +4951,7 @@
             ```
 
             ```sql
-            // SQL        
+            // SQL      
             select i from i
             where i.DTYPE in ('B', 'M')
             ```
@@ -4810,7 +4971,7 @@
             ```
 
             ```sql
-            // SQL        
+            // SQL (Single 테이블 전략을 사용한다고 가정함)         
             select i.* from Item i
             where i.DTYPE = 'B' and i.author = 'kim'
             ```
@@ -4819,16 +4980,23 @@
 
     * 기본 키 값
 
-        * JPQL에서 엔티티를 직접 사용하면 SQL에서는 해당 엔티티의 기본 키 값을 사용한다.
+        * JPQL에서 엔티티를 직접 사용하면 실행되는 SQL에서 해당 엔티티의 기본 키 값을 사용한다.
         
-            ```java        
-            select count(m.id) from Member m //엔티티의 아이디를 사용
-            select count(m) from Member m //엔티티를 직접 사용
+            ```java
+            // JPQL        
+            select count(m.id) from Member m // 엔티티의 아이디를 사용
+            select count(m) from Member m // 엔티티를 직접 사용
             ```
-          
+
+            ```sql
+            // SQL        
+            select count(m.id) as cnt 
+            from Member m
+            ```
+    
             * 엔티티를 식별 할 수 있는 것은 기본 키 값이기 때문이다.
           
-        * JPQL의 파라미터로 엔티티를 직접 사용하더라도 SQL에서는 해당 엔티티의 기본 키 값을 사용한다.
+        * 엔티티를 JPQL의 파라미터로 전달하면 실행되는 SQL에서 해당 엔티티의 기본 키 값을 사용한다.
     
             ```java        
             String query = "select m from Member m where m = :member"; 
@@ -4836,77 +5004,188 @@
                                 .setParameter("member", member)
                                 .getResultList();
             ```
-          
+
+            ```sql
+            // SQL        
+            select m.*
+            from Member m
+            where m.id = ?
+            ```
+
     * 외래 키 값
 
         * 기본 키 값이 1L인 팀 엔티티를 파라미터로 사용하고 있다. m.team은 현재 team_id라는 외래 키와 매핑되어 있다.
 
-        * JPQL의 파라미터로 엔티티를 직접 사용하더라도 SQL에서는 해당 엔티티의 외래 키 값을 사용한다.
+        * JPQL에서 엔티티를 직접 사용하면 실행되는 SQL에서 해당 엔티티의 외래 키 값을 사용한다.    
 
             ```java        
             Team team = em.find(Team.class, 1L);
           
+            // 실행되는 SQL에서 "m.team" : 외래 키, ":team" : 기본 키로 변환된다. 
             String qlString = "select m from Member m where m.team = :team"; 
             List resultList = em.createQuery(qlString)
                                 .setParameter("team", team) .getResultList();
             ```
 
+            ```sql
+            // SQL        
+            SELECT M.*
+            FROM MEMBER M
+            WHERE M.TEAM_ID = ?
+            ```
+    
 * Named 쿼리: 정적 쿼리
 
-    * JPQL 쿼리는 동적 쿼리와 정적 쿼리로 나눌 수 있다.
+    * JPQL 쿼리는 동적 쿼리와 정적 쿼리로 분류할 수 있다.
 
-        * `동적 쿼리` : 실행 시점에 검색 조건에 따라 다른 쿼리를 생성하는 것을 말한다.
+        * `동적 쿼리 (Dynamic Query)` : 실행 시점에 검색 조건에 따라 다른 쿼리를 생성하는 것을 말한다.
         
             * `em.createQuery("select ...")`
 
-        * `정적 쿼리` : 미리 정의한 쿼리에 이름을 부여해서 필요할 때 사용하는 것을 말한다. `Named 쿼리`라고도 한다.
-        
-            * 애플리케이션 로딩 시점에 JPQL 문법을 체크하여 미리 SQL로 파싱해둔다.
+        * `정적 쿼리 (Static Query)` : (어떤 검색 조건에도 변경되지 않는) 고정된 형태의 쿼리를 말한다.
     
-                * `파싱(Parsing)` : 어떤 데이터를 원하는 형태로 가공하는 것을 말한다.
+    * `Named 쿼리` : 미리 정의한 쿼리(JPQL)에 이름을 부여해서 필요할 때 사용하는 것을 말한다.
+
+        * Named 쿼리의 특징
+          
+            * 정적 쿼리다.
+              
+            * 애플리케이션 로딩 시점에 JPQL 문법을 체크해서 미리 SQL로 파싱해둔다. (문법 체크 시, 문제가 있다면 오류가 발생함)
+        
+                * `파싱 (Parsing)` : 어떤 데이터를 원하는 형태로 가공하는 것을 말한다.
             
-            * 따라서 오류를 빨리 확인할 수 있고 사용하는 시점에는 파싱된 결과를 재사용하므로 성능상 이점이 있다.
-            
+            * 따라서 오류를 빨리 확인할 수 있고 사용하는 시점에는 파싱된 결과를 재사용하므로 성능 상 이점이 있다.
+
+        * 사용 방법
+    
+            * @NamedQuery를 사용해서 Named 쿼리를 정의한다. 
+
                 ```java        
                 @Entity
                 @NamedQuery(
-                    name = "Member.findByUsername",
-                    query="select m from Member m where m.username = :username")
+                    name = "Member.findByUsername", // name의 관례는 "엔티티명.쿼리명" 이다.
+                    query = "select m from Member m where m.username = :username")
                 public class Member {
                     //...
                 }
+                ```
               
+                * name 속성에 쿼리 이름을 부여하고 query 속성에 사용할 쿼리를 입력한다.
+
+            * Named 쿼리를 사용한다. 
+            
+                ```java        
                 List<Member> resultList = em.createNamedQuery("Member.findByUsername", Member.class)
                                             .setParameter("username", "회원1")
                                             .getResultList();
                 ```
               
-                * 스프링 데이터 JPA에서는 `@Query`를 제공한다.
+                * 스프링 데이터 JPA에서는 해당 방식 보다 유용한 `@Query`를 제공한다.
         
 * 벌크 연산
 
-    * `벌크 연산`은 JPQL로 한 번에 여러 데이터를 수정하거나 삭제하는 것을 말한다. (SQL의 UPDATE, DELETE 문)
+    * `벌크 연산 (Bulk Data Operations)`은 한 번에 여러 데이터(Row)를 수정하거나 삭제하는 방법을 말한다. (SQL의 UPDATE, DELETE 문)
+
+        * 벌크 연산의 특징
+    
+            * 쿼리 한 번으로 테이블의 여러 행을 변경한다.
+    
+            * executeUpdate()의 결과는 벌크 연산으로 영향을 받은 엔티티 수를 반환한다.
+    
+            * UPDATE, DELETE를 지원한다.
+    
+            * INSERT (INSERT INTO .. SELECT)는 하이버네이트에서 지원한다.
+    
+            * 스프링 데이터 JPA에서는 벌크 연산을 `@Modifying`으로 제공한다.
+
+        * 벌크 연산이 필요한 이유
+          
+            * 예를 들어, 재고가 10개 미만인 모든 상품의 가격을 10% 상승 하려고 할 때, JPA의 변경 감지 기능으로 해결하려면 너무 많은 SQL 문을 실행해야 한다. 
+        
+                * 재고가 10개 미만인 상품을 리스트로 조회한다.
+        
+                * 리스트를 반복문으로 순회하며 상품 엔티티의 가격을 10% 증가한다.
+        
+                * 트랜잭션 커밋 시점에 변경 감지가 동작한다.
+        
+            * 변경된 데이터가 100건이라면 100 번의 UPDATE SQL문이 실행된다.
 
         * UPDATE 벌크 연산
-        
-            ```java
-            // 재고가 10개 미만인 모든 상품의 가격을 10% 상승한다.
-            String query = "update Product p " +
-                           "set p.prce = p.price * 1.1 " +
-                           "where p.stockAmount < :stockAmount";
-            
-            // JPQL을 실행하기 직전에 flush()가 자동 호출된다.
-            int resultCount = em.createQuery(query)
-                                .setParameter("stockAmount", 10)
-                                .executeUpdate();
-          
-            em.clear();
-            ```
-          
-            * 벌크 연산(UPDATE, DELETE)은 `executeUpdate()`를 사용한다. 
-              
-                * 해당 메소드는 벌크 연산으로 영향을 받은 엔티티 건수를 반환한다.
 
+            * 모든 회원의 나이를 20살로 변경한다.
+            
+                ```java
+                // 팀(Team)
+                Team teamA = new Team();
+                teamA.setName("팀A");
+                em.persist(teamA);
+                
+                Team teamB = new Team();
+                teamB.setName("팀B");
+                em.persist(teamB);
+                
+                // 회원(Member)
+                Member member1 = new Member();
+                member1.setUsername("회원1");
+                member1.setTeam(teamA);
+                em.persist(member1);
+                
+                Member member2 = new Member();
+                member2.setUsername("회원2");
+                member2.setTeam(teamA);
+                em.persist(member2);
+                
+                Member member3 = new Member();
+                member3.setUsername("회원3");
+                member3.setTeam(teamB);
+                em.persist(member3);
+                
+                /* JPQL을 실행하기 직전에 flush()가 자동 호출된다. 
+                   따라서 영속성 컨텍스트의 현재 상태가 DB에 반영된다.
+                   그 다음, 벌크 연산이 실행되어 DB에서 모든 회원의 나이를 20살로 변경한다. 
+                   하지만 영속성 컨텍스트는 변경되지 않았다. */
+                int resultCount = em.createQuery("update Member m set m.age = 20")
+                        .executeUpdate();
+                
+                /* 만약 벌크 연산을 수행한 후, 바로 영속성 컨텍스트를 초기화하면 데이터베이스에서 벌크 연산이 적용된 데이터를 조회한다.
+                   (주석에서 설명한대로 동작 되도록 하고 싶다면 clear()의 주석을 해제하자. */
+                // em.clear();
+                
+                Member findMember = em.find(Member.class, member1.getId());
+                System.out.println("findMember = " + findMember.getAge());
+                ```
+              
+                * 벌크 연산을 수행하기 전에 모든 회원의 나이는 0 이었다. 
+                  
+                    * 나이를 따로 설정하지 않았기 때문에 기본 값 0을 가진다.
+    
+                * 벌크 연산을 수행하면 DB에 있는 모든 회원의 나이는 20살이 된다.
+    
+                * 그 다음, 영속성 컨텍스트를 초기화하지 않는다면 영속성 컨텍스트에 있는 모든 회원의 나이는 그대로 0살이다. 
+    
+                    * 벌크 연산은 영속성 컨텍스트를 무시하고 데이터베이스에 직접 쿼리하기 때문이다.
+    
+                * 따라서 벌크 연산을 수행한 후에 바로 영속성 컨텍스트를 초기화한다. (`em.clear()`)
+
+            * 재고가 10개 미만인 모든 상품의 가격을 10% 상승한다.        
+
+                ```java
+                String query = "update Product p " +
+                               "set p.prce = p.price * 1.1 " +
+                               "where p.stockAmount < :stockAmount";
+                
+                // JPQL을 실행하기 직전에 flush()가 자동 호출된다.
+                int resultCount = em.createQuery(query)
+                                    .setParameter("stockAmount", 10)
+                                    .executeUpdate();
+              
+                em.clear();
+                ```
+        
+                * 벌크 연산(UPDATE, DELETE)은 `executeUpdate()`를 사용한다. 
+                  
+                    * 해당 메소드는 벌크 연산으로 영향을 받은 엔티티 건수를 반환한다.
+    
         * DELETE 벌크 연산
         
             ```java
@@ -4924,22 +5203,22 @@
     * 벌크 연산의 주의사항
 
         * **벌크 연산은 영속성 컨텍스트를 무시하고 데이터베이스에 직접 쿼리한다**는 점에 주의해야 한다.
+    
+            * 따라서 영속성 컨텍스트와 데이터베이스에 있는 데이터가 다를 수 있다.
 
-        * 해결책은 다음 2가지가 있다.
+        * 해결책은 다음 2 가지가 있다.
         
             * ① 벌크 연산을 가장 먼저 실행한다. 
             
             * ② 벌크 연산을 수행한 후, 바로 영속성 컨텍스트를 초기화한다.
             
                 * 영속성 컨텍스트를 초기화하면 이후 엔티티를 조회할 때, 벌크 연산이 적용된 데이터베이스에서 엔티티를 조회한다.
-            
-    * 스프링 데이터 JPA에서는 벌크 연산을 `@Modifying`으로 제공한다.
-
+    
 ## 11. ETC
 
 ### 1. 변경 감지(Dirty Checking) 와 병합(merge)
 
-* (1) 준영속 엔티티?
+* **(1) 준영속 엔티티?**
 
     * `준영속 엔티티` : 영속성 컨텍스트가 더 이상 관리하지 않는 엔티티를 말한다.
 
@@ -4973,7 +5252,7 @@
     
         * 따라서 Book 객체는 준영속 상태의 객체다.
 
-* (2) 준영속 엔티티를 수정하는 2 가지 방법 
+* **(2) 준영속 엔티티를 수정하는 2 가지 방법** 
   
     * ① 변경 감지 기능 사용
     
@@ -5025,7 +5304,7 @@
       
         * `merge`는 준영속 상태의 엔티티를 영속 상태로 변경할 때 사용한다.
     
-* (3) 병합 동작 방식
+* **(3) 병합 동작 방식**
 
     * 상세 버전
     
@@ -5061,7 +5340,7 @@
     
 ### 2. OSIV와 성능 최적화
 
-* (1) OSIV는 무엇인가?
+* **(1) OSIV는 무엇인가?**
 
     * `OSIV (Open Session In View)` : 영속성 컨텍스트를 뷰까지 열어둔다는 의미다.
 
@@ -5073,7 +5352,7 @@
         
             * 실시간 서비스는 OSIV를 끄고, ADMIN 처럼 데이터베이스 커넥션을 많이 사용하지 않는 서비스는 OSIV를 켠다.
 
-* (2) OSIV ON / OFF
+* **(2) OSIV ON / OFF**
   
     * OSIV ON (`spring.jpa.open-in-view=true`)
     
@@ -5103,7 +5382,7 @@
     
         * 하지만 모든 지연 로딩을 트랜잭션 안에서 처리해야 된다는 단점이 있다.
     
-* (3) 커맨드와 쿼리 분리하기
+* **(3) 커맨드와 쿼리 분리하기**
 
     * 실무에서 OSIV를 끈 상태로 복잡성을 관리하는 좋은 방법이 있다. 
       
