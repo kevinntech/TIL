@@ -4,7 +4,7 @@
 
 ## Markdown 문법
 
-* [마크다운 문법](https://github.com/kevinntech/TIL/tree/main/markdownSyntax "마크다운 문법")
+* [마크다운 문법](https://github.com/kevinntech/TIL/tree/main/markdown-syntax "마크다운 문법")
 
 ## Java
 
@@ -30,11 +30,11 @@
 
 ## JPA
 
-* [자바 ORM 표준 JPA 프로그래밍 - 기본편](https://github.com/kevinntech/TIL/tree/main/jpa/jpaBasic "자바 ORM 표준 JPA 프로그래밍 - 기본편")
+* [자바 ORM 표준 JPA 프로그래밍 - 기본편](https://github.com/kevinntech/TIL/tree/main/jpa/jpa-basic "자바 ORM 표준 JPA 프로그래밍 - 기본편")
 
-* [실전! 스프링 부트와 JPA 활용1 - 웹 애플리케이션 개발](https://github.com/kevinntech/TIL/tree/main/jpa/jpaUse1 "실전! 스프링 부트와 JPA 활용1")
+* [실전! 스프링 부트와 JPA 활용1 - 웹 애플리케이션 개발](https://github.com/kevinntech/TIL/tree/main/jpa/jpa-use1 "실전! 스프링 부트와 JPA 활용1")
 
-* [실전! 스프링 데이터 JPA](https://github.com/kevinntech/TIL/tree/main/jpa/springDataJpa "실전! 스프링 데이터 JPA")
+* [실전! 스프링 데이터 JPA](https://github.com/kevinntech/TIL/tree/main/jpa/spring-data-jpa "실전! 스프링 데이터 JPA")
 
 * [실전! Querydsl](https://github.com/kevinntech/TIL/tree/main/jpa/querydsl "실전! Querydsl")
 
