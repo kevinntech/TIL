@@ -10050,7 +10050,7 @@ int[][] arr = {
       
         * `effectively final` : (final 키워드를 붙이진 않았지만) 사실상 final인 변수를 말한다.
     
-    * 그렇지 않을 경우 concurrency 문제가 생길 수 있어서 컴파일러가 방지한다.
+    * 그렇지 않을 경우, 동시성(Concurrency) 문제가 생길 수 있어서 컴파일러가 방지한다.
 
 #### 2) 함수형 인터페이스
         
@@ -11590,12 +11590,12 @@ int[][] arr = {
 
 * (5) 리듀싱 - reduce()
 
-    * `reduce()` : 스트림의 요소를 소모해서 최종 결과를 도출한다. 
+    * `reduce()` : 스트림의 모든 요소를 소모해서 최종 결과를 도출한다.
 
         * `Optional<T> reduce (BinaryOperator<T> accumulator)`
         
             * 스트림 내의 처음 두 요소를 가지고 연산한 결과와 그 다음 요소를 연산하는 방식으로 스트림의 모든 요소를 소모하게 되면 최종 결과를 반환한다.
-        
+            
                 * 스트림의 요소가 하나도 없을 때는 결과가 `null` 일 수 있으므로 반환 타입이 `Optional<T>` 이다. 
 
         * `T reduce(T identity, BinaryOperator<T> accumulator)`
@@ -11635,7 +11635,7 @@ int[][] arr = {
  
 * (1) collect()와 Collectors
 
-    * `collect()` : 스트림의 요소를 소모해서 최종 결과를 도출한다. 
+    * `collect()` : 스트림의 모든 요소를 소모해서 최종 결과를 도출한다. 
     
         * 특징 
           
@@ -11661,12 +11661,10 @@ int[][] arr = {
                 
     * `reduce()`과 `collect()`의 차이점 
 
-        * `reduce()` : 전체 리듀싱을 할 수 있다.
+        * `reduce()` : 전체 집계를 할 수 있다.
         
-        * `collect()` : 전체 또는 그룹별 리듀싱을 할 수 있다. 
-    
-            * 리듀싱 : 모든 스트림의 요소를 처리해서 하나의 값으로 도출하는 것을 말한다.
-                    
+        * `collect()` : 전체 또는 그룹별 집계를 할 수 있다. 
+     
     * `Collector`는 수집(`collect()`)에 필요한 메서드를 정의해 놓은 인터페이스다.
 
         ```java
@@ -11814,7 +11812,7 @@ int[][] arr = {
             Object[] students = studentStream.toArray();
             ```
         
-            * 해당 메소드에서 반환하는 배열 타입은 `Object[]`이다.
+            * 매개변수가 없는 toArray()는 `Object[]`를 반환한다.
         
         * `toArray(IntFunction<T[]> generator)` : 스트림의 모든 요소를 특정 타입의 배열에 담아서 반환한다. 
 
@@ -11822,10 +11820,10 @@ int[][] arr = {
             Student[] students = studentStream.toArray(Student[]::new);
             ```
           
-            * 해당 메소드에서 반환하는 배열 타입은 `T[]`이다.
-            
-                * `IntFunction<T[]>`에서 매개변수로 전달하는 int 값은 배열의 길이다. 
-
+            * 매개변수가 있는 toArray()는 `T[]`를 반환한다.
+    
+                * 매개변수에 반환 받고자 하는 배열 타입을 지정한다.
+    
     * 스트림의 통계
 
         * `counting()` : 스트림에 있는 요소의 총 개수를 계산한다.
@@ -11865,9 +11863,26 @@ int[][] arr = {
                                 .collect(summarizingInt(Student::getTotalScore));
             ```
 
+    * 스트림의 문자열 연결
+    
+        * `joining()` : 문자열 스트림의 모든 요소를 구분자로 연결한다.
+        
+            ```java
+            String studentNames = stuStream.map(Student::getName).collect(joining());
+            String studentNames = stuStream.map(Student::getName).collect(joining(",")); // 구분자 
+            String studentNames = stuStream.map(Student::getName).collect(joining(",", "[", "]")); // 구분자, prefix, suffix
+            String studentInfo = stuStream.collect(joining(",")); // Student의 toString()로 결합 
+            ```
+
     * 스트림의 리듀싱
 
-        * `reducing()` : 리듀싱을 한다.
+        * `reducing()` : 스트림의 모든 요소를 소모해서 최종 결과를 도출한다.
+    
+            * 특징
+    
+                * 지금까지 살펴본 컬렉터는 reducing()로도 정의할 수 있다.
+    
+                * 그럼에도 이전 예제에서 특화된 컬렉터를 사용한 이유는 프로그래밍적 편의성 때문이다.   
         
             * 문법
             
@@ -11890,8 +11905,8 @@ int[][] arr = {
                     ```java
                     IntStream intStream = new Random().ints(1, 46).distinct().limit(6);
                     
-                    OptionalInt max = intStream.reduce(Integer::max);
-                    Optional<Integer> max = intStream.boxed().collect(reducing(Integer::max));
+                    OptionalInt max = intStream.reduce(Integer::max);                           // 전체 리듀싱 
+                    Optional<Integer> max = intStream.boxed().collect(reducing(Integer::max));  // 원한다면 그룹별 리듀싱이 가능하다.
                     ```
                   
                     * `boxed()` : 기본형 스트림을 스트림으로 변환한다. 
@@ -11911,16 +11926,7 @@ int[][] arr = {
                     int grandTotal = stuStream.map(Student::getTotalScore).reduce(0, Integer::sum);
                     int grandTotal = stuStream.collect(reducing(0, Student::getTotalScore, Integer::sum)); // reducing(초기 값, 변환 작업, 누적 작업)
                     ```
-                              
-    * `joining()` : 문자열 스트림의 모든 요소를 구분자로 연결한다.
-
-        ```java
-        String studentNames = stuStream.map(Student::getName).collect(joining());
-        String studentNames = stuStream.map(Student::getName).collect(joining(",")); // 구분자 
-        String studentNames = stuStream.map(Student::getName).collect(joining(",", "[", "]")); // 구분자, prefix, suffix
-        String studentInfo = stuStream.collect(joining(",")); // Student의 toString()로 결합 
-        ```
-
+    
 * (2) 그룹화와 분할
 
     * `partitioningBy()` : 스트림의 요소를 2개의 그룹으로 분할한다.

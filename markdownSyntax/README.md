@@ -1,11 +1,10 @@
-# 마크다운 문법(Markdown Syntax)
+# 마크다운 문법 (Markdown Syntax)
 
-## 마크다운(Markdown)
+## 마크다운 (Markdown)
 
 - 마크다운(Markdown)은 일반 텍스트 기반의 마크업 언어다.
 
-- 깃(Git)의 README.md 파일이나 온라인 문서, 혹은 일반 텍스트 편집기로 문서 양식을 편집할 때,
-  쉽게 쓰고 읽을 수 있으며 HTML로 변환이 가능하다.
+- 깃(Git)의 README.md 파일이나 온라인 문서, 혹은 일반 텍스트 편집기로 문서 양식을 편집할 때, 쉽게 쓰고 읽을 수 있으며 HTML로 변환이 가능하다.
 
 ## 1. 줄 바꾸기
 
@@ -197,34 +196,41 @@ ___
 
 * HTML의 `<details>`를 이용하면 접기 / 펼치기 기능을 적용 할 수 있다.
 
-    ```
-    <details>
-    <summary>접기 / 펼치기</summary>
-    <div markdown="1">
-    
-    <!-- 내용 작성 -->
-    
-    </div>
-    </details>
-    ```
+  ```html
+  <details> 
+      <summary>제목</summary> 
+  
+      <!-- summary 아래에 한 칸 공백이 있어야 함 --> 
+      # 내용 작성
+  </details>
+  ```
 
 * 예시
 
-    <details>
-    <summary>접기 / 펼치기</summary>
-    <div markdown="1">
-    
-    <br>
-    
-    상세 내용을 이렇게 작성 할 수 있습니다.
-    
-    ```
-    | 제품 | 개수 | 가격 |
-    | --- | :---: | ---:|
-    | `시계` | `1`개 | `200`|
-    | `컴퓨터` | `1`개 | `150` |
-    | `라디오` | `가`개 | `10` |
-    ```
-    
-    </div>
-    </details>
+  <details> 
+      <summary>소스코드</summary> 
+  
+  ```java
+  System.out.println("Hello World!");
+  ```
+  
+  </details>
+
+## 17. 디렉토리 트리 구조 표현하기
+
+* ① (Mac OS인 경우) Homebrew를 통해 tree 명령어를 설치한다.
+
+  ```
+  brew install tree
+  ```
+
+* ② 터미널에서 tree 명령어를 입력한다.
+
+* ③ tree 명령어의 결과를 마크다운 문서에 복사한다.
+
+  ```bash
+  ├── HELP.md
+  ├── build.gradle
+  ├── gradle
+  ...
+  ```
