@@ -3381,7 +3381,7 @@
 
 ### 2. JPQL
 
-* JPQL ?
+* **(1) JPQL ?**
 
     * `JPQL (Java Persistence Query Language, 자바 영속성 쿼리 언어)` : 테이블이 아닌 엔티티 객체를 대상으로 검색하는 객체지향 쿼리 언어다.
     
@@ -3391,169 +3391,169 @@
         
         * JPQL은 결국 SQL로 변환된다.
     
-* 예제로 사용할 도메인 모델
-
-    * 그림
-      
-        * UML
+    * 예제로 사용할 도메인 모델
     
-            ![image 31](images/img31.png)    
+        * 그림
+          
+            * UML
         
-        * ERD
-    
-            ![image 32](images/img32.png)
+                ![image 31](images/img31.png)    
+            
+            * ERD
         
-            * Address라는 임베디드 타입은 ERD에서 ORDERS 테이블에 포함되어 있다. 
-    
-    * 소스코드
-    
-        * Member
+                ![image 32](images/img32.png)
+            
+                * Address라는 임베디드 타입은 ERD에서 ORDERS 테이블에 포함되어 있다. 
         
-            ```java
-            @Entity
-            public class Member {
-            
-                @Id @GeneratedValue
-                private Long id;
-            
-                private String username;
-            
-                private int age;
-            
-                @ManyToOne
-                @JoinColumn(name = "TEAM_ID")
-                private Team team;
-            
-                @OneToMany(mappedBy = "member")
-                private List<Order> orders = new ArrayList<>();
-            
-                // Getter, Setter
-            }
-            ```
+        * 소스코드
         
-        * Team
-        
-            ```java
-            @Entity
-            public class Team {
+            * Member
             
-                @Id @GeneratedValue
-                private Long id;
-            
-                private String name;
-            
-                @OneToMany(mappedBy = "team")
-                private List<Member> members = new ArrayList<>();
-            
-                // Getter, Setter
-            }
-            ```
-        
-        * Order
-        
-            ```java
-            @Entity
-            @Table(name = "ORDERS")
-            public class Order {
-            
-                @Id @GeneratedValue
-                private Long id;
-            
-                private int orderAmount;
-            
-                @Embedded
-                private Address address;
-            
-                @ManyToOne
-                @JoinColumn(name = "MEMBER_ID")
-                private Member member;
-            
-                @ManyToOne
-                @JoinColumn(name = "PRODUCT_ID")
-                private Product product;
-            
-                // 연관관계 편의 메소드 
-                public void changeMember(Member member) {
-                    this.member = member;
-                    member.getOrders().add(this);
-                }
-            
-                // Getter, Setter
-            }
-            ``` 
-         
-        * Address
-        
-            ```java
-            @Embeddable
-            public class Address {
-            
-                private String city;
-            
-                private String street;
-            
-                private String zipcode;
-            
-                // Getter, Setter
-            }
-            ```
-        
-        * Product
-        
-            ```java
-            @Entity
-            public class Product {
-            
-                @Id @GeneratedValue
-                private Long id;
-            
-                private String name;
-            
-                private int price;
-            
-                private int stackAmount;
-            
-                // Getter, Setter
-            }
-            ```
-
-* 실행 코드 작성하기
-
-    ```java
-    public class JpaMain {
-    
-        public static void main(String[] args) {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
-    
-            EntityManager em = emf.createEntityManager();
-    
-            EntityTransaction tx = em.getTransaction();
-    
-            tx.begin(); // 트랜잭션 시작
-    
-            try {
-                // 실행 준비 데이터 만들기
-                Member member = new Member();
-                member.setUsername("member1");
-                member.setAge(10);
-                em.persist(member);
-    
-                // JPQL 작성하기
+                ```java
+                @Entity
+                public class Member {
                 
-                tx.commit();
-            } catch (Exception e) {
-                e.printStackTrace();
-                tx.rollback();
-            } finally {
-                em.close();
-            }
+                    @Id @GeneratedValue
+                    private Long id;
+                
+                    private String username;
+                
+                    private int age;
+                
+                    @ManyToOne
+                    @JoinColumn(name = "TEAM_ID")
+                    private Team team;
+                
+                    @OneToMany(mappedBy = "member")
+                    private List<Order> orders = new ArrayList<>();
+                
+                    // Getter, Setter
+                }
+                ```
+            
+            * Team
+            
+                ```java
+                @Entity
+                public class Team {
+                
+                    @Id @GeneratedValue
+                    private Long id;
+                
+                    private String name;
+                
+                    @OneToMany(mappedBy = "team")
+                    private List<Member> members = new ArrayList<>();
+                
+                    // Getter, Setter
+                }
+                ```
+            
+            * Order
+            
+                ```java
+                @Entity
+                @Table(name = "ORDERS")
+                public class Order {
+                
+                    @Id @GeneratedValue
+                    private Long id;
+                
+                    private int orderAmount;
+                
+                    @Embedded
+                    private Address address;
+                
+                    @ManyToOne
+                    @JoinColumn(name = "MEMBER_ID")
+                    private Member member;
+                
+                    @ManyToOne
+                    @JoinColumn(name = "PRODUCT_ID")
+                    private Product product;
+                
+                    // 연관관계 편의 메소드 
+                    public void changeMember(Member member) {
+                        this.member = member;
+                        member.getOrders().add(this);
+                    }
+                
+                    // Getter, Setter
+                }
+                ``` 
+             
+            * Address
+            
+                ```java
+                @Embeddable
+                public class Address {
+                
+                    private String city;
+                
+                    private String street;
+                
+                    private String zipcode;
+                
+                    // Getter, Setter
+                }
+                ```
+            
+            * Product
+            
+                ```java
+                @Entity
+                public class Product {
+                
+                    @Id @GeneratedValue
+                    private Long id;
+                
+                    private String name;
+                
+                    private int price;
+                
+                    private int stackAmount;
+                
+                    // Getter, Setter
+                }
+                ```
     
-            emf.close();
+    * 실행 코드 작성하기
+    
+        ```java
+        public class JpaMain {
+        
+            public static void main(String[] args) {
+                EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+        
+                EntityManager em = emf.createEntityManager();
+        
+                EntityTransaction tx = em.getTransaction();
+        
+                tx.begin(); // 트랜잭션 시작
+        
+                try {
+                    // 실행 준비 데이터 만들기
+                    Member member = new Member();
+                    member.setUsername("member1");
+                    member.setAge(10);
+                    em.persist(member);
+        
+                    // JPQL 작성하기
+                    
+                    tx.commit();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    tx.rollback();
+                } finally {
+                    em.close();
+                }
+        
+                emf.close();
+            }
         }
-    }
-    ```
+        ```
 
-* JPQL 문법
+* **(2) JPQL 기본 문법**
 
     * 문법
     
@@ -3579,7 +3579,7 @@
             
                 * as는 생략 가능하다.
 
-* TypedQuery, Query
+* **(3) TypedQuery, Query**
 
     * `TypedQuery` : 반환 타입이 명확할 때 사용한다.
     
@@ -3598,7 +3598,7 @@
         Query query = em.createQuery("select m.username, m.age from Member m");
         ```
     
-* 결과 조회 API
+* **(4) 결과 조회 API**
 
     * `query.getResultList()` : (SELECT 쿼리를 실행한) 결과를 리스트로 반환한다.
     
@@ -3620,7 +3620,7 @@
         
         * 결과가 둘 이상이면 예외(`javax.persistence.NonUniqueResultException`)가 발생한다.
 
-* 파라미터 바인딩
+* **(5) 파라미터 바인딩**
 
     * JPQL는 `이름 기준 파라미터 바인딩`과 `위치 기준 파라미터 바인딩`을 제공한다.
     
@@ -3656,7 +3656,7 @@
               
                 * 해당 방식은 순서에 따라서 버그가 발생할 가능성이 있다. 
 
-* 프로젝션
+* **(6) 프로젝션**
 
     * `프로젝션 (projection)`은 SELECT 절에 조회할 대상을 지정하는 것을 말한다.
     
@@ -3664,7 +3664,7 @@
         
             * 스칼라 타입은 숫자, 문자 등 기본 데이터 타입을 의미한다.
             
-        * `DISTINCT`로 중복을 제거 할 수 있다.
+        * `DISTINCT`로 중복을 제거할 수 있다.
         
         * **엔티티 프로젝션으로 조회한 엔티티는 영속성 컨텍스트에서 관리된다.**
     
@@ -3753,7 +3753,7 @@
 
                 * 순서와 타입이 일치하는 생성자가 필요하다.
 
-* 페이징 API
+* **(7) 페이징 API**
 
     * JPA는 페이징을 다음 두 API로 추상화 했다.
 
@@ -3813,25 +3813,33 @@
             ORDER BY M.AGE DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
             ```
 
-* 집합과 정렬
+* **(8) 집합과 정렬**
 
     * 집합은 집합 함수와 함께 통계 정보를 구할 때, 사용한다.
 
         * 집합 함수
         
-            * `COUNT` : 결과 수를 구한다.
+            * `COUNT` : 개수를 구한다.
             
-            * `MAX, MIN` : 최대, 최소 값을 구한다. 문자, 숫자, 날짜 등에 사용한다.
+            * `MAX`, `MIN` : 최대, 최소 값을 구한다. 
+    
+                * 문자, 숫자, 날짜 등에 사용한다.
             
-            * `AVG` : 평균 값을 구한다. 숫자 타입만 사용 할 수 있다.
+            * `AVG` : 평균 값을 구한다. 
+    
+                * 숫자 타입만 사용할 수 있다.
             
-            * `SUM` : 합계를 구한다. 숫자 타입만 사용 할 수 있다. 
+            * `SUM` : 합계를 구한다. 
+    
+                * 숫자 타입만 사용할 수 있다. 
 
         * 집합 함수 사용 시 참고사항
         
             * NULL 값은 무시하므로 통계에 잡히지 않는다.
             
-            * 값이 없는데 SUM, AVG, MAX, MIN 함수를 사용하면 NULL 값이 된다. 단 COUNT는 0이 된다.
+            * 값이 없는데 SUM, AVG, MAX, MIN 함수를 사용하면 NULL 값이 된다. 
+              
+                * 단 COUNT는 0이 된다.
             
             * DISTINCT를 집합 함수 안에 사용해서 중복된 값을 제거하고 집합을 구할 수 있다.
             
@@ -3865,7 +3873,23 @@
               
             * `ASC` : 오름차순(기본 값), `DESC` : 내림차순
 
-* 조인
+* **(9) 조인**
+
+    * JPQL 조인은 연관 필드를 사용해서 조인을 한다.
+    
+        * `연관 필드 (association field)` : 연관 관계를 위한 필드를 말한다. (즉, 다른 엔티티와 연관관계를 가지기 위해 사용하는 필드다.)
+        
+            * Ex) `Member m inner join m.team t`
+            
+                * 회원이 가지고 있는 연관 필드로 팀과 조인한다.
+                
+                * 조인한 팀에는 t라는 별칭을 주었다.
+        
+        * [참고] 
+        
+            * `엔티티 조인` : 단일 값 연관 필드(m.team)를 사용해서 조인을 하는 것을 말한다.  
+            
+            * `컬렉션 조인` : 컬렉션 연관 필드(t.members)를 사용해서 조인을 하는 것을 말한다.
 
     * 내부 조인은 `[INNER] JOIN`을 사용한다. (`INNER`는 생략 가능)
     
@@ -3875,13 +3899,7 @@
         List<Member> result = em.createQuery(query, Member.class)
                 .getResultList();
         ```
-      
-        * JPQL 조인은 연관 필드를 사용한다.
-        
-            * `연관 필드`는 다른 엔티티와 연관관계를 가지기 위해 사용하는 필드를 말한다.
     
-                * Ex) `Member m inner join m.team t` : 회원이 가지고 있는 연관 필드로 팀과 조인한다.
-            
         * 위의 JPQL을 실행하면 Member와 Team을 조인해서 데이터를 가져온다.
     
             * Member와 Team의 연관관계를 매핑할 때 fetch가 EAGER로 되어 있다면 Member와 연관된 엔티티인 Team의 데이터를 함께 가져오려고 시도한다. (이때, N + 1 문제 발생)
@@ -3916,7 +3934,7 @@
                 String query = "select m from Member m left join m.team t on t.name = 'teamA'";
                 ```
         
-        * **연관관계가 없는 엔티티를 외부 조인**할 때도, 사용한다. (하이버네이트 5.1 부터)
+        * **연관관계가 없는 엔티티를 외부 조인**할 때도 사용한다. (하이버네이트 5.1 부터)
         
             * Ex1) 회원의 이름과 팀의 이름이 같은 대상을 외부 조인
             
@@ -3939,7 +3957,7 @@
               
                 * 강좌에서 사용된 코드가 아닌 내가 테스트 용도로 작성했던 예제다. 
     
-* 서브 쿼리
+* **(10) 서브 쿼리**
 
     * `서브 쿼리 (Sub Query)`은 쿼리문 안에 포함되어 있는 또 다른 쿼리문을 말한다.
     
@@ -3998,15 +4016,15 @@
                 where exists (select t from m.team t WHERE t.name = '팀A')
                 ```
 
-        * {ALL | ANY | SOME} 
+        * ALL, ANY, SOME 
         
             * `{ALL | ANY | SOME} (subquery)`
     
-                * `ALL` : 조건을 모두 만족하면 참이다.
+                * `ALL` : 서브쿼리의 결과가 **모두** 조건을 만족하면 참이다.
                 
-                * `ANY`, `SOME`: 조건을 하나라도 만족하면 참이다. (둘은 같은 의미)
+                * `ANY`, `SOME` : 서브쿼리의 결과 중 **어느 하나라도** 조건을 만족하면 참이다. (둘은 같은 의미)
 
-                    * ALL, ANY, SOME은 비교 연산자와 같이 사용한다.
+                    * ALL, ANY, SOME은 비교 연산자(`=`, `>`, `>=`, `<`, `<=`, `<>`)와 같이 사용한다.
 
             * 예시
             
@@ -4024,6 +4042,8 @@
         
             * `[NOT] IN (subquery)` : 서브 쿼리의 결과 중 하나라도 같은 것이 있으면 참이다.
     
+                * 참고로 IN은 서브쿼리가 아닌 곳에서도 사용한다. 
+    
             * 예시
 
                 ```java
@@ -4032,7 +4052,7 @@
                 where t IN (select t2 from Team t2 JOIN t2.members m2 where m2.age >= 20)
                 ```
 
-* 조건식
+* **(11) 조건식**
 
     * JPQL 타입 표현
 
@@ -4062,9 +4082,9 @@
                 
                 * `{t 'hh:mm:ss'}` : TIME 
     
-                * `{ts 'yyyy-mm-dd hh:mm:ss.f}` : TIMESTAMP
+                * `{ts 'yyyy-mm-dd hh:mm:ss.f'}` : TIMESTAMP
     
-                    * Ex) `m.createDate = {d ‘2021-01-03’}`
+                    * Ex) `m.createDate = {d '2021-01-03'}`
                
             * Boolean
             
@@ -4072,7 +4092,7 @@
                 
             * ENUM
             
-                * ENUM은 하드 코딩 시, 패키지명을 포함한 전체 이름(`jpql.MemberType.ADMIN`)을 사용해야 한다.
+                * ENUM은 하드 코딩 시, 패키지명을 포함한 전체 이름(Ex: `jpql.MemberType.ADMIN`)을 사용해야 한다.
 
                     ```java
                     @Entity
@@ -4135,17 +4155,17 @@
     
         * BETWEEN, IN, LIKE, IS NULL
     
-            * `필드 [NOT] BETWEEN A AND B` : 필드는 A ~ B 사이의 값이면 참
+            * `필드 [NOT] BETWEEN A AND B` : 필드 값이 A 이상 B 이하면 참이다.
     
-            * `필드 [NOT] IN(목록)` : 필드와 같은 값이 목록에 하나라도 있으면 참이다.
+            * `필드 [NOT] IN(목록)` : 필드 값이 지정된 목록에 포함되어 있으면 참이다.
 
-            * `필드 [NOT] LIKE 패턴값` : 필드와 패턴 값을 비교한다.
+            * `필드 [NOT] LIKE 패턴값` : 필드 값이 문자열 패턴과 일치하면 참이다.
     
-                * `%` : 아무 값들이 입력되어도 된다. (값이 없어도 됨)
-    
-                * `_` : 한 글자는 아무 값이 입력되어도 되지만, 값이 있어야 한다.
+                * `%` : 무엇이든 허용한다는 의미다. (값이 없어도 됨)
 
-            * `필드 IS [NOT] NULL` : NULL 인지 비교한다.
+                * `_` : 한 글자를 매칭할 때 사용한다. (값이 있어야 함)
+
+            * `필드 IS [NOT] NULL` : 필드 값이 NULL이면 참이다.
     
                 * NULL은 =가 아닌 IS NULL로 비교해야 한다.
 
@@ -4161,6 +4181,8 @@
                     ELSE <스칼라식>  
                 END
                 ```
+              
+                * `스칼라 식`은 하나의 값을 반환하는 식을 말한다.
 
             * 예시
             
@@ -4222,7 +4244,7 @@
                 select NULLIF(m.username, '관리자') from Member m
                 ```
 
-* JPQL 기본 함수
+* **(12) JPQL 기본 함수**
 
     * 문자 함수
     
@@ -4302,7 +4324,7 @@
             select index(t.members) from Team t;
             ```
 
-* 사용자 정의 함수 호출
+* **(13) 사용자 정의 함수 호출**
 
     * JPA는 사용자 정의 함수 호출을 지원한다.
     
@@ -4385,7 +4407,7 @@
                             .fetch();
                     ```
 
-* 경로 표현식
+* **(14) 경로 표현식**
 
     * `경로 표현식` : `.(점)`을 찍어 객체 그래프를 탐색하는 것을 말한다.
     
@@ -4402,15 +4424,15 @@
         
             * Ex) m.username
         
-        * `연관 필드 (association field)` : 연관 관계를 위한 필드를 말한다.
+        * `연관 필드 (association field)` : 연관 관계를 위한 필드를 말한다. (즉, 다른 엔티티와 연관관계를 가지기 위해 사용하는 필드다.)
         
-            * `단일 값 연관 필드` : 대상이 엔티티인 필드를 말한다. (`@ManyToOne`, `@OneToOne`)
+            * `단일 값 연관 필드` : 연관관계의 대상이 엔티티인 것을 말한다. (`@ManyToOne`, `@OneToOne`)
             
                 * Ex) m.team
             
-            * `컬렉션 값 연관 필드` : 대상이 컬렉션인 필드를 말한다. (`@OneToMany`, `@ManyToMany`)   
+            * `컬렉션 값 연관 필드` : 연관관계의 대상이 컬렉션인 것을 말한다. (`@OneToMany`, `@ManyToMany`)
           
-                * Ex) m.orders
+                * Ex) m.orders, t.members
                 
     * 경로 표현식의 특징
     
@@ -4420,54 +4442,56 @@
     
                 * 예를 들어, `m.username`에서 점(.)을 찍더라도 더 이상 탐색할 수 없다. 
         
-        * `단일 값 연관 경로` : **묵시적으로 내부 조인이 발생한다.** 계속 탐색할 수 있다.
-
-            * Ex) `select m.team from Member m`
-
-                * 예를 들어, SELECT 절에 `m.team`처럼 작성하면 실행되는 SQL에 묵시적으로 내부 조인이 발생한다.
-
-                    ```sql
-                    -- 연관 경로에 의해 실행되는 묵시적 내부 조인은 다음과 같다. 
-                    SELECT  T.ID, T.NAME 
-                    FROM    MEMBER  M INNER JOIN TEAM T ON M.TEAM_ID = T.ID
-                    ```
-                  
-                * 그리고 `m.team`에서 점(.)을 찍어서 `m.team.name`으로 더 탐색할 수 있다.
-
-        * `컬렉션 값 연관 경로` : **묵시적으로 내부 조인이 발생한다.** 더 이상 탐색할 수 없다.
-
-            ```java
-            // 컬렉션 값 연관 경로를 사용하는 JPQL를 작성한다.
-            String query = "select t.members from Team t";
-            Collection result = em.createQuery(query, Collection.class)
-                    .getResultList();
-            
-            for (Object o : result) {
-                System.out.println("o = " + o);
-            }
-            ```
-            
-            ```sql
-            -- 연관 경로에 의해 실행되는 묵시적 내부 조인은 다음과 같다. 
-            SELECT  M.ID,
-                    M.AGE,
-                    M.TEAM_ID,
-                    M.TYPE,
-                    M.USERNAME
-            FROM    TEAM T INNER JOIN MEMBER M ON T.ID = M.TEAM_ID
-            ```
-
-            * [묵시적 조인] `select t.members from Team t`
-
-                * 예를 들어, SELECT 절에 `t.members`처럼 작성하면 실행되는 SQL에 묵시적으로 내부 조인이 발생한다.
-                  
-                * `t.members`는 컬렉션 자체를 의미하기 때문에 `t.members.size`처럼 size만 사용할 수 있다.
+        * `연관 경로` : **묵시적으로 내부 조인이 발생한다.**
+          
+            * `단일 값 연관 경로` : 계속 탐색할 수 있다.
+    
+                * Ex) `select m.team from Member m`
+    
+                    * 예를 들어, SELECT 절에 `m.team`처럼 작성하면 실행되는 SQL에 묵시적으로 내부 조인이 발생한다.
+    
+                        ```sql
+                        -- 연관 경로에 의해 실행되는 묵시적 내부 조인은 다음과 같다. 
+                        SELECT  T.ID, T.NAME 
+                        FROM    MEMBER  M INNER JOIN TEAM T ON M.TEAM_ID = T.ID
+                        ```
+                      
+                    * 그리고 `m.team`에서 점(.)을 찍어서 `m.team.name`으로 더 탐색할 수 있다.
+    
+            * `컬렉션 값 연관 경로` : 더 이상 탐색할 수 없다.
+    
+                ```java
+                // 컬렉션 값 연관 경로를 사용하는 JPQL를 작성한다.
+                String query = "select t.members from Team t";
+                Collection result = em.createQuery(query, Collection.class)
+                        .getResultList();
                 
-            * [명시적 조인] `select m.username from Team t join t.members m`
+                for (Object o : result) {
+                    System.out.println("o = " + o);
+                }
+                ```
+                
+                ```sql
+                -- 연관 경로에 의해 실행되는 묵시적 내부 조인은 다음과 같다. 
+                SELECT  M.ID,
+                        M.AGE,
+                        M.TEAM_ID,
+                        M.TYPE,
+                        M.USERNAME
+                FROM    TEAM T INNER JOIN MEMBER M ON T.ID = M.TEAM_ID
+                ```
     
-                * 컬렉션은 경로 탐색의 끝이다. 컬렉션에서 경로 탐색을 하고 싶으면 명시적 조인을 통해 별칭을 얻어야 한다.
+                * [묵시적 조인] `select t.members from Team t`
     
-                    * `join t.members m`으로 컬렉션에 새로운 별칭을 얻었다. 이제 별칭 m 부터 다시 경로 탐색을 할 수 있다.
+                    * 예를 들어, SELECT 절에 `t.members`처럼 작성하면 실행되는 SQL에 묵시적으로 내부 조인이 발생한다.
+                      
+                    * `t.members`는 컬렉션 자체를 의미하기 때문에 `t.members.size`처럼 size만 사용할 수 있다.
+                    
+                * [명시적 조인] `select m.username from Team t join t.members m`
+        
+                    * **컬렉션은 경로 탐색의 끝이다. 컬렉션에서 경로 탐색을 하고 싶으면 명시적 조인을 통해 별칭을 얻어야 한다.**
+        
+                        * `join t.members m`으로 컬렉션에 새로운 별칭을 얻었다. 이제 별칭 m 부터 다시 경로 탐색을 할 수 있다.
                 
         * 정리하기
           
@@ -4505,7 +4529,7 @@
     
         * Ex4) `select m.username from Team t join t.members m` (성공)
 
-* 페치 조인
+* **(15) 페치 조인**
 
     * `페치 조인 (fetch join)`은 **연관된 엔티티나 컬렉션을 SQL 한 번에 함께 조회하는 기능**이다.
     
@@ -4538,7 +4562,7 @@
             FROM MEMBER M INNER JOIN TEAM T ON M.TEAM_ID = T.ID
             ```
     
-        * 페치 조인을 사용하는 코드는 살펴보자.
+        * 페치 조인을 사용하는 코드를 살펴보자.
         
             ```java
             /*
@@ -4596,7 +4620,7 @@
     
                     ![image 34](images/img34.png)
     
-                * ③ 엔티티 페치 조인을 한 결과 객체는 다음 그림과 같다.
+                * ③ 엔티티 페치 조인을 한 결과 객체(리스트)는 다음 그림과 같다.
     
                     ![image 35](images/img35.png)
                     
@@ -4607,6 +4631,7 @@
                 * 위의 예제에서 페치 조인을 사용하지 않는다면 N+1 문제가 발생한다.
                 
                     ```java
+                    // 페치 조인을 사용하지 않는 JPQL
                     String query =  "select m from Member m";
                     
                     List<Member> result = em.createQuery(query, Member.class)
@@ -4615,7 +4640,7 @@
                     for (Member member : result) {
                         /* [N+1 문제 발생]
                            회원1, 팀A (SQL 실행)
-                           회원2, 팀B (1차 캐시에서 조회)
+                           회원2, 팀A (1차 캐시에서 조회)
                            회원3, 팀B (SQL 실행)       */
                         System.out.println("member = " + member.getUsername() + ", " + member.getTeam().getName());
                     }
@@ -4645,7 +4670,7 @@
             WHERE T.NAME = '팀A'
             ```
     
-        * 위의 예제를 좀 더 자세히 살펴보자. (일대다 관계)
+        * 페치 조인을 사용하는 코드를 살펴보자. (일대다 관계)
 
             ```java
             String query =  "select t from Team t join fetch t.members";
@@ -4656,7 +4681,7 @@
                 System.out.println("team = " + team.getName() + " | members = " + team.getMembers().size());
                 
                 for (Member member : team.getMembers()) {
-                    //페치 조인으로 팀과 회원을 함께 조회해서 지연 로딩이 발생하지 않는다.
+                    // 페치 조인으로 팀과 회원을 함께 조회해서 지연 로딩이 발생하지 않는다.
                     System.out.println("-> member = " + member);
                 }
             }
@@ -4672,19 +4697,19 @@
     
                     ![image 37](images/img37.png)   
     
-                * ③ 일대다 관계인 컬렉션을 페치 조인한 결과 객체는 다음과 같다.
+                * ③ 일대다 관계인 컬렉션을 페치 조인한 결과 객체(리스트)는 다음과 같다.
     
                     ![image 21](images/img21.png)
     
                     * 컬렉션 페치 조인을 한 결과 객체 (`teams`)는 주소가 `0x100`으로 같은 '팀A'를 2건 가지게 된다.
     
-                    * 위의 그림에 있는 `teams`는 예제 소스코드의 `List<Team> result`과 같다. 
+                    * 위의 그림에 있는 `teams`는 예제 소스코드의 `List<Team> result`와 같다. 
 
             * **주의사항**
             
-                * **일대다 조인은 결과 개수가 증가할 수 있다.**
+                * **일대다 조인은 결과 개수가 늘어날 수도 있다.**
                 
-                * 일대일 또는 다대일 조인은 결과 개수가 증가하지 않는다. (같거나 작아진다)
+                * 일대일 또는 다대일 조인은 결과 개수가 늘어나지 않는다. (같거나 작아진다)
 
             * 실행 결과
 
@@ -4698,10 +4723,14 @@
                 team = 팀B | members = 1
                 -> member = Member{id=5, username='회원3', age=0}
                 ```
+              
+                * 컬렉션 페치 조인을 하기 전에는 팀 엔티티에 2건의 데이터(`팀A`, `팀B`)가 있었다.
     
+                * 컬렉션 페치 조인을 한 이후에는 팀 엔티티에 3건의 데이터(`팀A`, `팀A`, `팀B`)가 있다.
+
     * 페치 조인과 DISTINCT
     
-        * JPQL의 `DISTINCT`는 SQL에 DISTINCT를 추가하면서 애플리케이션에서 한번 더 중복을 제거한다. (같은 식별자를 가지는 엔티티 제거). 
+        * JPQL의 `DISTINCT`는 SQL에 DISTINCT를 추가하면서 애플리케이션에서 한번 더 중복을 제거한다. (즉, 같은 식별자를 가지는 엔티티는 하나만 남겨 놓는다.). 
 
             ```java        
             select distinct t
@@ -4712,13 +4741,13 @@
 
             * 위의 예시를 실행 했을 때, 동작 과정은 다음과 같다.    
 
-                * ① SQL에 DISTINCT를 추가하더라도 각 행(ROW)의 데이터가 다르므로 SQL 결과에서는 중복 제거에 실패한다. (SQL은 완전히 같아야 중복이 제거 됨)
+                * ① SQL에 DISTINCT를 추가하더라도 각 행(ROW)의 데이터가 다르므로 SQL 결과에서는 중복 제거에 실패한다. (SQL은 SELECT 절에 나열된 모든 컬럼 값이 같을 때만 중복된 행으로 판단함)
                 
                     * TEAM_ID: 1, TEAM_NAME : 팀A, **MEMBER_ID : 1**, TEAM_ID : 1, NAME : 회원1
                     
                     * TEAM_ID: 1, TEAM_NAME : 팀A, **MEMBER_ID : 2**, TEAM_ID : 1, NAME : 회원2
                 
-                * ② 애플리케이션에서 한번 더 중복 제거를 시도한다. 즉, **같은 식별자를 가진 Team 엔티티를 제거한다.**
+                * ② 애플리케이션에서 한번 더 중복 제거를 시도한다. 즉, **같은 식별자를 가지는 Team 엔티티는 하나만 남겨 놓는다.**
         
                     * 애플리케이션에서 중복을 제거 했을 때 결과 객체는 다음과 같다.
 
@@ -4736,7 +4765,7 @@
 
     * 페치 조인과 일반 조인의 차이
     
-        * ① 일반 조인을 실행하면 연관된 엔티티를 함께 조회하지 않는다.
+        * ① **일반 조인을 실행하면 연관된 엔티티를 함께 조회하지 않는다.**
 
             ```java
             // JPQL       
@@ -4755,13 +4784,13 @@
 
                 * JPQL은 결과를 반환할 때 연관관계까지 고려하지 않는다. 
             
-                * 단지 SELECT 절에 지정한 엔티티만 조회할 뿐이다.
+                * **단지 SELECT 절에 지정한 엔티티만 조회할 뿐이다.**
             
             * 따라서 팀 엔티티만 조회하고, 연관된 회원 컬렉션은 조회하지 않는다.
     
                 * 만약 회원 컬렉션을 지연 로딩으로 설정 했다면 프록시나 아직 초기화하지 않은 컬렉션 래퍼를 반환한다.
 
-        * ② 페치 조인을 사용할 때만 연관된 엔티티도 함께 조회한다. 
+        * ② **페치 조인을 사용할 때만 연관된 엔티티도 함께 조회한다.** 
 
             ```java
             // JPQL
@@ -4808,9 +4837,7 @@
 
                         * 페치 조인 대상(`t.members`)에 별칭을 잘못 사용해서 컬렉션 결과를 일부만 조회 되도록 필터링 하면 객체와 DB의 상태 일관성이 깨져버린다.
 
-                            * 예를 들어, 팀과 연관된 회원이 5명이라고 가정한다.
-    
-                            * where 조건을 나이가 10살 보다 큰 회원만 조회 하도록 지정하면 결과는 3명이 된다.
+                            * 예를 들어, 팀과 연관된 회원이 5명이며 나이가 10살 보다 큰 회원만 조회 하도록 where 조건을 지정하면 결과는 3명이 된다.
                     
                             * 이것은 JPA에서 설계한 의도와 다르다. 
     
@@ -4822,7 +4849,9 @@
 
                         * 해당 쿼리에서 `Team`은 fetch join 대상이 아니므로 where에서 마음껏 사용해도 된다.
 
-                        * 하지만 `t.members m`은 페치 조인 대상이다. 따라서 on, where 등에서 필터링 조건으로 사용하면 위험하다.
+                        * 하지만 `t.members m`은 페치 조인 대상이다. 
+                          
+                        * 따라서 on, where 등에서 필터링 조건으로 사용하면 위험하다.
 
                 * 3번. 
                   
@@ -4840,7 +4869,7 @@
 
         * ④ 컬렉션을 페치 조인하면 페이징 API(setFirstResult, setMaxResults)를 사용할 수 없다.
         
-            * 컬렉션(`일대일`)이 아닌 단일 값 연관 필드(`일대일`, `다대일`)들은 페치 조인을 사용해도 페이징 API를 사용할 수 있다.
+            * 컬렉션(`일대다`)이 아닌 단일 값 연관 필드(`일대일`, `다대일`)들은 페치 조인을 사용해도 페이징 API를 사용할 수 있다.
     
                 * 일대다는 조심하자! 데이터가 더 많아 질 수 있다.
                  
@@ -4848,7 +4877,7 @@
 
                 ```java
                 // [잘못된 방식] 일대다 페치 조인         
-                select t from Team t join fetch t.members m
+                String query = "select t from Team t join fetch t.members m"
                 
                 List<Team> result = em.createQuery(query, Team.class)
                         .setFirstResult(0)
@@ -4864,7 +4893,7 @@
            
                     ```java 
                     // [올바른 방식] 다대일 페치 조인       
-                    select m from Member m join fetch m.team
+                    String query = "select m from Member m join fetch m.team"
                     
                     List<Team> result = em.createQuery(query, Team.class)
                             .setFirstResult(0)
@@ -4888,7 +4917,7 @@
                     ```
 
                     ```java 
-                    String query =  "select t from Team t";
+                    String query = "select t from Team t";
                     
                     List<Team> result = em.createQuery(query, Team.class)
                             .setFirstResult(0)
@@ -4938,7 +4967,7 @@
         
             * **Ex) 통계 쿼리**
     
-* 다형성 쿼리
+* **(16) 다형성 쿼리**
 
     * `TYPE`은 엔티티의 상속 구조에서 조회 대상을 특정 자식 타입으로 한정할 때 사용한다.
 
@@ -4976,7 +5005,7 @@
             where i.DTYPE = 'B' and i.author = 'kim'
             ```
           
-* 엔티티 직접 사용
+* **(17) 엔티티 직접 사용**
 
     * 기본 키 값
 
@@ -5034,31 +5063,29 @@
             WHERE M.TEAM_ID = ?
             ```
     
-* Named 쿼리: 정적 쿼리
+* **(18) Named 쿼리: 정적 쿼리**
 
     * JPQL 쿼리는 동적 쿼리와 정적 쿼리로 분류할 수 있다.
 
         * `동적 쿼리 (Dynamic Query)` : 실행 시점에 검색 조건에 따라 다른 쿼리를 생성하는 것을 말한다.
-        
-            * `em.createQuery("select ...")`
-
+    
         * `정적 쿼리 (Static Query)` : (어떤 검색 조건에도 변경되지 않는) 고정된 형태의 쿼리를 말한다.
     
     * `Named 쿼리` : 미리 정의한 쿼리(JPQL)에 이름을 부여해서 필요할 때 사용하는 것을 말한다.
 
         * Named 쿼리의 특징
           
-            * 정적 쿼리다.
+            * ① 정적 쿼리다.
               
-            * 애플리케이션 로딩 시점에 JPQL 문법을 체크해서 미리 SQL로 파싱해둔다. (문법 체크 시, 문제가 있다면 오류가 발생함)
+            * ② 애플리케이션 로딩 시점에 JPQL 문법을 체크해서 미리 SQL로 파싱해둔다. (문법 체크 시, 문제가 있다면 오류가 발생함)
         
                 * `파싱 (Parsing)` : 어떤 데이터를 원하는 형태로 가공하는 것을 말한다.
             
-            * 따라서 오류를 빨리 확인할 수 있고 사용하는 시점에는 파싱된 결과를 재사용하므로 성능 상 이점이 있다.
+            * ③ 따라서 오류를 빨리 확인할 수 있고 사용하는 시점에는 파싱된 결과를 재사용하므로 성능 상 이점이 있다.
 
         * 사용 방법
     
-            * @NamedQuery를 사용해서 Named 쿼리를 정의한다. 
+            * ① @NamedQuery를 사용해서 Named 쿼리를 정의한다. 
 
                 ```java        
                 @Entity
@@ -5072,7 +5099,7 @@
               
                 * name 속성에 쿼리 이름을 부여하고 query 속성에 사용할 쿼리를 입력한다.
 
-            * Named 쿼리를 사용한다. 
+            * ② Named 쿼리를 사용한다. 
             
                 ```java        
                 List<Member> resultList = em.createNamedQuery("Member.findByUsername", Member.class)
@@ -5082,137 +5109,143 @@
               
                 * 스프링 데이터 JPA에서는 해당 방식 보다 유용한 `@Query`를 제공한다.
         
-* 벌크 연산
+* **(19) 벌크 연산**
 
     * `벌크 연산 (Bulk Data Operations)`은 한 번에 여러 데이터(Row)를 수정하거나 삭제하는 방법을 말한다. (SQL의 UPDATE, DELETE 문)
 
         * 벌크 연산의 특징
     
-            * 쿼리 한 번으로 테이블의 여러 행을 변경한다.
+            * ① 쿼리 한 번으로 테이블의 여러 행을 변경한다.
     
-            * executeUpdate()의 결과는 벌크 연산으로 영향을 받은 엔티티 수를 반환한다.
+            * ② executeUpdate()의 결과는 벌크 연산으로 영향을 받은 엔티티 수를 반환한다.
     
-            * UPDATE, DELETE를 지원한다.
+            * ③ UPDATE, DELETE를 지원한다.
     
-            * INSERT (INSERT INTO .. SELECT)는 하이버네이트에서 지원한다.
+            * ④ INSERT (INSERT INTO .. SELECT)는 하이버네이트에서 지원한다.
     
-            * 스프링 데이터 JPA에서는 벌크 연산을 `@Modifying`으로 제공한다.
+            * ⑤ 스프링 데이터 JPA에서는 벌크 연산을 `@Modifying`으로 제공한다.
 
         * 벌크 연산이 필요한 이유
           
             * 예를 들어, 재고가 10개 미만인 모든 상품의 가격을 10% 상승 하려고 할 때, JPA의 변경 감지 기능으로 해결하려면 너무 많은 SQL 문을 실행해야 한다. 
         
-                * 재고가 10개 미만인 상품을 리스트로 조회한다.
+                * ① 재고가 10개 미만인 상품을 리스트로 조회한다.
         
-                * 리스트를 반복문으로 순회하며 상품 엔티티의 가격을 10% 증가한다.
+                * ② 리스트를 반복문으로 순회하며 상품 엔티티의 가격을 10% 증가한다.
         
-                * 트랜잭션 커밋 시점에 변경 감지가 동작한다.
+                * ③ 트랜잭션 커밋 시점에 변경 감지가 동작한다.
         
-            * 변경된 데이터가 100건이라면 100 번의 UPDATE SQL문이 실행된다.
+            * 만약 변경된 데이터가 100건이라면 100 번의 UPDATE SQL문이 실행된다.
+    
+            * 따라서 SQL 한 번에 여러 데이터를 수정하거나 삭제하는 벌크 연산이 필요하다.
 
-        * UPDATE 벌크 연산
-
-            * 모든 회원의 나이를 20살로 변경한다.
+        * 벌크 연산 예시
+          
+            * UPDATE 벌크 연산
+    
+                * 모든 회원의 나이를 20살로 변경한다.
+                
+                    ```java
+                    // 팀(Team)
+                    Team teamA = new Team();
+                    teamA.setName("팀A");
+                    em.persist(teamA);
+                    
+                    Team teamB = new Team();
+                    teamB.setName("팀B");
+                    em.persist(teamB);
+                    
+                    // 회원(Member)
+                    Member member1 = new Member();
+                    member1.setUsername("회원1");
+                    member1.setTeam(teamA);
+                    em.persist(member1);
+                    
+                    Member member2 = new Member();
+                    member2.setUsername("회원2");
+                    member2.setTeam(teamA);
+                    em.persist(member2);
+                    
+                    Member member3 = new Member();
+                    member3.setUsername("회원3");
+                    member3.setTeam(teamB);
+                    em.persist(member3);
+                    
+                    /* JPQL을 실행하기 직전에 flush()가 자동 호출된다. 
+                       따라서 영속성 컨텍스트의 현재 상태가 DB에 반영된다.
+                       그 다음, 벌크 연산이 실행되어 DB에서 모든 회원의 나이를 20살로 변경한다. 
+                       하지만 영속성 컨텍스트는 변경되지 않았다. */
+                    int resultCount = em.createQuery("update Member m set m.age = 20")
+                            .executeUpdate();
+                    
+                    /* 만약 벌크 연산을 수행한 후, 바로 영속성 컨텍스트를 초기화하면 데이터베이스에서 벌크 연산이 적용된 데이터를 조회한다.
+                       (주석에서 설명한대로 동작 되도록 하고 싶다면 clear()의 주석을 해제하자. */
+                    // em.clear();
+                    
+                    Member findMember = em.find(Member.class, member1.getId());
+                    System.out.println("findMember = " + findMember.getAge());
+                    ```
+                  
+                    * 벌크 연산을 수행하기 전에 모든 회원의 나이는 0 이었다. 
+                      
+                        * 나이를 따로 설정하지 않았기 때문에 기본 값 0을 가진다.
+        
+                    * 벌크 연산을 수행하면 DB에 있는 모든 회원의 나이는 20살이 된다.
+        
+                    * 그 다음, 영속성 컨텍스트를 초기화하지 않는다면 영속성 컨텍스트에 있는 모든 회원의 나이는 그대로 0살이다. 
+        
+                        * 벌크 연산은 영속성 컨텍스트를 무시하고 데이터베이스에 직접 쿼리하기 때문이다.
+        
+                    * 따라서 벌크 연산을 수행한 후에 바로 영속성 컨텍스트를 초기화한다. (`em.clear()`)
+    
+                * 재고가 10개 미만인 모든 상품의 가격을 10% 상승한다.        
+    
+                    ```java
+                    String query = "update Product p " +
+                                   "set p.prce = p.price * 1.1 " +
+                                   "where p.stockAmount < :stockAmount";
+                    
+                    // JPQL을 실행하기 직전에 flush()가 자동 호출된다.
+                    int resultCount = em.createQuery(query)
+                                        .setParameter("stockAmount", 10)
+                                        .executeUpdate();
+                  
+                    // 벌크 연산을 수행한 후, 바로 영속성 컨텍스트를 초기화한다.
+                    em.clear();
+                    ```
+            
+                    * 벌크 연산(UPDATE, DELETE)은 `executeUpdate()`를 사용한다. 
+                      
+                        * 해당 메소드는 벌크 연산으로 영향을 받은 엔티티 건수를 반환한다.
+        
+            * DELETE 벌크 연산
             
                 ```java
-                // 팀(Team)
-                Team teamA = new Team();
-                teamA.setName("팀A");
-                em.persist(teamA);
+                // 가격이 100원 미만인 상품을 삭제한다.
+                String query = "delete from Product p " +
+                               "where p.price < :price";
                 
-                Team teamB = new Team();
-                teamB.setName("팀B");
-                em.persist(teamB);
-                
-                // 회원(Member)
-                Member member1 = new Member();
-                member1.setUsername("회원1");
-                member1.setTeam(teamA);
-                em.persist(member1);
-                
-                Member member2 = new Member();
-                member2.setUsername("회원2");
-                member2.setTeam(teamA);
-                em.persist(member2);
-                
-                Member member3 = new Member();
-                member3.setUsername("회원3");
-                member3.setTeam(teamB);
-                em.persist(member3);
-                
-                /* JPQL을 실행하기 직전에 flush()가 자동 호출된다. 
-                   따라서 영속성 컨텍스트의 현재 상태가 DB에 반영된다.
-                   그 다음, 벌크 연산이 실행되어 DB에서 모든 회원의 나이를 20살로 변경한다. 
-                   하지만 영속성 컨텍스트는 변경되지 않았다. */
-                int resultCount = em.createQuery("update Member m set m.age = 20")
-                        .executeUpdate();
-                
-                /* 만약 벌크 연산을 수행한 후, 바로 영속성 컨텍스트를 초기화하면 데이터베이스에서 벌크 연산이 적용된 데이터를 조회한다.
-                   (주석에서 설명한대로 동작 되도록 하고 싶다면 clear()의 주석을 해제하자. */
-                // em.clear();
-                
-                Member findMember = em.find(Member.class, member1.getId());
-                System.out.println("findMember = " + findMember.getAge());
-                ```
-              
-                * 벌크 연산을 수행하기 전에 모든 회원의 나이는 0 이었다. 
-                  
-                    * 나이를 따로 설정하지 않았기 때문에 기본 값 0을 가진다.
-    
-                * 벌크 연산을 수행하면 DB에 있는 모든 회원의 나이는 20살이 된다.
-    
-                * 그 다음, 영속성 컨텍스트를 초기화하지 않는다면 영속성 컨텍스트에 있는 모든 회원의 나이는 그대로 0살이다. 
-    
-                    * 벌크 연산은 영속성 컨텍스트를 무시하고 데이터베이스에 직접 쿼리하기 때문이다.
-    
-                * 따라서 벌크 연산을 수행한 후에 바로 영속성 컨텍스트를 초기화한다. (`em.clear()`)
-
-            * 재고가 10개 미만인 모든 상품의 가격을 10% 상승한다.        
-
-                ```java
-                String query = "update Product p " +
-                               "set p.prce = p.price * 1.1 " +
-                               "where p.stockAmount < :stockAmount";
-                
-                // JPQL을 실행하기 직전에 flush()가 자동 호출된다.
                 int resultCount = em.createQuery(query)
-                                    .setParameter("stockAmount", 10)
+                                    .setParameter("price", 100)
                                     .executeUpdate();
               
+                // 벌크 연산을 수행한 후, 바로 영속성 컨텍스트를 초기화한다.
                 em.clear();
                 ```
-        
-                * 벌크 연산(UPDATE, DELETE)은 `executeUpdate()`를 사용한다. 
-                  
-                    * 해당 메소드는 벌크 연산으로 영향을 받은 엔티티 건수를 반환한다.
-    
-        * DELETE 벌크 연산
-        
-            ```java
-            // 가격이 100원 미만인 상품을 삭제한다.
-            String query = "delete from Product p " +
-                           "where p.price < :price";
-            
-            int resultCount = em.createQuery(query)
-                                .setParameter("price", 100)
-                                .executeUpdate();
           
-            em.clear();
-            ```
-          
-    * 벌크 연산의 주의사항
-
-        * **벌크 연산은 영속성 컨텍스트를 무시하고 데이터베이스에 직접 쿼리한다**는 점에 주의해야 한다.
+        * 벌크 연산의 주의사항
     
-            * 따라서 영속성 컨텍스트와 데이터베이스에 있는 데이터가 다를 수 있다.
-
-        * 해결책은 다음 2 가지가 있다.
+            * **벌크 연산은 영속성 컨텍스트를 무시하고 데이터베이스에 직접 쿼리한다**는 점에 주의해야 한다.
         
-            * ① 벌크 연산을 가장 먼저 실행한다. 
+                * 따라서 영속성 컨텍스트와 데이터베이스에 있는 데이터가 다를 수 있다.
+    
+            * 해결책은 다음 2 가지가 있다.
             
-            * ② 벌크 연산을 수행한 후, 바로 영속성 컨텍스트를 초기화한다.
-            
-                * 영속성 컨텍스트를 초기화하면 이후 엔티티를 조회할 때, 벌크 연산이 적용된 데이터베이스에서 엔티티를 조회한다.
+                * ① 벌크 연산을 가장 먼저 실행한다. 
+                
+                * ② 벌크 연산을 수행한 후, 바로 영속성 컨텍스트를 초기화한다.
+                
+                    * 영속성 컨텍스트를 초기화하면 이후 엔티티를 조회할 때, 벌크 연산이 적용된 데이터베이스에서 엔티티를 조회한다.
     
 ## 11. ETC
 
