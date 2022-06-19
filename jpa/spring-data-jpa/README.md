@@ -1255,18 +1255,18 @@
                 List<Member> findAll();
                 
                 // JPQL + 엔티티 그래프
-                // JPQL는 작성 했는데 페치 조인만 적용하고 싶은 경우에도 엔티티 그래프를 사용 할 수 있다.
+                // JPQL는 작성 했는데 페치 조인만 적용하고 싶은 경우에도 엔티티 그래프를 사용할 수 있다.
                 @EntityGraph(attributePaths = {"team"})
                 @Query("select m from Member m") 
                 List<Member> findMemberEntityGraph();
                 
-                // 메소드 이름으로 쿼리를 생성하는 경우에도 엔티티 그래프를 사용 할 수 있다.
+                // 메소드 이름으로 쿼리를 생성하는 경우에도 엔티티 그래프를 사용할 수 있다.
                 // 회원 엔티티를 조회할 때, 연관된 팀 엔티티도 함께 조회한다.
                 @EntityGraph(attributePaths = {"team"})
                 List<Member> findEntityGraphByUsername(@Param("username") String username);
                 ```
                 
-                * `attributePaths` : 쿼리 수행 시, 즉시 로딩(EAGER LOADING)으로 함께 조회할 필드명을 지정한다.
+                * `attributePaths` : 쿼리 수행 시, 함께 조회할 필드명을 지정한다.
     
             * ⓑ 테스트 코드(findMemberLazy())의 내용을 수정한다.
 
@@ -1786,7 +1786,7 @@
         
                             * Ex) `sort=username`
     
-                * 사용자가 웹 브라우저에서 요청 파라미터 정보를 입력하면 `PageRequest` 객체를 생성해서 컨트롤러의 메소드 파라미터로 전달한다.
+                * 사용자가 웹 브라우저에서 페이징에 대한 요청 파라미터 정보를 입력하면 `PageRequest` 객체를 생성해서 컨트롤러의 메소드 파라미터로 전달한다.
 
     * Pageable 기본 값을 변경하기
     

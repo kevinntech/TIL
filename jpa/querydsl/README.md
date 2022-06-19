@@ -3,7 +3,7 @@
 
 ## 1. 프로젝트 환경설정
 
-* (1) 프로젝트 생성하기
+* **(1) 프로젝트 생성하기**
 
     * https://start.spring.io/ 에서 프로젝트를 생성한다.
     
@@ -11,7 +11,7 @@
         
             ![image 1](images/img1.png)
         
-* (2) Querydsl 설정하기
+* **(2) Querydsl 설정하기**
 
     * Gradle인 경우, `build.gradle`에 다음과 같은 Querydsl 설정을 추가한다.
     
@@ -121,7 +121,7 @@
             // [END] querydsl 빌드 관련 설정 
             ```
 
-* (3) Querydsl 설정을 검증하기
+* **(3) Querydsl 설정을 검증하기**
 
     * ① 검증용 엔티티를 작성한다.
     
@@ -214,13 +214,13 @@
             
             * 그리고 Gradle의 `build` 디렉토리는 대부분 Git에 포함하지 않는다. 따라서 이 부분은 자연스럽게 해결된다.
 
-* (4) H2 데이터베이스 설치하기
+* **(4) H2 데이터베이스 설치하기**
 
     * ① H2 데이터베이스 설치 파일을 다운로드 받은 다음에 설치한다.
 
     * ② Mac을 사용하는 경우, `chmod 755 h2.sh`로 권한을 부여해야 된다.
     
-* (5) 스프링 부트 설정하기 (`application.yml`)
+* **(5) 스프링 부트 설정하기 (`application.yml`)**
 
     ```yaml
     spring:
@@ -306,7 +306,6 @@
 * ② Team 엔티티를 작성한다.
 
     ```java
-    
     @Entity
     @Getter @Setter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -375,7 +374,7 @@
 
 #### 1) JPQL vs Querydsl
 
-* JPQL vs Querydsl
+* **(1) JPQL vs Querydsl**
 
     * `JPQL` : 엔티티 객체를 대상으로 검색하는 객체지향 쿼리 언어다.
 
@@ -387,7 +386,7 @@
     
         * 그리고 JPQL은 파라미터 바인딩을 직접 처리해야 되지만 Querydsl은 파라미터 바인딩을 자동으로 처리해준다.
 
-* 실습하기
+* **(2) 실습하기**
 
     * ① 기본적인 테스트 코드를 작성한다.
     
@@ -400,7 +399,7 @@
             EntityManager em;
         
             @BeforeEach
-            public void before(){
+            public void before() {
                 Team teamA = new Team("teamA");
                 Team teamB = new Team("teamB");
         
@@ -427,7 +426,7 @@
         
             ```java
             @Test
-            public void startJPQL(){
+            public void startJPQL() {
                 // member1을 찾아라.
                 String qlString =
                         "select m from Member m " +
@@ -445,7 +444,7 @@
         
             ```java
             @Test
-            public void startQuerydsl(){
+            public void startQuerydsl() {
                 // EntityManager로 JPAQueryFactory를 생성한다.
                 JPAQueryFactory queryFactory = new JPAQueryFactory(em);
             
@@ -462,9 +461,9 @@
             }
             ```
 
-* Querydsl의 기본적인 사용 방법
+* **(3) Querydsl의 기본적인 사용 방법**
 
-    * ① JPAQueryFactory를 생성한다.
+    * ① JPAQueryFactory 인스턴스를 생성한다.
     
         ```java
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
@@ -497,7 +496,7 @@
 
 #### 2) 기본 Q-Type 활용
 
-* Q 클래스 인스턴스를 사용하는 2 가지 방법
+* **(1) Q 클래스 인스턴스를 사용하는 2 가지 방법**
 
     * ① Q 클래스 인스턴스를 직접 생성해서 사용하기
 
@@ -511,7 +510,7 @@
         QMember qMember = QMember.member; //기본 인스턴스 사용
         ```
 
-* 참고사항
+* **(2) 참고사항**
 
     * Q 클래스의 기본 인스턴스를 `static import`와 함께 사용할 수 있다.
     
@@ -542,7 +541,7 @@
 
 #### 3) 검색 조건 쿼리
 
-* 기본 검색 쿼리
+* **(1) 기본 검색 쿼리**
 
     ```java
     @Test
@@ -560,91 +559,93 @@
     
     * 검색 조건은 `.and()`, `.or()`를 메서드 체인으로 연결할 수 있다.
 
-* JPQL이 제공하는 모든 검색 조건을 지원한다.
-
-    ```java
-    member.username.eq("member1")           // username = 'member1'
-    member.username.ne("member1")           // username != 'member1'
-    member.username.eq("member1").not()     // username != 'member1'
+* **(2) 검색 조건**
   
-    member.username.isNotNull()             // 이름이 is not null
-  
-    member.age.in(10, 20)                   // age in (10,20)
-    member.age.notIn(10, 20)                // age not in (10, 20)
-    member.age.between(10, 30)              // between 10 and 30
-  
-    member.age.goe(30)                      // age >= 30
-    member.age.gt(30)                       // age > 30
-    member.age.loe(30)                      // age <= 30
-    member.age.lt(30)                       // age < 30
-  
-    member.username.like("member%")         // like 검색 
-    member.username.contains("member")      // like '%member%' 검색 
-    member.username.startsWith("member")    // like 'member%' 검색
-    ```
-  
-    * **eq** (`=`) : equals
+    * JPQL이 제공하는 모든 검색 조건을 지원한다.
     
-    * **ne** (`!=`) : not equal to
-    
-    * **gt** (`>`) : greater than
-    
-    * **goe** (`>=`) : greater than or equal to
-    
-    * **lt** (`<`) : less than
-    
-    * **loe** (`<=`) : less than or equal to
-
-* AND 조건을 처리하기
-
-    * `and()`를 사용하기
-            
         ```java
-        @Test
-        public void search(){
-            Member findMember = queryFactory
-                    .selectFrom(member)
-                    .where(member.username.eq("member1")
-                            .and(member.age.eq(10)))
-                    .fetchOne();
-        
-            assertThat(findMember.getUsername()).isEqualTo("member1");
-        }
+        member.username.eq("member1")           // username = 'member1'
+        member.username.ne("member1")           // username != 'member1'
+        member.username.eq("member1").not()     // username != 'member1'
+      
+        member.username.isNotNull()             // 이름이 is not null
+      
+        member.age.in(10, 20)                   // age in (10,20)
+        member.age.notIn(10, 20)                // age not in (10, 20)
+        member.age.between(10, 30)              // between 10 and 30
+      
+        member.age.goe(30)                      // age >= 30
+        member.age.gt(30)                       // age > 30
+        member.age.loe(30)                      // age <= 30
+        member.age.lt(30)                       // age < 30
+      
+        member.username.like("member%")         // like 검색 
+        member.username.contains("member")      // like '%member%' 검색  (인덱스 사용 X)
+        member.username.startsWith("member")    // like 'member%' 검색 (인덱스 사용 O)
         ```
-
-    * AND 조건을 파라미터로 처리하기
+      
+        * **eq** (`=`) : equals
         
-        * `where()`에 검색 조건을 `,`로 구분해서 전달하면 AND 조건으로 추가된다.
+        * **ne** (`!=`, `<>`) : not equal to
+        
+        * **gt** (`>`) : greater than
+        
+        * **goe** (`>=`) : greater than or equal to
+        
+        * **lt** (`<`) : less than
+        
+        * **loe** (`<=`) : less than or equal to
+
+    * AND 조건을 처리하는 방법은 다음과 같다.
     
+        * `and()`를 사용하기
+                
             ```java
             @Test
-            public void searchAndParam(){
+            public void search() {
                 Member findMember = queryFactory
                         .selectFrom(member)
-                        .where(member.username.eq("member1"),
-                               member.age.eq(10))
+                        .where(member.username.eq("member1")
+                                .and(member.age.eq(10)))
                         .fetchOne();
             
                 assertThat(findMember.getUsername()).isEqualTo("member1");
             }
             ```
-
-        * 이 방식은 null 값을 무시한다.
-
-            ```java
-            queryFactory
-                .selectFrom(member)
-                .where(member.username.eq("member1"),
-                       member.age.eq(10), 
-                       null) // null 무시
-                //...
-            ```
-
-            * 메서드 추출을 활용해서 동적 쿼리를 깔끔하게 만들 수 있다.
+    
+        * `where()`에 검색 조건을 ,로 구분해서 전달하기
+            
+            * `where()`에 검색 조건을 `,`로 구분해서 전달하면 AND 조건으로 추가된다.
+        
+                ```java
+                @Test
+                public void searchAndParam(){
+                    Member findMember = queryFactory
+                            .selectFrom(member)
+                            .where(member.username.eq("member1"),
+                                   member.age.eq(10))
+                            .fetchOne();
+                
+                    assertThat(findMember.getUsername()).isEqualTo("member1");
+                }
+                ```
+    
+            * 이 방식은 null 값을 무시한다.
+    
+                ```java
+                queryFactory
+                    .selectFrom(member)
+                    .where(member.username.eq("member1"),
+                           member.age.eq(10), 
+                           null) // null 무시
+                    //...
+                ```
+    
+                * 메서드 추출을 활용해서 동적 쿼리를 깔끔하게 만들 수 있다.
     
 #### 4) 결과 조회
 
-* 문법
+* **(1) 문법**
 
     * `fetch()` : 리스트로 조회한다. 
       
@@ -666,7 +667,7 @@
     
     * `fetchCount()` : (select 절을 count 쿼리로 변경해서) count 수만 조회한다.
 
-* 예시
+* **(2) 예시**
 
     ```java
     @Test
@@ -730,19 +731,21 @@
 
 #### 6) 페이징
 
-* 페이징은 `offset()`과 `limit()`을 사용한다.
-
-    * `offset()` : 조회 시작 위치를 지정한다. (0 부터 시작)
+* **(1) 페이징 처리**
+  
+    * 페이징은 `offset()`과 `limit()`을 사용한다.
     
-    * `limit()` : 조회할 데이터 수를 지정한다.
+        * `offset()` : 조회 시작 위치를 지정한다. (0 부터 시작)
+        
+        * `limit()` : 조회할 데이터 수를 지정한다.
     
-* 예시
+* **(2) 예시**
 
     * 기본적인 사용 방법은 다음과 같다.
 
         ```java
         @Test
-        public void paging1(){
+        public void paging1() {
             List<Member> result = queryFactory.selectFrom(member)
                     .orderBy(member.username.desc())
                     .offset(1)
@@ -753,11 +756,13 @@
         }
         ```
       
+        * 페이징을 할 때는 `orderBy()`를 추가해야 페이징이 정상적으로 동작하는지 알 수 있다.
+      
     * 전체 데이터 수가 필요하면 `fetchResults()`를 활용한다.
 
         ```java
         @Test
-        public void paging2(){
+        public void paging2() {
             // count 쿼리를 실행한 다음, 컨텐츠를 조회하기 위한 쿼리가 실행된다.
             QueryResults<Member> queryResults = queryFactory.selectFrom(member)
                     .orderBy(member.username.desc())
@@ -778,9 +783,9 @@
 
 #### 7) 집합
 
-* 집계 함수
+* **(1) 집계 함수**
 
-    * 집계 함수는 집합 안에 NULL 값이 있다면 이를 제외하고 처리한다.
+    * `집계 함수`는 집합 안에 NULL 값이 있다면 이를 제외하고 처리한다.
       
         * 단, `COUNT(*)`는 모든 컬럼의 행수를 카운트하기 때문에 NULL 값이 있어도 무시되지 않는다.
         
@@ -800,7 +805,7 @@
 
         ```java
         @Test
-        public void aggregation(){
+        public void aggregation() {
             List<Tuple> result = queryFactory
                     .select(member.count(), // 회원 수
                             member.age.sum(), // 나이 합계 
@@ -816,11 +821,10 @@
             assertThat(tuple.get(member.age.avg())).isEqualTo(25);
             assertThat(tuple.get(member.age.max())).isEqualTo(40);
             assertThat(tuple.get(member.age.min())).isEqualTo(10);
-        
         }
         ```
       
-* GROUP BY, HAVING
+* **(2) GROUP BY, HAVING**
 
     * `groupBy()` : 지정한 컬럼 값이 같은 행을 하나의 그룹으로 묶는다.
 
@@ -855,7 +859,7 @@
         .having(item.price.gt(1000))
         ```
 
-* 참고 사항
+* **(3) 참고 사항**
   
     * Live Templates 기능
     
@@ -884,7 +888,7 @@
 
 #### 8) 조인(Join) - 기본 조인
 
-* 기본 조인
+* **(1) 기본 조인**
 
     * 문법
 
@@ -929,9 +933,9 @@
         }
         ```
       
-* `크로스 조인(CROSS JOIN)`
+* **(2) 크로스 조인**
   
-    * CROSS JOIN는 한쪽 테이블의 모든 행과 다른 쪽 테이블의 모든 행을 결합하는 것을 말한다.
+    * `크로스 조인 (CROSS JOIN)`는 한쪽 테이블의 모든 행과 다른 쪽 테이블의 모든 행을 결합하는 것을 말한다.
       
         * 연관관계가 없는 필드로 크로스 조인을 할 수 있다.
 
@@ -939,7 +943,7 @@
 
         ```java
         @Test
-        public void theta_join(){
+        public void theta_join() {
             em.persist(new Member("teamA"));
             em.persist(new Member("teamB"));
             
@@ -969,13 +973,13 @@
     
 #### 9) 조인(Join) - ON 절
 
-* ON 절을 활용한 조인 (JPA 2.1 부터 지원)
+* **(1) ON 절을 활용한 조인 (JPA 2.1 부터 지원)**
 
-    * ① 조인 대상을 필터링하기
+    * ① 조인 대상을 필터링할 때 사용한다.
       
-    * ② 연관관계가 없는 엔티티를 외부 조인하기
+    * ② 연관관계가 없는 엔티티를 외부 조인할 때 사용한다.
 
-* 예시
+* **(2) 예시**
 
     * ① 조인 대상을 필터링하기
     
@@ -985,7 +989,7 @@
         * JPQL : select m, t from Member m left join m.team t on t.name = 'teamA'
         * */
         @Test
-        public void join_on_filtering(){
+        public void join_on_filtering() {
             List<Tuple> result = queryFactory
                     .select(member, team)
                     .from(member)
@@ -1011,7 +1015,7 @@
          * 회원 이름이 팀 이름과 같은 대상을 외부 조인해라.
          * */
         @Test
-        public void join_one_no_relation(){
+        public void join_one_no_relation() {
             em.persist(new Member("teamA"));
             em.persist(new Member("teamB"));
         
@@ -1033,19 +1037,21 @@
         
             * `일반 조인` : `leftJoin(member.team, team)`
             
-            * `on 조인` : `from(member).leftJoin(team).on(xxx)`
+            * `on 조인` : `from(member).leftJoin(team).on(조인 조건)`
 
 #### 10) 조인(Join) - 페치 조인
 
-* 페치 조인(fetch join)은 연관된 엔티티나 컬렉션을 SQL 한 번에 함께 조회하는 기능이다.
-
-    * SQL에서 제공하는 기능이 아니다.
-
-    * 주로 성능 최적화에 사용한다.
+* **(1) 페치 조인 ?**
+  
+    * `페치 조인 (fetch join)`은 연관된 엔티티나 컬렉션을 SQL 한 번에 함께 조회하는 기능이다.
     
-* 예시
+        * SQL에서 제공하는 기능이 아니다.
     
-    * (1) 페치 조인 미적용
+        * 주로 성능 최적화에 사용한다.
+    
+* **(2) 예시**
+    
+    * ① 페치 조인 미적용
     
         ```java
         @PersistenceUnit
@@ -1066,7 +1072,7 @@
         }
         ```
     
-    * (2) 페치 조인 적용
+    * ② 페치 조인 적용
     
         * `fetchJoin()` : fetch join을 한다. 
           
@@ -1074,7 +1080,7 @@
     
                 ```java
                 @Test
-                public void fetchJoinUse(){
+                public void fetchJoinUse() {
                     em.flush();
                     em.clear();
                 
@@ -1094,13 +1100,15 @@
 
 #### 11) 서브쿼리
 
-* `JPAExpressions` : 서브쿼리를 만들 때 사용한다.
+* **(1) JPAExpressions**
   
-    * `com.querydsl.jpa.JPAExpressions`
+    * `JPAExpressions` : 서브쿼리를 작성할 때 사용한다.
+      
+        * `com.querydsl.jpa.JPAExpressions`
 
-* 예시
+* **(2) 예시**
 
-    * (1) WHERE 절에 서브쿼리 사용하기
+    * ① WHERE 절에 서브쿼리 사용하기
       
         * 서브쿼리 eq 사용
     
@@ -1109,7 +1117,7 @@
             * 나이가 가장 많은 회원을 조회한다.
             * */
             @Test
-            public void subQuery(){
+            public void subQuery() {
                 // 메인 쿼리와 서브 쿼리에서 사용하는 테이블의 별칭이 중복되면 안 된다. 따라서 별칭을 직접 지정해서 Q 인스턴스를 만든다. 
                 QMember memberSub = new QMember("memberSub");
             
@@ -1154,7 +1162,7 @@
     
             ```java
             @Test
-            public void subQueryIn(){
+            public void subQueryIn() {
             
                 QMember memberSub = new QMember("memberSub");
             
@@ -1173,11 +1181,11 @@
             }
             ```
       
-    * (2) select 절에 서브쿼리 사용하기
+    * ② select 절에 서브쿼리 사용하기
 
         ```java
         @Test
-        public void selectSubQuery(){
+        public void selectSubQuery() {
         
             QMember memberSub = new QMember("memberSub");
         
@@ -1200,37 +1208,37 @@
     
             * Ex) `JPAExpressions.select()` -> `select()`
     
-* from 절의 서브쿼리 한계점과 해결방안
+* **(3) from 절의 서브쿼리 한계점과 해결방안**
 
-    * (1) 한계점
+    * ① 한계점
 
         * JPA의 JPQL는 from 절의 서브쿼리(인라인 뷰)를 지원하지 않는다.
 
-            * 따라서 Querydsl도 지원하지 않는다. 
+        * 따라서 Querydsl도 지원하지 않는다. 
               
-                * 사실, JPA의 표준 스펙에서는 select 절에서 서브쿼리를 사용할 수 없다.
+            * 사실, JPA의 표준 스펙에서는 select 절에서 서브쿼리를 사용할 수 없다.
 
-            * 하이버네이트 구현체를 사용하면 select 절의 서브쿼리를 지원한다.
+            * 만약, 하이버네이트 구현체를 사용하면 select 절의 서브쿼리를 지원한다.
 
-    * (2) 해결방안
+    * ② 해결방안
 
-        * ① 서브쿼리를 join으로 변경한다.
+        * ⓐ 서브쿼리를 join으로 변경한다.
           
             * 가능한 상황도 있고, 불가능한 상황도 있다.
 
-        * ② 애플리케이션에서 쿼리를 2번 분리해서 실행한다.
+        * ⓑ 애플리케이션에서 쿼리를 2번 분리해서 실행한다.
 
-        * ③ 네이티브 쿼리를 사용한다.
+        * ⓒ 네이티브 쿼리를 사용한다.
 
 #### 12) case 문
 
-* case 문은 select, where, order by 절에서 사용 가능하다.
+* case 문은 select, where, order by 절에서 사용할 수 있다.
 
     * 단순 CASE 식
 
         ```java
         @Test
-        public void basicCase(){
+        public void basicCase() {
             List<String> result = queryFactory
                     .select(member.age
                             .when(10).then("열살")
@@ -1249,7 +1257,7 @@
 
         ```java
         @Test
-        public void complexCase(){
+        public void complexCase() {
             List<String> result = queryFactory
                     .select(new CaseBuilder()
                             .when(member.age.between(0, 20)).then("0~20살")
@@ -1289,13 +1297,13 @@
                 
 #### 13) 상수, 문자 더하기
 
-* 상수
+* **(1) 상수**
   
     * `Expressions.constant()` : select 절에서 상수를 지정할 때 사용한다.
     
         ```java
         @Test
-        public void constant(){
+        public void constant() {
             List<Tuple> result = queryFactory
                     .select(member.username, Expressions.constant("A"))
                     .from(member)
@@ -1308,11 +1316,11 @@
         }
         ```
 
-* 문자 더하기
+* **(2) 문자 더하기**
 
     ```java
     @Test
-    public void concat(){
+    public void concat() {
         List<String> result = queryFactory
                 .select(member.username.concat("_").concat(member.age.stringValue()))
                 .from(member)
@@ -1325,31 +1333,35 @@
     }
     ```
   
-    * 설명
+    * 동작 설명
       
         * 위의 예시에서 `member.username`는 문자 타입이지만 `member.age`는 숫자 타입이다. 
           
         * 따라서 `concat()`을 하려면 `member.age`를 문자 타입으로 변환해야 한다.  
 
-    * `stringValue()` : 문자가 아닌 다른 타입들을 문자로 변환한다. 
-    
-        * 이 방법은 ENUM을 처리할 때도 자주 사용한다.
+    * 참고 사항
+      
+        * `stringValue()` : 문자가 아닌 다른 타입들을 문자로 변환한다. 
+        
+            * 이 방법은 ENUM을 처리할 때도 자주 사용한다.
 
 ## 4. 중급 문법
 
 #### 1) 프로젝션과 결과 반환 - 기본
 
-* `프로젝션 (projection)` : select 대상을 지정하는 것을 말한다.
-
-    * 프로젝션 대상이 하나면 타입을 명확하게 지정할 수 있다.
-    
-        * Ex) `List<String>` , `List<Member>`
-    
-    * 프로젝션 대상이 둘 이상이면 튜플이나 DTO로 조회한다.
-
-* 예시
+* **(1) 프로젝션 ?**
   
-    * 프로젝션 대상이 하나
+    * `프로젝션 (projection)` : select 대상을 지정하는 것을 말한다.
+    
+        * 프로젝션 대상이 하나면 타입을 명확하게 지정할 수 있다.
+        
+            * Ex) `List<String>` , `List<Member>`
+        
+        * 프로젝션 대상이 둘 이상이면 튜플(Tuple)이나 DTO로 조회한다.
+
+* **(2) 예시**
+  
+    * **프로젝션 대상이 하나**인 경우
     
         ```java
         List<String> result = queryFactory
@@ -1358,7 +1370,7 @@
                 .fetch();
         ```
     
-    * 프로젝션 대상이 둘 이상
+    * **프로젝션 대상이 둘 이상**인 경우
       
         * 튜플 조회
         
@@ -1367,17 +1379,25 @@
                     .select(member.username, member.age)
                     .from(member)
                     .fetch();
+            
+            for (Tuple tuple : result) {
+                String username = tuple.get(member.username);
+                Integer age = tuple.get(member.age);
+          
+                System.out.println("username=" + username);
+                System.out.println("age=" + age);
+            }
             ```
           
-            * Tuple는 리포지토리 계층에서 사용하는 것은 괜찮으나 다른 계층(서비스, 컨트롤러)에서 사용하는 것은 좋은 설계가 아니라고 생각한다. (by 강사님) 
+            * Tuple는 리포지토리 계층에서만 사용하고 다른 계층(서비스, 컨트롤러)에서 반환할 때는 DTO로 변환해서 사용하자. 
           
         * DTO 조회
     
-            * 다음 강좌에서 DTO로 바로 조회하는 방법을 학습한다. (자주 사용되며 중요하다.)
+            * 아래 챕터에서 DTO로 바로 조회하는 방법을 학습한다. (자주 사용되며 중요하다.)
 
 #### 2) 프로젝션과 결과 반환 - DTO 조회
 
-* 순수 JPA에서 DTO 조회
+* **(1) 순수 JPA에서 DTO 조회**
 
     * ① DTO를 작성한다.
     
@@ -1398,7 +1418,7 @@
         }
         ```
 
-    * ② 바로 DTO로 조회한다.
+    * ② DTO로 바로 조회한다.
 
         ```java
         @Test
@@ -1418,291 +1438,305 @@
           
         * 생성자 방식만 지원한다.
 
-* Querydsl에서 DTO 조회
+* **(2) Querydsl에서 DTO 조회**
 
-    * Querydsl 빈 생성 (Bean population)이라고 하며 결과를 DTO로 반환할 때 사용한다.
+    * ① DTO를 작성한다.
+
+        * 앞서 작성한 DTO를 사용하자.
+
+    * ② 다음 4 가지 방법 중 하나를 이용해서 DTO로 바로 조회한다.
+
+        * `프로퍼티 접근` : Setter를 이용하여 지정하는 방식이다.
+
+            * `Projections.bean()`를 사용한다.
+
+                ```java
+                List<MemberDto> result = queryFactory
+                        .select(Projections.bean(MemberDto.class,
+                                member.username,
+                                member.age))
+                        .from(member)
+                        .fetch();
+                ```
+              
+                * 이 방식은 DTO에 기본 생성자가 필요하다.
+
+        * `필드 직접 접근` : (Setter 없이) 필드에 직접 접근하여 지정하는 방식이다.
+
+            * `Projections.fields()`를 사용한다.
+        
+                ```java
+                List<MemberDto> result = queryFactory
+                        .select(Projections.fields(MemberDto.class,
+                                member.username,
+                                member.age))
+                        .from(member)
+                        .fetch();
+                ```
+
+                * 이 방식은 DTO에 기본 생성자가 필요하다.
+        
+        * `생성자 사용` : 생성자를 사용해서 지정하는 방식이다.
+
+            * `Projections.constructor()`를 사용한다.            
+
+                ```java
+                List<MemberDto> result = queryFactory
+                        .select(Projections.constructor(MemberDto.class,
+                                member.username,
+                                member.age))
+                        .from(member)
+                        .fetch();
+                ```
+
+                * 지정한 값과 동일한 매개변수 타입을 가지는 생성자가 존재해야 한다. 
+
+                    * 즉, 생성자 사용 방식은 이름이 아닌 타입이 일치하면 된다.
+
+        * `@QueryProjection` 사용하기 
+
+            * 다음 챕터에서 학습하며 **가장 권장하는 방식**이다.
     
-        * ① DTO를 작성한다.
-    
-            * 앞서 작성한 DTO를 사용하자.
+* **(3) 프로퍼티 또는 필드 접근 방식에서 DTO와 엔티티의 필드명이 다른 경우에 해결하는 방법**
 
-        * ② 다음 4 가지 방법 중 하나를 이용해서 바로 DTO로 조회한다.
-    
-            * `프로퍼티 접근` : Setter를 이용하여 지정하는 방식이다.
+    * ① 새로운 DTO를 작성한다.
 
-                * `Projections.bean()`를 사용한다.
-
-                    ```java
-                    List<MemberDto> result = queryFactory
-                            .select(Projections.bean(MemberDto.class,
-                                    member.username,
-                                    member.age))
-                            .from(member)
-                            .fetch();
-                    ```
-                  
-                    * 이 방식은 DTO에 기본 생성자가 필요하다.
-    
-            * `필드 직접 접근` : (Setter 없이) 필드에 직접 접근하여 지정하는 방식이다.
-
-                * `Projections.fields()`를 사용한다.
+        ```java
+        @Data
+        @NoArgsConstructor
+        public class UserDto {
             
-                    ```java
-                    List<MemberDto> result = queryFactory
-                            .select(Projections.fields(MemberDto.class,
-                                    member.username,
-                                    member.age))
-                            .from(member)
-                            .fetch();
-                    ```
-
-                    * 이 방식은 DTO에 기본 생성자가 필요하다.
+            private String name; // 필드명이 name
             
-            * `생성자 사용` : 생성자를 사용해서 지정하는 방식이다.
-
-                * `Projections.constructor()`를 사용한다.            
-
-                    ```java
-                    List<MemberDto> result = queryFactory
-                            .select(Projections.constructor(MemberDto.class,
-                                    member.username,
-                                    member.age))
-                            .from(member)
-                            .fetch();
-                    ```
-
-                    * 지정한 값과 동일한 매개변수 타입을 가지는 생성자가 존재해야 한다. 
-    
-                        * 즉, 생성자 사용 방식은 이름이 아닌 타입이 일치하면 된다.
-    
-            * `@QueryProjection` 사용하기
-    
-                * 다음 강좌에서 학습한다.
-    
-    * 프로퍼티 또는 필드 접근 방식에서 DTO와 엔티티의 필드명이 다른 경우에 대한 해결 방법
-
-        * ① 새로운 DTO를 작성한다.
-
-            ```java
-            @Data
-            @NoArgsConstructor
-            public class UserDto {
-                
-                private String name;
-                
-                private int age;
-                
-            }
-            ```
-    
-        * ② 별칭을 지정한다.
-             
-            ```java
-            QMember memberSub = new QMember("memberSub");
+            private int age;
             
-            List<UserDto> result = queryFactory
-                    .select(Projections.fields(UserDto.class,
-                            member.username.as("name"),
-                            ExpressionUtils.as(JPAExpressions
-                                    .select(memberSub.age.max())
-                                    .from(memberSub), "age")
-                    ))
-                    .from(member)
-                    .fetch();
-            ```
+        }
+        ```
 
-            * DTO (`UserDto`)의 필드명은 name 인데 엔티티 (`Member`)의 필드명은 username 이므로 맞지 않다.
-    
-            * 이러한 경우에 다음과 같은 메소드를 사용해서 별칭을 지정하면 된다.
+    * ② 별칭을 지정한다.
+         
+        ```java
+        QMember memberSub = new QMember("memberSub");
+        
+        List<UserDto> result = queryFactory
+                .select(Projections.fields(UserDto.class,
+                        member.username.as("name"),
+                        ExpressionUtils.as(JPAExpressions
+                                .select(memberSub.age.max())
+                                .from(memberSub), "age")
+                ))
+                .from(member)
+                .fetch();
+        ```
 
-                * `as()` : 특정 필드에 별칭을 지정한다.          
-    
-                    * Ex) `username.as("name")` : username 필드에 name이라는 별칭을 지정한다.
-                
-                * `ExpressionUtils.as(source, alias)` : 필드 또는 서브쿼리의 결과에 별칭을 지정한다. 
+        * DTO (`UserDto`)의 필드명은 name 인데 엔티티 (`Member`)의 필드명은 username 이므로 맞지 않다.
+
+        * 이러한 경우에는 아래의 메소드를 사용해서 별칭을 지정하면 된다.
+
+            * `as()` : 특정 필드에 별칭을 지정한다.          
+
+                * Ex) `username.as("name")` : username 필드에 name이라는 별칭을 지정한다.
+            
+            * `ExpressionUtils.as(source, alias)` : 특정 필드 또는 서브쿼리에 별칭을 지정한다. 
 
 #### 3) 프로젝션과 결과 반환 - @QueryProjection 및 distinct
 
-* `@QueryProjection` : DTO용 Query Type을 생성하는 방식이다.
-
-    * 특징
-    
-        * 가장 권장하는 DTO 조회 방식이다.
-          
-        * IDE에서 자동 완성 기능을 지원한다.
-    
-        * 컴파일 시점에 타입을 체크해서 오류를 발견할 수 있다.
-    
-            * `Projections.constructor()`는 런타임 시점이 되서야 오류를 발견할 수 있다는 단점이 있다.
-    
-        * DTO 용 Query Type을 생성해야 된다는 단점이 있다. 
-    
-        * DTO가 QueryDSL에 의존성을 가지는 단점이 있다.
+* **(1) @QueryProjection**
   
-    * 사용 방법
-
-        * ① DTO의 생성자에 `@QueryProjection`를 붙인다.
-                    
-            ```java
-            @Data
-            @NoArgsConstructor
-            public class MemberDto {
-            
-                private String username;
-            
-                private int age;
-                
-                @QueryProjection
-                public MemberDto(String username, int age) {
-                    this.username = username;
-                    this.age = age;
-                }
-            
-            }
-            ```
-          
-        * ② `Gradle`의 `compileQuerydsl`를 클릭한다. 
-          
-            * 컴파일을 함으로써 Query Type (`QMemberDto`)를 생성한다.
+    * `@QueryProjection` : DTO용 Query Type을 생성하는 방식이다.
     
-        * ③ 바로 DTO로 조회한다.
+        * 특징
         
-            ```java
-            List<MemberDto> result = queryFactory
-                    .select(new QMemberDto(member.username, member.age))
-                    .from(member)
-                    .fetch();
-            ```
+            * **가장 권장하는 DTO 조회 방식이다.**
+              
+            * IDE에서 자동 완성 기능을 지원한다.
+        
+            * 컴파일 시점에 타입을 체크해서 오류를 발견할 수 있다.
+        
+                * `Projections.constructor()`는 런타임 시점에 오류를 발견할 수 있다는 단점이 있다.
+        
+            * DTO 용 Query Type을 생성해야 된다는 단점이 있다. 
+        
+            * DTO가 QueryDSL에 의존성을 가지는 단점이 있다.
+      
+        * 사용 방법
     
-* `distinct()` : SQL에 DISTINCT를 추가하고 애플리케이션에서 같은 식별자를 가지는 엔티티의 중복을 제거한다.
-    
-    ```java
-    List<String> result = queryFactory
-            .select(member.username).distinct()
-            .from(member)
-            .fetch();
-    ```
+            * ① DTO의 생성자에 `@QueryProjection`를 붙인다.
+                        
+                ```java
+                @Data
+                @NoArgsConstructor
+                public class MemberDto {
+                
+                    private String username;
+                
+                    private int age;
+                    
+                    @QueryProjection
+                    public MemberDto(String username, int age) {
+                        this.username = username;
+                        this.age = age;
+                    }
+                
+                }
+                ```
+              
+            * ② `Gradle`의 `other`-`compileQuerydsl`를 클릭한다. 
+              
+                * DTO를 Query Type으로 생성한다.
+        
+                    * Ex) `QMemberDto`
+        
+            * ③ DTO로 바로 조회한다.
+            
+                ```java
+                List<MemberDto> result = queryFactory
+                        .select(new QMemberDto(member.username, member.age))
+                        .from(member)
+                        .fetch();
+                ```
 
-    * JPQL의 distinct와 같다.
+* **(2) distinct()**    
+
+    * `distinct()` : SQL에 DISTINCT를 추가하고 애플리케이션에서 같은 식별자를 가지는 엔티티의 중복을 제거한다.
+        
+        ```java
+        List<String> result = queryFactory
+                .select(member.username).distinct()
+                .from(member)
+                .fetch();
+        ```
+    
+        * JPQL의 distinct와 같다.
       
 #### 4) 동적 쿼리
 
-* 동적 쿼리를 해결하는 두 가지 방식
+* **(1) 소개**
 
-    * (1) BooleanBuilder
-
-        * `BooleanBuilder` : where 절의 조건문을 작성할 때 사용한다.    
-
-            * 특징
-
-                * `BooleanBuilder`에 초기 값을 지정할 수도 있다.
-
-                    * Ex) `BooleanBuilder builder = new BooleanBuilder(member.username.eq(usernameCond));`
-
-                * `BooleanBuilder`에 AND 또는 OR 조건을 이어 붙일 수 있다.
-            
-                * 해당 방식은 WHERE 절의 조건을 한눈에 알아보기 어렵다는 단점이 있다.
+    * 동적 쿼리를 해결하는 두 가지 방식이 있다.
     
-            * 예시
+        * BooleanBuilder, 
+
+* **(2) BooleanBuilder**
+
+    * `BooleanBuilder` : where 절의 조건문을 작성할 때 사용한다.    
+
+        * 특징
+
+            * `BooleanBuilder`에 초기 값을 지정할 수도 있다.
+
+                * Ex) `BooleanBuilder builder = new BooleanBuilder(member.username.eq(usernameCond));`
+
+            * `BooleanBuilder`에 AND 또는 OR 조건을 이어 붙일 수 있다.
         
+            * 해당 방식은 WHERE 절의 조건을 한눈에 알아보기 어렵다는 단점이 있다.
+
+        * 예시
+    
+            ```java
+            @Test
+            public void dynamicQuery_BooleanBuilder() {
+                /*
+                * 파라미터의 값을 변경할 때 마다 실행되는 JPQL이 달라지는 것을 확인할 수 있다.
+                * */
+                String usernameParam = "member1";
+                Integer ageParam = 10;
+            
+                List<Member> result = searchMember1(usernameParam, ageParam);
+                assertThat(result.size()).isEqualTo(1);
+            }
+            
+            private List<Member> searchMember1(String usernameCond, Integer ageCond) {
+                // ① 먼저 BooleanBuilder를 만든다.
+                BooleanBuilder builder = new BooleanBuilder();
+            
+                // ② usernameCond이 null이 아니면 BooleanBuilder에 AND 조건을 이어 붙인다.
+                if (usernameCond != null) {
+                    builder.and(member.username.eq(usernameCond));
+                }
+            
+                if (ageCond != null) {
+                    builder.and(member.age.eq(ageCond));
+                }
+            
+                // ③ where 절에 BooleanBuilder를 지정한다.
+                return queryFactory
+                        .selectFrom(member)
+                        .where(builder)
+                        .fetch();
+            }
+            ```
+     
+* **(3) Where 절에 파라미터 방식 사용하기** 
+
+    * `BooleanExpression` : where 절의 조건문을 작성할 때 사용한다.
+
+        * 특징
+
+            * `BooleanExpression` 타입을 리턴하는 메소드를 만든 다음에 where 절의 조건으로 추가한다.
+
+                * `BooleanExpression`는 `where()`의 파라미터로 전달할 수 있으며 `,`를 and 조건으로 사용한다.
+
+            * Querydsl의 `where()`는 파라미터로 `null` 값을 전달 받으면 무시한다. 
+              
+                * 즉, 조건문에 추가하지 않는다.
+
+            * `BooleanExpression` 타입을 리턴하는 메소드는 다른 쿼리에서도 재활용할 수 있으며 쿼리 자체의 가독성이 높아진다.
+
+            * **가장 권장하는 방식이며 해당 방식을 사용할 수 없는 경우에 BooleanBuilder를 사용하자.**
+
+        * 예시
+
+            * ① Querydsl로 쿼리를 작성할 때, BooleanExpression를 리턴하는 메소드를 where 절의 조건으로 추가한다.
+
                 ```java
                 @Test
-                public void dynamicQuery_BooleanBuilder() {
+                public void dynamicQuery_WhereParam() {
                     /*
-                    * 파라미터의 값을 변경할 때 마다 실행되는 JPQL이 달라지는 것을 확인할 수 있다.
-                    * */
+                     * 파라미터의 값을 변경할 때 마다 실행되는 JPQL이 달라지는 것을 확인할 수 있다.
+                     * */
                     String usernameParam = "member1";
-                    Integer ageParam = 10;
+                    Integer ageParam = 10; // null
                 
-                    List<Member> result = searchMember1(usernameParam, ageParam);
+                    List<Member> result = searchMember2(usernameParam, ageParam);
                     assertThat(result.size()).isEqualTo(1);
                 }
                 
-                private List<Member> searchMember1(String usernameCond, Integer ageCond) {
-                    // ① 먼저 BooleanBuilder를 만든다.
-                    BooleanBuilder builder = new BooleanBuilder();
-                
-                    // ② usernameCond이 null이 아니면 BooleanBuilder에 AND 조건을 이어 붙인다.
-                    if (usernameCond != null) {
-                        builder.and(member.username.eq(usernameCond));
-                    }
-                
-                    if (ageCond != null) {
-                        builder.and(member.age.eq(ageCond));
-                    }
-                
-                    // ③ where 절에 BooleanBuilder를 지정한다.
+                private List<Member> searchMember2(String usernameCond, Integer ageCond) {
                     return queryFactory
                             .selectFrom(member)
-                            .where(builder)
+                            .where(usernameEq(usernameCond), ageEq(ageCond))
                             .fetch();
                 }
                 ```
-         
-    * (2) BooleanExpression
 
-        * `BooleanExpression` : where 절의 조건문을 작성할 때 사용한다.    
+            * ② BooleanExpression를 리턴하는 메소드를 작성한다.
+              
+                ```java
+                private BooleanExpression usernameEq(String usernameCond) {
+                    return usernameCond != null ? member.username.eq(usernameCond) : null;
+                }
+                
+                private BooleanExpression ageEq(Integer ageCond) {
+                    return ageCond != null ? member.age.eq(ageCond) : null;
+                }
+                ```
 
-            * 특징
+            * ③ 그리고 BooleanExpression는 여러 가지 조건을 조합할 수도 있다.
+                   
+                ```java
+                private BooleanExpression allEq(String usernameCond, Integer ageCond) {
+                    return usernameEq(usernameCond).and(ageEq(ageCond));
+                }
+                ```
+              
+                * 여기서는 하지 않았지만 null 체크하는 것을 잊지 말자!
+
+                    * Ex) `usernameEq(usernameCond)`가 null를 리턴하는 경우에 대해서 대비해야 함
     
-                * `BooleanExpression` 타입을 리턴하는 메소드를 만든 다음에 where 절의 조건으로 추가한다.
+#### 5) 벌크 연산
 
-                    * `BooleanExpression`는 `where()`의 파라미터로 전달할 수 있으며 `,`를 and 조건으로 사용한다.
-
-                * Querydsl의 `where()`는 파라미터로 `null`을 전달 받으면 무시한다. 
-                  
-                    * 즉, 조건문에 추가하지 않는다.
-
-                * `BooleanExpression` 타입을 리턴하는 메소드는 다른 쿼리에서도 재활용 할 수 있으며 쿼리 자체의 가독성이 높아진다.
-
-                * `BooleanExpression`를 사용하는 것을 권장하며 해당 방식을 사용 할 수 없는 경우에는 `BooleanBuilder`를 사용한다.
-
-            * 예시
-    
-                * 기본적인 사용 방법
-               
-                    ```java
-                    @Test
-                    public void dynamicQuery_WhereParam() {
-                        /*
-                         * 파라미터의 값을 변경할 때 마다 실행되는 JPQL이 달라지는 것을 확인할 수 있다.
-                         * */
-                        String usernameParam = "member1";
-                        Integer ageParam = 10; // null
-                    
-                        List<Member> result = searchMember2(usernameParam, ageParam);
-                        assertThat(result.size()).isEqualTo(1);
-                    }
-                    
-                    private List<Member> searchMember2(String usernameCond, Integer ageCond) {
-                        return queryFactory
-                                .selectFrom(member)
-                                .where(usernameEq(usernameCond), ageEq(ageCond))
-                                .fetch();
-                    }
-                    
-                    private BooleanExpression usernameEq(String usernameCond) {
-                        return usernameCond != null ? member.username.eq(usernameCond) : null;
-                    }
-                    
-                    private BooleanExpression ageEq(Integer ageCond) {
-                        return ageCond != null ? member.age.eq(ageCond) : null;
-                    }
-                    ```
-    
-                * `BooleanExpression`는 여러 가지 조건을 조합할 수 있다.
-                       
-                    ```java
-                    private BooleanExpression allEq(String usernameCond, Integer ageCond){
-                        return usernameEq(usernameCond).and(ageEq(ageCond));
-                    }
-                    ```
-                  
-                    * `null` 체크는 주의해서 처리해야 한다.
-            
-#### 5) 수정, 삭제 - 벌크 연산
-
-* 수정(update)
+* **(1) 수정 (update)**
 
     * 쿼리 한번에 여러 데이터를 수정하기
 
@@ -1725,7 +1759,9 @@
         }
         ```
       
-        * `execute()`는 UPDATE를 했을 때, 영향을 받은 행(Row) 수를 반환한다.
+        * Querydsl에서 벌크 연산은 `execute()`를 사용한다.
+          
+            * `execute()`는 수정 또는 삭제를 했을 때, 영향을 받은 행(Row) 개수를 반환한다.
     
         * `@Commit`를 메소드 레벨에 적용해서 해당 메소드만 커밋 되도록 할 수 있다.
       
@@ -1752,7 +1788,7 @@
     
         * `mod()` : 나머지 연산
     
-* 삭제(delete)
+* **(2) 삭제 (delete)**
 
     * 쿼리 한번에 여러 데이터를 삭제하기
     
@@ -1767,7 +1803,7 @@
         }
         ```
 
-* 벌크 연산 시, 주의사항    
+* **(3) 벌크 연산 시, 주의사항**    
 
     * 벌크 연산은 영속성 컨텍스트를 무시하고 실행되기 때문에 벌크 연산을 실행하고 나면 영속성 컨텍스트를 초기화하는 것이 안전하다.
     
@@ -1780,7 +1816,9 @@
     
 #### 6) SQL function 호출하기
 
-* Dialect에 등록된 SQL function만 호출할 수 있다.
+* JPA는 기본적으로 Dialect에 등록된 SQL function만 호출할 수 있다.
+
+* Querydsl에서 SQL function를 호출하는 방법은 다음과 같다.
 
     * 회원 이름에서 member라는 단어를 M으로 변경하기 위해 replace 함수를 사용한다.
     
@@ -1820,25 +1858,23 @@
         }
         ```
 
-* Querydsl는 `lower()`과 같은 ANSI 표준 함수들을 내장하고 있다. 
-  
-    * 따라서 다음과 같이 처리할 수도 있다.
+* Querydsl는 `lower()`과 같은 ANSI 표준 함수들을 내장하고 있다. 따라서 다음과 같이 처리할 수도 있다.
 
-        ```java
-        List<String> result = queryFactory
-                .select(member.username)
-                .from(member)
-                .where(member.username.eq(member.username.lower()))
-                .fetch();
-        ```
+    ```java
+    List<String> result = queryFactory
+            .select(member.username)
+            .from(member)
+            .where(member.username.eq(member.username.lower()))
+            .fetch();
+    ```
   
 ## 5. 실무 활용 - 순수 JPA와 Querydsl
 
 #### 1) 순수 JPA 리포지토리와 Querydsl
 
-* (1) 순수 JPA 리포지토리
+* **(1) 순수 JPA 리포지토리**
 
-    * 순수 JPA 리포지토리를 작성한다.
+    * ① 순수 JPA 리포지토리를 작성한다.
 
         ```java
         @Repository
@@ -1876,7 +1912,7 @@
         }
         ```
 
-    * 테스트 코드를 작성한다.
+    * ② 테스트 코드를 작성한다.
     
         ```java
         @SpringBootTest
@@ -1894,7 +1930,7 @@
                 memberJpaRepository.save(member);
         
                 Member findMember = memberJpaRepository.findById(member.getId()).get();
-                assertThat(findMember).isEqualTo(member);
+                assertThat(findMember).isEqualTo(member); // JPA는 같은 트랜잭션 안에서 조회하면 같은 엔티티를 반환한다. 따라서 equals()의 결과가 true다.
         
                 List<Member> result1 = memberJpaRepository.findAll();
                 assertThat(result1).containsExactly(member);
@@ -1905,10 +1941,10 @@
         
         }
         ```
-    
-* (2) 순수 JPA 리포지토리에서 Querydsl 사용하기
 
-    * Querydsl를 활용해서 findAll()와 회원명으로 조회하는 메소드를 작성한다.
+* **(2) 순수 JPA 리포지토리에서 Querydsl 사용하기**
+
+    * ① Querydsl를 활용해서 findAll()와 회원명으로 조회하는 메소드를 작성한다.
 
         ```java
         public List<Member> findAll_Querydsl() {
@@ -1925,7 +1961,7 @@
         }
         ```
       
-    * 테스트 코드를 작성한다.
+    * ② 테스트 코드를 작성한다.
 
         ```java
         @Test
@@ -1944,9 +1980,9 @@
         }
         ```
     
-* (3) JPAQueryFactory를 스프링 빈으로 등록하기
+* **(3) JPAQueryFactory를 스프링 빈으로 등록하기**
 
-    * `JPAQueryFactory`는 스프링 빈으로 등록한 다음, 주입 받아서 사용해도 된다.
+    * ① JPAQueryFactory는 스프링 빈으로 등록한다.
     
         ```java
         @SpringBootApplication
@@ -1964,13 +2000,32 @@
       
         * JPAQueryFactory는 동시성 문제에 대해서 걱정하지 않아도 된다. 
         
-            * 그 이유는 여기서 스프링이 주입하는 엔티티 매니저는 프록시용 가짜 엔티티 매니저이기 때문이다.
+            * 그 이유는 스프링이 여기서 주입하는 엔티티 매니저는 프록시인 가짜 엔티티 매니저이기 때문이다.
             
             * 이 가짜 엔티티 매니저는 실제 사용하는 시점에 트랜잭션 단위로 진짜 엔티티 매니저(영속성 컨텍스트)를 할당해준다.
 
+    * ② JPAQueryFactory를 주입 받아서 사용한다.
+
+        ```java
+        @Repository
+        public class MemberJpaRepository {
+            
+            private final EntityManager em;
+            private final JPAQueryFactory queryFactory;
+        
+            public MemberJpaRepository(EntityManager em, JPAQueryFactory queryFactory) {
+                this.em = em;
+                this.queryFactory = queryFactory;
+            }
+        
+            // ...
+            
+        }
+        ```
+
 #### 2) 동적 쿼리와 성능 최적화 조회 - Builder 사용
 
-* (1) 실습 준비하기
+* **(1) 실습 준비하기**
   
     * ① 조회 최적화용 DTO를 작성한다.
     
@@ -2000,7 +2055,9 @@
         }
         ```
 
-    * ② `Gradle`의 `compileQuerydsl`를 클릭해서 DTO 용 Q 타입을 생성한다.     
+    * ② `Gradle`의 `compileQuerydsl`를 클릭해서 DTO를 Q 타입으로 생성한다.   
+    
+        * 또는 `./gradlew compileQuerydsl` 처럼 명령어를 사용하는 방법도 있다. 
 
     * ③ 검색 조건을 전달할 때 사용할 DTO를 작성한다.
     
@@ -2019,11 +2076,11 @@
         }
         ```
       
-        * 이름이 너무 길면 `MemberCond`처럼 줄여서 사용해도 된다.
+        * 이름이 너무 길면 `MemberCond`처럼 줄여서 작성해도 된다.
 
-* (2) Builder를 사용한 동적 쿼리 작성하기
+* **(2) BooleanBuilder를 사용해서 동적 쿼리 작성하기**
 
-    * ① BooleanBuilder를 사용한 동적 쿼리를 작성한다.
+    * ① BooleanBuilder를 사용해서 동적 쿼리를 작성한다.
 
         ```java
         @Repository
@@ -2034,7 +2091,7 @@
             public List<MemberTeamDto> searchByBuilder(MemberSearchCondition condition) {
                 BooleanBuilder builder = new BooleanBuilder();
       
-                if (hasText(condition.getUsername())) {
+                if (hasText(condition.getUsername())) { // StringUtils.hasText()
                     builder.and(member.username.eq(condition.getUsername()));
                 }
                 if (hasText(condition.getTeamName())) {
@@ -2064,9 +2121,9 @@
         }
         ```
 
-        * `StringUtils.hasText()` : null과 빈 문자열이 아니면서 공백이 아닌 문자가 하나 이상 있는 문자열인지 검사한다.
+        * `StringUtils.hasText()` : null, 빈 문자열(""), 공백(" ")이 아닌 문자가 하나 이상 있는 문자열인지 검사한다.
 
-            * 스프링에서 제공하는 메소드다.
+            * 스프링(org.springframework.util)에서 제공하는 메소드다.
 
     * ② 테스트 코드를 작성한다.
     
@@ -2105,15 +2162,17 @@
         }
         ```
 
-        * 동적 쿼리를 작성할 때는 조건이 모두 null 인 경우를 조심해야 한다. 이러한 경우에 전체 조회가 된다.
+        * **동적 쿼리를 작성할 때는 조건이 모두 null 인 경우를 조심해야 한다. 이러한 경우에 전체 조회가 된다.**
     
-        * 따라서 null 체크를 잘하거나 기본 조건을 지정해주는 것이 좋다. 페이징 처리를 하는 것도 좋은 방법이 된다.
+            * **따라서 null 체크를 잘하거나 기본 조건을 지정해주는 것이 좋다.** 
+              
+            * **페이징 처리를 하는 것도 좋은 방법이다.**
 
 #### 3) 동적 쿼리와 성능 최적화 조회 - Where 절 파라미터 사용
 
-* BooleanExpression를 사용한 동적 쿼리 작성하기
+* Where 절에 파라미터 방식을 사용해서 동적 쿼리 작성하기 
 
-    * ① BooleanExpression를 사용한 동적 쿼리를 작성한다.
+    * ① Querydsl로 쿼리를 작성할 때, BooleanExpression를 리턴하는 메소드를 where 절의 조건으로 추가한다.
     
         ```java
         @Repository
@@ -2159,7 +2218,7 @@
         }
         ```
 
-        * BooleanExpression는 여러가지 조건을 조합할 수 있다.
+        * BooleanExpression는 여러 가지 조건을 조합할 수도 있다.
         
             ```java
             private BooleanExpression ageBetween(Integer ageGoe, Integer ageLoe) {
@@ -2171,7 +2230,7 @@
             }
             ```
 
-    * ② 앞서 작성한 테스트 코드에서 BooleanExpression를 사용한 쿼리를 호출 하도록 변경해서 실행한다.
+    * ② 앞서 작성한 테스트 코드(searchTest())를 변경해서 테스트한다.
 
         ```java
         @SpringBootTest
@@ -2193,9 +2252,9 @@
 
 #### 4) 조회 API 컨트롤러 개발
 
-* (1) 프로파일 설정하기 
+* **(1) 프로파일 설정하기** 
 
-    * 샘플 데이터를 추가하는 것이 테스트 코드를 실행하는 것에 영향을 주지 않도록 프로파일을 설정한다.
+    * ① 샘플 데이터를 추가하는 것이 테스트 코드를 실행하는 것에 영향을 주지 않도록 프로파일을 설정한다.
 
         ```yaml
         # src/main/resources/application.yml
@@ -2215,7 +2274,7 @@
         
         * 스프링 부트를 구동할 때, `The following profiles are active: local`이라는 로깅을 확인하면 현재 활성화 되어 있는 프로파일을 알아 낼 수 있다.
     
-    * test 디렉토리에 기존 application.yml를 복사한 다음, 해당 파일의 내용 중에서 프로파일을 test로 변경한다.    
+    * ② test/resources 디렉토리에 기존 application.yml를 복사한 다음, 해당 파일의 내용 중에서 프로파일을 test로 변경한다.    
 
         ```yaml
         # src/test/resources/application.yml
@@ -2225,51 +2284,53 @@
         # 생략 ...
         ```
 
-* (2) 샘플 데이터를 추가하기
+* **(2) 샘플 데이터를 추가하기**
 
-    ```java
-    @Profile("local")
-    @Component
-    @RequiredArgsConstructor
-    public class InitMember {
+    * InitMember 클래스를 작성해서 샘플 데이터를 추가한다.
     
-        private final InitMemberService initMemberService;
-    
-        @PostConstruct
-        public void init() {
-            initMemberService.init();
-        }
-    
+        ```java
+        @Profile("local")
         @Component
-        static class InitMemberService {
-    
-            @PersistenceContext
-            EntityManager em;
-    
-            @Transactional
+        @RequiredArgsConstructor
+        public class InitMember {
+        
+            private final InitMemberService initMemberService;
+        
+            @PostConstruct
             public void init() {
-                Team teamA = new Team("teamA");
-                Team teamB = new Team("teamB");
-    
-                em.persist(teamA);
-                em.persist(teamB);
-    
-                for (int i = 0; i < 100; i++) {
-                    Team selectedTeam = i % 2 == 0 ? teamA : teamB;
-                    em.persist(new Member("member" + i, i, selectedTeam));
+                initMemberService.init();
+            }
+        
+            @Component
+            static class InitMemberService {
+        
+                @PersistenceContext
+                EntityManager em;
+        
+                @Transactional
+                public void init() {
+                    Team teamA = new Team("teamA");
+                    Team teamB = new Team("teamB");
+        
+                    em.persist(teamA);
+                    em.persist(teamB);
+        
+                    for (int i = 0; i < 100; i++) {
+                        Team selectedTeam = i % 2 == 0 ? teamA : teamB;
+                        em.persist(new Member("member" + i, i, selectedTeam));
+                    }
                 }
+                
             }
             
         }
-        
-    }
-    ```
-  
-    * `@PostConstruct`과 `@Transactional`는 로직을 분리해야 한다.
+        ```
       
-        * 빈 라이프 사이클 때문에 두 애노테이션을 함께 사용하는 것은 불가능하다. 
+        * `@PostConstruct`과 `@Transactional`는 로직을 분리해야 한다.
+          
+            * 빈 라이프 사이클 때문에 두 애노테이션을 함께 사용하는 것은 불가능하다. 
 
-* (3) 조회 API 컨트롤러 작성하기
+* **(3) 조회 API 컨트롤러 작성하기**
 
     * ① 조회 API 컨트롤러를 작성한다.
     
@@ -2296,9 +2357,9 @@
 
 #### 1) 순수 JPA에서 스프링 데이터 JPA 리포지토리로 변경하기
   
-* (1) 스프링 데이터 JPA 리포지토리 생성하기
+* **(1) 스프링 데이터 JPA 리포지토리 생성하기**
 
-    * JpaRepository 인터페이스를 상속받은 인터페이스를 작성한다.
+    * ① JpaRepository를 상속받은 인터페이스를 작성한다.
  
         ```java
         public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -2310,10 +2371,42 @@
         * 공통 인터페이스(JpaRepository)는 CRUD 메소드를 제공하므로 직접 구현할 필요가 없다.
     
         * 제네릭은 `<엔티티 타입, 식별자 타입>`를 설정한다.
-        
-* (2) 사용자 정의 Repository 생성하기
 
-    * ① 사용자 정의 인터페이스를 작성한다.
+    * ② 테스트 코드를 작성한다.
+
+        ```java
+        @SpringBootTest
+        @Transactional
+        class MemberRepositoryTest {
+        
+            @Autowired EntityManager em;
+            @Autowired MemberRepository memberRepository;
+        
+            @Test
+            public void basicTest() {
+                Member member = new Member("member1", 10);
+                memberRepository.save(member);
+        
+                Member findMember = memberRepository.findById(member.getId()).get();
+                assertThat(findMember).isEqualTo(member);
+        
+                List<Member> result1 = memberRepository.findAll();
+                assertThat(result1).containsExactly(member);
+        
+                List<Member> result2 = memberRepository.findByUsername("member1");
+                assertThat(result2).containsExactly(member);
+            }
+        
+        }
+        ```
+      
+        * 현재 상황에서는 Querydsl를 사용할 수 없다.  
+    
+            * 즉, 사용자 정의 리포지토리가 필요하다. 
+
+* **(2) 사용자 정의 리포지토리 생성하기**
+
+    * ① 사용자 정의 리포지토리를 작성한다.
 
         ```java
         public interface MemberRepositoryCustom {
@@ -2321,7 +2414,7 @@
         }
         ```
 
-    * ② 사용자 정의 인터페이스를 구현한 클래스를 작성한다.
+    * ② 사용자 정의 리포지토리를 구현한 클래스를 작성한다.
 
         ```java
         import com.querydsl.core.types.dsl.BooleanExpression;
@@ -2345,7 +2438,7 @@
                 this.queryFactory = new JPAQueryFactory(em);
             }
         
-            public List<MemberTeamDto> search(MemberSearchCondition condition){
+            public List<MemberTeamDto> search(MemberSearchCondition condition) {
                 return queryFactory
                         .select(new QMemberTeamDto(
                                 member.id,
@@ -2385,17 +2478,17 @@
       
         * 클래스 이름을 짓는 규칙은 다음과 같다.
 
-            * 기존 방식 : `리포지토리 인터페이스명 + Impl`
+            * 기존 방식 : `스프링 데이터 JPA 리포지토리명 + Impl`
             
                 * Ex) `MemberRepositoryImpl`
 
-            * 변경된 방식 (스프링 데이터 2.x 부터) : `사용자 정의 인터페이스명 + Impl`
+            * 변경된 방식 (스프링 데이터 2.x 부터) : `사용자 정의 리포지토리명 + Impl`
 
                 * Ex) `MemberRepositoryCustomImpl`
                     
         * 위와 같은 클래스명으로 작성하면 스프링 데이터 JPA가 인식해서 스프링 빈으로 등록한다.
 
-    * ③ 스프링 데이터 JPA 리포지토리가 사용자 정의 인터페이스를 상속 받도록 한다.
+    * ③ 스프링 데이터 JPA 리포지토리가 사용자 정의 리포지토리를 상속 받도록 한다.
 
         ```java
         public interface MemberRepository extends JpaRepository<Member, Long> , MemberRepositoryCustom {
@@ -2404,7 +2497,7 @@
         }
         ```
 
-    * ④ 사용자 정의 인터페이스가 정상적으로 동작하는지 테스트한다.
+    * ④ 사용자 정의 리포지토리가 정상적으로 동작하는지 테스트한다.
     
         ```java
         @SpringBootTest
@@ -2447,85 +2540,85 @@
         }
         ```
 
-#### 2) 스프링 데이터의 페이징을 활용하기 1
+#### 2) 스프링 데이터의 페이징 활용하기 1
 
-* (3) 스프링 데이터의 페이징 기능을 Querydsl에서 활용하기
+* **(1) 스프링 데이터의 페이징 기능을 Querydsl에서 활용하기**
 
-    * Querydsl 페이징 연동
+    * ① 사용자 정의 리포지토리에 페이징을 하는 메소드를 추가한다. 
 
-        * ① 사용자 정의 인터페이스에 페이징 관련 메소드를 추가한다. 
+        ```java
+        public interface MemberRepositoryCustom {
+            // ...
+        
+            Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable);
+        
+            Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable);
+        }
+        ```
+      
+    * ② 사용자 정의 리포지토리를 구현한 클래스(`MemberRepositoryCustomImpl`)에서 메소드의 내용을 완성한다.
     
+        * 간단한 페이징
+        
             ```java
-            public interface MemberRepositoryCustom {
+            public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
+            
                 // ...
+          
+                @Override
+                public Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable) {
+                    QueryResults<MemberTeamDto> results = queryFactory
+                            .select(new QMemberTeamDto(
+                                    member.id,
+                                    member.username,
+                                    member.age,
+                                    team.id,
+                                    team.name))
+                            .from(member)
+                            .leftJoin(member.team, team)
+                            .where(
+                                    usernameEq(condition.getUsername()),
+                                    teamNameEq(condition.getTeamName()),
+                                    ageGoe(condition.getAgeGoe()),
+                                    ageLoe(condition.getAgeLoe())
+                            )
+                            .offset(pageable.getOffset())
+                            .limit(pageable.getPageSize())
+                            .fetchResults(); // Deprecated
             
-                Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable);
+                    List<MemberTeamDto> content = results.getResults();
+                    long total = results.getTotal();
             
-                Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable);
+                    return new PageImpl<>(content, pageable, total);
+                }
+                
             }
             ```
-          
-        * ② 사용자 정의 인터페이스를 구현한 클래스(`MemberRepositoryCustomImpl`)에서 메소드의 내용을 완성한다.
-        
-            * 간단한 페이징
-            
-                ```java
-                public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
-                
-                    // ...
+
+            * `PageRequest` : Pageable 인터페이스의 구현체다.
               
-                    @Override
-                    public Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable) {
-                        QueryResults<MemberTeamDto> results = queryFactory
-                                .select(new QMemberTeamDto(
-                                        member.id,
-                                        member.username,
-                                        member.age,
-                                        team.id,
-                                        team.name))
-                                .from(member)
-                                .leftJoin(member.team, team)
-                                .where(
-                                        usernameEq(condition.getUsername()),
-                                        teamNameEq(condition.getTeamName()),
-                                        ageGoe(condition.getAgeGoe()),
-                                        ageLoe(condition.getAgeLoe())
-                                )
-                                .offset(pageable.getOffset())
-                                .limit(pageable.getPageSize())
-                                .fetchResults();
+                * `page` : 조회할 페이지 번호 (0번 부터 시작)
                 
-                        List<MemberTeamDto> content = results.getResults();
-                        long total = results.getTotal();
-                
-                        return new PageImpl<>(content, pageable, total);
-                    }
-                    
-                }
-                ```
-    
-                * `PageRequest`
-                
-                    * `page` : 조회할 페이지 번호 (0번 부터 시작)
-                    
-                    * `size` : 한 페이지 마다 조회 할 데이터 수
-    
-                    * `sort` : 정렬 방식
-    
-                * `offset()`는 시작 위치를 지정하며 `limit()`는 조회할 데이터 수를 지정한다.
-                
-                    * `offset`은 조회할 페이지 번호(page) * 한 페이지 마다 조회 할 데이터 수(size)와 같다.
-                
-                * `fetchResults()` : 컨텐츠와 전체 카운트를 한번에 조회할 수 있다. (실제 쿼리는 2번 호출됨)
+                * `size` : 한 페이지 마다 조회할 데이터 수
 
-                    * 전체 카운트 쿼리가 호출된 다음에 컨텐츠를 조회하는 쿼리가 호출된다.                
+                * `sort` : 정렬 방식
 
-                    * `fetchResults()`에서 전체 카운트 쿼리 호출 시, 필요 없는 `order by`는 제거한다.
-                
-                * `PageImpl` : 스프링 데이터에서 제공하는 Page 인터페이스의 구현체다. 
-    
-            * 전체 카운트와 컨텐츠(데이터 내용)를 별도로 조회하기
+            * `PageImpl` : Page 인터페이스의 구현체다.
             
+            * `offset()` : 조회 시작 위치를 지정한다. 
+
+                * offset는 조회할 페이지 번호 (page) * 한 페이지 마다 조회할 데이터 수 (size)와 같다.              
+
+            * `limit()` : 조회할 데이터 수를 지정한다.
+    
+            * `fetchResults()` : 추가 total count 쿼리를 호출하는 페이징 결과를 반환한다.
+              
+                * 전체 (total) 카운트 쿼리가 호출된 다음에 컨텐츠를 조회하는 쿼리가 호출된다.                
+    
+        * 전체 (total) 카운트와 컨텐츠를 조회하는 쿼리를 분리하기
+    
+            * ⓐ MemberRepositoryCustomImpl에서 searchPageComplex()의 내용을 작성한다.
+        
                 ```java
                 public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 
@@ -2533,7 +2626,7 @@
                 
                     @Override
                     public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) {
-                        // 컨텐츠 (데이터 내용) 조회 쿼리
+                        // 컨텐츠를 조회하는 쿼리
                         List<MemberTeamDto> content = queryFactory
                                 .select(new QMemberTeamDto(
                                         member.id.as("memberId"),
@@ -2553,7 +2646,7 @@
                                 .limit(pageable.getPageSize())
                                 .fetch();
                 
-                        // 전체 카운트 조회 쿼리
+                        // 전체 (total) 카운트를 조회하는 쿼리
                         long total = queryFactory
                                 .select(member)
                                 .from(member)
@@ -2564,7 +2657,7 @@
                                         ageGoe(condition.getAgeGoe()),
                                         ageLoe(condition.getAgeLoe())
                                 )
-                                .fetchCount();
+                                .fetch().size();
                 
                         return new PageImpl<>(content, pageable, total);
                     }
@@ -2572,37 +2665,77 @@
                 }
                 ```
               
-                * 전체 카운트 조회 쿼리에 대해서 최적화를 할 수 있다면 2개의 쿼리로 분리할 수 있다.
+                * 전체 카운트를 조회하는 쿼리에 대해서 최적화를 할 수 있는 경우가 있다.
                     
-                    * 예를 들어 전체 카운트를 조회할 때, 필요 없는 조인 쿼리를 줄일 수 있다.
+                    * 예를 들어, 전체 카운트를 조회하는 쿼리에서는 필요 없는 조인 쿼리를 줄일 수 있다.
     
-                * 코드를 리펙토링해서 컨텐츠 (데이터 내용) 조회 쿼리과 전체 카운트 조회 쿼리를 읽기 좋게 분리하면 좋다.
+            * ⓑ 테스트 코드를 작성한다. 
+            
+                ```java
+                @SpringBootTest
+                @Transactional
+                class MemberRepositoryTest {
+                
+                    @Autowired EntityManager em;
+                    @Autowired MemberRepository memberRepository;
+                
+                    @Test
+                    public void searchPageComplexTest() {
+                        Team teamA = new Team("teamA");
+                        Team teamB = new Team("teamB");
+                        em.persist(teamA);
+                        em.persist(teamB);
+                
+                        Member member1 = new Member("member1", 10, teamA);
+                        Member member2 = new Member("member2", 20, teamA);
+                        Member member3 = new Member("member3", 30, teamB);
+                        Member member4 = new Member("member4", 40, teamB);
+                        em.persist(member1);
+                        em.persist(member2);
+                        em.persist(member3);
+                        em.persist(member4);
+                
+                        MemberSearchCondition condition = new MemberSearchCondition();
+                        PageRequest pageRequest = PageRequest.of(0, 3);
+                
+                        Page<MemberTeamDto> result = memberRepository.searchPageComplex(condition, pageRequest);
+                
+                        assertThat(result.getSize()).isEqualTo(3);
+                        assertThat(result.getContent()).extracting("username").containsExactly("member1", "member2", "member3");
+                    }
+                
+                }
+                ```
 
-#### 3) 스프링 데이터의 페이징을 활용하기 2 - CountQuery 최적화
+#### 3) 스프링 데이터의 페이징 활용하기 2 - CountQuery 최적화
 
-* 용어 정리하기
+* **(1) 용어 정리**
 
-    * `페이지 사이즈` : 한 페이지 마다 표시할 데이터 수
+    * `페이지 크기 (Page Size)` : 한 페이지 마다 표시할 데이터 수를 의미한다.
     
-    * `컨텐츠 사이즈` : 현재 페이지에 실제 표시할 수 있는 데이터 수
+    * `컨텐츠 크기 (Contents Size)` : 현재 페이지에 실제 표시할 수 있는 데이터 수를 의미한다.
 
-* CountQuery 최적화하기
+* **(2) CountQuery 최적화**
 
     * 전체 count 쿼리를 생략할 수 있는 경우는 다음과 같다. 
       
-        * ① 첫 번째 페이지면서 컨텐츠 사이즈가 페이지 사이즈 보다 작은 경우에 전체 count 쿼리를 생략할 수 있다.
+        * ① 시작 페이지일 때, 컨텐츠 사이즈가 페이지 사이즈 보다 작은 경우에 전체 count 쿼리를 생략할 수 있다.
     
-            * 예를 들어, 첫 번째 페이지면서 페이지 사이즈가 5개 이고 컨텐츠 사이즈가 2개이면 전체 사이즈는 2개가 되기 때문에 count 쿼리를 호출할 필요가 없다. 
-      
-        * ② 마지막 페이지 일 때, 시작 위치(offset)과 컨텐츠 사이즈를 더하면 전체 사이즈를 구할 수 있다. 이러한 경우에 count 쿼리를 생략할 수 있다.
-
-            * 예를 들어, 마지막 페이지일 때 시작 위치(offset)가 6일 때, 컨텐츠 사이즈 2개를 더하면 전체 사이즈인 8개를 구할 수 있다.
+            * Ex) `현재 페이지` : 시작 페이지 (0 번째 페이지), `페이지 사이즈` : 5개, `컨텐츠 사이즈` : 2개 
+              
+                * -> `전체 사이즈` : 2개
             
-                * 0번 페이지 : 3개
-                
-                * 1번 페이지 : 3개
-                
-                * 2번 페이지 [마지막 페이지] : 2개
+        * ② 마지막 페이지일 때, 시작 위치 (offset)과 컨텐츠 사이즈를 더하면 전체 사이즈를 구할 수 있다. 이러한 경우에 전체 count 쿼리를 생략할 수 있다.
+
+            * Ex) `현재 페이지` : 마지막 페이지 (2 번째 페이지), `페이지 사이즈` : 3개, `컨텐츠 사이즈` : 2개, `시작 위치 (offset)` : 6
+    
+                * -> `전체 사이즈` : offset + 컨텐츠 사이즈 = 6 + 2 = 8개 
+    
+                    * 0번 페이지 : 3개
+                    
+                    * 1번 페이지 : 3개
+                    
+                    * 2번 페이지 [마지막 페이지] : 2개
 
     * 실습하기
     
@@ -2610,28 +2743,28 @@
         @Override
         public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) {
             // ...
-      
+        
             JPAQuery<Member> countQuery = queryFactory
-                    .select(member)
-                    .from(member)
-                    .leftJoin(member.team, team)
-                    .where(
-                            usernameEq(condition.getUsername()),
-                            teamNameEq(condition.getTeamName()),
-                            ageGoe(condition.getAgeGoe()),
-                            ageLoe(condition.getAgeLoe())
-                    );
+            .select(member)
+            .from(member)
+            .leftJoin(member.team, team)
+            .where(
+                usernameEq(condition.getUsername()),
+                teamNameEq(condition.getTeamName()),
+                ageGoe(condition.getAgeGoe()),
+                ageLoe(condition.getAgeLoe())
+            );
         
             // getPage()에서 전체 count 쿼리가 필요한 경우에는 호출하고 필요하지 않다면 호출하지 않는다.
-            return PageableExecutionUtils.getPage(content, pageable, () -> countQuery.fetchCount());
+            return PageableExecutionUtils.getPage(content, pageable, () -> countQuery.fetch().size());
         }
         ```
 
-        * `PageableExecutionUtils.getPage()` : 전체 count 쿼리 호출을 생략할 수 있는 경우에 대해서는 전체 count 쿼리를 호출하지 않는다.
+        * `PageableExecutionUtils.getPage()` : 전체 count 쿼리 호출을 생략할 수 있는 경우에 대해서는 쿼리를 호출하지 않는다.
 
-#### 3) 스프링 데이터의 페이징을 활용하기 3 - 컨트롤러 개발
+#### 3) 스프링 데이터의 페이징 활용하기 3 - 컨트롤러 개발
 
-* 컨트롤러 개발
+* **(1) 컨트롤러 개발**
 
     * ① MemberController의 코드를 변경한다.
     
@@ -2670,23 +2803,35 @@
     
         * `localhost:8080/v3/members?page=1&size=5`
     
-* 스프링 데이터 정렬 (Sort)
+* **(2) 스프링 데이터 정렬 (Sort)**
 
     * 스프링 데이터 JPA는 자신의 정렬(Sort)을 Querydsl의 정렬(OrderSpecifier)로 편리하게 변경하는 기능을 제공한다. 
 
-        * 궁금하다면 교재를 참고하자.
+        ```java
+        JPAQuery<Member> query = queryFactory
+                  .selectFrom(member);
+        
+        for (Sort.Order o : pageable.getSort()) {
+            PathBuilder pathBuilder = new PathBuilder(member.getType(), member.getMetadata());
+            query.orderBy(new OrderSpecifier(o.isAscending() ? Order.ASC : Order.DESC, pathBuilder.get(o.getProperty())));
+        }
+        
+        List<Member> result = query.fetch();
+        ```
 
     * 참고사항 
       
-        * 스프링 데이터의 정렬(Sort)은 조인이 사용되면 Pageable의 Sort 기능이 정상적으로 동작하지 않는다. 
+        * 스프링 데이터의 정렬 (Sort)은 조금만 복잡해져도 Pageable의 Sort 기능이 정상적으로 동작하지 않는다. 
           
-        * 정렬 조건을 파라미터로 직접 받아서 `orderBy()`로 처리하는 것을 권장한다.
+            * OrderSpecifier도 마찬가지다.
+    
+        * 따라서 정렬 조건을 파라미터로 받아서 `orderBy()`로 직접 처리하는 것을 권장한다.
 
 ## 7. 스프링 데이터 JPA가 제공하는 Querydsl 기능
 
 #### 1) 인터페이스 지원 - QuerydslPredicateExecutor
 
-* QuerydslPredicateExecutor 인터페이스
+* **(1) QuerydslPredicateExecutor 인터페이스**
 
     ```java
     public interface QuerydslPredicateExecutor<T> {
@@ -2703,7 +2848,7 @@
     }
     ```
 
-* 스프링 데이터 리포지토리에 QuerydslPredicateExecutor 적용하기
+* **(2) 스프링 데이터 리포지토리에 QuerydslPredicateExecutor 적용하기**
 
     * ① 스프링 데이터 리포지토리가 QuerydslPredicateExecutor를 상속 받도록 한다.
     
@@ -2739,7 +2884,7 @@
     
         * 예를 들어, `findAll()`에 Querydsl의 조건을 입력할 수 있다.
 
-* 한계점
+* **(3) 한계점**
 
     * ① 조인이 불가능하다. 
       
@@ -2753,7 +2898,7 @@
 
 #### 2) Querydsl Web 지원
 
-* Querydsl Web 지원
+* **(1) Querydsl Web 지원**
 
     ```java
     @Controller
@@ -2781,7 +2926,7 @@
       
             * `QUser.user.firstname.eq("Dave").and(QUser.user.lastname.eq("Matthews"))`
     
-* 한계점
+* **(2) 한계점**
 
     * ① 단순한 조건만 가능하다.
     
@@ -2793,7 +2938,7 @@
 
 #### 3) 리포지토리 지원 - QuerydslRepositorySupport
 
-* QuerydslRepositorySupport 적용하기
+* **(1) QuerydslRepositorySupport 적용하기**
 
     ```java
     public class MemberRepositoryCustomImpl extends QuerydslRepositorySupport {
@@ -2849,7 +2994,7 @@
     }
     ```
 
-* QuerydslRepositorySupport의 장점과 한계점
+* **(2) QuerydslRepositorySupport의 장점과 한계점**
 
     * 장점
     
@@ -2877,7 +3022,7 @@
         
         * 스프링 데이터 Sort 기능이 정상적으로 동작하지 않는다.
 
-* QuerydslRepositorySupport과 JPAQueryFactory 함께 사용하기
+* **(3) QuerydslRepositorySupport과 JPAQueryFactory 함께 사용하기**
   
     ```java
     public class MemberRepositoryCustomImpl extends QuerydslRepositorySupport {
@@ -2896,7 +3041,7 @@
 
 #### 4) Querydsl 지원 클래스를 직접 만들기
 
-* (1) 개요
+* **(1) 개요**
 
     * 스프링 데이터가 제공하는 `QuerydslRepositorySupport`가 지닌 한계를 극복하기 위해 Querydsl 지원 클래스를 직접 만들어 보자.
 
@@ -2912,7 +3057,7 @@
           
         * ⑤ `EntityManager`, `QueryFactory`를 제공한다.
 
-* (2) 실습하기
+* **(2) 실습하기**
 
     * ① `Querydsl4RepositorySupport`를 작성한다.
     
@@ -3123,7 +3268,7 @@
 
 #### 1) 프로젝트 설정하기
 
-* (1) 프로젝트 생성하기
+* **(1) 프로젝트 생성하기**
 
     * ① https://start.spring.io/ 에서 프로젝트를 생성한다.
 
@@ -3151,7 +3296,7 @@
         #  org.hibernate.type: trace
         ```
 
-* (2) Gradle 설정하기
+* **(2) Gradle 설정하기**
 
     * `build.gradle`에 다음과 같은 Querydsl 관련 내용을 추가한다.
 
@@ -3213,7 +3358,7 @@
         // [END] querydsl 빌드 관련 설정 
         ```
 
-* (3) Querydsl 설정하기
+* **(3) Querydsl 설정하기**
 
     * ① 엔티티를 작성한다.
     
@@ -3339,7 +3484,7 @@
     
 #### 2) Spring Data JPA 프로젝트에 Querydsl 적용하기
 
-* (1) JPAQueryFactory를 주입 받아 사용하기
+* **(1) JPAQueryFactory를 주입 받아 사용하기**
 
     * ① Querydsl용 자바 설정 파일을 만든다. 
 
@@ -3479,7 +3624,7 @@
         }
         ```
     
-* (2) 직접 만든 Querydsl 지원 클래스를 사용하기
+* **(2) 직접 만든 Querydsl 지원 클래스를 사용하기**
 
     * ① `Querydsl4RepositorySupport`를 작성한다.
     
