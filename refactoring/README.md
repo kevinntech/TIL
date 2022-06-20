@@ -1,5 +1,5 @@
 # 백기선님의 코딩으로 학습하는 리팩토링
-> 아래 내용은 [백기선님의 코딩으로 학습하는 리팩토링](https://www.inflearn.com/course/%EB%A6%AC%ED%8C%A9%ED%86%A0%EB%A7%81#curriculum "백기선님의 코딩으로 학습하는 리팩토링") 강좌를 정리한 내용 입니다.
+> 아래 내용은 백기선님의 [코딩으로 학습하는 리팩토링](https://www.inflearn.com/course/%EB%A6%AC%ED%8C%A9%ED%86%A0%EB%A7%81#curriculum "코딩으로 학습하는 리팩토링") 강좌를 정리한 내용 입니다.
 
 ## 1. 소개
 
